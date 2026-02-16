@@ -73,16 +73,6 @@ const Navbar = () => {
                     )}
                 </div>
             </div>
-
-            {/* Hero Content Preview (Slightly visible in screenshot) */}
-            <div className="px-6 py-16 max-w-[1400px] mx-auto">
-                <h1 className="text-3xl font-medium text-gray-100 mb-6">
-                    Discover healthy and delicious food options for your pets
-                </h1>
-                <button className="bg-[#4cc9f0] text-[#020d1a] px-6 py-2.5 rounded-md font-bold text-sm hover:bg-sky-400 transition">
-                    Shop Food
-                </button>
-            </div>
         </nav>
     );
 };
