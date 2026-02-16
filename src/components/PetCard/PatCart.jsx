@@ -1,11 +1,11 @@
 import React from 'react';
 
-const mainPage = () => {
+const PatCart = () => {
   return (
     <div>
-      hi
+      
     </div>
   );
 };
 
-export default mainPage;
+export default PatCart;
