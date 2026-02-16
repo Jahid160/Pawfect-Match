@@ -1,17 +1,10 @@
-import Banner from '@/components/Banner/Banner';
+import Banner from '@/components/Banner/page';
 import React from 'react';
 
 const mainPage = () => {
   return (
-    <div className="space-y-20">
-      <section>
-
-      </section>
-      <section>
-        <Banner></Banner>
-      </section>
-
-
+    <div>
+      <Banner></Banner>
     </div>
   );
 };
