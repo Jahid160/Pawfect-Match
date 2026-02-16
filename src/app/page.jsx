@@ -1,3 +1,4 @@
+import Banner from '@/components/Banner/Banner';
 import React from 'react';
 
 const mainPage = () => {
