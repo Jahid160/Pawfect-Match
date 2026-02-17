@@ -3,9 +3,13 @@ import React from 'react';
 
 const mainPage = () => {
   return (
-    <div>
-      <Banner></Banner>
+    <div className="space-y-20" >
+      <section>
+        <Banner></Banner>
+      </section>
     </div>
+
+
   );
 };
 
