@@ -1,4 +1,5 @@
 import Banner from '@/components/Banner/page';
+import Footer from '@/components/Footer/page';
 import Navbar from '@/components/Navbar/page';
 import React from 'react';
 
@@ -10,6 +11,9 @@ const mainPage = () => {
       </section>
       <section>
         <Banner></Banner>
+      </section>
+      <section>
+        <Footer></Footer>
       </section>
     </div>
 

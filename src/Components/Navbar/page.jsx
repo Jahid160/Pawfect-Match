@@ -2,13 +2,20 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // 🔹 Dummy user (replace later with auth data)
+  const user = {
+    name: "MD SHAKIL",
+    avatar: "https://via.placeholder.com/150",
+  };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -20,6 +27,11 @@ const Navbar = () => {
     { name: "My Listing", href: "/my-listing" },
     { name: "My Orders", href: "/orders" },
   ];
+
+  const handleProfileClick = () => {
+    setIsDropdownOpen(false);
+    router.push("/profile");
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
@@ -38,7 +50,7 @@ const Navbar = () => {
                 className="w-10 h-10 rounded-full border-2 border-[#4cc9f0] overflow-hidden"
               >
                 <img
-                  src="https://via.placeholder.com/150"
+                  src={user.avatar}
                   alt="User"
                   className="w-full h-full object-cover"
                 />
@@ -46,9 +58,13 @@ const Navbar = () => {
 
               {isDropdownOpen && (
                 <div className="absolute left-0 mt-4 w-56 bg-white rounded-2xl shadow-xl border p-4 text-center z-50">
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-3">
-                    MD SHAKIL
-                  </p>
+                  <button
+                    onClick={handleProfileClick}
+                    className="block w-full text-sm font-semibold text-gray-800 hover:text-[#4cc9f0] transition mb-4"
+                  >
+                    {user.name}
+                  </button>
+
                   <button className="w-full py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition">
                     Logout
                   </button>
@@ -92,7 +108,7 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {/* Desktop Routes (perfect center) */}
+            {/* Desktop Routes */}
             <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
@@ -127,7 +143,7 @@ const Navbar = () => {
                 className="w-11 h-11 rounded-full border-2 border-[#4cc9f0] overflow-hidden hover:scale-105 transition"
               >
                 <img
-                  src="https://via.placeholder.com/150"
+                  src={user.avatar}
                   alt="User"
                   className="w-full h-full object-cover"
                 />
@@ -135,9 +151,13 @@ const Navbar = () => {
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-4 w-56 bg-white rounded-2xl shadow-xl border p-4 text-center z-50">
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-3">
-                    MD SHAKIL
-                  </p>
+                  <button
+                    onClick={handleProfileClick}
+                    className="block w-full text-sm font-semibold text-gray-800 hover:text-[#4cc9f0] transition mb-4"
+                  >
+                    {user.name}
+                  </button>
+
                   <button className="w-full py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition">
                     Logout
                   </button>
