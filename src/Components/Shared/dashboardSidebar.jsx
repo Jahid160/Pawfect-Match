@@ -5,7 +5,7 @@ import React from "react";
 
 const DashboardSidebar = () => {
   return (
-    <div className="w-[200px] bg-purple-200 text-black h-screen px-3 py-4 fixed top-0 left-0">
+    <div className="w-[200px] bg-gray-200 text-black h-screen px-3 py-4 fixed top-0 left-0">
       <Link href={"/"}>
 
         {/* Logo Image      */}
@@ -19,8 +19,8 @@ const DashboardSidebar = () => {
       </Link>
 
       <div className="flex flex-col gap-2 mt-7">
-        <Link href={"/dashboard/profile"}>Profile</Link>
-        <Link href={"/dashboard/my-bookings"}>My Booking</Link>
+        <Link className="text-lg font-medium" href={"/dashboard/profile"}>Profile</Link>
+        <Link className="text-lg font-medium" href={"/dashboard/manage-pets"}>Manage Pets</Link>
       </div>
     </div>
   );
