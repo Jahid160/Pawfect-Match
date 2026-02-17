@@ -5,7 +5,7 @@ import React from 'react';
 
 const mainPage = () => {
   return (
-    <div className="space-y-20" >
+    <div className="space-y-5" >
       <section>
         <Navbar></Navbar>
       </section>
