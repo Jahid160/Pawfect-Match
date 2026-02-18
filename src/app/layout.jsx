@@ -1,5 +1,7 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/layouts/Navbar";
+import Footer from "@/components/layouts/Footer";
 
 const poopin = Poppins({
   subsets: ['latin'],
@@ -18,9 +20,15 @@ export default function RootLayout({ children }) {
       <body
         className={`${poopin.className}  antialiased`}
       >
+        <section>
+          <Navbar></Navbar>
+        </section>
         <main>
           {children}
         </main>
+        <section>
+          <Footer></Footer>
+        </section>
       </body>
     </html>
   );
