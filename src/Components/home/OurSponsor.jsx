@@ -64,7 +64,7 @@ export default function OurSponsor() {
               <div className="relative w-full h-40">
                 <Image
                   src={story.img}
-                  alt={story.name}
+                  alt={story.id}
                   fill
                   className="object-cover"
                 />
