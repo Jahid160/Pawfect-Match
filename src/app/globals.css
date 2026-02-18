@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 @import "tailwindcss";
-
 @plugin "daisyui" {
   themes: light --default;
 }
@@ -27,6 +25,3 @@
   --color-error: oklch(62% 0.24 28);
 }
 
-=======
-@import "tailwindcss";
->>>>>>> eaa375cdccb9c57dbd15ef33fcf1b3a586fbb9cc
