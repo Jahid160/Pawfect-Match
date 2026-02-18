@@ -3,6 +3,7 @@ import Banner from "@/components/home/Banner";
 import FeaturedPets from "@/Components/home/FeaturedPets";
 import PetCategories from "@/Components/home/PetCategories";
 import PetSearch from "@/Components/home/PetSearch";
+import SuccessStories from "@/Components/home/SuccessStories";
 import React from "react";
 
 const mainPage = () => {
@@ -14,6 +15,7 @@ const mainPage = () => {
         <FeaturedPets></FeaturedPets>
         <PetSearch></PetSearch>
         <AdoptionProcess></AdoptionProcess>
+        <SuccessStories></SuccessStories>
       </section>
     </div>
   );
