@@ -1,6 +1,9 @@
 const uri = process.env.URI;
 const dbname = process.env.DBNAME;
 
+export const collections = {
+  USERS: "users",
+};
 //  npm install mongodb first
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
