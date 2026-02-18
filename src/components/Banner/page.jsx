@@ -1,49 +1,58 @@
 "use client";
 
-import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import Image from 'next/image';
-import Link from 'next/link';
+import React from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import Image from "next/image";
+import Link from "next/link";
 
 // Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 const heroSlides = [
   {
     id: 1,
 
-    image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=1600',
-    alt: 'Friendly smiling dog',
-    tag: 'Find your forever friend ',
-    headline: 'Every Pet Deserves a <span class="text-orange-500">Pawfect</span> Match.',
-    description: 'Connecting lonely paws with loving homes. Start your journey today and find a companion that fits your lifestyle perfectly.',
-    buttonText: 'Adopt a Pet',
-    buttonLink: '/adopt',
+    image:
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=1600",
+    alt: "Friendly smiling dog",
+    tag: "Find your forever friend ",
+    headline:
+      'Every Pet Deserves a <span class="text-orange-500">Pawfect</span> Match.',
+    description:
+      "Connecting lonely paws with loving homes. Start your journey today and find a companion that fits your lifestyle perfectly.",
+    buttonText: "Adopt a Pet",
+    buttonLink: "/adopt",
   },
   {
     id: 2,
 
-    image: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?q=80&w=1600',
-    alt: 'Cute cat looking away',
-    tag: 'Your new family member awaits',
-    headline: 'Discover Unconditional <span class="text-orange-500">Love</span> Today.',
-    description: 'Browse thousands of pets looking for their loving homes. Find your perfect match and bring joy to your life.',
-    buttonText: 'Meet Our Pets',
-    buttonLink: '/pets',
+    image:
+      "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?q=80&w=1600",
+    alt: "Cute cat looking away",
+    tag: "Your new family member awaits",
+    headline:
+      'Discover Unconditional <span class="text-orange-500">Love</span> Today.',
+    description:
+      "Browse thousands of pets looking for their loving homes. Find your perfect match and bring joy to your life.",
+    buttonText: "Meet Our Pets",
+    buttonLink: "/pets",
   },
   {
     id: 3,
 
-    image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=1600',
-    alt: 'Human and pet bonding',
-    tag: 'Making dreams come true',
-    headline: 'Start Your <span class="text-orange-500">Adoption Journey</span> Here.',
-    description: 'Our streamlined process makes adopting easy and safe. We\'re here to guide you every step of the way.',
-    buttonText: 'How It Works',
-    buttonLink: '/how-it-works',
+    image:
+      "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=1600",
+    alt: "Human and pet bonding",
+    tag: "Making dreams come true",
+    headline:
+      'Start Your <span class="text-orange-500">Adoption Journey</span> Here.',
+    description:
+      "Our streamlined process makes adopting easy and safe. We're here to guide you every step of the way.",
+    buttonText: "How It Works",
+    buttonLink: "/how-it-works",
   },
 ];
 
@@ -111,7 +120,8 @@ const Banner = () => {
 
       {/* Custom CSS for Swiper arrows - optional but makes it pro */}
       <style jsx global>{`
-        .swiper-button-next, .swiper-button-prev {
+        .swiper-button-next,
+        .swiper-button-prev {
           color: white !important;
           transform: scale(0.7);
         }
