@@ -1,13 +1,9 @@
 import React from 'react';
-// react-icons install thakle eygulo kaj korbe
 import { FaHeart, FaMapMarkerAlt, FaPaw, FaLongArrowAltRight } from 'react-icons/fa';
 
 const PetCard = ({ pet }) => {
   return (
-    <div 
-      onClick={() => window.location.href = `/product/${pet.id}`}
-      className="group relative flex flex-col bg-white shadow-md hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all hover:-translate-y-2 duration-500"
-    >
+    <div className="group relative flex flex-col bg-white shadow-md hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all hover:-translate-y-2 duration-500 cursor-pointer">
       {/* Image Section */}
       <div className="relative w-full h-72 overflow-hidden">
         <img
@@ -23,13 +19,10 @@ const PetCard = ({ pet }) => {
           {pet.category}
         </div>
 
-        {/* Wishlist Icon */}
-        <button 
-          onClick={(e) => { e.stopPropagation(); alert("Added to Favorites!"); }}
-          className="top-4 right-4 absolute bg-white/80 hover:bg-red-50 shadow-md backdrop-blur-md p-2.5 rounded-full text-gray-400 hover:text-red-500 transition-all"
-        >
+        {/* Wishlist Icon - Removed Alert/Click */}
+        <div className="top-4 right-4 absolute bg-white/80 hover:bg-red-50 shadow-md backdrop-blur-md p-2.5 rounded-full text-gray-400 hover:text-red-500 transition-all">
           <FaHeart size={18} />
-        </button>
+        </div>
       </div>
 
       {/* Content Section */}
@@ -67,7 +60,6 @@ const PetCard = ({ pet }) => {
 };
 
 const Petcarts = () => {
-  // 8 Unique Fake Data for Grid Testing
   const pets = [
     { id: 1, name: "Buddy", age: "2 Months", location: "Dhaka", price: "$250", category: "Dog", image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=500" },
     { id: 2, name: "Luna", age: "3 Months", location: "Sylhet", price: "$180", category: "Cat", image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500" },
@@ -76,33 +68,44 @@ const Petcarts = () => {
     { id: 5, name: "Charlie", age: "5 Months", location: "Rajshahi", price: "$320", category: "Dog", image: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=500" },
     { id: 6, name: "Bella", age: "2 Months", location: "Barishal", price: "$210", category: "Cat", image: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?q=80&w=500" },
     { id: 7, name: "Rocky", age: "6 Months", location: "Comilla", price: "$450", category: "Dog", image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=500" },
-    { id: 8, name: "Mimi", age: "3 Months", location: "Rangpur", price: "$120", category: "Bird", image: "https://images.unsplash.com/photo-1522926193341-e9fed19c7df4?q=80&w=500" },
+    { id: 8, name: "Mimi", age: "3 Months", location: "Rangpur", price: "$120", category: "Bird", image: "https://images.unsplash.com/photo-1452570053594-1b985d6ea890?q=80&w=500" },
   ];
 
   return (
-    <div className="bg-gray-50 px-4 sm:px-8 py-16 min-h-screen">
-      {/* Header Container */}
-      <div className="flex md:flex-row flex-col justify-between md:items-end gap-4 mx-auto mb-16 max-w-7xl">
-        <div>
-          <h2 className="font-black text-gray-900 text-4xl leading-tight">
-            Find Your <span className="text-orange-500">PawFact</span><br />
-            Companion Today
-          </h2>
-          <div className="bg-orange-500 mt-4 rounded-full w-20 h-1.5"></div>
-        </div>
-        <p className="max-w-md font-medium text-gray-500">
-          Browse through our list of adorable pets looking for a new home. 
-          Every pet deserves a family that loves them.
-        </p>
+    <div className="bg-gray-50 px-4 sm:px-8 py-20 min-h-screen">
+  {/* Header Container */}
+  <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-6 mx-auto mb-16 max-w-7xl">
+    <div className="space-y-4">
+      <div className="inline-block bg-orange-100 px-4 py-1.5 rounded-full font-bold text-orange-600 text-sm uppercase tracking-wide">
+         Adopt, Don't Shop
       </div>
-
-      {/* Grid: 1 col (Mobile), 2 col (Tablet), 3 col (Desktop), 4 col (Large Screens) */}
-      <div className="gap-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl">
-        {pets.map(pet => (
-          <PetCard key={pet.id} pet={pet} />
-        ))}
-      </div>
+      <h2 className="font-extrabold text-gray-900 text-5xl lg:text-6xl leading-[1.1] tracking-tight">
+        Find Your <span className="relative text-orange-500">
+          PawFact
+          <svg className="-bottom-2 left-0 -z-10 absolute w-full h-3 text-orange-200" viewBox="0 0 100 12" preserveAspectRatio="none">
+            <path d="M0,10 Q50,0 100,10" stroke="currentColor" strokeWidth="4" fill="none" />
+          </svg>
+        </span><br />
+        Companion Today
+      </h2>
+      <div className="bg-orange-500 rounded-full w-24 h-2"></div>
     </div>
+    
+    <div className="max-w-lg">
+      <p className="pl-6 border-orange-200 border-l-4 font-medium text-gray-600 text-xl italic leading-relaxed">
+        "Every paw leaves a footprint in our hearts. Browse our curated gallery of 
+        loving pets waiting to bring joy, loyalty, and endless wagging tails to your home."
+      </p>
+    </div>
+  </div>
+
+  {/* Grid Section - Card remains unchanged as per your instruction */}
+  <div className="gap-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl">
+    {pets.map(pet => (
+      <PetCard key={pet.id} pet={pet} />
+    ))}
+  </div>
+</div>
   );
 };
 
