@@ -13,9 +13,9 @@ const mainPage = () => {
         <Banner></Banner>
         <PetCategories></PetCategories>
         <FeaturedPets></FeaturedPets>
+        <SuccessStories></SuccessStories>
         <PetSearch></PetSearch>
         <AdoptionProcess></AdoptionProcess>
-        <SuccessStories></SuccessStories>
       </section>
     </div>
   );
