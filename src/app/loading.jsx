@@ -1,7 +1,7 @@
 import Petdetailscart from '@/components/cards/Petdetailscart';
 import React from 'react';
 
-const page = () => {
+const loading = () => {
      return (
           <div>
                <Petdetailscart></Petdetailscart>
@@ -9,4 +9,4 @@ const page = () => {
      );
 };
 
-export default page;
+export default loading;
