@@ -1,3 +1,4 @@
+import AdoptionProcess from "@/Components/home/AdoptionProcess";
 import Banner from "@/components/home/Banner";
 import FeaturedPets from "@/Components/home/FeaturedPets";
 import PetCategories from "@/Components/home/PetCategories";
@@ -12,6 +13,7 @@ const mainPage = () => {
         <PetCategories></PetCategories>
         <FeaturedPets></FeaturedPets>
         <PetSearch></PetSearch>
+        <AdoptionProcess></AdoptionProcess>
       </section>
     </div>
   );
