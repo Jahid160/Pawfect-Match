@@ -16,7 +16,7 @@ export default function AdoptionProcess() {
         {steps.map((step, i) => (
           <div key={i} className="flex items-center gap-6">
             {/* Step Card */}
-            <div className="p-16 w-52 shadow-lg rounded-xl bg-white">
+            <div className="p-16 hover:scale-105 transition w-52 shadow-lg rounded-xl bg-white">
               <p className="font-semibold">{step}</p>
             </div>
 
