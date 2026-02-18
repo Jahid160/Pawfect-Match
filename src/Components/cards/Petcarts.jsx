@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 import { FaHeart, FaMapMarkerAlt, FaPaw, FaLongArrowAltRight } from 'react-icons/fa';
 
@@ -47,12 +48,14 @@ const PetCard = ({ pet }) => {
 
         {/* Action Footer */}
         <div className="flex justify-between items-center mt-auto pt-5 border-gray-100 border-t">
-          <span className="font-black text-gray-400 group-hover:text-orange-500 text-xs uppercase tracking-[2px] transition-all">
+          <Link href="/pet-details" className="font-black text-gray-400 group-hover:text-orange-500 text-xs uppercase tracking-[2px] transition-all">
             View Profile
-          </span>
-          <div className="flex justify-center items-center bg-orange-100 group-hover:bg-orange-500 rounded-full w-10 h-10 text-orange-600 group-hover:text-white transition-all group-hover:translate-x-1 duration-300">
+          </Link>
+          <Link
+            href="/pet-details"
+           className="flex justify-center items-center bg-orange-100 group-hover:bg-orange-500 rounded-full w-10 h-10 text-orange-600 group-hover:text-white transition-all group-hover:translate-x-1 duration-300">
             <FaLongArrowAltRight size={20} />
-          </div>
+          </Link>
         </div>
       </div>
     </div>

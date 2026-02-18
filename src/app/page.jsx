@@ -1,5 +1,6 @@
 
 import Petcarts from '@/components/cards/Petcarts';
+import Petdetailscart from '@/components/cards/Petdetailscart';
 import Banner from '@/components/home/Banner';
 import React from 'react';
 
@@ -11,6 +12,9 @@ const mainPage = () => {
       </section>
       <section>
         <Petcarts></Petcarts>
+      </section>
+      <section>
+        <Petdetailscart></Petdetailscart>
       </section>
     </div>
 

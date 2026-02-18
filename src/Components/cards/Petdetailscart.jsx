@@ -1,8 +1,9 @@
 import React from 'react';
+import Link from 'next/link';
 import { FaHeart, FaMapMarkerAlt, FaPaw, FaPhoneAlt, FaEnvelope, FaInfoCircle, FaChevronLeft } from 'react-icons/fa';
 
 const Petdetailscart = () => {
-  // Mock Data for Design Testing
+  // Mock Data (Real project-e eta dynamic hobe)
   const pet = {
     id: 1,
     name: "Buddy",
@@ -26,34 +27,34 @@ const Petdetailscart = () => {
     <div className="bg-[#FDFCFB] px-4 sm:px-6 py-12 min-h-screen">
       <div className="mx-auto max-w-6xl">
         
-        {/* Navigation Button */}
-        <button 
-          onClick={() => window.history.back()}
-          className="group flex items-center gap-2 mb-8 font-bold text-gray-400 hover:text-orange-500 transition-all"
+        {/* Navigation Button using Link (Safe for Server Components) */}
+        <Link 
+          href="/" 
+          className="group flex items-center gap-2 mb-8 w-fit font-bold text-gray-400 hover:text-orange-500 transition-all"
         >
           <FaChevronLeft className="transition-transform group-hover:-translate-x-1" /> 
           Back to Collection
-        </button>
+        </Link>
 
         <div className="flex lg:flex-row flex-col items-start gap-12">
           
           {/* Left: Image Hero Section */}
-          <div className="top-10 sticky w-full lg:w-1/2">
-            <div className="relative bg-white shadow-2xl p-2 rounded-[40px] overflow-hidden">
+          <div className="top-10 lg:sticky w-full lg:w-1/2">
+            <div className="relative bg-white shadow-2xl p-2 border border-gray-100 rounded-[40px] overflow-hidden">
               <img 
                 src={pet.image} 
                 alt={pet.name} 
                 className="rounded-[35px] w-full h-[500px] object-cover"
               />
               
-              {/* Floating Badges */}
+              {/* Category Badge */}
               <div className="top-8 left-8 absolute flex items-center gap-2 bg-white/90 shadow-lg backdrop-blur-md px-6 py-2 rounded-full font-bold text-orange-600">
                 <FaPaw /> {pet.category}
               </div>
               
-              <button className="top-8 right-8 absolute bg-white/90 shadow-lg backdrop-blur-md p-4 rounded-full text-red-500 hover:scale-110 active:scale-95 transition-all">
+              <div className="top-8 right-8 absolute bg-white/90 shadow-lg backdrop-blur-md p-4 rounded-full text-red-500">
                 <FaHeart size={22} />
-              </button>
+              </div>
             </div>
           </div>
 
@@ -73,15 +74,15 @@ const Petdetailscart = () => {
 
             {/* Quick Stats Grid */}
             <div className="gap-4 grid grid-cols-3">
-              <div className="bg-white shadow-sm p-5 border-2 border-gray-100 hover:border-orange-200 rounded-3xl text-center transition-colors">
+              <div className="bg-white shadow-sm p-5 border-2 border-gray-100 rounded-3xl text-center">
                 <p className="mb-1 font-black text-[10px] text-gray-400 uppercase tracking-widest">Age</p>
                 <p className="font-bold text-gray-800 text-lg">{pet.age}</p>
               </div>
-              <div className="bg-white shadow-sm p-5 border-2 border-gray-100 hover:border-blue-200 rounded-3xl text-center transition-colors">
+              <div className="bg-white shadow-sm p-5 border-2 border-gray-100 rounded-3xl text-center">
                 <p className="mb-1 font-black text-[10px] text-gray-400 uppercase tracking-widest">Gender</p>
                 <p className="font-bold text-gray-800 text-lg">{pet.gender}</p>
               </div>
-              <div className="bg-white shadow-sm p-5 border-2 border-gray-100 hover:border-green-200 rounded-3xl text-center transition-colors">
+              <div className="bg-white shadow-sm p-5 border-2 border-gray-100 rounded-3xl text-center">
                 <p className="mb-1 font-black text-[10px] text-gray-400 uppercase tracking-widest">Weight</p>
                 <p className="font-bold text-gray-800 text-lg">{pet.weight}</p>
               </div>
@@ -93,24 +94,23 @@ const Petdetailscart = () => {
                 <FaInfoCircle className="text-orange-500" /> Story of {pet.name}
               </h3>
               <p className="font-medium text-gray-600 italic leading-relaxed">
-                {pet?.description || "No description available."}
+                "{pet.description}"
               </p>
             </div>
 
             {/* Contact & Adoption Section */}
             <div className="relative bg-orange-500 shadow-orange-200 shadow-xl p-8 rounded-[40px] overflow-hidden text-white">
-               {/* Decorative Circle */}
                <div className="-right-10 -bottom-10 absolute bg-orange-400 opacity-50 rounded-full w-40 h-40"></div>
                
                <h3 className="z-10 relative mb-6 font-bold text-2xl">Ready to Adopt?</h3>
                
                <div className="z-10 relative flex sm:flex-row flex-col gap-4">
-                 <button className="flex flex-1 justify-center items-center gap-3 bg-white hover:bg-gray-100 py-4 rounded-2xl font-black text-orange-600 text-sm uppercase tracking-wider transition-all">
+                 <div className="flex flex-1 justify-center items-center gap-3 bg-white py-4 rounded-2xl font-black text-orange-600 text-sm uppercase tracking-wider cursor-pointer">
                    <FaPhoneAlt size={16} /> Contact Seller
-                 </button>
-                 <button className="flex flex-1 justify-center items-center gap-3 bg-orange-900/20 hover:bg-orange-900/30 backdrop-blur-sm py-4 border-2 border-white/30 rounded-2xl font-black text-white text-sm uppercase tracking-wider transition-all">
+                 </div>
+                 <div className="flex flex-1 justify-center items-center gap-3 bg-orange-900/20 backdrop-blur-sm py-4 border-2 border-white/30 rounded-2xl font-black text-white text-sm uppercase tracking-wider cursor-pointer">
                    Adopt {pet.name}
-                 </button>
+                 </div>
                </div>
                
                <div className="z-10 relative flex items-center gap-3 mt-6 font-medium text-orange-100 text-sm">
