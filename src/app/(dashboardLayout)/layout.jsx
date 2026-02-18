@@ -1,11 +1,12 @@
-import DashboardSidebar from "@/Components/Shared/dashboardSidebar";
+
+import DashboardSidebar from "@/components/dashboardlayouts/dashboardSidebar";
 import React from "react";
 
 const layout = ({ children }) => {
   return (
     <div className="flex gap-4 ">
       <DashboardSidebar />
-      <div className="ml-50">{children}</div>
+      <div className="ml-[210px]">{children}</div>
     </div>
   );
 };
