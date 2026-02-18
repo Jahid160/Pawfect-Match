@@ -1,5 +1,5 @@
 
-import DashboardSidebar from "@/Components/Shared/dashboardSidebar";
+import DashboardSidebar from "@/components/dashboardlayouts/dashboardSidebar";
 import React from "react";
 
 const layout = ({ children }) => {

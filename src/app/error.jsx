@@ -1,6 +1,7 @@
+'use client'
 import React from 'react';
 
-const card = () => {
+const error = () => {
      return (
           <div>
 
@@ -8,4 +9,4 @@ const card = () => {
      );
 };
 
-export default card;
+export default error;
