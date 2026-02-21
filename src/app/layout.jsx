@@ -21,24 +21,24 @@ export default function RootLayout({ children }) {
   return (
     <NextAuthProvider>
 
-    <html lang="en">
-      
-       
-      
-      <body
-        className={`${poppins.className}  antialiased`}
-      >
-        <section>
-          <Navbar></Navbar>
-        </section>
-        <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
-          {children}
-        </main>
-        <section>
-          <Footer></Footer>
-        </section>
-      </body>
-    </html>
-        </NextAuthProvider>
+      <html lang="en">
+
+
+
+        <body
+          className={`${poopin.className}  antialiased`}
+        >
+          <section>
+            <Navbar></Navbar>
+          </section>
+          <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
+            {children}
+          </main>
+          <section>
+            <Footer></Footer>
+          </section>
+        </body>
+      </html>
+    </NextAuthProvider>
   );
 }
