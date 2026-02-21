@@ -1,14 +1,12 @@
+import Petcarts from "@/components/cards/Petcarts";
+import Petdetailscart from "@/components/cards/Petdetailscart";
+import AdoptionProcess from "@/components/home/AdoptionProcess";
+import Banner from "@/components/home/Banner";
+import OurSponsor from "@/components/home/OurSponsor";
+import PetCategories from "@/components/home/PetCategories";
+import PetSearch from "@/components/home/PetSearch";
+import SuccessStories from "@/components/home/SuccessStories";
 
-import Petcarts from '@/components/cards/Petcarts';
-import Petdetailscart from '@/components/cards/Petdetailscart';
-import React from 'react';
-import AdoptionProcess from "@/Components/home/AdoptionProcess";
-import FeaturedPets from "@/Components/home/FeaturedPets";
-import OurSponsor from "@/Components/home/OurSponsor";
-import PetCategories from "@/Components/home/PetCategories";
-import PetSearch from "@/Components/home/PetSearch";
-import SuccessStories from "@/Components/home/SuccessStories";
-import Banner from '@/components/home/Banner';
 
 
 const mainPage = () => {
@@ -18,13 +16,12 @@ const mainPage = () => {
         <Banner></Banner>
         <PetCategories></PetCategories>
         <Petcarts></Petcarts>
-        {/* <FeaturedPets></FeaturedPets> */}
         <SuccessStories></SuccessStories>
         <PetSearch></PetSearch>
         <AdoptionProcess></AdoptionProcess>
         <OurSponsor></OurSponsor>
       </section>
-      
+
       <section>
         <Petdetailscart></Petdetailscart>
       </section>
