@@ -5,6 +5,7 @@ import Navbar from "@/components/layouts/Navbar";
 import Footer from "@/components/layouts/Footer";
 
 
+
 const poopin = Poppins({
   subsets: ['latin'],
   weight: ['100', '200', '300', '400', '500', '600', '700', '800']
@@ -25,12 +26,12 @@ export default function RootLayout({ children }) {
        
       
       <body
-        className={`${poopin.className}  antialiased`}
+        className={`${poppins.className}  antialiased`}
       >
         <section>
           <Navbar></Navbar>
         </section>
-        <main>
+        <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
           {children}
         </main>
         <section>
