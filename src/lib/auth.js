@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { collections, dbConnect } from "./db";
 export const authOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  // secret: process.env.NEXTAUTH_SECRET,
 
   providers: [
     CredentialsProvider({
@@ -18,28 +18,31 @@ export const authOptions = {
       },
     }),
 
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_CLIENT_ID,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    // }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
   ],
 
   callbacks: {
     async signIn({ user, account }) {
       try {
-        const db = dbConnect(collections.USERS);
-        const exists = await db.findOne({ email: user.email });
+        const usersCollection = await dbConnect(collections.USERS);
+        const exists = await usersCollection.findOne({ email: user.email });
         if (exists) return true;
 
-        await db.insertOne({
-          provider: account?.provider,
+        await usersCollection.insertOne({
+          provider: account?.provider || "credentials",
           email: user.email,
-          name: user.name,
-          image: user.image,
+          name: user.name || "",
+          image: user.image || "",
           role: "user",
+          createdAt: new Date(),
         });
+
         return true;
-      } catch {
+      } catch (e) {
+        console.log("signIn callback error:", e);
         return false;
       }
     },

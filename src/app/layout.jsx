@@ -4,12 +4,10 @@ import NextAuthProvider from "@/provider/NextAuthProvider";
 import Navbar from "@/components/layouts/Navbar";
 import Footer from "@/components/layouts/Footer";
 
-
 const poopin = Poppins({
-  subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800']
-
-})
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
+});
 
 export const metadata = {
   title: "Pawfact Match",
@@ -18,26 +16,18 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <NextAuthProvider>
-
     <html lang="en">
-      
-       
-      
-      <body
-        className={`${poopin.className}  antialiased`}
-      >
-        <section>
-          <Navbar></Navbar>
-        </section>
-        <main>
-          {children}
-        </main>
-        <section>
-          <Footer></Footer>
-        </section>
+      <body className={`${poopin.className}  antialiased`}>
+        <NextAuthProvider>
+          <section>
+            <Navbar></Navbar>
+          </section>
+          <main>{children}</main>
+          <section>
+            <Footer></Footer>
+          </section>
+        </NextAuthProvider>
       </body>
     </html>
-        </NextAuthProvider>
   );
 }
