@@ -4,6 +4,8 @@ import NextAuthProvider from "@/provider/NextAuthProvider";
 import Navbar from "@/components/layouts/Navbar";
 import Footer from "@/components/layouts/Footer";
 
+
+
 const poopin = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
