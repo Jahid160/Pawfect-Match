@@ -90,7 +90,7 @@ const Banner = () => {
               {/* Overlay */}
               <div className="absolute inset-0 flex justify-center items-center bg-black/40 p-6">
                 <div className="z-10 mx-auto text-white text-center container">
-                  <span className="inline-block bg-primary mb-4 px-4 py-1 rounded-full font-semibold text-xs md:text-sm uppercase tracking-widest animate-fade-in">
+                  <span className="inline-block bg-orange-500 mb-4 px-4 py-1 rounded-full font-semibold text-xs md:text-sm uppercase tracking-widest animate-fade-in">
                     {slide.tag}
                   </span>
 
@@ -106,7 +106,7 @@ const Banner = () => {
                   <div className="flex sm:flex-row flex-col justify-center gap-4">
                     <Link
                       href={slide.buttonLink}
-                      className="bg-primary hover:opacity-90 shadow-lg shadow-primary/20 px-10 py-4 rounded-full font-bold text-white text-lg hover:scale-105 transition-all"
+                      className="bg-orange-500 hover:opacity-90 shadow-lg shadow-primary/20 px-10 py-4 rounded-full font-bold text-white text-lg hover:scale-105 transition-all"
                     >
                       {slide.buttonText}
                     </Link>
