@@ -11,7 +11,7 @@ import SuccessStories from "@/Components/home/SuccessStories";
 import Banner from '@/components/home/Banner';
 
 
-const page = () => {
+const mainPage = () => {
   return (
     <div className="space-y-5">
       <section>
@@ -32,8 +32,4 @@ const page = () => {
   );
 };
 
-<<<<<<< HEAD
-export default page;
-=======
 export default mainPage;
->>>>>>> bbf26457aea57d130cc7000cf15590fb6d319d5d
