@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
-// import { SocialButtons } from "./SocialButton";
 import { useState } from "react";
 import { postUser } from "@/actions/server/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
+import { SocialButtons } from "./Socialform";
 
 export const RegisterForm = () => {
   const params = useSearchParams();
@@ -42,10 +42,7 @@ export const RegisterForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center gap-5 justify-center bg-base-200">
-    {/* <div>
-      <h1 className="text-6xl font-semibold w-[500px]">Welcome to Pawfect Match</h1>
-    </div> */}
+    <div className="min-h-screen flex items-center justify-center bg-base-200">
       <div className="card w-full max-w-sm shadow-xl bg-base-100">
         <div className="card-body">
           <h2 className="text-2xl font-bold text-center">Create Account</h2>
@@ -83,7 +80,7 @@ export const RegisterForm = () => {
             </button>
           </form>
 
-          {/* <SocialButtons /> */}
+          <SocialButtons />
 
           <p className="text-center text-sm mt-4">
             Already have an account?{" "}

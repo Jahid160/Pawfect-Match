@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { Socialform } from "./Socialform";
+import { SocialButtons } from "./Socialform";
 
 const LoginForm = () => {
   const params = useSearchParams();
@@ -32,7 +32,7 @@ const LoginForm = () => {
         "error"
       );
     } else {
-      Swal.fire("success", "Welcome to Pawfect Match", "success");
+      Swal.fire("success", "Welcome to Pawfect Match Hub", "success");
       router.push(callback);
     }
   };
@@ -64,12 +64,17 @@ const LoginForm = () => {
               Login
             </button>
           </form>
-          <Socialform/>
+
+          <SocialButtons />
+
           <p className="text-center text-sm mt-4">
             Don’t have an account?{" "}
-            <Link href={`/register?callbackUrl=${callback}`}
-              className="link link-primary" 
-              >Register</Link>
+            <Link
+              href={`/register?callbackUrl=${callback}`}
+              className="link link-primary"
+            >
+              Register
+            </Link>
           </p>
         </div>
       </div>

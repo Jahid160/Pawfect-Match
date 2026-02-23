@@ -3,7 +3,7 @@ import { signIn } from "next-auth/react";
 import { useParams, useSearchParams } from "next/navigation";
 import { FaGoogle } from "react-icons/fa";
 
-export const Socialform = () => {
+export const SocialButtons = () => {
   const params = useSearchParams();
 
   const handleSignIn = async () => {
