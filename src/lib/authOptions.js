@@ -2,7 +2,7 @@ import { loginUser } from "@/actions/server/auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { collections, dbConnect } from "./db";
 export const authOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  // secret: process.env.NEXTAUTH_SECRET,
 
   providers: [
     CredentialsProvider({
