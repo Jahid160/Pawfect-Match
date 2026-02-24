@@ -1,7 +1,8 @@
-import { loginUser } from "@/actions/server/auth";
+
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { collections, dbConnect } from "./db";
+import { loginUser } from "@/action/server/auth";
 export const authOptions = {
   // secret: process.env.NEXTAUTH_SECRET,
 
