@@ -5,93 +5,106 @@ import { FaShieldAlt, FaStethoscope, FaHeart, FaUserCheck } from 'react-icons/fa
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 const WhyChooseUs = () => {
-  const { scrollYProgress } = useScroll();
-  
-  // Ekhane ami percentage ta define korlam
-  const reveal = useTransform(scrollYProgress, [0.1, 0.4], [0, 100]);
+    const { scrollYProgress } = useScroll();
 
-  const features = [
-    { id: 1, title: "Verified Safety", description: "Every pet profile undergoes a rigorous verification process.", icon: <FaShieldAlt className="text-3xl" /> },
-    { id: 2, title: "Health First", description: "Detailed medical history and vaccination ensured before adoption.", icon: <FaStethoscope className="text-3xl" /> },
-    { id: 3, title: "Expert Support", description: "Our experts are available 24/7 to guide you through care.", icon: <FaUserCheck className="text-3xl" /> },
-    { id: 4, title: "Pure Love", description: "Focusing on personality match and lifestyle compatibility.", icon: <FaHeart className="text-3xl" /> },
-  ];
+    // Animation timing adjustment for better scroll response
+    const reveal = useTransform(scrollYProgress, [0.05, 0.3], [0, 100]);
 
-  return (
-    <section className="bg-[#FDFCFB] py-24">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        
-        {/* Header Section */}
-        <div className="mx-auto mb-20 max-w-3xl text-center">
-          <h2 className="mb-6 font-black text-gray-900 text-4xl md:text-5xl leading-tight">
-            You shouldn’t be the only one <br />
-            <span className="text-orange-500">Living Healthy.</span>
-          </h2>
-        </div>
+    const features = [
+        { id: 1, title: "Verified Safety", description: "Every pet profile undergoes a rigorous verification process.", icon: <FaShieldAlt className="text-3xl" /> },
+        { id: 2, title: "Health First", description: "Detailed medical history and vaccination ensured before adoption.", icon: <FaStethoscope className="text-3xl" /> },
+        { id: 3, title: "Expert Support", description: "Our experts are available 24/7 to guide you through care.", icon: <FaUserCheck className="text-3xl" /> },
+        { id: 4, title: "Pure Love", description: "Focusing on personality match and lifestyle compatibility.", icon: <FaHeart className="text-3xl" /> },
+    ];
 
-        <div className="flex lg:flex-row flex-col justify-between items-center gap-12">
-          
-          {/* Left Features */}
-          <div className="space-y-16 w-full lg:w-1/3">
-            {features.slice(0, 2).map((f) => (
-              <div key={f.id} className="flex flex-col items-center lg:items-end text-center lg:text-right">
-                <div className="flex justify-center items-center bg-white shadow-lg mb-4 rounded-2xl w-16 h-16 text-orange-500">
-                  {f.icon}
+    return (
+        <section className="bg-[#FDFCFB] py-28 overflow-hidden">
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
+
+                {/* Header Section */}
+                <div className="mx-auto mb-24 px-4 max-w-4xl text-center">
+                    {/* Header Title */}
+                    <h2 className="mb-8 font-black text-gray-900 text-5xl md:text-7xl leading-[1.05] tracking-tight">
+                        The standard of care <br />
+                        <span className="text-orange-500 italic">they deserve.</span>
+                    </h2>
+
+                    {/* Description Text - Perfected Size & Spacing */}
+                    <p className="mx-auto max-w-3xl font-medium text-gray-600 text-lg md:text-xl leading-snug md:leading-relaxed tracking-tight">
+                        We don't just find homes; we ensure a lifestyle of health and happiness
+                        that starts with what's in their bowl and
+                        ends with a wagging tail.
+                    </p>
                 </div>
-                <h4 className="font-bold text-gray-800 text-2xl">{f.title}</h4>
-                <p className="text-gray-500">{f.description}</p>
-              </div>
-            ))}
-          </div>
 
-          {/* Central Visual: Reveal Slider */}
-          <div className="flex justify-center w-full lg:w-1/3">
-             <div className="relative bg-gray-200 shadow-2xl border-8 border-white rounded-full w-80 md:w-[400px] h-80 md:h-[400px] overflow-hidden">
-                
-                {/* Image 1: Background (Puran/Raw look) */}
-                <img 
-                  src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=600" 
-                  alt="Before" 
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                <div className="flex lg:flex-row flex-col justify-between items-center gap-12 lg:gap-4">
 
-                {/* Image 2: Foreground (Reveal/Healthy look) */}
-                <motion.div 
-                  className="z-10 absolute inset-0"
-                  style={{ 
-                    clipPath: useTransform(reveal, (v) => `inset(0 ${100 - v}% 0 0)`) 
-                  }}
-                >
-                  <img 
-                    src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=600" 
-                    alt="After" 
-                    className="absolute inset-0 border-orange-500 border-r-4 w-full h-full object-cover"
-                  />
-                </motion.div>
-                
-                <div className="bottom-5 left-1/2 z-20 absolute bg-black/50 px-3 py-1 rounded-full font-bold text-[10px] text-white -translate-x-1/2">
-                   SCROLL DOWN
+                    {/* Left Features */}
+                    <div className="space-y-24 order-2 lg:order-1 w-full lg:w-1/4">
+                        {features.slice(0, 2).map((f) => (
+                            <div key={f.id} className="group flex flex-col items-center lg:items-end text-center lg:text-right">
+                                <div className="flex justify-center items-center bg-white shadow-2xl group-hover:shadow-orange-200 mb-8 rounded-3xl w-24 h-24 text-orange-500 transition-all group-hover:-translate-y-2 duration-500">
+                                    {f.icon}
+                                </div>
+                                <h4 className="mb-4 font-black text-gray-900 text-3xl">{f.title}</h4>
+                                <p className="font-medium text-gray-600 text-lg leading-relaxed">{f.description}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Central Visual: Massive Reveal Slider (Farmer's Dog Style) */}
+                    <div className="flex justify-center order-1 lg:order-2 w-full lg:w-2/4">
+                        <div className="group relative bg-white shadow-[0_50px_100px_-20px_rgba(251,146,60,0.3)] border-[16px] border-white rounded-full w-[340px] sm:w-[500px] md:w-[550px] h-[340px] sm:h-[500px] md:h-[550px] overflow-hidden">
+
+                            {/* Image 1: Background (Processed/Raw Vibe) */}
+                            <img
+                                src="https://i.ibb.co.com/3YWs98HK/bonnie-kittle-MUcxe-w-Dur-E-unsplash.jpg"
+                                alt="Standard Pet Care"
+                                className="absolute inset-0 brightness-90 grayscale-[40%] w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+
+                            {/* Image 2: Foreground (Fresh Food/Happy Result Reveal) */}
+                            <motion.div
+                                className="z-10 absolute inset-0 shadow-2xl border-orange-500 border-r-[8px]"
+                                style={{
+                                    clipPath: useTransform(reveal, (v) => `inset(0 ${100 - v}% 0 0)`)
+                                }}
+                            >
+                                <img
+                                    src="https://i.ibb.co.com/4g748wmh/zhen-yao-WG-Qdg-WTZ-s-unsplash.jpg"
+                                    alt="Premium PawFact Care"
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                />
+                            </motion.div>
+
+                            {/* Animated Scroll Indicator */}
+                            <motion.div
+                                animate={{ y: [0, 10, 0] }}
+                                transition={{ repeat: Infinity, duration: 2 }}
+                                className="bottom-16 left-1/2 z-20 absolute bg-orange-500 shadow-xl px-8 py-3 rounded-full font-black text-white text-xs tracking-[0.2em] -translate-x-1/2"
+                            >
+                                SCROLL TO REVEAL
+                            </motion.div>
+                        </div>
+                    </div>
+
+                    {/* Right Features */}
+                    <div className="space-y-24 order-3 w-full lg:w-1/4">
+                        {features.slice(2, 4).map((f) => (
+                            <div key={f.id} className="group flex flex-col items-center lg:items-start lg:text-left text-center">
+                                <div className="flex justify-center items-center bg-white shadow-2xl group-hover:shadow-orange-200 mb-8 rounded-3xl w-24 h-24 text-orange-500 transition-all group-hover:-translate-y-2 duration-500">
+                                    {f.icon}
+                                </div>
+                                <h4 className="mb-4 font-black text-gray-900 text-3xl">{f.title}</h4>
+                                <p className="font-medium text-gray-600 text-lg leading-relaxed">{f.description}</p>
+                            </div>
+                        ))}
+                    </div>
+
                 </div>
-             </div>
-          </div>
-
-          {/* Right Features */}
-          <div className="space-y-16 w-full lg:w-1/3">
-            {features.slice(2, 4).map((f) => (
-              <div key={f.id} className="flex flex-col items-center lg:items-start lg:text-left text-center">
-                <div className="flex justify-center items-center bg-white shadow-lg mb-4 rounded-2xl w-16 h-16 text-orange-500">
-                  {f.icon}
-                </div>
-                <h4 className="font-bold text-gray-800 text-2xl">{f.title}</h4>
-                <p className="text-gray-500">{f.description}</p>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </div>
-    </section>
-  );
+            </div>
+        </section>
+    );
 };
 
 export default WhyChooseUs;
