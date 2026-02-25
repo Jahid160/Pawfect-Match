@@ -23,8 +23,8 @@ const mainPage = () => {
         <Petcarts></Petcarts>
         <HowItWorks></HowItWorks>
         <SuccessStories></SuccessStories>
-        <PetSearch></PetSearch>
-        <AdoptionProcess></AdoptionProcess>
+        {/* <PetSearch></PetSearch> */}
+        {/* <AdoptionProcess></AdoptionProcess> */}
         <OurSponsor></OurSponsor>
         <Newsletter></Newsletter>
       </section>

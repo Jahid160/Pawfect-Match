@@ -8,11 +8,15 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'i.ibb.co', // ImgBB er direct image host
+        hostname: 'i.ibb.co',
       },
       {
         protocol: 'https',
-        hostname: 'images.pexels.com', // Pexels host
+        hostname: 'upload.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
       },
     ],
   },
