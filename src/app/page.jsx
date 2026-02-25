@@ -3,6 +3,7 @@ import Petdetailscart from "@/components/cards/Petdetailscart";
 import AdoptionProcess from "@/components/home/AdoptionProcess";
 import Banner from "@/components/home/Banner";
 import HowItWorks from "@/components/home/HowItWorks";
+import Newsletter from "@/components/home/Newsletter";
 import OurSponsor from "@/components/home/OurSponsor";
 import PetCategories from "@/components/home/PetCategories";
 import PetSearch from "@/components/home/PetSearch";
@@ -24,6 +25,7 @@ const mainPage = () => {
         <PetSearch></PetSearch>
         <AdoptionProcess></AdoptionProcess>
         <OurSponsor></OurSponsor>
+        <Newsletter></Newsletter>
       </section>
 
       <section>
