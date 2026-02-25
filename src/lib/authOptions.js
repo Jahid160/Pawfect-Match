@@ -1,6 +1,7 @@
 import { loginUser } from "@/actions/server/auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import { collections, dbConnect } from "./db";
 export const authOptions = {
   // secret: process.env.NEXTAUTH_SECRET,
@@ -14,13 +15,28 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        return await loginUser(credentials);
+
+        const user = await loginUser(credentials);
+
+        if (!user) return null;
+
+        // BLOCK UNVERIFIED USERS HERE
+        if (!user.isVerified) {
+          throw new Error("Email not verified");
+          // OR: return null;
+        }
+
+        return user;
       },
     }),
 
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
     }),
   ],
 
