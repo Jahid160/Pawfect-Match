@@ -1,219 +1,110 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, ChevronDown } from "lucide-react";
 
-const Navbar = () => {
-  const pathname = usePathname();
-  const router = useRouter();
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // 🔹 Dummy user (replace later with auth data)
-  const user = {
-    name: "MD SHAKIL",
-    avatar: "https://via.placeholder.com/150",
-  };
-
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "PetsCard", href: "/Petcarts" },
-    { name: "Pets & Supplies", href: "/pets" },
-    { name: "About Us", href: "/about" },
-    { name: "FAQ", href: "/faq" },
-    { name: "Adoption Guidelines", href: "/guidelines" },
-    { name: "Add Listing", href: "/add-listing" },
-    { name: "My Listing", href: "/my-listing" },
-    { name: "My Orders", href: "/orders" },
-  ];
-
-  const handleProfileClick = () => {
-    setIsDropdownOpen(false);
-    router.push("/profile");
-  };
+  // Add a smooth shadow and background blur when scrolling down
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="top-0 z-50 sticky bg-white/80 backdrop-blur-lg border-gray-200 border-b">
-      <div className="mx-auto px-4 sm:px-6 py-3 max-w-[1400px]">
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 py-1"
+          : "bg-transparent py-3"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-14">
+          
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-extrabold text-gray-900 tracking-tight">
+            Paw<span className="text-orange-500">fect</span>
+          </Link>
 
-        {/* ================= TOP BAR ================= */}
-        <div className="items-center grid grid-cols-3 lg:grid-cols-[1fr_auto_1fr]">
-
-          {/* LEFT — Logo (desktop) | Profile (mobile) */}
-          <div className="flex justify-start items-center gap-3">
-
-            {/* Mobile Profile */}
-            <div className="lg:hidden relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="border-[#4cc9f0] border-2 rounded-full w-10 h-10 overflow-hidden"
-              >
-                <img
-                  src={user.avatar}
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="left-0 z-50 absolute bg-white shadow-xl mt-4 p-4 border rounded-2xl w-56 text-center">
-                  <button
-                    onClick={handleProfileClick}
-                    className="block mb-4 w-full font-semibold text-gray-800 hover:text-[#4cc9f0] text-sm transition"
-                  >
-                    {user.name}
-                  </button>
-
-                  <button className="bg-red-500 hover:bg-red-600 py-2 rounded-lg w-full font-semibold text-white transition">
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Desktop Logo */}
-            <Link href="/" className="group hidden lg:flex items-center gap-3">
-              <div className="bg-[#4cc9f0] p-2 rounded-full group-hover:scale-105 transition">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6 text-[#020d1a]"
-                >
-                  <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
-                </svg>
-              </div>
-              <span className="font-bold text-[#4cc9f0] text-2xl">
-                PawFect
-              </span>
-            </Link>
-          </div>
-
-          {/* CENTER — Logo (mobile) | Routes (desktop centered) */}
-          <div className="flex justify-center">
-
-            {/* Mobile Logo */}
-            <Link href="/" className="lg:hidden flex items-center gap-2">
-              <div className="bg-[#4cc9f0] p-2 rounded-full">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6 text-[#020d1a]"
-                >
-                  <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
-                </svg>
-              </div>
-              <span className="font-bold text-[#4cc9f0] text-lg">
-                PawFect
-              </span>
-            </Link>
-
-            {/* Desktop Routes */}
-            <div className="hidden lg:flex items-center gap-6 font-medium text-sm">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className={`relative transition ${
-                      isActive
-                        ? "text-[#4cc9f0]"
-                        : "text-gray-700 hover:text-[#4cc9f0]"
-                    }`}
-                  >
-                    {link.name}
-                    {isActive && (
-                      <span className="-bottom-2 left-0 absolute bg-[#4cc9f0] rounded-full w-full h-[2px]" />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* RIGHT — Profile (desktop) | Menu (mobile) */}
-          <div className="flex justify-end items-center gap-3">
-
-            {/* Desktop Profile */}
-            <div className="hidden lg:block relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="border-[#4cc9f0] border-2 rounded-full w-11 h-11 overflow-hidden hover:scale-105 transition"
-              >
-                <img
-                  src={user.avatar}
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="right-0 z-50 absolute bg-white shadow-xl mt-4 p-4 border rounded-2xl w-56 text-center">
-                  <button
-                    onClick={handleProfileClick}
-                    className="block mb-4 w-full font-semibold text-gray-800 hover:text-[#4cc9f0] text-sm transition"
-                  >
-                    {user.name}
-                  </button>
-
-                  <button className="bg-red-500 hover:bg-red-600 py-2 rounded-lg w-full font-semibold text-white transition">
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden flex justify-center items-center hover:bg-gray-100 border rounded-lg w-10 h-10 transition"
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-2">
+            <Link 
+              href="#" 
+              className="px-4 py-2 text-sm font-medium text-gray-600 rounded-full hover:text-orange-600 hover:bg-orange-50 transition-all duration-200"
             >
-              <svg
-                className="w-6 h-6 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
+              Services
+            </Link>
 
-        {/* ================= MOBILE MENU ================= */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden space-y-2 mt-4 pt-4 border-t">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+            {/* Dropdown Menu */}
+            <div className="relative group">
+              <button className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-600 rounded-full hover:text-orange-600 hover:bg-orange-50 transition-all duration-200">
+                Products
+                <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-orange-500 group-hover:rotate-180 transition-transform duration-300" />
+              </button>
 
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-lg font-medium transition ${
-                    isActive
-                      ? "bg-[#4cc9f0]/10 text-[#4cc9f0]"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {link.name}
+              {/* Dropdown Panel with Slide-up Animation */}
+              <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 p-2">
+                <Link href="#" className="block px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                  Dog Food
                 </Link>
-              );
-            })}
+                <Link href="#" className="block px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                  Cat Toys
+                </Link>
+              </div>
+            </div>
+
+            <Link 
+              href="#" 
+              className="px-4 py-2 text-sm font-medium text-gray-600 rounded-full hover:text-orange-600 hover:bg-orange-50 transition-all duration-200"
+            >
+              About Us
+            </Link>
+
+            {/* CTA Button */}
+            <div className="ml-4">
+              <button className="bg-orange-500 text-white text-sm font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-orange-500/30 hover:bg-orange-600 hover:shadow-orange-500/50 hover:-translate-y-0.5 transition-all duration-200">
+                Book Now
+              </button>
+            </div>
           </div>
-        )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu (Animated slide down) */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-white px-6 py-4 shadow-xl border-t border-gray-100 flex flex-col gap-2">
+          <Link href="#" className="px-4 py-3 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors">
+            Services
+          </Link>
+          <Link href="#" className="px-4 py-3 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors">
+            Products
+          </Link>
+          <Link href="#" className="px-4 py-3 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors">
+            About Us
+          </Link>
+          <button className="mt-2 w-full bg-orange-500 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-orange-600 transition-colors">
+            Book Now
+          </button>
+        </div>
       </div>
     </nav>
   );
-};
-
-export default Navbar;
+}
