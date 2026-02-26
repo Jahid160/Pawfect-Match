@@ -8,21 +8,30 @@
 @plugin "daisyui/theme" {
   name: "light";
   default: true;
-  /* Brand */
-  --color-primary: oklch(65% 0.23 250);
-  --color-secondary: oklch(58% 0.18 245);
-  --color-accent: oklch(72% 0.20 265);
 
-  /* Base */
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(97% 0.01 95);
-  --color-base-300: oklch(92% 0.015 95);
+  /* Brand - Pet Adoption Theme (Warm & Trustworthy) */
+  /* Primary: Vibrant Orange (oklch onujayi) */
+  --color-primary: oklch(70% 0.19 45); 
+  
+  /* Secondary: Soft Peach/Cream (Warm background elements) */
+  --color-secondary: oklch(90% 0.05 50);
+  
+  /* Accent: Playful Sky Blue (Friendly vibe) */
+  --color-accent: oklch(75% 0.14 215);
 
-  /* Neutral */
-  --color-neutral: oklch(35% 0.01 260);
-  --color-neutral-content: oklch(96% 0 0);
+  /* Base - Clean and Warm backgrounds */
+  --color-base-100: oklch(100% 0 0);      /* Pure White */
+  --color-base-200: oklch(98% 0.01 60);   /* Near White warm */
+  --color-base-300: oklch(95% 0.02 60);   /* Light Grey-Cream */
 
-  /* Feedback */
-  --color-success: oklch(70% 0.17 145);
-  --color-error: oklch(62% 0.24 28);
+  /* Neutral - For Text and Deep elements */
+  --color-neutral: oklch(25% 0.02 60);    /* Deep Charcoal/Brown */
+  --color-neutral-content: oklch(98% 0 0);
+
+  /* Feedback colors */
+  --color-success: oklch(75% 0.15 150);   /* Calm Green */
+  --color-info: oklch(70% 0.12 210);      /* Info Blue */
+  --color-error: oklch(65% 0.22 25);      /* Soft Red-Orange */
 }
+
+@custom-variant dark (&:where([data-theme=night], [data-theme=night] *));

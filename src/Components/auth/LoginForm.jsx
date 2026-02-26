@@ -1,9 +1,10 @@
-"use client";
+"use client"
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Socialform } from "./Socialform";
 
 const LoginForm = () => {
   const params = useSearchParams();
@@ -58,15 +59,23 @@ const LoginForm = () => {
               className="input input-bordered w-full"
               required
             />
-
+{/* start add forgot password Md Zahid */}
+<p className="text-right text-sm">
+  <Link href="/forgot-password" className="link link-primary">
+    Forgot Password?
+  </Link>
+</p>
+{/*end add forgot password  Md Zahid */}
             <button type="submit" className="btn btn-primary w-full">
               Login
             </button>
           </form>
-
+          <Socialform/>
           <p className="text-center text-sm mt-4">
             Don’t have an account?{" "}
-            <Link href='/register' className="link link-primary">Register</Link>
+            <Link href={`/register?callbackUrl=${callback}`}
+              className="link link-primary" 
+              >Register</Link>
           </p>
         </div>
       </div>

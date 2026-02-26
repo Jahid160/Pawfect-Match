@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-// import { SocialButtons } from "./SocialButton";
 import { useState } from "react";
 import { postUser } from "@/action/server/auth";
 import { useRouter, useSearchParams } from "next/navigation";
