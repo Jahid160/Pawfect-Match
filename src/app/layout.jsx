@@ -6,11 +6,10 @@ import Footer from "@/components/layouts/Footer";
 
 
 
-const poopin = Poppins({
-  subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800']
-
-})
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
+});
 
 export const metadata = {
   title: "Pawfact Match",
@@ -19,26 +18,20 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <NextAuthProvider>
-
-      <html lang="en">
-
-
-
-        <body
-          className={`${poopin.className}  antialiased`}
-        >
-          <section>
+    <html lang="en">
+      <body className={`${poppins.className}  antialiased`}>
+        <NextAuthProvider>
+          <header className="mx-auto py-2 md:w-11/12">
             <Navbar></Navbar>
-          </section>
-          <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
-            {children}
-          </main>
-          <section>
+          </header>
+
+          <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">{children}</main>
+
+          <footer>
             <Footer></Footer>
-          </section>
-        </body>
-      </html>
-    </NextAuthProvider>
+          </footer>
+        </NextAuthProvider>
+      </body>
+    </html>
   );
 }
