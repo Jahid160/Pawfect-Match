@@ -26,32 +26,32 @@ const Petdetailscart = () => {
   return (
     <div className="bg-[#FDFCFB] px-4 sm:px-6 py-12 min-h-screen">
       <div className="mx-auto max-w-6xl">
-        
+
         {/* Navigation Button using Link (Safe for Server Components) */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="group flex items-center gap-2 mb-8 w-fit font-bold text-gray-400 hover:text-orange-500 transition-all"
         >
-          <FaChevronLeft className="transition-transform group-hover:-translate-x-1" /> 
+          <FaChevronLeft className="transition-transform group-hover:-translate-x-1" />
           Back to Collection
         </Link>
 
         <div className="flex lg:flex-row flex-col items-start gap-12">
-          
+
           {/* Left: Image Hero Section */}
           <div className="top-10 lg:sticky w-full lg:w-1/2">
             <div className="relative bg-white shadow-2xl p-2 border border-gray-100 rounded-[40px] overflow-hidden">
-              <img 
-                src={pet.image} 
-                alt={pet.name} 
+              <img
+                src={pet.image}
+                alt={pet.name}
                 className="rounded-[35px] w-full h-[500px] object-cover"
               />
-              
+
               {/* Category Badge */}
               <div className="top-8 left-8 absolute flex items-center gap-2 bg-white/90 shadow-lg backdrop-blur-md px-6 py-2 rounded-full font-bold text-orange-600">
                 <FaPaw /> {pet.category}
               </div>
-              
+
               <div className="top-8 right-8 absolute bg-white/90 shadow-lg backdrop-blur-md p-4 rounded-full text-red-500">
                 <FaHeart size={22} />
               </div>
@@ -60,7 +60,7 @@ const Petdetailscart = () => {
 
           {/* Right: Details & Action Section */}
           <div className="space-y-8 w-full lg:w-1/2">
-            
+
             {/* Title & Price */}
             <div>
               <div className="flex justify-between items-end mb-4">
@@ -94,29 +94,29 @@ const Petdetailscart = () => {
                 <FaInfoCircle className="text-orange-500" /> Story of {pet.name}
               </h3>
               <p className="font-medium text-gray-600 italic leading-relaxed">
-                "{pet.description}"
+                {pet.description}
               </p>
             </div>
 
             {/* Contact & Adoption Section */}
             <div className="relative bg-orange-500 shadow-orange-200 shadow-xl p-8 rounded-[40px] overflow-hidden text-white">
-               <div className="-right-10 -bottom-10 absolute bg-orange-400 opacity-50 rounded-full w-40 h-40"></div>
-               
-               <h3 className="z-10 relative mb-6 font-bold text-2xl">Ready to Adopt?</h3>
-               
-               <div className="z-10 relative flex sm:flex-row flex-col gap-4">
-                 <div className="flex flex-1 justify-center items-center gap-3 bg-white py-4 rounded-2xl font-black text-orange-600 text-sm uppercase tracking-wider cursor-pointer">
-                   <FaPhoneAlt size={16} /> Contact Seller
-                 </div>
-                 <div className="flex flex-1 justify-center items-center gap-3 bg-orange-900/20 backdrop-blur-sm py-4 border-2 border-white/30 rounded-2xl font-black text-white text-sm uppercase tracking-wider cursor-pointer">
-                   Adopt {pet.name}
-                 </div>
-               </div>
-               
-               <div className="z-10 relative flex items-center gap-3 mt-6 font-medium text-orange-100 text-sm">
-                 <FaEnvelope />
-                 <span>Owner: {pet.owner.name} ({pet.owner.email})</span>
-               </div>
+              <div className="-right-10 -bottom-10 absolute bg-orange-400 opacity-50 rounded-full w-40 h-40"></div>
+
+              <h3 className="z-10 relative mb-6 font-bold text-2xl">Ready to Adopt?</h3>
+
+              <div className="z-10 relative flex sm:flex-row flex-col gap-4">
+                <div className="flex flex-1 justify-center items-center gap-3 bg-white py-4 rounded-2xl font-black text-orange-600 text-sm uppercase tracking-wider cursor-pointer">
+                  <FaPhoneAlt size={16} /> Contact Seller
+                </div>
+                <div className="flex flex-1 justify-center items-center gap-3 bg-orange-900/20 backdrop-blur-sm py-4 border-2 border-white/30 rounded-2xl font-black text-white text-sm uppercase tracking-wider cursor-pointer">
+                  Adopt {pet.name}
+                </div>
+              </div>
+
+              <div className="z-10 relative flex items-center gap-3 mt-6 font-medium text-orange-100 text-sm">
+                <FaEnvelope />
+                <span>Owner: {pet.owner.name} ({pet.owner.email})</span>
+              </div>
             </div>
 
           </div>
