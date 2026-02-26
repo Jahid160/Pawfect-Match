@@ -2,7 +2,7 @@
 import Link from "next/link";
 // import { SocialButtons } from "./SocialButton";
 import { useState } from "react";
-import { postUser } from "@/actions/server/auth";
+import { postUser } from "@/action/server/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
@@ -43,7 +43,7 @@ export const RegisterForm = () => {
 
   return (
     <div className="min-h-screen flex items-center gap-5 justify-center bg-base-200">
-    {/* <div>
+      {/* <div>
       <h1 className="text-6xl font-semibold w-[500px]">Welcome to Pawfect Match</h1>
     </div> */}
       <div className="card w-full max-w-sm shadow-xl bg-base-100">
