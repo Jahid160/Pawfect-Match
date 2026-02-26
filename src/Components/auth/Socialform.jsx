@@ -17,7 +17,7 @@ export const Socialform = () => {
     <div className="flex gap-3 mt-4">
       <button
         onClick={handleSignIn}
-        className="btn btn-outline btn-error flex-1"
+        className="flex-1 btn-outline btn btn-error"
       >
         <FaGoogle className="text-lg" />
         Google

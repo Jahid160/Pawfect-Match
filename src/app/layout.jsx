@@ -6,7 +6,7 @@ import Footer from "@/components/layouts/Footer";
 
 
 
-const poopin = Poppins({
+const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
 });
@@ -19,15 +19,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${poopin.className}  antialiased`}>
+      <body className={`${poppins.className}  antialiased`}>
         <NextAuthProvider>
-          <section>
+          <header className="mx-auto py-2 md:w-11/12">
             <Navbar></Navbar>
-          </section>
-          <main>{children}</main>
-          <section>
+          </header>
+
+          <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">{children}</main>
+
+          <footer>
             <Footer></Footer>
-          </section>
+          </footer>
         </NextAuthProvider>
       </body>
     </html>
