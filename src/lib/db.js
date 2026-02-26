@@ -1,5 +1,6 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
-
+// const { MongoClient, ServerApiVersion } = require("mongodb");
+import { MongoClient, ServerApiVersion } from "mongodb";
+// const uri = process.env.URI;
 const uri = process.env.URI;
 const dbname = process.env.DBNAME;
 
@@ -16,13 +17,10 @@ const client = new MongoClient(uri, {
   },
 });
 
-let isConnected = false;
+
 
 export const dbConnect = async (cname) => {
-  if (!isConnected) {
-    await client.connect();
-    isConnected = true;
-  }
+
   return client.db(dbname).collection(cname);
 };
 
