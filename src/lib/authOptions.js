@@ -17,14 +17,9 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await loginUser(credentials);
-
         if (!user) return null;
 
-        // BLOCK UNVERIFIED USERS HERE
-        if (!user.isVerified) {
-          throw new Error("Email not verified");
-          // OR: return null;
-        }
+        if (!user.isVerified) return null; // cleaner than throw
 
         return user;
       },

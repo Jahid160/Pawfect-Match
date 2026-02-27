@@ -25,12 +25,14 @@ const LoginForm = () => {
       callbackUrl: params.get("callbackUrl") || "/",
     });
 
-    if (!result.ok) {
-      Swal.fire(
-        "error",
-        "Email password not Matched . Try Google Login / Register",
-        "error"
-      );
+    if (!result?.ok) {
+      const msg =
+        result?.error === "CredentialsSignin"
+          ? "Invalid email/password or your email is not verified yet."
+          : result?.error || "Login failed";
+
+      Swal.fire("Error", msg, "error");
+      return;
     } else {
       Swal.fire("success", "Welcome to Pawfect Match Hub", "success");
       router.push(callback);

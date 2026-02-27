@@ -23,22 +23,25 @@ export const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await postUser(form);
 
-    if (result.acknowledged) {
-      const result = await signIn("credentials", {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-        callbackUrl: callbackUrl,
-      });
-      if (result.ok) {
-        Swal.fire("success", "Registered successfully", "success");
-        router.push(callbackUrl);
-      }
-    } else {
-      Swal.fire("erro", "Sorry", "error");
+    const res = await postUser(form);
+
+    if (res?.acknowledged && res?.requiresVerification) {
+      Swal.fire("Success", "OTP sent to your email. Please verify.", "success");
+      router.push(
+        `/verify?email=${encodeURIComponent(form.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+      );
+      return;
     }
+
+    if (res?.acknowledged) {
+      // if you ever allow verified auto-users
+      Swal.fire("Success", "Registered successfully", "success");
+      router.push("/login");
+      return;
+    }
+
+    Swal.fire("Error", res?.message || "Registration failed", "error");
   };
 
   return (
