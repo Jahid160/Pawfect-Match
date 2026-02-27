@@ -49,13 +49,13 @@ export default function OurSponsor() {
             sponsor.img && (
               <SwiperSlide key={sponsor.id} className="flex justify-center items-center">
                 <div className="relative w-32 md:w-40 h-14 md:h-20 transition-all duration-500">
-                  <img
+                  {/* <img
                     src={sponsor.img}
                     alt={`Partner Logo ${sponsor.id}`}
                     fill
                     sizes="(max-width: 768px) 120px, 200px"
                     className="opacity-40 hover:opacity-100 brightness-110 grayscale hover:grayscale-0 object-contain transition-all duration-700"
-                  />
+                  /> */}
                 </div>
               </SwiperSlide>
             )
