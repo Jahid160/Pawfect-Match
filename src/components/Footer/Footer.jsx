@@ -14,7 +14,7 @@ export default function Footer() {
           </h2>
           <p className="mt-4 text-sm text-gray-400">
             Connecting loving families with pets in need. 
-            Our mission is to make adoption simple, safe, and joyful.
+            Our mission is to make 
           </p>
         </div>
 
