@@ -1,218 +1,88 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+// import Logo from './Logo';
+import NavLink from '../button/NavLink';
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Menu, LogIn } from "lucide-react";
+import AuthButtons from '../button/AuthButtons';
+
 
 const Navbar = () => {
-  const pathname = usePathname();
-  const router = useRouter();
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // 🔹 Dummy user (replace later with auth data)
-  const user = {
-    name: "MD SHAKIL",
-    avatar: "https://via.placeholder.com/150",
-  };
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "PetsCard", href: "/Petcarts" },
-    { name: "Pets & Supplies", href: "/pets" },
-    { name: "About Us", href: "/about" },
+    { name: "About", href: "/about" },
     { name: "FAQ", href: "/faq" },
-    { name: "Adoption Guidelines", href: "/guidelines" },
-    { name: "Add Listing", href: "/add-listing" },
-    { name: "My Listing", href: "/my-listing" },
-    { name: "My Orders", href: "/orders" },
+    { name: "Contact", href: "/contact" },
   ];
 
-  const handleProfileClick = () => {
-    setIsDropdownOpen(false);
-    router.push("/profile");
-  };
+  const navItems = navLinks.map((link) => (
+    <li key={link.name} className="relative group">
+      <NavLink href={link.href}>
+        <span className="relative py-2 text-[15px] font-semibold tracking-wide transition-colors group-hover:text-primary">
+          {link.name}
+          {/* Modern dot indicator on hover */}
+          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full opacity-0 transition-all duration-300 group-hover:opacity-100"></span>
+        </span>
+      </NavLink>
+    </li>
+  ));
 
   return (
-    <nav className="top-0 z-50 sticky bg-white/80 backdrop-blur-lg border-gray-200 border-b">
-      <div className="mx-auto px-4 sm:px-6 py-3 max-w-[1400px]">
+    <div className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 md:px-12 ${isScrolled ? "pt-2" : "pt-6"}`}>
+      <div className={`navbar max-w-7xl mx-auto rounded-3xl transition-all duration-300 ${isScrolled
+          ? "bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/20 px-8 h-16"
+          : "bg-transparent px-4 h-20"
+        }`}>
 
-        {/* ================= TOP BAR ================= */}
-        <div className="items-center grid grid-cols-3 lg:grid-cols-[1fr_auto_1fr]">
-
-          {/* LEFT — Logo (desktop) | Profile (mobile) */}
-          <div className="flex justify-start items-center gap-3">
-
-            {/* Mobile Profile */}
-            <div className="lg:hidden relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="border-[#4cc9f0] border-2 rounded-full w-10 h-10 overflow-hidden"
-              >
-                <img
-                  src={user.avatar}
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="left-0 z-50 absolute bg-white shadow-xl mt-4 p-4 border rounded-2xl w-56 text-center">
-                  <button
-                    onClick={handleProfileClick}
-                    className="block mb-4 w-full font-semibold text-gray-800 hover:text-[#4cc9f0] text-sm transition"
-                  >
-                    {user.name}
-                  </button>
-
-                  <button className="bg-red-500 hover:bg-red-600 py-2 rounded-lg w-full font-semibold text-white transition">
-                    Logout
-                  </button>
-                </div>
-              )}
+        {/* Navbar Start: Logo & Mobile Trigger */}
+        <div className="navbar-start">
+          <div className="dropdown">
+            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden mr-2 hover:bg-primary/10">
+              <Menu className="h-6 w-6" />
             </div>
-
-            {/* Desktop Logo */}
-            <Link href="/" className="group hidden lg:flex items-center gap-3">
-              <div className="bg-[#4cc9f0] p-2 rounded-full group-hover:scale-105 transition">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6 text-[#020d1a]"
-                >
-                  <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
-                </svg>
-              </div>
-              <span className="font-bold text-[#4cc9f0] text-2xl">
-                PawFect
-              </span>
-            </Link>
-          </div>
-
-          {/* CENTER — Logo (mobile) | Routes (desktop centered) */}
-          <div className="flex justify-center">
-
-            {/* Mobile Logo */}
-            <Link href="/" className="lg:hidden flex items-center gap-2">
-              <div className="bg-[#4cc9f0] p-2 rounded-full">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6 text-[#020d1a]"
-                >
-                  <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
-                </svg>
-              </div>
-              <span className="font-bold text-[#4cc9f0] text-lg">
-                PawFect
-              </span>
-            </Link>
-
-            {/* Desktop Routes */}
-            <div className="hidden lg:flex items-center gap-6 font-medium text-sm">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className={`relative transition ${
-                      isActive
-                        ? "text-[#4cc9f0]"
-                        : "text-gray-700 hover:text-[#4cc9f0]"
-                    }`}
-                  >
-                    {link.name}
-                    {isActive && (
-                      <span className="-bottom-2 left-0 absolute bg-[#4cc9f0] rounded-full w-full h-[2px]" />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* RIGHT — Profile (desktop) | Menu (mobile) */}
-          <div className="flex justify-end items-center gap-3">
-
-            {/* Desktop Profile */}
-            <div className="hidden lg:block relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="border-[#4cc9f0] border-2 rounded-full w-11 h-11 overflow-hidden hover:scale-105 transition"
-              >
-                <img
-                  src={user.avatar}
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
-              </button>
-
-              {isDropdownOpen && (
-                <div className="right-0 z-50 absolute bg-white shadow-xl mt-4 p-4 border rounded-2xl w-56 text-center">
-                  <button
-                    onClick={handleProfileClick}
-                    className="block mb-4 w-full font-semibold text-gray-800 hover:text-[#4cc9f0] text-sm transition"
-                  >
-                    {user.name}
-                  </button>
-
-                  <button className="bg-red-500 hover:bg-red-600 py-2 rounded-lg w-full font-semibold text-white transition">
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden flex justify-center items-center hover:bg-gray-100 border rounded-lg w-10 h-10 transition"
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content bg-base-100/90 backdrop-blur-md rounded-2xl z-[1] mt-4 w-64 p-4 shadow-2xl border border-base-200 gap-2"
             >
-              <svg
-                className="w-6 h-6 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+              {navItems}
+              <div className="divider my-1"></div>
+              <li><Link href="/login" className="btn btn-primary btn-sm text-white">Login</Link></li>
+            </ul>
+          </div>
+          <div className="hover:scale-105 transition-transform duration-300 flex items-center">
+            {/* <Logo /> */}
           </div>
         </div>
 
-        {/* ================= MOBILE MENU ================= */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden space-y-2 mt-4 pt-4 border-t">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+        {/* Navbar Center: Links with spacing */}
+        <div className="navbar-center hidden lg:flex">
+          <ul className="menu menu-horizontal px-1 gap-8">
+            {navItems}
+          </ul>
+        </div>
 
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-lg font-medium transition ${
-                    isActive
-                      ? "bg-[#4cc9f0]/10 text-[#4cc9f0]"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              );
-            })}
-          </div>
-        )}
+        {/* Navbar End: Styled Login only */}
+        <div className="navbar-end">
+          <AuthButtons/>
+          {/* <Link
+            href="/login"
+            className="group relative flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
+          >
+            <span>Login</span>
+            <LogIn className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </Link> */}
+        </div>
       </div>
-    </nav>
+    </div>
   );
 };
 

@@ -80,14 +80,15 @@ export const authOptions = {
         // username: { label: "Username", type: "text", placeholder: "jsmith" },
         // password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+      async authorize(credentials, req) {
+        console.log(credentials);
 
-        const user = await loginUser(credentials);
-        if (!user) return null;
+        const user = await loginUser({
+          email: credentials.email,
+          password: credentials.password,
+        });
 
-        if (!user.isVerified) return null; // cleaner than throw
-
+        // Return null if user data could not be retrieved
         return user;
       },
     }),
@@ -99,6 +100,7 @@ export const authOptions = {
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
     }),
+    // ...add more providers here
   ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {

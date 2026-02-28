@@ -1,4 +1,3 @@
-// const { MongoClient, ServerApiVersion } = require("mongodb");
 import { MongoClient, ServerApiVersion } from "mongodb";
 // const uri = process.env.URI;
 const uri = process.env.URI;
@@ -24,6 +23,3 @@ export const dbConnect = async (cname) => {
 
   return client.db(dbname).collection(cname);
 };
-
-
-
