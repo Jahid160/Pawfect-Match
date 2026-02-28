@@ -103,32 +103,33 @@ export const authOptions = {
     // ...add more providers here
   ],
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      console.log({ user, account, profile, email, credentials });
 
-      const isExist = await dbConnect(collections.USERS).findOne({
-        email: user.email,
-        // provider: account?.provider,
-      });
-      if (isExist) {
-        return true;
-      }
+    
+    
+    async signIn({ user, account }) {
+  const usersCollection = await dbConnect(collections.USERS);
 
-      const newUser = {
-        provider: account?.provider,
-        email: user.email,
-        name: user.name,
-        image: user.image,
-        role: "user",
-      };
-      const result = await dbConnect(collections.USERS).insertOne(newUser);
+  const isExist = await usersCollection.findOne({
+    email: user.email,
+  });
 
-      return result.acknowledged;
-      // return true
-    },
-    // async redirect({ url, baseUrl }) {
-    //   return baseUrl;
-    // },
+  if (isExist) {
+    return true;
+  }
+
+  const newUser = {
+    provider: account?.provider,
+    email: user.email,
+    name: user.name,
+    image: user.image,
+    role: "user",
+  };
+
+  const result = await usersCollection.insertOne(newUser);
+
+  return result.acknowledged;
+},
+    
     async session({ session, token, user }) {
       if (token) {
         session.role = token?.role;
@@ -140,9 +141,14 @@ export const authOptions = {
       console.log("account data in token", token);
       if (user) {
         if (account.provider == "google") {
-          const dbUser = await dbConnect(collections.USERS).findOne({
+
+
+          const usersCollection = await dbConnect(collections.USERS);
+
+          const dbUser = await usersCollection.findOne({
             email: user.email,
           });
+
           token.role = dbUser?.role;
           token.email = dbUser?.email;
         } else {
