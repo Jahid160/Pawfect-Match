@@ -3,6 +3,7 @@ import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
 import Navbar from "@/components/Header/Navbar";
 import Footer from "@/components/Footer/Footer";
+import SupportButton from "@/components/HelpCenter/SupportButton";
 
 
 
@@ -27,7 +28,7 @@ export default function RootLayout({ children }) {
           </header>
 
           <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">{children}</main>
-
+<SupportButton></SupportButton>
           <footer>
             <Footer></Footer>
           </footer>
