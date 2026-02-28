@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Logo from './Logo';
 import NavLink from '../button/NavLink';
 import Link from "next/link";
-import { Menu, LogIn } from "lucide-react"; 
+import { Menu, LogIn } from "lucide-react";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,12 +36,11 @@ const Navbar = () => {
 
   return (
     <div className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 md:px-12 ${isScrolled ? "pt-2" : "pt-6"}`}>
-      <div className={`navbar max-w-7xl mx-auto rounded-3xl transition-all duration-300 ${
-        isScrolled 
-        ? "bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/20 px-8 h-16" 
-        : "bg-transparent px-4 h-20"
-      }`}>
-        
+      <div className={`navbar max-w-7xl mx-auto rounded-3xl transition-all duration-300 ${isScrolled
+          ? "bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/20 px-8 h-16"
+          : "bg-transparent px-4 h-20"
+        }`}>
+
         {/* Navbar Start: Logo & Mobile Trigger */}
         <div className="navbar-start">
           <div className="dropdown">
@@ -71,8 +70,8 @@ const Navbar = () => {
 
         {/* Navbar End: Styled Login only */}
         <div className="navbar-end">
-          <Link 
-            href="/login" 
+          <Link
+            href="/login"
             className="group relative flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
           >
             <span>Login</span>
