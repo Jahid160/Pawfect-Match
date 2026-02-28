@@ -6,7 +6,6 @@ import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
 import { useSearchParams, useRouter } from "next/navigation";
 // import { SocialButtons } from "./SocialButton";
-
 import { FaUser, FaLock, FaPaw } from "react-icons/fa";
 import { SocialButtons } from "./Socialform";
 
@@ -32,12 +31,12 @@ const LoginForm = ({ isModal, closeModal, switchToRegister }) => {
       Swal.fire(
         "Error",
         "Email/Password not matched. Try Google Login.",
-        "error",
+        "error"
       );
       return;
     }
 
-    Swal.fire("Success", "Welcome to Pawfect Match", "success");
+    Swal.fire("Success", "Welcome Back!", "success");
 
     if (isModal && closeModal) closeModal();
     router.push(callback);
@@ -45,12 +44,12 @@ const LoginForm = ({ isModal, closeModal, switchToRegister }) => {
   };
 
   return (
-    <div className="w-[920px]  overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="w-full max-w-[920px] overflow-hidden rounded-2xl bg-white shadow-2xl">
       <div className="grid grid-cols-1 md:grid-cols-2">
-        {/* LEFT */}
+        {/* LEFT SIDE */}
         <div className="p-7 md:p-10">
           <h2 className="text-center text-xl font-semibold text-gray-800">
-            Log In to Gadget Tech
+            Log In to Pawfect Match
           </h2>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -120,7 +119,7 @@ const LoginForm = ({ isModal, closeModal, switchToRegister }) => {
           </p>
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT SIDE */}
         <div className="relative hidden md:block">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-violet-100/60 to-indigo-50" />
 
@@ -131,20 +130,23 @@ const LoginForm = ({ isModal, closeModal, switchToRegister }) => {
               </span>
 
               <div className="leading-tight">
-                <div className="text-base font-semibold">Furry</div>
-                <div className="-mt-1 text-base font-semibold">Home</div>
+                <div className="text-base font-semibold">Pawfect</div>
+                <div className="-mt-1 text-base font-semibold">Match</div>
               </div>
             </div>
 
             <div className="flex flex-col items-center gap-4">
               <div className="relative h-[260px] w-[260px]">
-                {/* <Image
+                {/* Optional Image */}
+                {/* 
+                <Image
                   src="/cat.png"
-                  alt="Cat"
+                  alt="Image"
                   fill
                   className="object-contain drop-shadow"
                   priority
-                /> */}
+                /> 
+                */}
               </div>
 
               <button

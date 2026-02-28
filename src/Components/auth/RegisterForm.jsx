@@ -140,8 +140,8 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
               </span>
 
               <div className="leading-tight">
-                <div className="text-base font-semibold">Furry</div>
-                <div className="-mt-1 text-base font-semibold">Home</div>
+                <div className="text-base font-semibold">Pawfect</div>
+                <div className="-mt-1 text-base font-semibold">Match</div>
               </div>
             </div>
 
