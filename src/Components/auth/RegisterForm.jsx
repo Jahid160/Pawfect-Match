@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
 
+
 export const RegisterForm = () => {
   const params = useSearchParams();
   const router = useRouter();

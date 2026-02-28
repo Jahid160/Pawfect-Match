@@ -13,7 +13,7 @@ const PetCard = ({ pet }) => {
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
-        
+
         {/* Category Badge */}
         <div className="top-4 left-4 absolute flex items-center gap-2 bg-white/90 shadow-sm backdrop-blur-md px-4 py-1.5 rounded-full font-bold text-[11px] text-orange-600 uppercase tracking-wider">
           <FaPaw size={12} />
@@ -53,7 +53,7 @@ const PetCard = ({ pet }) => {
           </Link>
           <Link
             href="/pet-details"
-           className="flex justify-center items-center bg-orange-100 group-hover:bg-orange-500 rounded-full w-10 h-10 text-orange-600 group-hover:text-white transition-all group-hover:translate-x-1 duration-300">
+            className="flex justify-center items-center bg-orange-100 group-hover:bg-orange-500 rounded-full w-10 h-10 text-orange-600 group-hover:text-white transition-all group-hover:translate-x-1 duration-300">
             <FaLongArrowAltRight size={20} />
           </Link>
         </div>
@@ -74,41 +74,43 @@ const Petcarts = () => {
     { id: 8, name: "Mimi", age: "3 Months", location: "Rangpur", price: "$120", category: "Bird", image: "https://images.unsplash.com/photo-1452570053594-1b985d6ea890?q=80&w=500" },
   ];
 
+
+
   return (
     <div className="bg-gray-50 px-4 sm:px-8 py-20 min-h-screen">
-  {/* Header Container */}
-  <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-6 mx-auto mb-16 max-w-7xl">
-    <div className="space-y-4">
-      <div className="inline-block bg-orange-100 px-4 py-1.5 rounded-full font-bold text-orange-600 text-sm uppercase tracking-wide">
-         Adopt, Don't Shop
-      </div>
-      <h2 className="font-extrabold text-gray-900 text-5xl lg:text-6xl leading-[1.1] tracking-tight">
-        Find Your <span className="relative text-orange-500">
-          PawFact
-          <svg className="-bottom-2 left-0 -z-10 absolute w-full h-3 text-orange-200" viewBox="0 0 100 12" preserveAspectRatio="none">
-            <path d="M0,10 Q50,0 100,10" stroke="currentColor" strokeWidth="4" fill="none" />
-          </svg>
-        </span><br />
-        Companion Today
-      </h2>
-      <div className="bg-orange-500 rounded-full w-24 h-2"></div>
-    </div>
-    
-    <div className="max-w-lg">
-      <p className="pl-6 border-orange-200 border-l-4 font-medium text-gray-600 text-xl italic leading-relaxed">
-        "Every paw leaves a footprint in our hearts. Browse our curated gallery of 
-        loving pets waiting to bring joy, loyalty, and endless wagging tails to your home."
-      </p>
-    </div>
-  </div>
+      {/* Header Container */}
+      <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-6 mx-auto mb-16 max-w-7xl">
+        <div className="space-y-4">
+          <div className="inline-block bg-orange-100 px-4 py-1.5 rounded-full font-bold text-orange-600 text-sm uppercase tracking-wide">
+            Adopt, Don't Shop
+          </div>
+          <h2 className="font-extrabold text-gray-900 text-5xl lg:text-6xl leading-[1.1] tracking-tight">
+            Find Your <span className="relative text-orange-500">
+              PawFact
+              <svg className="-bottom-2 left-0 -z-10 absolute w-full h-3 text-orange-200" viewBox="0 0 100 12" preserveAspectRatio="none">
+                <path d="M0,10 Q50,0 100,10" stroke="currentColor" strokeWidth="4" fill="none" />
+              </svg>
+            </span><br />
+            Companion Today
+          </h2>
+          <div className="bg-orange-500 rounded-full w-24 h-2"></div>
+        </div>
 
-  {/* Grid Section - Card remains unchanged as per your instruction */}
-  <div className="gap-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl">
-    {pets.map(pet => (
-      <PetCard key={pet.id} pet={pet} />
-    ))}
-  </div>
-</div>
+        <div className="max-w-lg">
+          <p className="pl-6 border-orange-200 border-l-4 font-medium text-gray-600 text-xl italic leading-relaxed">
+            "Every paw leaves a footprint in our hearts. Browse our curated gallery of
+            loving pets waiting to bring joy, loyalty, and endless wagging tails to your home."
+          </p>
+        </div>
+      </div>
+
+      {/* Grid Section - Card remains unchanged as per your instruction */}
+      <div className="gap-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl">
+        {pets.map(pet => (
+          <PetCard key={pet.id} pet={pet} />
+        ))}
+      </div>
+    </div>
   );
 };
 
