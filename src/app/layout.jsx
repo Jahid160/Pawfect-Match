@@ -5,8 +5,6 @@ import Navbar from "@/components/Header/Navbar";
 import Footer from "@/components/Footer/Footer";
 
 
-
-
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
@@ -22,7 +20,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${poppins.className}  antialiased`}>
         <NextAuthProvider>
-          <header className="mx-auto py-2 md:w-11/12">
+          <header className="mx-auto py-2 md:w-11/12 mb-15">
             <Navbar></Navbar>
           </header>
 
