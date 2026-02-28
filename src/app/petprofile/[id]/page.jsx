@@ -1,9 +1,10 @@
+import PetProfile from '@/components/profile/Petprofile';
 import React from 'react';
 
 const singlePetDetails = () => {
   return (
     <div>
-      singlePetDetails
+      <PetProfile></PetProfile>
     </div>
   );
 };

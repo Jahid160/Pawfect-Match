@@ -6,18 +6,17 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 
 
-const Petcollection = dbConnect(collections.PETS);
-
+const petCollectionPromise = dbConnect(collections.PETS);
 
 export const getPets = async () => {
+     const Petcollection = await petCollectionPromise;
      const pets = await Petcollection.find().toArray();
      return pets;
 };
 
 export const getSinglePets = async (id) => {
      if (id.length !== 24) return {};
-
-
+     const Petcollection = await petCollectionPromise;
      const pet = await Petcollection.findOne({
           _id: new ObjectId(id),
      });
@@ -37,12 +36,11 @@ export const DeletePets = async (id) => {
      if (id?.length != 24) {
           return { success: false };
      }
-
+     const Petcollection = await petCollectionPromise;
      const query = { _id: new ObjectId(id), email: user?.email };
      const result = await Petcollection.deleteOne(query)
 
      return { success: Boolean(result.deletedCount) }
-
 }
 
 export const UpdatePets = async (id, petdata = {}) => {
@@ -52,6 +50,7 @@ export const UpdatePets = async (id, petdata = {}) => {
           return { success: false };
      }
 
+     const Petcollection = await petCollectionPromise;
      const query = { _id: new ObjectId(id), email: user?.email }
 
      const updatedData = {
@@ -60,5 +59,4 @@ export const UpdatePets = async (id, petdata = {}) => {
 
      const result = await Petcollection.updateOne(query, updatedData)
      return { success: Boolean(result.modifiedCount) }
-
 }
