@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { FaUser, FaLock, FaEnvelope, FaPaw } from "react-icons/fa";
 import { SocialButtons } from "./Socialform";
 import { postUser } from "@/action/server/auth";
+import Image from "next/image";
 
 export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
   const params = useSearchParams();
@@ -48,120 +49,112 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
   };
 
   return (
-    <div className="w-[920px] max-w-[95vw] overflow-hidden rounded-2xl bg-white shadow-2xl">
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        {/* LEFT SIDE */}
-        <div className="p-7 md:p-10">
-          <h2 className="text-center text-xl font-semibold text-gray-800">
-            Create Your Account
-          </h2>
+  <div className="w-[920px] max-w-[95vw] overflow-hidden rounded-2xl bg-base-100 shadow-2xl shadow-primary/30">
+    <div className="grid grid-cols-1 md:grid-cols-2">
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            {/* Name */}
-            <div className="relative">
-              <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-800 outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
-                onChange={handleChange}
-                required
-              />
-            </div>
+      {/* LEFT SIDE */}
+      <div className="p-7 md:p-10 bg-base-100">
+        <h2 className="text-center text-xl font-semibold text-neutral">
+          Create Your Account
+        </h2>
 
-            {/* Email */}
-            <div className="relative">
-              <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-800 outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div className="relative">
-              <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-800 outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="h-11 w-full rounded-lg bg-violet-600 text-sm font-semibold text-white shadow hover:bg-violet-700 active:scale-[0.99]"
-            >
-              Register
-            </button>
-          </form>
-
-          <div className="mt-5">
-            <SocialButtons />
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          
+          {/* Name */}
+          <div className="relative">
+            <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral/50" />
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              className="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-3 text-sm text-neutral outline-none transition-all
+              focus:border-primary focus:ring-4 focus:ring-primary/20"
+              onChange={handleChange}
+              required
+            />
           </div>
 
-          <p className="mt-5 text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            {isModal ? (
-              <button
-                type="button"
-                onClick={switchToLogin}
-                className="font-semibold text-violet-600 hover:underline"
-              >
-                Login
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                className="font-semibold text-violet-600 hover:underline"
-              >
-                Login
-              </Link>
-            )}
-          </p>
+          {/* Email */}
+          <div className="relative">
+            <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral/50" />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-3 text-sm text-neutral outline-none transition-all
+              focus:border-primary focus:ring-4 focus:ring-primary/20"
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral/50" />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-3 text-sm text-neutral outline-none transition-all
+              focus:border-primary focus:ring-4 focus:ring-primary/20"
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="h-11 w-full rounded-lg bg-primary text-sm font-semibold text-white shadow-md 
+            hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            Register
+          </button>
+        </form>
+
+        <div className="mt-5">
+          <SocialButtons />
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="relative hidden md:block">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-violet-100/60 to-indigo-50" />
+        <p className="mt-5 text-center text-sm text-neutral/70">
+          Already have an account?{" "}
+          {isModal ? (
+            <button
+              type="button"
+              onClick={switchToLogin}
+              className="font-semibold text-primary hover:underline"
+            >
+              Login
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="font-semibold text-primary hover:underline"
+            >
+              Login
+            </Link>
+          )}
+        </p>
+      </div>
 
-          <div className="relative flex h-full flex-col items-center justify-between p-10">
-            <div className="mt-2 flex items-center gap-2 text-violet-700">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow">
-                <FaPaw />
-              </span>
+      {/* RIGHT SIDE */}
+      <div className="relative hidden md:block h-full w-full overflow-hidden">
+        
+        <Image
+          src="/register.png"
+          alt="Register Background"
+          fill
+          className="object-cover"
+          priority
+        />
 
-              <div className="leading-tight">
-                <div className="text-base font-semibold">Pawfect</div>
-                <div className="-mt-1 text-base font-semibold">Match</div>
-              </div>
-            </div>
+        {/* Warm Adoption Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-transparent to-neutral/30" />
 
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative h-[260px] w-[260px]">
-                {/* Optional Image */}
-              </div>
-
-              <button
-                type="button"
-                className="rounded-lg bg-white px-5 py-2 text-sm font-semibold text-gray-700 shadow hover:bg-gray-50"
-              >
-                Join Now
-              </button>
-            </div>
-
-            <div className="h-6" />
-          </div>
+        <div className="relative z-10 flex h-full flex-col items-center justify-between p-10">
+          <div className="h-6" />
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };

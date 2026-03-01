@@ -5,6 +5,7 @@ import Logo from './Logo';
 import NavLink from '../button/NavLink';
 import Link from "next/link";
 import { Menu, LogIn } from "lucide-react";
+import AuthButtons from '../button/AuthButtons';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -70,13 +71,14 @@ const Navbar = () => {
 
         {/* Navbar End: Styled Login only */}
         <div className="navbar-end">
-          <Link
+          <AuthButtons/>
+          {/* <Link
             href="/login"
             className="group relative flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
           >
             <span>Login</span>
             <LogIn className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>
