@@ -21,6 +21,7 @@ const Navbar = () => {
     { name: "FAQ", href: "/faq" },
     { name: "Contact", href: "/contact" },
     { name: "AdoptionForm", href: "/adoptionfrom" },
+    { name: "ShelterApplication", href: "/shelterForm" },
   ];
 
   const navItems = navLinks.map((link) => (
