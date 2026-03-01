@@ -3,7 +3,7 @@ import React from 'react';
 
 const allPetsList = async () => {
   const Pets = await getPets()
-  console.log(Pets)
+  // console.log(Pets)
   return (
     <div>
       allPetsList
