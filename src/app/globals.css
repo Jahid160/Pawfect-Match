@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin "daisyui";
+/* @plugin "daisyui"; */
 
 @plugin "daisyui" {
   themes: light --default;
@@ -17,7 +17,7 @@
   --color-secondary: oklch(90% 0.05 50);
   
   /* Accent: Playful Sky Blue (Friendly vibe) */
-  --color-accent: oklch(75% 0.14 215);
+  /* --color-accent: oklch(75% 0.14 215); */
 
   /* Base - Clean and Warm backgrounds */
   --color-base-100: oklch(100% 0 0);      /* Pure White */
