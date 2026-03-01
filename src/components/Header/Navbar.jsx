@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Logo from './Logo';
-import NavLink from '../button/NavLink';
+import React, { useState, useEffect } from "react";
+import Logo from "./Logo";
+import NavLink from "../button/NavLink";
 import Link from "next/link";
 import { Menu, LogIn } from "lucide-react";
 import AuthButtons from '../button/AuthButtons';
@@ -21,6 +21,7 @@ const Navbar = () => {
     { name: "About", href: "/about" },
     { name: "FAQ", href: "/faq" },
     { name: "Contact", href: "/contact" },
+    { name: "AdoptionForm", href: "/adoptionfrom" },
   ];
 
   const navItems = navLinks.map((link) => (
@@ -36,16 +37,24 @@ const Navbar = () => {
   ));
 
   return (
-    <div className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 md:px-12 ${isScrolled ? "pt-2" : "pt-6"}`}>
-      <div className={`navbar max-w-7xl mx-auto rounded-3xl transition-all duration-300 ${isScrolled
-          ? "bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/20 px-8 h-16"
-          : "bg-transparent px-4 h-20"
-        }`}>
-
+    <div
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 md:px-12 ${isScrolled ? "pt-2" : "pt-6"}`}
+    >
+      <div
+        className={`navbar max-w-7xl mx-auto rounded-3xl transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/20 px-8 h-16"
+            : "bg-transparent px-4 h-20"
+        }`}
+      >
         {/* Navbar Start: Logo & Mobile Trigger */}
         <div className="navbar-start">
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden mr-2 hover:bg-primary/10">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-ghost lg:hidden mr-2 hover:bg-primary/10"
+            >
               <Menu className="h-6 w-6" />
             </div>
             <ul
@@ -54,7 +63,14 @@ const Navbar = () => {
             >
               {navItems}
               <div className="divider my-1"></div>
-              <li><Link href="/login" className="btn btn-primary btn-sm text-white">Login</Link></li>
+              <li>
+                <Link
+                  href="/login"
+                  className="btn btn-primary btn-sm text-white"
+                >
+                  Login
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="hover:scale-105 transition-transform duration-300 flex items-center">
@@ -64,9 +80,7 @@ const Navbar = () => {
 
         {/* Navbar Center: Links with spacing */}
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 gap-8">
-            {navItems}
-          </ul>
+          <ul className="menu menu-horizontal px-1 gap-8">{navItems}</ul>
         </div>
 
         {/* Navbar End: Styled Login only */}
