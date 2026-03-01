@@ -4,9 +4,15 @@ import { usePathname } from "next/navigation";
 
 export default function NavLink({ href, children }) {
   const path = usePathname();
+  
+  const isActive = href === "/" ? path === "/" : path.startsWith(href);
+
   return (
-    <div>
-      <Link className={`${path.startsWith(href) && "text-primary"} font-medium`} href={href}>{children}</Link>
-    </div>
+    <Link 
+      href={href} 
+      className={`${isActive ? "text-primary" : "text-neutral"} font-bold transition-colors duration-200`}
+    >
+      {children}
+    </Link>
   );
 }
