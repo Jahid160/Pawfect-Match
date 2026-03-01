@@ -44,24 +44,6 @@ const Error404 = () => {
           </Link>
         </div>
 
-        {/* Helpful links */}
-        {/* <div className="mt-6 rounded-xl border border-orange-200 bg-white/70 p-4">
-          <p className="text-sm font-semibold text-orange-900">Quick links</p>
-          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-            <Link className="text-orange-700 hover:underline" href="/pets">
-              🐾 Adopt a pet
-            </Link>
-            <Link className="text-orange-700 hover:underline" href="/favorites">
-              ❤️ Favorites
-            </Link>
-            <Link className="text-orange-700 hover:underline" href="/about">
-              ℹ️ About us
-            </Link>
-            <Link className="text-orange-700 hover:underline" href="/contact">
-              ✉️ Contact
-            </Link>
-          </div>
-        </div> */}
 
         {/* Tiny footer note */}
         <p className="mt-5 text-center text-xs text-orange-900/60">

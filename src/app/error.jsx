@@ -52,7 +52,7 @@ export default function Error({ error, reset }) {
         {/* Optional error message (safe preview) */}
         {error?.message && (
           <div className="mt-6 rounded-xl border border-orange-200 bg-white/70 p-4">
-            <p className="text-xs text-orange-900/70 break-words">
+            <p className="text-xs text-orange-900/70 wrap-break-word">
               {error.message}
             </p>
           </div>
