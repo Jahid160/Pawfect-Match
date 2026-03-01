@@ -137,7 +137,7 @@ const PetProfile = ({ pet }) => {
                                                        </div>
 
                                                        {/* Content Card */}
-                                                       <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-[2rem] shadow-sm border border-neutral/5 hover:shadow-md transition-all">
+                                                       <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-4xl shadow-sm border border-neutral/5 hover:shadow-md transition-all">
                                                             <div className="flex items-center justify-between mb-2">
                                                                  <time className="font-black text-primary text-sm uppercase tracking-tighter">
                                                                       {milestone}
@@ -191,7 +191,7 @@ const PetProfile = ({ pet }) => {
                               </div>
 
                               {/* Story Card */}
-                              <div className="rounded-[2rem] border border-neutral/5 bg-white overflow-hidden shadow-xl">
+                              <div className="rounded-4xl border border-neutral/5 bg-white overflow-hidden shadow-xl">
                                    <div className="bg-secondary/20 p-6 border-b border-secondary/20">
                                         <h2 className="text-xl font-black text-neutral flex items-center gap-2">
                                              <Dog size={24} className="text-primary" />
@@ -214,7 +214,7 @@ const PetProfile = ({ pet }) => {
                               </div>
 
                               {/* Premium CTA Card */}
-                              <div className="rounded-[2rem] bg-neutral p-10 text-center shadow-2xl relative overflow-hidden">
+                              <div className="rounded-4xl bg-neutral p-10 text-center shadow-2xl relative overflow-hidden">
                                    <div className="absolute top-0 left-0 w-full h-1.5 bg-primary"></div>
                                    <div className="relative z-10 space-y-6">
                                         <h3 className="text-2xl font-bold text-white leading-tight">
