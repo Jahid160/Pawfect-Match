@@ -1,12 +1,14 @@
+import { getSinglePets } from '@/action/server/pets';
 import PetProfile from '@/components/profile/Petprofile';
 import React from 'react';
 
-const singlePetDetails = () => {
-  return (
-    <div>
-      <PetProfile></PetProfile>
-    </div>
-  );
-};
 
-export default singlePetDetails;
+
+export default async function Page({ params }) {
+  const { id } = await params
+  const singlePet = await getSinglePets(id)
+
+
+  return <PetProfile pet={singlePet} ></PetProfile>
+}
+
