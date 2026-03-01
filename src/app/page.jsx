@@ -25,10 +25,9 @@ const mainPage = () => {
         <Newsletter></Newsletter>
       </section>
 
-      <section>
+      {/* <section>
         <Petdetailscart></Petdetailscart>
-        <FAQPage></FAQPage>
-      </section>
+      </section> */}
 
     </div>
   );

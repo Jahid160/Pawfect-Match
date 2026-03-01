@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Swal from "sweetalert2";
 
-
 export const RegisterForm = () => {
   const params = useSearchParams();
   const router = useRouter();
@@ -42,20 +41,20 @@ export const RegisterForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center gap-5 justify-center bg-base-200">
+    <div className="flex justify-center items-center gap-5 bg-base-200 min-h-screen">
       {/* <div>
-      <h1 className="text-6xl font-semibold w-[500px]">Welcome to Pawfect Match</h1>
+      <h1 className="w-[500px] font-semibold text-6xl">Welcome to Pawfect Match</h1>
     </div> */}
-      <div className="card w-full max-w-sm shadow-xl bg-base-100">
+      <div className="bg-base-100 shadow-xl w-full max-w-sm card">
         <div className="card-body">
-          <h2 className="text-2xl font-bold text-center">Create Account</h2>
+          <h2 className="font-bold text-2xl text-center">Create Account</h2>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <input
               type="text"
               name="name"
               placeholder="Full Name"
-              className="input input-bordered w-full"
+              className="w-full input input-bordered"
               onChange={handleChange}
               required
             />
@@ -64,7 +63,7 @@ export const RegisterForm = () => {
               type="email"
               name="email"
               placeholder="Email"
-              className="input input-bordered w-full"
+              className="w-full input input-bordered"
               onChange={handleChange}
               required
             />
@@ -73,19 +72,19 @@ export const RegisterForm = () => {
               type="password"
               name="password"
               placeholder="Password"
-              className="input input-bordered w-full"
+              className="w-full input input-bordered"
               onChange={handleChange}
               required
             />
 
-            <button type="submit" className="btn btn-primary w-full">
+            <button type="submit" className="w-full btn btn-primary">
               Register
             </button>
           </form>
 
           {/* <SocialButtons /> */}
 
-          <p className="text-center text-sm mt-4">
+          <p className="mt-4 text-sm text-center">
             Already have an account?{" "}
             <Link href="/login" className="link link-primary">
               Login
