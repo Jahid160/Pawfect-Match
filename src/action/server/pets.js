@@ -11,7 +11,10 @@ const petCollectionPromise = dbConnect(collections.PETS);
 export const getPets = async () => {
      const Petcollection = await petCollectionPromise;
      const pets = await Petcollection.find().toArray();
-     return pets;
+     return {
+          ...pets,
+          _id: pets._id?.toString(),
+     };
 };
 
 export const getSinglePets = async (id) => {
