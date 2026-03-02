@@ -28,30 +28,48 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = await postUser(form);
+    try {
+      const result = await postUser(form);
 
-    if (result?.error === "EMAIL_EXISTS") {
-      Swal.fire("Error", "This email is already registered", "error");
-      return;
-    }
-
-    // Change result.acknowledged to result.success
-    if (result?.success) {
-      const login = await signIn("credentials", {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-        callbackUrl,
-      });
-
-      if (login?.ok) {
-        Swal.fire("Success", "Registered successfully", "success");
-        router.push(callbackUrl);
-        router.refresh();
+      if (result?.error === "EMAIL_EXISTS") {
+        Swal.fire("Error", "This email is already registered", "error");
+        return;
       }
-    } else {
-      // This is where it was falling through before!
-      Swal.fire("Error", result?.error || "Registration failed", "error");
+
+      if (result?.success) {
+        // Step 2: Log them in automatically
+        const login = await signIn("credentials", {
+          email: form.email,
+          password: form.password,
+          redirect: false,
+        });
+
+        if (login?.error) {
+          Swal.fire(
+            "Success!",
+            "Account created, but please log in manually.",
+            "info",
+          );
+          return;
+        }
+
+        if (login?.ok) {
+          await Swal.fire({
+            title: "Success",
+            text: "Registered successfully",
+            icon: "success",
+            timer: 1000,
+            showConfirmButton: false,
+          });
+
+          // Use window.location.href if router.push feels "stuck"
+          window.location.href = callbackUrl;
+        }
+      } else {
+        Swal.fire("Error", result?.error || "Registration failed", "error");
+      }
+    } catch (err) {
+      Swal.fire("Error", "Something went wrong. Please try again.", "error");
     }
   };
 
