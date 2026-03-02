@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import NavLink from "../button/NavLink";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Added this
-import { Menu, ChevronDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, ChevronDown, X } from "lucide-react";
 import AuthButtons from "../button/AuthButtons";
 import Logo from "./Logo";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -19,7 +18,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
@@ -32,12 +30,13 @@ const Navbar = () => {
       subLinks: [
         { name: "Our Mission", href: "/about/mission" },
         { name: "Team", href: "/about/team" },
+        { name: "FAQ", href: "/faq" },
       ],
     },
-    { name: "FAQ", href: "/faq" },
+    
     {
       name: "Forms",
-      href: "/forms", // Ensure this matches your route prefix
+      href: "/forms",
       subLinks: [
         { name: "Adoption Form", href: "/adoptionfrom" },
         { name: "Shelter Application", href: "/shelterForm" },
@@ -55,35 +54,29 @@ const Navbar = () => {
           : "bg-white/95 backdrop-blur-md h-20"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+      <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
         {/* Logo */}
         <div className="flex-shrink-0">
-          <Logo></Logo>
+          <Logo />
         </div>
 
-        {/* Center Links */}
+        {/* Center Links (Desktop) */}
         <div className="hidden lg:flex items-center h-full">
-          <ul className="flex flex-row items-center gap-8 list-none">
+          <ul className="flex flex-row items-center gap-8 mb-0 h-full list-none">
             {navLinks.map((link) => {
-              // Check if any sub-link is active to highlight the parent dropdown
               const isParentActive =
                 link.subLinks?.some((sub) => pathname.startsWith(sub.href)) ||
                 pathname === link.href;
 
               return (
-                <li
-                  key={link.name}
-                  className="relative flex items-center h-full"
-                >
+                <li key={link.name} className="relative flex items-center h-full">
                   {link.subLinks ? (
-                    <div className="dropdown dropdown-hover dropdown-bottom">
+                    <div className="dropdown-bottom dropdown dropdown-hover">
                       <div
                         tabIndex={0}
                         role="button"
                         className={`flex items-center gap-1 text-[15px] font-bold py-2 cursor-pointer transition-colors ${
-                          isParentActive
-                            ? "text-primary"
-                            : "text-neutral hover:text-primary"
+                          isParentActive ? "text-primary" : "text-neutral hover:text-primary"
                         }`}
                       >
                         {link.name}
@@ -91,39 +84,92 @@ const Navbar = () => {
                       </div>
                       <ul
                         tabIndex={0}
-                        className="dropdown-content z-[1] menu p-2 shadow-xl bg-white border border-base-200 rounded-xl w-48"
+                        className="z-[1] bg-white shadow-xl p-2 border border-base-200 rounded-xl w-48 dropdown-content menu"
                       >
                         {link.subLinks.map((sub) => (
                           <li key={sub.name}>
                             <Link
                               href={sub.href}
-                              className={`${pathname === sub.href ? "text-primary bg-primary/10" : "text-neutral"}`}
+                              className={`${
+                                pathname === sub.href ? "text-primary bg-primary/10" : "text-neutral"
+                              }`}
                             >
                               {sub.name}
                             </Link>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <Link 
-                        href={link.href}
-                        className={`block text-xl font-bold ${pathname === link.href ? "text-primary" : "text-neutral"}`}
-                      >
-                        {link.name}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className={`text-[15px] font-bold transition-colors ${
+                        pathname === link.href ? "text-primary" : "text-neutral hover:text-primary"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
-            <div className="pt-6 mt-6 border-t border-gray-100">
-              <AuthButtons />
-            </div>
-          </div>
-        </aside>
+        {/* Auth Buttons (Desktop) */}
+        <div className="hidden lg:block">
+          <AuthButtons />
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 text-neutral hover:text-primary transition-colors"
+          >
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
-    </>
+
+      {/* Mobile Menu Sidebar/Drawer */}
+      <div
+        className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-[110] ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col p-6 h-full">
+          <div className="mb-8">
+            <Logo />
+          </div>
+          <ul className="flex flex-col flex-grow gap-4 p-0 list-none">
+            {navLinks.map((link) => (
+              <li key={link.name}>
+                <Link
+                  href={link.href}
+                  className={`text-lg font-bold block py-2 ${
+                    pathname === link.href ? "text-primary" : "text-neutral"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-auto pt-6 border-gray-100 border-t">
+            <AuthButtons />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isMenuOpen && (
+        <div
+          className="lg:hidden z-[105] fixed inset-0 bg-black/20 backdrop-blur-sm"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+    </nav>
   );
 };
 
