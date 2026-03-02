@@ -1,5 +1,6 @@
 import Petcarts from "@/components/cards/Petcarts";
 import RecentPets from "@/components/cards/RecentPets";
+import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import Banner from "@/components/home/Banner";
 import FAQPage from "@/components/home/FAQPage";
 import HowItWorks from "@/components/home/HowItWorks";
@@ -19,6 +20,7 @@ const mainPage = () => {
         <PetCategories></PetCategories>
         <RecentPets></RecentPets>
         <HowItWorks></HowItWorks>
+        <ExpertSection></ExpertSection>
         <SuccessStories></SuccessStories>
         <OurSponsor></OurSponsor>
         <Newsletter></Newsletter>
