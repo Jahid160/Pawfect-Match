@@ -10,7 +10,7 @@ export default function Footer() {
     <div className="w-full bg-white pt-24 pb-12">
       <div className=" mx-auto px-6">
         {/* Main Footer Wrapper */}
-        <footer className="relative overflow-hidden bg-[#0f172a] rounded-[3rem] p-10 md:p-20 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-800">
+        <footer className="relative overflow-hidden bg-slate-700 rounded-[3rem] p-10 md:p-10 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-800">
           
           {/* Subtle Glow Effects */}
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none"></div>
