@@ -1,30 +1,32 @@
 "use client";
 
 import Link from 'next/link';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { FaHeart, FaMapMarkerAlt, FaPaw, FaLongArrowAltRight, FaVenusMars } from 'react-icons/fa';
+import { FaHeart, FaMapMarkerAlt, FaPaw, FaLongArrowAltRight, FaVenusMars, FaSearch } from 'react-icons/fa';
 
 // --- PetCard Component ---
-const PetCard = ({ pet }) => {
+export const PetCard = ({ pet }) => {
+  const petId = pet._id?.toString() || pet.id;
+
   return (
-    <div className="group relative flex flex-col bg-white shadow-md hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all hover:-translate-y-2 duration-500 cursor-pointer">
+    <div className="group relative flex flex-col bg-white shadow-md hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all hover:-translate-y-2 duration-500">
+      
       {/* Image Section */}
-      <div className="relative w-full h-72 overflow-hidden">
+      <div className="relative bg-gray-200 w-full h-72 overflow-hidden">
         <Image
-          src={pet.image}
-          alt={pet.name}
+          src={pet.images?.primary || pet.image || "/placeholder.jpg"}
+          alt={pet.name || "Pet"}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
-        {/* Soft Overlay on Hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
         {/* Category Badge */}
         <div className="top-4 left-4 absolute flex items-center gap-2 bg-white/90 shadow-sm backdrop-blur-md px-4 py-1.5 rounded-full font-bold text-[10px] text-orange-600 uppercase tracking-wider">
           <FaPaw size={12} />
-          {pet.category}
+          {pet.species || pet.category || "Pet"}
         </div>
 
         {/* Wishlist Icon */}
@@ -35,7 +37,7 @@ const PetCard = ({ pet }) => {
         {/* Gender Tag */}
         <div className="bottom-4 left-4 absolute flex items-center gap-1.5 bg-orange-500 shadow-lg px-3 py-1 rounded-lg font-bold text-white text-xs">
           <FaVenusMars size={12} />
-          {pet.gender}
+          {pet.gender || "Unknown"}
         </div>
       </div>
 
@@ -43,34 +45,36 @@ const PetCard = ({ pet }) => {
       <div className="flex flex-col flex-1 p-6">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="font-bold text-gray-800 group-hover:text-orange-600 text-2xl transition-colors">
+            <h3 className="max-w-[150px] font-bold text-gray-800 group-hover:text-orange-600 text-2xl truncate transition-colors">
               {pet.name}
             </h3>
-            <p className="font-medium text-gray-400 text-sm italic">{pet.breed}</p>
+            <p className="max-w-[150px] font-medium text-gray-400 text-sm truncate italic">
+              {pet.breed || "Mixed Breed"}
+            </p>
           </div>
-          <div className="bg-green-100 px-2.5 py-1 rounded-md font-bold text-[10px] text-green-600 uppercase">
-            Available
+          <div className={`px-2.5 py-1 rounded-md font-bold text-[10px] uppercase ${pet.status === 'Available' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+            {pet.status || "Available"}
           </div>
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 border border-gray-100 rounded-full text-xs">
             <span className="font-medium text-gray-400 uppercase">Age:</span>
-            <span className="font-bold text-gray-700">{pet.age}</span>
+            <span className="font-bold text-gray-700">{pet.age || "N/A"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-gray-500 text-xs">
             <FaMapMarkerAlt className="text-orange-400" />
-            <span className="font-semibold">{pet.location}</span>
+            <span className="max-w-[120px] font-semibold truncate">{pet.location || "Not specified"}</span>
           </div>
         </div>
 
         {/* Action Footer */}
         <div className="flex justify-between items-center mt-auto pt-5 border-gray-100 border-t">
-          <Link href={`/pet-details/${pet.id}`} className="font-black text-[11px] text-gray-400 group-hover:text-orange-600 uppercase tracking-[2px] transition-all">
+          <Link href={`/pet-details/${petId}`} className="font-black text-[11px] text-gray-400 group-hover:text-orange-600 uppercase tracking-[2px] transition-all">
             Meet {pet.name}
           </Link>
           <Link
-            href={`/pet-details/${pet.id}`}
+            href={`/all-pets/${petId}`}
             className="flex justify-center items-center bg-gray-100 group-hover:bg-orange-500 rounded-xl w-10 h-10 text-gray-400 group-hover:text-white transition-all group-hover:translate-x-1 duration-300"
           >
             <FaLongArrowAltRight size={20} />
@@ -82,22 +86,47 @@ const PetCard = ({ pet }) => {
 };
 
 // --- Main Petcarts Component ---
-const Petcarts = () => {
-  const pets = [
-    { id: 1, name: "Buddy", age: "2 Mo", location: "Dhaka", breed: "Golden Retriever", gender: "Male", category: "Dog", image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=500" },
-    { id: 2, name: "Luna", age: "3 Mo", location: "Sylhet", breed: "Persian", gender: "Female", category: "Cat", image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=500" },
-    { id: 3, name: "Max", age: "1 Mo", location: "Chittagong", breed: "Shepherd", gender: "Male", category: "Dog", image: "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=500" },
-    { id: 4, name: "Snowy", age: "4 Mo", location: "Khulna", breed: "Angora", gender: "Female", category: "Rabbit", image: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=500" },
-    { id: 5, name: "Charlie", age: "5 Mo", location: "Rajshahi", breed: "Beagle", gender: "Male", category: "Dog", image: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=500" },
-    { id: 6, name: "Bella", age: "2 Mo", location: "Barishal", breed: "Siamese", gender: "Female", category: "Cat", image: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?q=80&w=500" },
-    { id: 7, name: "Rocky", age: "6 Mo", location: "Comilla", breed: "Bulldog", gender: "Male", category: "Dog", image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=500" },
-    { id: 8, name: "Mimi", age: "3 Mo", location: "Rangpur", breed: "Parrot", gender: "Female", category: "Bird", image: "https://images.unsplash.com/photo-1452570053594-1b985d6ea890?q=80&w=500" },
-  ];
+const Petcarts = ({ pets = [] }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("Newest");
+
+  // Filter & Sort Logic
+  const filteredPets = useMemo(() => {
+    let result = [...pets];
+
+    // Search filter
+    if (searchQuery) {
+      result = result.filter(pet => 
+        pet.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pet.breed?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== "All") {
+      result = result.filter(pet => 
+        (pet.species || pet.category)?.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    // Sort logic
+    if (sortBy === "A-Z") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "Age") {
+      result.sort((a, b) => parseFloat(a.age) - parseFloat(b.age));
+    }
+
+    return result;
+  }, [pets, searchQuery, selectedCategory, sortBy]);
+
+  const categories = ["All", "Dog", "Cat", "Bird", "Rabbit"];
 
   return (
     <div className="bg-gray-50 px-4 sm:px-8 py-24 min-h-screen">
-      {/* Header Container */}
-      <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-8 mx-auto mb-20 max-w-7xl">
+      
+      {/* Header section */}
+      <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-8 mx-auto mb-16 max-w-7xl">
         <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-orange-100 mb-4 px-4 py-2 rounded-full font-bold text-orange-600 text-xs uppercase tracking-widest">
             <span className="bg-orange-500 rounded-full w-2 h-2 animate-pulse"></span>
@@ -113,26 +142,74 @@ const Petcarts = () => {
           </h2>
         </div>
 
-        {/* Top Right Section with Button & Text */}
         <div className="flex flex-col items-start md:items-end gap-6 max-w-md">
-          <Link 
-            href="/all-pets" 
-            className="group flex items-center gap-3 bg-white hover:bg-orange-500 shadow-[5px_5px_0px_0px_rgba(249,115,22,1)] hover:shadow-none px-8 py-3.5 border-2 border-orange-500 rounded-2xl font-black text-orange-600 hover:text-white text-sm uppercase tracking-widest transition-all hover:translate-x-[3px] hover:translate-y-[3px] duration-300"
-          >
-            View All Pets
-            <FaLongArrowAltRight className="transition-transform group-hover:translate-x-2 duration-300" size={20} />
-          </Link>
           <p className="text-gray-500 text-lg text-start md:text-end italic leading-relaxed">
             "Every paw leaves a footprint in our hearts. Browse our gallery of loving pets waiting for you."
           </p>
         </div>
       </div>
 
+      {/* Filter Bar */}
+      <div className="bg-white shadow-sm hover:shadow-md mx-auto mb-12 p-4 lg:p-6 border border-gray-100 rounded-[2rem] max-w-7xl transition-shadow duration-300">
+        <div className="flex lg:flex-row flex-col items-center gap-6">
+          
+          {/* Search */}
+          <div className="relative flex-1 w-full">
+            <input 
+              type="text" 
+              placeholder="Search by name or breed..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-gray-50/50 py-4 pr-4 pl-12 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full transition-all"
+            />
+            <FaSearch className="top-1/2 left-4 absolute text-gray-400 -translate-y-1/2" />
+          </div>
+
+          {/* Categories */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {categories.map((cat) => (
+              <button 
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${
+                  selectedCategory === cat 
+                  ? "bg-orange-500 text-white shadow-lg shadow-orange-200" 
+                  : "bg-gray-50 text-gray-500 hover:bg-orange-50 hover:text-orange-600"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort */}
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-gray-50/50 px-6 py-4 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full lg:w-48 font-bold text-gray-600 text-sm"
+          >
+            <option value="Newest">Newest First</option>
+            <option value="A-Z">Name: A to Z</option>
+            <option value="Age">Age: Youngest</option>
+          </select>
+        </div>
+      </div>
+
       {/* Grid Section */}
       <div className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl">
-        {pets.map(pet => (
-          <PetCard key={pet.id} pet={pet} />
-        ))}
+        {filteredPets.length > 0 ? (
+          filteredPets.map(pet => (
+            <PetCard key={pet._id?.toString() || pet.id} pet={pet} />
+          ))
+        ) : (
+          <div className="col-span-full py-20 text-center">
+            <div className="flex justify-center mb-4">
+               <FaPaw className="opacity-20 text-gray-400 text-7xl animate-bounce" />
+            </div>
+            <h3 className="font-bold text-gray-800 text-xl">No matching furry friends found</h3>
+            <p className="text-gray-400 italic">Try adjusting your filters or search terms.</p>
+          </div>
+        )}
       </div>
     </div>
   );

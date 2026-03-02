@@ -1,14 +1,24 @@
 "use client";
 
-import React from 'react';
+import React, { useRef } from 'react'; // useRef add kora hoyeche
 import { FaShieldAlt, FaStethoscope, FaHeart, FaUserCheck } from 'react-icons/fa';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 const WhyChooseUs = () => {
-    const { scrollYProgress } = useScroll();
+    // 1. Ref create kora hoyeche section target korar jonno
+    const containerRef = useRef(null);
 
-    // Animation timing adjustment for better scroll response
-    const reveal = useTransform(scrollYProgress, [0.05, 0.3], [0, 100]);
+    // 2. Scroll target ebong offset set kora hoyeche
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start end", "end start"] // Section jokhon screen e dhukbe ebong ber hobe
+    });
+
+    // 3. Reveal timing adjustment: 0.3 theke 0.6 er moddhe thakle reveal ta smoothly hobe
+    const reveal = useTransform(scrollYProgress, [0.35, 0.65], [0, 100]);
+    
+    // Sathe ektu opacity-o rakhte paren smoothness-er jonno
+    const opacityIndicator = useTransform(scrollYProgress, [0.35, 0.4, 0.6, 0.65], [0, 1, 1, 0]);
 
     const features = [
         { id: 1, title: "Verified Safety", description: "Every pet profile undergoes a rigorous verification process.", icon: <FaShieldAlt className="text-3xl" /> },
@@ -18,18 +28,17 @@ const WhyChooseUs = () => {
     ];
 
     return (
-        <section className="bg-[#FDFCFB] py-28 overflow-hidden">
+        // 4. Ref ekhane add kora hoyeche
+        <section ref={containerRef} className="bg-[#FDFCFB] py-28 overflow-hidden">
             <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
 
                 {/* Header Section */}
                 <div className="mx-auto mb-24 px-4 max-w-4xl text-center">
-                    {/* Header Title */}
                     <h2 className="mb-8 font-black text-gray-900 text-5xl md:text-7xl leading-[1.05] tracking-tight">
                         The standard of care <br />
                         <span className="text-orange-500 italic">they deserve.</span>
                     </h2>
 
-                    {/* Description Text - Perfected Size & Spacing */}
                     <p className="mx-auto max-w-3xl font-medium text-gray-600 text-lg md:text-xl leading-snug md:leading-relaxed tracking-tight">
                         We don't just find homes; we ensure a lifestyle of health and happiness
                         that starts with what's in their bowl and
@@ -52,18 +61,18 @@ const WhyChooseUs = () => {
                         ))}
                     </div>
 
-                    {/* Central Visual: Massive Reveal Slider (Farmer's Dog Style) */}
+                    {/* Central Visual */}
                     <div className="flex justify-center order-1 lg:order-2 w-full lg:w-2/4">
-                        <div className="group relative bg-white shadow-[0_50px_100px_-20px_rgba(251,146,60,0.3)] border-[16px] border-white rounded-full w-[340px] sm:w-[500px] md:w-[550px] h-[340px] sm:h-[500px] md:h-[550px] overflow-hidden">
+                        <div className="group relative bg-white shadow-[0_50px_100px_-20px_rgba(251,146,60,0.3)] border-[10px] border-white rounded-full w-[340px] sm:w-[500px] md:w-[550px] h-[340px] sm:h-[500px] md:h-[550px] overflow-hidden">
 
-                            {/* Image 1: Background (Processed/Raw Vibe) */}
+                            {/* Image 1: Background */}
                             <img
                                 src="https://i.ibb.co.com/3YWs98HK/bonnie-kittle-MUcxe-w-Dur-E-unsplash.jpg"
                                 alt="Standard Pet Care"
                                 className="absolute inset-0 brightness-90 grayscale-[40%] w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             />
 
-                            {/* Image 2: Foreground (Fresh Food/Happy Result Reveal) */}
+                            {/* Image 2: Reveal logic updated */}
                             <motion.div
                                 className="z-10 absolute inset-0 shadow-2xl border-orange-500 border-r-[8px]"
                                 style={{
@@ -77,8 +86,9 @@ const WhyChooseUs = () => {
                                 />
                             </motion.div>
 
-                            {/* Animated Scroll Indicator */}
+                            {/* Animated Scroll Indicator - Fade out when scrolled */}
                             <motion.div
+                                style={{ opacity: opacityIndicator }}
                                 animate={{ y: [0, 10, 0] }}
                                 transition={{ repeat: Infinity, duration: 2 }}
                                 className="bottom-16 left-1/2 z-20 absolute bg-orange-500 shadow-xl px-8 py-3 rounded-full font-black text-white text-xs tracking-[0.2em] -translate-x-1/2"
