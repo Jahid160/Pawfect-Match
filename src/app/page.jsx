@@ -1,4 +1,5 @@
 import Petcarts from "@/components/cards/Petcarts";
+import RecentPets from "@/components/cards/RecentPets";
 import Banner from "@/components/home/Banner";
 import FAQPage from "@/components/home/FAQPage";
 import HowItWorks from "@/components/home/HowItWorks";
@@ -11,20 +12,21 @@ import WhyChooseUs from "@/components/home/WhyChooseUs";
 
 const mainPage = () => {
   return (
-    <div className="space-y-5">
+    <div className="space-y-20">
       <section>
         <Banner></Banner>
         <WhyChooseUs></WhyChooseUs>
         <PetCategories></PetCategories>
-        <Petcarts></Petcarts>
+        <RecentPets></RecentPets>
         <HowItWorks></HowItWorks>
         <SuccessStories></SuccessStories>
         <OurSponsor></OurSponsor>
         <Newsletter></Newsletter>
       </section>
-      <section>
-        <FAQPage></FAQPage>
-      </section>
+
+      {/* <section>
+        <Petdetailscart></Petdetailscart>
+      </section> */}
 
     </div>
   );

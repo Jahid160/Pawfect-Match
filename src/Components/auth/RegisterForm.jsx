@@ -49,26 +49,25 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
   };
 
   return (
-  <div className="w-[920px] max-w-[95vw] overflow-hidden rounded-2xl bg-base-100 shadow-2xl shadow-primary/30">
+  <div className="bg-base-100 shadow-2xl shadow-primary/30 rounded-2xl w-[920px] max-w-[95vw] overflow-hidden">
     <div className="grid grid-cols-1 md:grid-cols-2">
 
       {/* LEFT SIDE */}
-      <div className="p-7 md:p-10 bg-base-100">
-        <h2 className="text-center text-xl font-semibold text-neutral">
+      <div className="bg-base-100 p-7 md:p-10">
+        <h2 className="font-semibold text-neutral text-xl text-center">
           Create Your Account
         </h2>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           
           {/* Name */}
           <div className="relative">
-            <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral/50" />
+            <FaUser className="top-1/2 left-3 absolute text-neutral/50 -translate-y-1/2" />
             <input
               type="text"
               name="name"
               placeholder="Full Name"
-              className="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-3 text-sm text-neutral outline-none transition-all
-              focus:border-primary focus:ring-4 focus:ring-primary/20"
+              className="bg-base-100 pr-3 pl-10 border border-base-300 focus:border-primary rounded-lg outline-none focus:ring-4 focus:ring-primary/20 w-full h-11 text-neutral text-sm transition-all"
               onChange={handleChange}
               required
             />
@@ -76,13 +75,12 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
 
           {/* Email */}
           <div className="relative">
-            <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral/50" />
+            <FaEnvelope className="top-1/2 left-3 absolute text-neutral/50 -translate-y-1/2" />
             <input
               type="email"
               name="email"
               placeholder="Email"
-              className="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-3 text-sm text-neutral outline-none transition-all
-              focus:border-primary focus:ring-4 focus:ring-primary/20"
+              className="bg-base-100 pr-3 pl-10 border border-base-300 focus:border-primary rounded-lg outline-none focus:ring-4 focus:ring-primary/20 w-full h-11 text-neutral text-sm transition-all"
               onChange={handleChange}
               required
             />
@@ -90,13 +88,12 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
 
           {/* Password */}
           <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral/50" />
+            <FaLock className="top-1/2 left-3 absolute text-neutral/50 -translate-y-1/2" />
             <input
               type="password"
               name="password"
               placeholder="Password"
-              className="h-11 w-full rounded-lg border border-base-300 bg-base-100 pl-10 pr-3 text-sm text-neutral outline-none transition-all
-              focus:border-primary focus:ring-4 focus:ring-primary/20"
+              className="bg-base-100 pr-3 pl-10 border border-base-300 focus:border-primary rounded-lg outline-none focus:ring-4 focus:ring-primary/20 w-full h-11 text-neutral text-sm transition-all"
               onChange={handleChange}
               required
             />
@@ -104,8 +101,7 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
 
           <button
             type="submit"
-            className="h-11 w-full rounded-lg bg-primary text-sm font-semibold text-white shadow-md 
-            hover:opacity-90 active:scale-[0.98] transition-all"
+            className="bg-primary hover:opacity-90 shadow-md rounded-lg w-full h-11 font-semibold text-white text-sm active:scale-[0.98] transition-all"
           >
             Register
           </button>
@@ -115,7 +111,7 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
           <SocialButtons />
         </div>
 
-        <p className="mt-5 text-center text-sm text-neutral/70">
+        <p className="mt-5 text-neutral/70 text-sm text-center">
           Already have an account?{" "}
           {isModal ? (
             <button
@@ -137,7 +133,7 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
       </div>
 
       {/* RIGHT SIDE */}
-      <div className="relative hidden md:block h-full w-full overflow-hidden">
+      <div className="hidden md:block relative w-full h-full overflow-hidden">
         
         <Image
           src="/register.png"
@@ -150,7 +146,7 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
         {/* Warm Adoption Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-transparent to-neutral/30" />
 
-        <div className="relative z-10 flex h-full flex-col items-center justify-between p-10">
+        <div className="z-10 relative flex flex-col justify-between items-center p-10 h-full">
           <div className="h-6" />
         </div>
       </div>
