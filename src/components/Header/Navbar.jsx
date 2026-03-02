@@ -32,12 +32,12 @@ const Navbar = () => {
       subLinks: [
         { name: "Our Mission", href: "/about/mission" },
         { name: "Team", href: "/about/team" },
+        { name: "FAQ", href: "/faq" },
       ]
     },
-    { name: "FAQ", href: "/faq" },
     { 
-      name: "Forms", 
-      href: "/forms",
+      name: "Adoptions", 
+      href: "/adoptions",
       subLinks: [
         { name: "Adoption Form", href: "/adoptionfrom" },
         { name: "Shelter Application", href: "/shelterForm" },
