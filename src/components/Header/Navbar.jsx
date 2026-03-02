@@ -10,13 +10,19 @@ import Logo from "./Logo";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = usePathname(); // Hook to check current path
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -95,25 +101,29 @@ const Navbar = () => {
                             >
                               {sub.name}
                             </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : (
-                    <NavLink href={link.href}>{link.name}</NavLink>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <Link 
+                        href={link.href}
+                        className={`block text-xl font-bold ${pathname === link.href ? "text-primary" : "text-neutral"}`}
+                      >
+                        {link.name}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-        {/* Right side Auth */}
-        <div className="flex items-center gap-4">
-          <AuthButtons />
-        </div>
+            <div className="pt-6 mt-6 border-t border-gray-100">
+              <AuthButtons />
+            </div>
+          </div>
+        </aside>
       </div>
-    </nav>
+    </>
   );
 };
 
