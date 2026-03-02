@@ -14,11 +14,11 @@ const AuthButtons = () => {
   return (
     <div>
       {status === "authenticated" ? (
-        <button onClick={() => signOut()} className="btn btn-primary">Log Out</button>
+        <button onClick={() => signOut()} className="btn btn-primary btn-outline">Log Out</button>
       ) : (
         <button 
           onClick={() => { setView("login"); setIsModalOpen(true); }} 
-          className="btn btn-primary btn-outline"
+          className="btn btn-primary "
         >
           Login
         </button>
