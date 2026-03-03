@@ -9,6 +9,9 @@ import {
 } from "lucide-react"; 
 import { FaUserGroup } from "react-icons/fa6";
 import { BsHouseAddFill } from "react-icons/bs";
+import Logo from "../Header/Logo";
+// Import your Logo component
+// import Logo from "./Logo"; 
 
 const DashboardSidebar = () => {
   const pathname = usePathname();
@@ -46,7 +49,7 @@ const DashboardSidebar = () => {
 
   return (
     <>
-      {/* --- MOBILE MOBILE HAMBURGER BUTTON --- */}
+      {/* --- MOBILE HAMBURGER BUTTON --- */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-orange-400 text-white rounded-md shadow-lg"
@@ -54,7 +57,7 @@ const DashboardSidebar = () => {
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* --- MOBILE OVERLAY (Darkens screen when menu is open) --- */}
+      {/* --- MOBILE OVERLAY --- */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-[80] lg:hidden"
@@ -65,13 +68,20 @@ const DashboardSidebar = () => {
       {/* --- SIDEBAR --- */}
       <aside className={`
         fixed top-0 left-0 h-screen bg-orange-200 border-r border-gray-100 text-black 
-        pt-20 pb-6 px-4 z-[90] flex flex-col transition-transform duration-300 ease-in-out
+        pb-6 px-4 z-[90] flex flex-col transition-transform duration-300 ease-in-out
         w-[240px]
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}>
         
-        {/* TOP SECTION */}
-        <div className="flex flex-col gap-1 flex-grow overflow-y-auto scrollbar-hide">
+        {/* --- LOGO SECTION --- */}
+        <div className="py-6 mb-2 border-b border-orange-300/50">
+          <Link href="/" className="flex items-center justify-center">
+            <Logo />
+          </Link>
+        </div>
+
+        {/* TOP SECTION / NAV ITEMS */}
+        <div className="flex flex-col gap-1 flex-grow overflow-y-auto scrollbar-hide pt-4">
           <Link 
             href="/dashboard" 
             onClick={() => setIsOpen(false)}
@@ -86,7 +96,7 @@ const DashboardSidebar = () => {
               <Link 
                 key={item.href} 
                 href={item.href} 
-                onClick={() => setIsOpen(false)} // Close on click for mobile
+                onClick={() => setIsOpen(false)}
                 className={getLinkStyle(item.href)}
               >
                 <item.icon className={getIconStyle(item.href)} />
