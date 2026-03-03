@@ -22,6 +22,8 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
+  // If the path starts with /dashboard, return nothing
+  if (pathname.startsWith("/dashboard")) return null;
   const navLinks = [
     { name: "Home", href: "/" },
     {
