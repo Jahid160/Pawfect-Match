@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import {
   User,
   Home,
-  Heart,
   PawPrint,
   CheckCircle2,
   ChevronRight,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
+import { createAdoptionUser } from "@/action/server/Adoptionuser";
 
 const AdoptionForm = () => {
   const [step, setStep] = useState(1);
@@ -25,8 +25,6 @@ const AdoptionForm = () => {
     address: "",
     residence: "",
     yard: "",
-    motivation: "",
-    otherPets: "",
   });
 
   // Capability Quiz states
@@ -48,14 +46,14 @@ const AdoptionForm = () => {
         text: "Please fill in all Guardian Details and Living Environment requirements.",
         confirmButtonColor: "#f97316",
       });
-      return;
+      return
     }
     setStep(2);
   };
 
   const handlePrev = () => setStep(1);
 
-  const handleComplete = (e) => {
+  const handleComplete = async (e) => {
     e.preventDefault();
     const isAllQuizAnswered = Object.values(quizData).every(
       (val) => val !== "",
@@ -71,20 +69,43 @@ const AdoptionForm = () => {
       return;
     }
 
-    setIsCompleted(true);
-    Swal.fire({
-      title: "Successfully Submitted! 🐾",
-      text: "Our team will review your capability assessment soon.",
-      icon: "success",
-      confirmButtonColor: "#f97316",
-    });
+
+    try {
+      // formData এবং quizData কে একসাথে একটি অবজেক্টে নেওয়া হচ্ছে
+      const finalData = {
+        ...formData,
+        ...quizData
+      };
+
+
+      // make server call to save the data
+      const response = await createAdoptionUser(finalData);
+
+      if (response) {
+        setIsCompleted(true);
+        Swal.fire({
+          title: "Successfully Submitted! 🐾",
+          text: "Our team will review your capability assessment soon.",
+          icon: "success",
+          confirmButtonColor: "#f97316",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Submission Failed",
+        text: "Something went wrong. Please try again.",
+      });
+    }
+
+
   };
 
   return (
     <div className="max-w-4xl mx-auto my-16 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden border border-gray-100 font-sans">
       {/* Header Section */}
-      <div className="relative bg-gradient-to-r from-orange-400 to-rose-500 p-10 text-center overflow-hidden">
-        <div className="absolute top-[-20px] right-[-20px] opacity-10 text-white">
+      <div className="relative bg-linear-to-r from-orange-400 to-rose-500 p-10 text-center overflow-hidden">
+        <div className="absolute -top-5 -right-5 opacity-10 text-white">
           <PawPrint size={150} />
         </div>
         <h2 className="relative text-4xl font-extrabold text-white mb-2 tracking-tight">
@@ -259,7 +280,7 @@ const AdoptionForm = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="w-full h-16 bg-gradient-to-r from-orange-500 to-rose-500 rounded-2xl text-white text-xl font-black uppercase tracking-widest shadow-lg hover:-translate-y-1 transition-all"
+                  className="w-full h-16 bg-linear-to-r from-orange-500 to-rose-500 rounded-2xl text-white text-xl font-black uppercase tracking-widest shadow-lg hover:-translate-y-1 transition-all"
                 >
                   Next: Capability Assessment{" "}
                   <ChevronRight className="inline ml-2" />
@@ -436,7 +457,7 @@ const AdoptionForm = () => {
                   </button>
                   <button
                     onClick={handleComplete}
-                    className="flex-[2] h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
+                    className="flex-2 h-16 bg-linear-to-r from-green-500 to-emerald-600 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
                   >
                     Final Submit <CheckCircle2 size={24} />
                   </button>
