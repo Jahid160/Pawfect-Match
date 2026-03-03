@@ -1,23 +1,18 @@
 "use client";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
 import { 
-  User, 
-  Settings, 
-  PawPrint, 
-  Stethoscope, 
-  Syringe, 
-  FileText, 
-  BarChart3, 
-  ClipboardCheck,
-  LayoutDashboard
+  User, Settings, PawPrint, Stethoscope, Syringe, 
+  FileText, BarChart3, ClipboardCheck, LayoutDashboard,
+  Menu, X 
 } from "lucide-react"; 
 import { FaUserGroup } from "react-icons/fa6";
 import { BsHouseAddFill } from "react-icons/bs";
 
 const DashboardSidebar = () => {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   const mainNavItems = [
     { name: "User Management", href: "/dashboard/users", icon: FaUserGroup },
@@ -35,7 +30,6 @@ const DashboardSidebar = () => {
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
-  // Helper to apply active styles
   const getLinkStyle = (path) => {
     const isActive = pathname === path;
     return `flex items-center gap-3 px-3 py-2 rounded-lg transition-all font-medium group ${
@@ -51,37 +45,73 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <aside className="w-[240px]  border-r border-gray-100 text-black h-screen pt-20 pb-6 px-4 fixed top-0 left-0 z-[90] flex flex-col">
-      
-      {/* 1. TOP SECTION */}
-      <div className="flex flex-col gap-1 flex-grow">
-        
-        {/* Clickable Dashboard Link - Styled like the others */}
-        <Link href="/dashboard" className={`${getLinkStyle("/dashboard")} mb-4`}>
-          <LayoutDashboard className={getIconStyle("/dashboard")} />
-          <span className="text-sm uppercase tracking-wider font-semibold">Dashboard</span>
-        </Link>
+    <>
+      {/* --- MOBILE MOBILE HAMBURGER BUTTON --- */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-orange-400 text-white rounded-md shadow-lg"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-        <nav className="flex flex-col gap-1">
-          {mainNavItems.map((item) => (
-            <Link key={item.href} href={item.href} className={getLinkStyle(item.href)}>
+      {/* --- MOBILE OVERLAY (Darkens screen when menu is open) --- */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[80] lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* --- SIDEBAR --- */}
+      <aside className={`
+        fixed top-0 left-0 h-screen bg-orange-200 border-r border-gray-100 text-black 
+        pt-20 pb-6 px-4 z-[90] flex flex-col transition-transform duration-300 ease-in-out
+        w-[240px]
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}>
+        
+        {/* TOP SECTION */}
+        <div className="flex flex-col gap-1 flex-grow overflow-y-auto scrollbar-hide">
+          <Link 
+            href="/dashboard" 
+            onClick={() => setIsOpen(false)}
+            className={`${getLinkStyle("/dashboard")} mb-4`}
+          >
+            <LayoutDashboard className={getIconStyle("/dashboard")} />
+            <span className="text-sm uppercase tracking-wider font-bold">Dashboard</span>
+          </Link>
+
+          <nav className="flex flex-col gap-1">
+            {mainNavItems.map((item) => (
+              <Link 
+                key={item.href} 
+                href={item.href} 
+                onClick={() => setIsOpen(false)} // Close on click for mobile
+                className={getLinkStyle(item.href)}
+              >
+                <item.icon className={getIconStyle(item.href)} />
+                <span className="text-sm">{item.name}</span>
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* BOTTOM SECTION */}
+        <div className="flex flex-col gap-1 border-t border-orange-300 pt-4 mt-4">
+          {bottomNavItems.map((item) => (
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              onClick={() => setIsOpen(false)}
+              className={getLinkStyle(item.href)}
+            >
               <item.icon className={getIconStyle(item.href)} />
               <span className="text-sm">{item.name}</span>
             </Link>
           ))}
-        </nav>
-      </div>
-
-      {/* 2. BOTTOM SECTION */}
-      <div className="flex flex-col gap-1 border-t border-orange-300 pt-4">
-        {bottomNavItems.map((item) => (
-          <Link key={item.href} href={item.href} className={getLinkStyle(item.href)}>
-            <item.icon className={getIconStyle(item.href)} />
-            <span className="text-sm">{item.name}</span>
-          </Link>
-        ))}
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 };
 
