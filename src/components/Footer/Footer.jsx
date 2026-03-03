@@ -1,11 +1,15 @@
+"use client"
 import Link from "next/link";
 import { 
   Facebook, Instagram, Twitter, Mail, 
   Phone, MapPin, Heart, PawPrint, ExternalLink 
 } from "lucide-react";
 import Logo from "../Header/Logo";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+   const pathname = usePathname();
+   if (pathname.startsWith("/dashboard")) return null;
   return (
     <div className="w-full bg-white pt-24 pb-12">
       <div className=" mx-auto px-6">
