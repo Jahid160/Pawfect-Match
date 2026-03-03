@@ -2,9 +2,11 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 // const uri = process.env.URI;
 const uri = process.env.URI;
+
+
 const dbname = process.env.DBNAME;
 
-// console.log(uri);
+
 export const collections = {
   USERS: "users",
   PETS: 'pets'

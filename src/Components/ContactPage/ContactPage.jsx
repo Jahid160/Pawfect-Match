@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -8,13 +8,12 @@ import {
   MapPin,
   Send,
   PawPrint,
-  Plus,
-  Minus,
-  Instagram,
-  Facebook,
-  Twitter,
   Heart,
+  Sparkles,
+  MessageSquareHeart,
+  ExternalLink
 } from "lucide-react";
+import Swal from 'sweetalert2';
 
 const ContactPage = () => {
   const [formState, setFormState] = useState({
@@ -23,265 +22,192 @@ const ContactPage = () => {
     subject: "",
     message: "",
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // এখানে আপনি চাইলে আপনার API কল করতে পারেন
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
+    Swal.fire({
+      title: 'Success!',
+      text: 'Our team will bark back at you soon!',
+      icon: 'success',
+      confirmButtonColor: 'var(--color-primary)',
+      background: 'var(--color-base-100)',
+      color: 'var(--color-neutral)',
+      customClass: {
+        popup: 'rounded-[2rem]',
+        confirmButton: 'rounded-full px-8 py-3'
+      }
+    });
+    setFormState({ name: "", email: "", subject: "", message: "" });
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] font-sans relative overflow-hidden">
-      {/* Decorative Paw Prints Background */}
-      <div className="absolute inset-0 pointer-events-none opacity-5">
-        <PawPrint className="absolute top-20 left-[10%] rotate-12 text-amber-900" size={120} />
-        <PawPrint className="absolute top-60 right-[5%] -rotate-12 text-amber-900" size={180} />
-        <PawPrint className="absolute bottom-40 left-[15%] rotate-45 text-amber-900" size={140} />
-        <PawPrint className="absolute bottom-10 right-[20%] -rotate-[30deg] text-amber-900" size={200} />
-      </div>
+    <div className="min-h-screen bg-neutral-content/20 font-sans relative overflow-hidden text-neutral">
+      
+      {/* Decorative Warm Glows - No Black/Blue */}
+      <div className="absolute top-[-5%] right-[-5%] w-[400px] h-[400px] bg-primary/20 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-[10%] left-[-5%] w-[300px] h-[300px] bg-accent/30 rounded-full blur-[80px] pointer-events-none"></div>
 
-      {/* Hero Section */}
-      <section className="bg-[#2563EB] relative py-20 px-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -ml-20 -mb-20"></div>
-        
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between relative z-10">
-          <div className="md:w-1/2 text-white mb-10 md:mb-0">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-6xl font-black mb-6 leading-tight"
-            >
-              We'd Love to <br /> Hear From You!
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-blue-100 text-lg md:text-xl max-w-md leading-relaxed"
-            >
-              Questions about adoption, volunteering, or just want to share a pet story? 
-              Our team is always here for you and your furry friends.
-            </motion.p>
-          </div>
-
-          <div className="md:w-1/2 relative flex justify-center">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 15 }}
-              className="relative"
-            >
-              <div className="w-64 h-64 md:w-80 md:h-80 bg-white rounded-full p-2 shadow-2xl overflow-hidden border-8 border-blue-400/30">
-                <img
-                  src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=1000"
-                  alt="Happy Dog"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-              
-              {/* Floating Badge */}
-              <motion.div
-                animate={{ rotate: [-2, 2, -2] }}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-10 bg-[#FFD60A] px-6 py-3 rounded-xl shadow-lg transform -rotate-6 border-2 border-amber-400 flex items-center gap-2"
-              >
-                <Heart className="text-amber-900" size={20} fill="currentColor" />
-                <span className="text-amber-900 font-black text-lg tracking-tight uppercase">
-                  Volunteer Now
-                </span>
-              </motion.div>
-            </motion.div>
-          </div>
+      {/* Hero Section - Using Secondary Cream/Peach */}
+      <section className="relative pt-24 pb-12 px-6">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-8 font-bold text-sm"
+          >
+            <Sparkles size={16} />
+            <span>WE ARE HERE FOR YOU</span>
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-5xl md:text-6xl font-black mb-6 leading-tight text-neutral"
+          >
+            Have Questions? <br />
+            <span className="text-primary font-serif italic">Give us a growl!</span>
+          </motion.h1>
         </div>
       </section>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 -mt-16 pb-24 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start my-20">
+      <main className="max-w-6xl mx-auto px-6 pb-24 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
-          {/* Contact Form Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-3 bg-[#2563EB] rounded-[3rem] p-8 md:p-12 shadow-2xl relative"
+          {/* Sidebar: Contact Info */}
+          <motion.div 
+            className="lg:col-span-4 space-y-6"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
           >
-            <div className="flex items-center justify-between mb-10">
-              <h2 className="text-white text-3xl font-black">Send us a Message</h2>
-              <div className="hidden md:flex items-center gap-2 text-blue-300">
-                <span className="text-xs font-bold uppercase tracking-widest">Support</span>
-                <div className="h-px w-20 bg-blue-400"></div>
+            <div className="bg-white rounded-[2.5rem] p-10 shadow-xl shadow-primary/5 border border-primary/10">
+              <h3 className="text-xl font-black text-neutral mb-8">Contact Details</h3>
+              
+              <div className="space-y-6">
+                <ContactDetail 
+                    icon={<Mail className="text-primary" size={20} />} 
+                    title="Send an Email" 
+                    value="adopt@pawfect.match" 
+                />
+                <ContactDetail 
+                    icon={<Phone className="text-primary" size={20} />} 
+                    title="Call the Shelter" 
+                    value="+1 234 PAWS" 
+                />
+                <ContactDetail 
+                    icon={<MapPin className="text-primary" size={20} />} 
+                    title="Visit the Pups" 
+                    value="Sunshine Valley, CA" 
+                />
+              </div>
+
+              <div className="mt-10 pt-8 border-t border-base-200 flex items-center justify-between">
+                <span className="text-xs font-bold text-neutral/40 uppercase tracking-widest">Follow the fun</span>
+                <div className="flex gap-3">
+                    <SocialButton icon={<MessageSquareHeart size={18} />} />
+                    <SocialButton icon={<ExternalLink size={18} />} />
+                </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-blue-100 text-sm font-bold mb-2 ml-1">Full Name</label>
+            {/* Fun Fact Card */}
+            <div className="bg-accent rounded-[2.5rem] p-8 text-accent-content shadow-lg relative overflow-hidden group">
+                <PawPrint className="absolute -right-4 -bottom-4 opacity-10 rotate-12 group-hover:scale-125 transition-transform" size={120} />
+                <p className="text-sm font-bold opacity-80 mb-2">Did you know?</p>
+                <p className="font-black text-lg">Adopting a pet can lower your blood pressure and reduce stress!</p>
+            </div>
+          </motion.div>
+
+          {/* Main Form Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="lg:col-span-8 bg-white rounded-[3rem] p-8 md:p-14 shadow-2xl shadow-primary/5 border border-white"
+          >
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-xs font-black text-neutral/40 uppercase tracking-widest ml-4">Full Name</label>
                   <input
                     required
-                    type="text"
-                    placeholder="Pawsome Human"
-                    className="w-full bg-white rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-400 transition-all text-gray-800 border-none shadow-inner"
+                    className="w-full bg-neutral-content focus:bg-white border-2 border-transparent focus:border-primary/20 rounded-3xl px-6 py-4 outline-none transition-all font-semibold"
+                    placeholder="E.g. Oliver Twist"
                     value={formState.name}
                     onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                   />
                 </div>
-                <div>
-                  <label className="block text-blue-100 text-sm font-bold mb-2 ml-1">Email Address</label>
+                <div className="space-y-3">
+                  <label className="text-xs font-black text-neutral/40 uppercase tracking-widest ml-4">Email Address</label>
                   <input
                     required
                     type="email"
-                    placeholder="hello@example.com"
-                    className="w-full bg-white rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-400 transition-all text-gray-800 border-none shadow-inner"
+                    className="w-full bg-neutral-content focus:bg-white border-2 border-transparent focus:border-primary/20 rounded-3xl px-6 py-4 outline-none transition-all font-semibold"
+                    placeholder="oliver@paws.com"
                     value={formState.email}
                     onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-blue-100 text-sm font-bold mb-2 ml-1">Subject</label>
+
+              <div className="space-y-3">
+                <label className="text-xs font-black text-neutral/40 uppercase tracking-widest ml-4">What's on your mind?</label>
                 <input
                   required
-                  type="text"
-                  placeholder="How can we help?"
-                  className="w-full bg-white rounded-2xl px-6 py-4 outline-none focus:ring-4 focus:ring-blue-400 transition-all text-gray-800 border-none shadow-inner"
+                  className="w-full bg-neutral-content focus:bg-white border-2 border-transparent focus:border-primary/20 rounded-3xl px-6 py-4 outline-none transition-all font-semibold"
+                  placeholder="Inquiry about adoption process"
                   value={formState.subject}
                   onChange={(e) => setFormState({ ...formState, subject: e.target.value })}
                 />
               </div>
-              <div>
-                <label className="block text-blue-100 text-sm font-bold mb-2 ml-1">Your Message</label>
+
+              <div className="space-y-3">
+                <label className="text-xs font-black text-neutral/40 uppercase tracking-widest ml-4">Your Message</label>
                 <textarea
                   required
                   rows="5"
-                  placeholder="Tell us about your furry friend..."
-                  className="w-full bg-white rounded-[2rem] px-6 py-5 outline-none focus:ring-4 focus:ring-blue-400 transition-all text-gray-800 border-none shadow-inner resize-none"
+                  className="w-full bg-neutral-content focus:bg-white border-2 border-transparent focus:border-primary/20 rounded-[2rem] px-6 py-5 outline-none transition-all font-semibold resize-none"
+                  placeholder="Tell us more..."
                   value={formState.message}
                   onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                 ></textarea>
               </div>
+
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                className="w-full md:w-auto bg-[#FFD60A] text-amber-900 font-black text-lg px-10 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl hover:bg-[#FFE045] transition-colors"
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="btn btn-primary w-full md:w-auto rounded-full px-12 h-16 text-lg font-black shadow-xl shadow-primary/30 border-none"
               >
-                Submit Message <Send size={20} />
+                Send Message
+                <Heart size={20} className="ml-2" fill="currentColor" />
               </motion.button>
             </form>
-
-            <AnimatePresence>
-              {isSubmitted && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="absolute inset-0 bg-blue-600 rounded-[3rem] flex flex-col items-center justify-center text-white p-8 text-center z-50"
-                >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", bounce: 0.6 }}
-                    className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 text-blue-600"
-                  >
-                    <Heart size={40} fill="currentColor" />
-                  </motion.div>
-                  <h3 className="text-3xl font-black mb-2">Message Sent!</h3>
-                  <p className="text-blue-100">Thanks for reaching out. We'll get back to you soon!</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
-
-          {/* Contact Details & Map Column */}
-          <div className="lg:col-span-2 space-y-10 py-6">
-            <div className="space-y-8">
-              <ContactInfoItem 
-                icon={<Mail size={24} />} 
-                title="Email Us" 
-                detail="hello@pawsandhomes.org" 
-                sub="We respond within 24 hours!" 
-                delay={0.3} 
-              />
-              <ContactInfoItem 
-                icon={<Phone size={24} />} 
-                title="Call Us" 
-                detail="+1 (555) 123-4567" 
-                sub="Mon-Fri, 9am - 6pm" 
-                delay={0.4} 
-              />
-              <ContactInfoItem 
-                icon={<MapPin size={24} />} 
-                title="Visit Us" 
-                detail="123 Shelter Way, Tail Town" 
-                sub="Find your new best friend here" 
-                delay={0.5} 
-              />
-            </div>
-
-            {/* Stylized Map View */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6 }}
-              className="bg-white p-3 rounded-[2.5rem] shadow-xl border-4 border-white overflow-hidden aspect-square relative"
-            >
-              <div className="absolute inset-0 bg-[#E5E7EB]">
-                <div className="absolute inset-0 opacity-40">
-                  <div className="h-4 w-full bg-white absolute top-1/4"></div>
-                  <div className="w-4 h-full bg-white absolute left-1/3"></div>
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                  <motion.div
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="text-red-500"
-                  >
-                    <MapPin size={40} fill="currentColor" />
-                  </motion.div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="max-w-4xl mx-auto px-6 pb-12 flex flex-col items-center border-t border-gray-100 pt-10">
-        <div className="flex gap-4 text-gray-400 mb-6">
-          <Facebook size={20} className="hover:text-blue-600 cursor-pointer transition-colors" />
-          <Twitter size={20} className="hover:text-blue-400 cursor-pointer transition-colors" />
-          <Instagram size={20} className="hover:text-pink-600 cursor-pointer transition-colors" />
-        </div>
-        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest text-center">
-          © 2026 Paws and Homes Animal Shelter. Spreading love, one paw at a time.
-        </p>
+      <footer className="text-center pb-12 opacity-30 font-bold text-[10px] tracking-[0.3em] uppercase">
+        Pawfect Match Shelter • 2026
       </footer>
     </div>
   );
 };
 
-// Helper Component for Info Items
-const ContactInfoItem = ({ icon, title, detail, sub, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay }}
-    className="flex items-start gap-5 group"
-  >
-    <div className="bg-[#5D4037] p-4 rounded-2xl text-white shadow-lg group-hover:scale-110 transition-transform">
-      {icon}
+// Sub-components for cleaner code
+const ContactDetail = ({ icon, title, value }) => (
+    <div className="flex items-center gap-4 group">
+        <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            {icon}
+        </div>
+        <div>
+            <p className="text-[10px] font-black text-neutral/30 uppercase tracking-wider leading-none mb-1">{title}</p>
+            <p className="font-bold text-neutral/80">{value}</p>
+        </div>
     </div>
-    <div>
-      <h4 className="text-xl font-black text-gray-800">{title}</h4>
-      <p className="text-blue-600 font-semibold mb-1">{detail}</p>
-      <p className="text-gray-400 text-sm">{sub}</p>
-    </div>
-  </motion.div>
+);
+
+const SocialButton = ({ icon }) => (
+    <button className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-neutral/40 hover:bg-primary hover:text-white transition-all">
+        {icon}
+    </button>
 );
 
 export default ContactPage;
