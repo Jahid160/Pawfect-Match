@@ -1,157 +1,131 @@
-// import { loginUser } from "@/actions/server/auth";
-// import CredentialsProvider from "next-auth/providers/credentials";
-// import GoogleProvider from "next-auth/providers/google";
-// import { collections, dbConnect } from "./db";
-// export const authOptions = {
-//   // secret: process.env.NEXTAUTH_SECRET,
-
-//   providers: [
-//     CredentialsProvider({
-//       name: "Credentials",
-//       credentials: {
-//         email: { label: "Email", type: "email" },
-//         password: { label: "Password", type: "password" },
-//       },
-//       async authorize(credentials) {
-//         if (!credentials?.email || !credentials?.password) return null;
-//         return await loginUser(credentials);
-//       },
-//     }),
-
-//     GoogleProvider({
-//       clientId: process.env.GOOGLE_CLIENT_ID,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//     }),
-//   ],
-
-//   callbacks: {
-//     async signIn({ user, account }) {
-//       try {
-//         const usersCollection = await dbConnect(collections.USERS);
-//         const exists = await usersCollection.findOne({ email: user.email });
-//         if (exists) return true;
-
-//         await usersCollection.insertOne({
-//           provider: account?.provider || "credentials",
-//           email: user.email,
-//           name: user.name || "",
-//           image: user.image || "",
-//           role: "user",
-//           createdAt: new Date(),
-//         });
-
-//         return true;
-//       } catch (e) {
-//         console.log("signIn callback error:", e);
-//         return false;
-//       }
-//     },
-
-//     async jwt({ token, user, account }) {
-//       if (user) {
-//         token.email = user.email;
-//         token.role = user.role ?? "user";
-//       }
-//       return token;
-//     },
-
-//     async session({ session, token }) {
-//       if (session.user) {
-//         session.user.email = token.email;
-//         session.user.role = token.role;
-//       }
-//       return session;
-//     },
-//   },
-// };
-
 import { loginUser } from "@/action/server/auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import { collections, dbConnect } from "./db";
-// import { loginUser } from "@/action/server/auth";
+
 export const authOptions = {
   providers: [
+    // 🔐 Credentials
     CredentialsProvider({
       name: "Credentials",
-
-      credentials: {
-        // username: { label: "Username", type: "text", placeholder: "jsmith" },
-        // password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials, req) {
-        console.log(credentials);
+      credentials: {},
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
 
         const user = await loginUser({
           email: credentials.email,
           password: credentials.password,
         });
 
-        // Return null if user data could not be retrieved
-        return user;
+        return user || null;
       },
     }),
+
+    //  Google
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    // ...add more providers here
+
+    //  GitHub
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
   ],
+
   callbacks: {
-
-    
-    
+    /**
+     * Runs on every successful authentication
+     */
     async signIn({ user, account }) {
-  const usersCollection = await dbConnect(collections.USERS);
+      try {
+        if (!user?.email) return false;
 
-  const isExist = await usersCollection.findOne({
-    email: user.email,
-  });
+        const usersCollection = await dbConnect(collections.USERS);
+        const now = new Date();
 
-  if (isExist) {
-    return true;
-  }
+        // Single atomic upsert (NO duplicate field conflicts)
+        const result = await usersCollection.updateOne(
+          { email: user.email },
+          {
+            // Only fields that NEVER change
+            $setOnInsert: {
+              email: user.email,
+              role: "user",
+              createdAt: now,
+            },
 
-  const newUser = {
-    provider: account?.provider,
-    email: user.email,
-    name: user.name,
-    image: user.image,
-    role: "user",
-  };
+            // Fields that can change anytime
+            $set: {
+              provider: account?.provider || "credentials",
+              name: user?.name || null,
+              image: user?.image || null,
+              lastLoginAt: now,
+              lastAuthAt: now,
+            },
+          },
+          { upsert: true }
+        );
 
-  const result = await usersCollection.insertOne(newUser);
+        //  Detect register vs login
+        const action =
+          result.upsertedCount > 0 ? "register" : "login";
 
-  return result.acknowledged;
-},
-    
-    async session({ session, token, user }) {
-      if (token) {
-        session.role = token?.role;
-        session.email = token?.email;
+        await usersCollection.updateOne(
+          { email: user.email },
+          {
+            $set: { lastAuthAction: action },
+          }
+        );
+
+        return true;
+      } catch (error) {
+        console.error("signIn DB update error:", error);
+        return false; // prevents 403 loop
       }
-      return session;
     },
-    async jwt({ token, user, account, profile, isNewUser }) {
-      console.log("account data in token", token);
-      if (user) {
-        if (account.provider == "google") {
 
+    /**
+     * Attach custom fields to JWT
+     */
+    async jwt({ token, user }) {
+      if (user?.email) {
+        const usersCollection = await dbConnect(collections.USERS);
+        const dbUser = await usersCollection.findOne({
+          email: user.email,
+        });
 
-          const usersCollection = await dbConnect(collections.USERS);
-
-          const dbUser = await usersCollection.findOne({
-            email: user.email,
-          });
-
-          token.role = dbUser?.role;
-          token.email = dbUser?.email;
-        } else {
-          token.role = user?.role;
-          token.email = user?.email;
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.id = dbUser._id?.toString();
         }
       }
+
       return token;
     },
+
+    /**
+     * Expose fields to client session
+     */
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
+
+      return session;
+    },
   },
+
+  session: {
+    strategy: "jwt",
+  },
+
+  pages: {
+    signIn: "/login", // optional custom login page
+  },
+
+  secret: process.env.NEXTAUTH_SECRET,
 };

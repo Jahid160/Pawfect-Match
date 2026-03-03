@@ -1,27 +1,38 @@
 "use client";
 import { signIn } from "next-auth/react";
-import { useParams, useSearchParams } from "next/navigation";
-import { FaGoogle } from "react-icons/fa";
+import { useSearchParams } from "next/navigation";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 
-export const Socialform = () => {
+export const SocialButtons = () => {
   const params = useSearchParams();
 
-  const handleSignIn = async () => {
-    const result = await signIn("google", {
-      // redirect: "false",
+  const handleSignIn = async (provider) => {
+    await signIn(provider, {
       callbackUrl: params.get("callbackUrl") || "/",
     });
   };
 
   return (
-    <div className="flex gap-3 mt-4">
-      <button
-        onClick={handleSignIn}
-        className="flex-1 btn-outline btn btn-error"
-      >
-        <FaGoogle className="text-lg" />
-        Google
-      </button>
+    <div>
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={() => handleSignIn("google")}
+          className="btn btn-outline btn-error flex-1"
+        >
+          <FaGoogle className="text-lg" />
+          Google
+        </button>
+      </div>
+
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={() => handleSignIn("github")}
+          className="btn btn-outline btn-neutral flex-1"
+        >
+          <FaGithub className="text-lg" />
+          GitHub
+        </button>
+      </div>
     </div>
   );
 };

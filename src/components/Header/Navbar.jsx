@@ -1,85 +1,178 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Logo from './Logo';
-import NavLink from '../button/NavLink';
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, LogIn } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, ChevronDown, X } from "lucide-react";
+import AuthButtons from "../button/AuthButtons";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  // If the path starts with /dashboard, return nothing
+  if (pathname.startsWith("/dashboard")) return null;
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "FAQ", href: "/faq" },
+    {
+      name: "About",
+      href: "/about",
+      subLinks: [
+        { name: "Our Mission", href: "/about/mission" },
+        { name: "Team", href: "/about/team" },
+        { name: "FAQ", href: "/faq" },
+        { name: "Experts", href: "/experts" },
+      ],
+    },
+    
+    {
+      name: "Forms",
+      href: "/forms",
+      subLinks: [
+        { name: "Adoption Form", href: "/adoptionfrom" },
+        { name: "Shelter Application", href: "/shelterForm" },
+        { name: "Pet Details", href: "/petdetailsform" },
+      ],
+    },
     { name: "Contact", href: "/contact" },
   ];
 
-  const navItems = navLinks.map((link) => (
-    <li key={link.name} className="relative group">
-      <NavLink href={link.href}>
-        <span className="relative py-2 text-[15px] font-semibold tracking-wide transition-colors group-hover:text-primary">
-          {link.name}
-          {/* Modern dot indicator on hover */}
-          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full opacity-0 transition-all duration-300 group-hover:opacity-100"></span>
-        </span>
-      </NavLink>
-    </li>
-  ));
-
   return (
-    <div className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 md:px-12 ${isScrolled ? "pt-2" : "pt-6"}`}>
-      <div className={`navbar max-w-7xl mx-auto rounded-3xl transition-all duration-300 ${isScrolled
-          ? "bg-white/70 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.05)] border border-white/20 px-8 h-16"
-          : "bg-transparent px-4 h-20"
-        }`}>
-
-        {/* Navbar Start: Logo & Mobile Trigger */}
-        <div className="navbar-start">
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden mr-2 hover:bg-primary/10">
-              <Menu className="h-6 w-6" />
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100/90 backdrop-blur-md rounded-2xl z-[1] mt-4 w-64 p-4 shadow-2xl border border-base-200 gap-2"
-            >
-              {navItems}
-              <div className="divider my-1"></div>
-              <li><Link href="/login" className="btn btn-primary btn-sm text-white">Login</Link></li>
-            </ul>
-          </div>
-          <div className="hover:scale-105 transition-transform duration-300 flex items-center">
-            <Logo />
-          </div>
+    <nav
+      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+        isScrolled
+          ? "bg-white shadow-md h-16"
+          : "bg-white/95 backdrop-blur-md h-20"
+      }`}
+    >
+      <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          <Logo />
         </div>
 
-        {/* Navbar Center: Links with spacing */}
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 gap-8">
-            {navItems}
+        {/* Center Links (Desktop) */}
+        <div className="hidden lg:flex items-center h-full">
+          <ul className="flex flex-row items-center gap-8 mb-0 h-full list-none">
+            {navLinks.map((link) => {
+              const isParentActive =
+                link.subLinks?.some((sub) => pathname.startsWith(sub.href)) ||
+                pathname === link.href;
+
+              return (
+                <li key={link.name} className="relative flex items-center h-full">
+                  {link.subLinks ? (
+                    <div className="dropdown-bottom dropdown dropdown-hover">
+                      <div
+                        tabIndex={0}
+                        role="button"
+                        className={`flex items-center gap-1 text-[15px] font-bold py-2 cursor-pointer transition-colors ${
+                          isParentActive ? "text-primary" : "text-neutral hover:text-primary"
+                        }`}
+                      >
+                        {link.name}
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                      <ul
+                        tabIndex={0}
+                        className="z-[1] bg-white shadow-xl p-2 border border-base-200 rounded-xl w-48 dropdown-content menu"
+                      >
+                        {link.subLinks.map((sub) => (
+                          <li key={sub.name}>
+                            <Link
+                              href={sub.href}
+                              className={`${
+                                pathname === sub.href ? "text-primary bg-primary/10" : "text-neutral"
+                              }`}
+                            >
+                              {sub.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className={`text-[15px] font-bold transition-colors ${
+                        pathname === link.href ? "text-primary" : "text-neutral hover:text-primary"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
 
-        {/* Navbar End: Styled Login only */}
-        <div className="navbar-end">
-          <Link
-            href="/login"
-            className="group relative flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
+        {/* Auth Buttons (Desktop) */}
+        <div className="hidden lg:block">
+          <AuthButtons />
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="lg:hidden">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 text-neutral hover:text-primary transition-colors"
           >
-            <span>Login</span>
-            <LogIn className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </div>
-    </div>
+
+      {/* Mobile Menu Sidebar/Drawer */}
+      <div
+        className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-[110] ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col p-6 h-full">
+          <div className="mb-8">
+            <Logo />
+          </div>
+          <ul className="flex flex-col flex-grow gap-4 p-0 list-none">
+            {navLinks.map((link) => (
+              <li key={link.name}>
+                <Link
+                  href={link.href}
+                  className={`text-lg font-bold block py-2 ${
+                    pathname === link.href ? "text-primary" : "text-neutral"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-auto pt-6 border-gray-100 border-t">
+            <AuthButtons />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isMenuOpen && (
+        <div
+          className="lg:hidden z-[105] fixed inset-0 bg-black/20 backdrop-blur-sm"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+    </nav>
   );
 };
 

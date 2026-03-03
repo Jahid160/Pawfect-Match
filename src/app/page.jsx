@@ -1,5 +1,6 @@
 import Petcarts from "@/components/cards/Petcarts";
-import Petdetailscart from "@/components/cards/Petdetailscart";
+import RecentPets from "@/components/cards/RecentPets";
+import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import Banner from "@/components/home/Banner";
 import FAQPage from "@/components/home/FAQPage";
 import HowItWorks from "@/components/home/HowItWorks";
@@ -10,25 +11,24 @@ import SuccessStories from "@/components/home/SuccessStories";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
 
 
-
 const mainPage = () => {
   return (
-    <div className="space-y-5">
+    <div className="space-y-20">
       <section>
         <Banner></Banner>
         <WhyChooseUs></WhyChooseUs>
         <PetCategories></PetCategories>
-        <Petcarts></Petcarts>
+        <RecentPets></RecentPets>
         <HowItWorks></HowItWorks>
+        <ExpertSection></ExpertSection>
         <SuccessStories></SuccessStories>
         <OurSponsor></OurSponsor>
         <Newsletter></Newsletter>
       </section>
 
-      <section>
+      {/* <section>
         <Petdetailscart></Petdetailscart>
-        <FAQPage></FAQPage>
-      </section>
+      </section> */}
 
     </div>
   );
