@@ -3,7 +3,8 @@ import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
 import Navbar from "@/components/Header/Navbar";
 import Footer from "@/components/Footer/Footer";
-import Script from "next/script";
+import Script from "next/script"; // Next.js এর Script কম্পোনেন্ট
+import SupportButton from "@/components/HelpCenter/SupportButton";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -12,13 +13,13 @@ const poppins = Poppins({
 
 export const metadata = {
   title: "Pawfact Match",
-  description: "Adop your Pet",
+  description: "Adopt your Pet",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${poppins.className}  antialiased`}>
+      <body className={`${poppins.className} antialiased`}>
         <NextAuthProvider>
           <header className="mx-auto py-2 md:w-11/12 mb-15">
             <Navbar></Navbar>
@@ -27,11 +28,13 @@ export default function RootLayout({ children }) {
           <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
             {children}
           </main>
-          <script
+
+          <Script
             src="//code.tidio.co/bnnskbd4agggqkgqz1jtpiuiiw8yt0s7.js"
             strategy="afterInteractive"
-            async
-          ></script>
+          />
+
+          <SupportButton></SupportButton>
 
           <footer>
             <Footer></Footer>
