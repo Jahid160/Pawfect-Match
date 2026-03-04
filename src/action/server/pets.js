@@ -8,12 +8,18 @@ import { getServerSession } from "next-auth";
 const petCollectionPromise = dbConnect(collections.PETS);
 
 export const getPets = async () => {
-     const Petcollection = await petCollectionPromise;
-     const pets = await Petcollection.find().toArray();
-     return {
-          ...pets,
-          _id: pets._id?.toString(),
-     };
+    try {
+        const Petcollection = await petCollectionPromise;
+        const pets = await Petcollection.find().toArray();
+        
+        return pets.map(pet => ({
+            ...pet,
+            _id: pet._id.toString(),
+        }));
+    } catch (error) {
+        console.error("Error:", error);
+        return [];
+    }
 };
 
 export const getSinglePets = async (id) => {
