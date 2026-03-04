@@ -112,7 +112,7 @@ const Banner = () => {
 
                 <div className="flex sm:flex-row flex-col gap-5">
                   <Link
-                    href={slide.buttonLink}
+                    href="/all-pets"
                     className="group flex justify-center items-center gap-3 bg-orange-500 hover:bg-slate-900 shadow-lg shadow-orange-100 px-12 py-5 rounded-2xl font-bold text-white text-center transition-all hover:-translate-y-1 duration-500 transform"
                   >
                     {slide.buttonText}
