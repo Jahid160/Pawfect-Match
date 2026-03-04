@@ -26,6 +26,7 @@ const Navbar = () => {
   if (pathname.startsWith("/dashboard")) return null;
   const navLinks = [
     { name: "Home", href: "/" },
+    { name: "All Pets", href: "/all-pets" },
     {
       name: "About",
       href: "/about",
