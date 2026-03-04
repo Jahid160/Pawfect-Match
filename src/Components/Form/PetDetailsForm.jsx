@@ -250,7 +250,7 @@ export default function PetAdoptionForm() {
               <span className="font-bold text-white">
                 {form.petName || "Your pet"}
               </span>
-              's profile is under review. We'll publish it soon so they can find
+              profile is under review. We will publish it soon so they can find
               their forever home. 🐾
             </p>
           </div>
@@ -1049,7 +1049,7 @@ export default function PetAdoptionForm() {
 
           {currentStep < steps.length ? (
             <button
-              type="button"
+              type="submit"
               onClick={() =>
                 setCurrentStep((s) => Math.min(steps.length, s + 1))
               }

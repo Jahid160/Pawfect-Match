@@ -112,7 +112,7 @@ const AdoptionForm = () => {
           Adoption Suitability 🐾
         </h2>
         <p className="relative text-white/90 font-light text-lg italic">
-          "A pet is a lifetime commitment. Help us ensure a perfect match."
+          A pet is a lifetime commitment. Help us ensure a perfect match .
         </p>
       </div>
 
@@ -269,7 +269,7 @@ const AdoptionForm = () => {
                             }
                           />
                           <span className="font-medium text-slate-600">
-                            No, I don't
+                            No, I do not
                           </span>
                         </label>
                       </div>

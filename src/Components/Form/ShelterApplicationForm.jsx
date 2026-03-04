@@ -1,5 +1,7 @@
 "use client";
+import { createShelterUser } from "@/action/server/Shelteruser";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const steps = [
   { id: 1, title: "Personal Info", icon: "👤" },
@@ -42,9 +44,78 @@ export default function ShelterApplicationForm() {
   const nextStep = () => setCurrentStep((s) => Math.min(s + 1, 4));
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = (e) => {
+
+  const uploadImagesToImgBB = async (files) => {
+    const uploadedUrls = [];
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      // console.log("Upload response:", data);
+
+      if (data.success) {
+        uploadedUrls.push(data.url);
+      }
+    }
+
+    return uploadedUrls;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
+
+
+    try {
+      Swal.fire({
+        title: "Uploading Images...",
+        text: "Please wait...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // 🔥 1. Upload images to ImgBB
+      const imageUrls = await uploadImagesToImgBB(previewImages);
+
+      // 🔥 2. Prepare final data
+      const finalData = {
+        ...formData,
+        temperaments: selectedTemperaments,
+        images: imageUrls,
+        createdAt: new Date(),
+      };
+
+      //  3. Save to database
+      const response = await createShelterUser(finalData);
+
+      Swal.close();
+
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Application Submitted!",
+          text: "Your shelter role application has been submitted successfully.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Submit Application",
+          text: response.message || "An error occurred.",
+        });
+      }
+    } catch (error) {
+      Swal.close();
+      console.error("Failed to submit:", error);
+    }
   };
 
   if (submitted) {
@@ -98,18 +169,18 @@ export default function ShelterApplicationForm() {
             >
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${step.id < currentStep
-                    ? "bg-primary text-primary-content shadow-md"
-                    : step.id === currentStep
-                      ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
-                      : "bg-base-100 text-base-content/40 border-2 border-base-300"
+                  ? "bg-primary text-primary-content shadow-md"
+                  : step.id === currentStep
+                    ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
+                    : "bg-base-100 text-base-content/40 border-2 border-base-300"
                   }`}
               >
                 {step.id < currentStep ? "✓" : step.icon}
               </div>
               <span
                 className={`text-xs font-medium hidden sm:block ${step.id === currentStep
-                    ? "text-primary"
-                    : "text-base-content/50"
+                  ? "text-primary"
+                  : "text-base-content/50"
                   }`}
               >
                 {step.title}
