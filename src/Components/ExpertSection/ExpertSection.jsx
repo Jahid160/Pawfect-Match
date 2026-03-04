@@ -101,16 +101,14 @@ const ExpertSection = () => {
 
         {/* View All Button */}
         <div className="flex justify-center">
-          <Link
-            href="/experts"
-            className="group inline-flex relative items-center gap-4 bg-gray-900 shadow-2xl px-10 py-4 hover:pr-14 rounded-full overflow-hidden font-bold text-white text-lg active:scale-95 transition-all"
+          <Link 
+            href="/experts" 
+            className="group inline-flex relative items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-[0_20px_40px_-15px_rgba(249,115,22,0.4)] hover:shadow-2xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white uppercase tracking-wider transition-all duration-500"
           >
-            <span className="z-10 relative text-sm uppercase tracking-widest">View All Our Experts</span>
-            <div className="right-6 absolute opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2 duration-300">
-              <FaArrowRight />
-            </div>
-            {/* Background Hover Effect */}
-            <div className="absolute inset-0 bg-orange-500 transition-transform translate-y-full group-hover:translate-y-0 duration-500"></div>
+            <span className="z-10 relative">View All Our Experts</span>
+            <FaArrowRight className="z-10 relative transition-transform group-hover:translate-x-2 duration-300" />
+            
+            <div className="top-0 -left-full group-hover:left-full absolute bg-gradient-to-r from-transparent via-white/20 to-transparent w-full h-full transition-all duration-1000 ease-in-out"></div>
           </Link>
         </div>
       </div>

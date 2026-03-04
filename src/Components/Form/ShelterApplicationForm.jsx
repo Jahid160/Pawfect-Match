@@ -86,9 +86,9 @@ export default function ShelterApplicationForm() {
 
         {/* Stepper */}
         <div className="flex items-center justify-between mb-8 relative">
-          <div className="absolute top-5 left-0 right-0 h-0.5 bg-base-300 -z-0" />
+          <div className="absolute top-5 left-0 right-0 h-0.5 bg-base-300 z-0" />
           <div
-            className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-500 -z-0"
+            className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-500 z-0"
             style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
           />
           {steps.map((step) => (
@@ -97,22 +97,20 @@ export default function ShelterApplicationForm() {
               className="flex flex-col items-center gap-1 z-10"
             >
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
-                  step.id < currentStep
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${step.id < currentStep
                     ? "bg-primary text-primary-content shadow-md"
                     : step.id === currentStep
                       ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
                       : "bg-base-100 text-base-content/40 border-2 border-base-300"
-                }`}
+                  }`}
               >
                 {step.id < currentStep ? "✓" : step.icon}
               </div>
               <span
-                className={`text-xs font-medium hidden sm:block ${
-                  step.id === currentStep
+                className={`text-xs font-medium hidden sm:block ${step.id === currentStep
                     ? "text-primary"
                     : "text-base-content/50"
-                }`}
+                  }`}
               >
                 {step.title}
               </span>

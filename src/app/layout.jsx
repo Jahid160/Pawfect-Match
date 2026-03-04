@@ -29,10 +29,10 @@ export default function RootLayout({ children }) {
             {children}
           </main>
 
-          <Script
+          {/* <Script
             src="//code.tidio.co/bnnskbd4agggqkgqz1jtpiuiiw8yt0s7.js"
             strategy="afterInteractive"
-          />
+          /> */}
 
           <SupportButton></SupportButton>
 

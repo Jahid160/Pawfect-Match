@@ -8,12 +8,18 @@ import { getServerSession } from "next-auth";
 const petCollectionPromise = dbConnect(collections.PETS);
 
 export const getPets = async () => {
-     const Petcollection = await petCollectionPromise;
-     const pets = await Petcollection.find().toArray();
-     return {
-          ...pets,
-          _id: pets._id?.toString(),
-     };
+    try {
+        const Petcollection = await petCollectionPromise;
+        const pets = await Petcollection.find().toArray();
+        
+        return pets.map(pet => ({
+            ...pet,
+            _id: pet._id.toString(),
+        }));
+    } catch (error) {
+        console.error("Error:", error);
+        return [];
+    }
 };
 
 export const getSinglePets = async (id) => {
@@ -34,6 +40,18 @@ export const getSinglePets = async (id) => {
           return {};
      }
 };
+
+export const AddPets = async (petdata) => {
+     try {
+          const Petcollection = await petCollectionPromise;
+          const result = await Petcollection.insertOne({
+               ...petdata,
+          });
+          return { success: Boolean(result.insertedId) };
+     } catch (error) {
+          return { success: false, error: error.message };
+     }
+}
 
 export const DeletePets = async (id) => {
      const session = await getServerSession(authOptions);

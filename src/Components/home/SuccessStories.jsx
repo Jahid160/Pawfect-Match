@@ -77,7 +77,7 @@ export default function SuccessStories() {
 
         {/* Bottom CTA for Section */}
         <div className="mt-16 text-center">
-            <button className="bg-gray-900 hover:bg-orange-500 shadow-xl px-10 py-4 rounded-2xl font-black text-white text-sm tracking-widest transition-colors">
+            <button className="bg-orange-500 hover:bg-gray-900 shadow-xl px-10 py-4 rounded-2xl font-black text-white text-sm tracking-widest transition-colors">
                 READ ALL STORIES
             </button>
         </div>
