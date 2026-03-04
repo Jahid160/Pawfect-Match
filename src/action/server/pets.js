@@ -41,6 +41,18 @@ export const getSinglePets = async (id) => {
      }
 };
 
+export const AddPets = async (petdata) => {
+     try {
+          const Petcollection = await petCollectionPromise;
+          const result = await Petcollection.insertOne({
+               ...petdata,
+          });
+          return { success: Boolean(result.insertedId) };
+     } catch (error) {
+          return { success: false, error: error.message };
+     }
+}
+
 export const DeletePets = async (id) => {
      const session = await getServerSession(authOptions);
      if (!session?.user) return { success: false, message: "Unauthorized" };

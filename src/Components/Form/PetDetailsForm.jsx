@@ -1,9 +1,8 @@
 "use client";
-
+import Image from 'next/image'
 import { useState } from "react";
 import {
   PawPrint,
-  Heart,
   Stethoscope,
   Smile,
   Camera,
@@ -21,7 +20,6 @@ import {
   Shield,
   Activity,
   Home,
-  Trees,
   Baby,
   Dog,
   Clock,
@@ -31,6 +29,8 @@ import {
   RotateCcw,
   CircleCheck,
 } from "lucide-react";
+import Swal from 'sweetalert2';
+import { AddPets } from '@/action/server/pets';
 
 const steps = [
   { id: 1, label: "Basic Info", icon: PawPrint },
@@ -60,6 +60,8 @@ const temperamentOptions = [
   "Protective",
 ];
 
+
+
 /* ── Reusable pill-style radio ── */
 function Pill({ value, current, onChange, icon: Icon, label, wide }) {
   const active = current === value;
@@ -69,7 +71,7 @@ function Pill({ value, current, onChange, icon: Icon, label, wide }) {
       className={[
         "flex-1 flex items-center justify-center gap-2 cursor-pointer select-none",
         "border-2 rounded-xl py-3 px-4 text-sm font-semibold transition-all duration-200",
-        wide ? "min-w-[120px]" : "min-w-[72px]",
+        wide ? "min-w-30" : "min-w-18",
         active
           ? "border-primary bg-primary text-white shadow-lg shadow-primary/30"
           : "border-base-300 bg-base-100 text-neutral/60 hover:border-primary/60 hover:text-primary hover:bg-primary/5",
@@ -91,6 +93,7 @@ function IconInput({ icon: Icon, className = "", ...props }) {
       />
       <input
         {...props}
+        value={props.value ?? ""}
         className={`input input-bordered w-full pl-10 focus:input-primary bg-base-200/60 focus:bg-base-100 transition-colors ${className}`}
       />
     </div>
@@ -105,7 +108,7 @@ function SectionLabel({ icon: Icon, children }) {
         <Icon size={11} />
         {children}
       </span>
-      <div className="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent" />
+      <div className="flex-1 h-px bg-linear-to-r from-primary/30 to-transparent" />
     </div>
   );
 }
@@ -155,17 +158,88 @@ export default function PetAdoptionForm() {
     );
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    setPreviewImages((p) =>
-      [...p, ...files.map((f) => URL.createObjectURL(f))].slice(0, 6),
+    setPreviewImages((prev) =>
+      [...prev, ...files].slice(0, 6)
     );
   };
 
+  //  Image upload function
+  const uploadImagesToImgBB = async (files) => {
+    const uploadedUrls = [];
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      // console.log("Upload response:", data);
+
+      if (data.success) {
+        uploadedUrls.push(data.url);
+      }
+    }
+
+    return uploadedUrls;
+  };
+  //handlesubmit function
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      Swal.fire({
+        title: "Uploading Images...",
+        text: "Please wait...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // 🔥 1. Upload images to ImgBB
+      const imageUrls = await uploadImagesToImgBB(previewImages);
+
+      // 🔥 2. Prepare final data
+      const finalData = {
+        ...form,
+        temperaments: selectedTemperaments,
+        images: imageUrls,
+        createdAt: new Date(),
+      };
+
+      // 🔥 3. Save to database
+      const response = await AddPets(finalData);
+
+      Swal.close();
+
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Pet Listed!",
+          text: "Your pet has been successfully listed for adoption.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to List Pet",
+          text: response.message || "An error occurred.",
+        });
+      }
+    } catch (error) {
+      Swal.close();
+      console.error("Failed to submit:", error);
+    }
+  };
   /* ── Success screen ── */
   if (submitted) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center p-6">
         <div className="card bg-base-100 shadow-2xl max-w-sm w-full rounded-3xl overflow-hidden">
-          <div className="bg-gradient-to-br from-primary to-primary/70 p-10 flex flex-col items-center text-center gap-4">
+          <div className="bg-linear-to-br from-primary to-primary/70 p-10 flex flex-col items-center text-center gap-4">
             <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center animate-bounce">
               <CircleCheck size={40} className="text-white" />
             </div>
@@ -263,16 +337,14 @@ export default function PetAdoptionForm() {
 
       {/* ── Form Card ── */}
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          setSubmitted(true);
-        }}
+        onSubmit={handleSubmit}
+
         className="card bg-base-100 shadow-2xl max-w-2xl mx-auto rounded-3xl overflow-hidden"
       >
         {/* Card Header */}
         <div className="bg-primary px-8 py-7 flex items-center gap-5 relative overflow-hidden">
           <div className="absolute -top-12 -right-8 w-40 h-40 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
-          <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary flex-shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shrink-0">
             <StepIcon size={26} />
           </div>
           <div>
@@ -576,11 +648,10 @@ export default function PetAdoptionForm() {
                       key={t}
                       type="button"
                       onClick={() => toggleT(t)}
-                      className={`btn btn-sm rounded-full font-semibold transition-all duration-200 gap-1.5 ${
-                        selectedTemperaments.includes(t)
-                          ? "btn-primary shadow-md shadow-primary/25"
-                          : "btn-ghost border border-base-300 hover:border-primary/50 hover:text-primary"
-                      }`}
+                      className={`btn btn-sm rounded-full font-semibold transition-all duration-200 gap-1.5 ${selectedTemperaments.includes(t)
+                        ? "btn-primary shadow-md shadow-primary/25"
+                        : "btn-ghost border border-base-300 hover:border-primary/50 hover:text-primary"
+                        }`}
                     >
                       {selectedTemperaments.includes(t) && <Check size={11} />}
                       {t}
@@ -783,39 +854,40 @@ export default function PetAdoptionForm() {
                 />
               </label>
 
-              {previewImages.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
-                  {previewImages.map((src, i) => (
-                    <div
-                      key={i}
-                      className="relative group rounded-xl overflow-hidden aspect-square bg-base-200"
-                    >
-                      <img
-                        src={src}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPreviewImages((p) =>
-                            p.filter((_, idx) => idx !== i),
-                          )
-                        }
-                        className="absolute top-2 right-2 btn btn-xs btn-circle btn-neutral opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X size={11} />
-                      </button>
-                      {i === 0 && (
-                        <span className="absolute bottom-2 left-2 badge badge-primary badge-xs font-bold tracking-wider uppercase">
-                          Main
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-3 gap-3">
+                {previewImages.map((file, i) => (
+                  <div
+                    key={i}
+                    className="relative group rounded-xl overflow-hidden aspect-square bg-base-200"
+                  >
+                    <Image
+                      src={URL.createObjectURL(file)}   // 🔥 এখানে পরিবর্তন
+                      width={300}
+                      height={300}
+                      alt="Pet Photo"
+                      className="w-full h-full object-cover"
+                    />
 
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreviewImages((p) =>
+                          p.filter((_, idx) => idx !== i),
+                        )
+                      }
+                      className="absolute top-2 right-2 btn btn-xs btn-circle btn-neutral opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={11} />
+                    </button>
+
+                    {i === 0 && (
+                      <span className="absolute bottom-2 left-2 badge badge-primary badge-xs font-bold tracking-wider uppercase">
+                        Main
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
               <div className="divider my-1 text-xs opacity-40">Location</div>
 
               <div className="form-control gap-1.5">
@@ -965,13 +1037,12 @@ export default function PetAdoptionForm() {
             {steps.map((s) => (
               <div
                 key={s.id}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  currentStep === s.id
-                    ? "w-5 bg-neutral"
-                    : currentStep > s.id
-                      ? "w-1.5 bg-primary/50"
-                      : "w-1.5 bg-base-300"
-                }`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${currentStep === s.id
+                  ? "w-5 bg-neutral"
+                  : currentStep > s.id
+                    ? "w-1.5 bg-primary/50"
+                    : "w-1.5 bg-base-300"
+                  }`}
               />
             ))}
           </div>
