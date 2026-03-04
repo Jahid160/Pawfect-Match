@@ -1,4 +1,4 @@
-import ShelterApplicationForm from "@/Components/Form/ShelterApplicationForm";
+import ShelterApplicationForm from "@/components/Form/ShelterApplicationForm";
 import React from "react";
 
 const shelterForm = () => {
