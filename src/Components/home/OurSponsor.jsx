@@ -2,11 +2,11 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode } from "swiper/modules";
+import Image from "next/image";
 
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/free-mode";
-import Image from "next/image";
 
 const sponsors = [
   { id: 1, img: "https://i.ibb.co.com/93qCkQDq/purnima.png" },
@@ -21,7 +21,7 @@ export default function OurSponsor() {
   return (
     <section className="bg-white py-16 border-gray-100 border-y overflow-hidden">
       <div className="mx-auto px-6 max-w-7xl">
-        <p className="mb-12 font-bold text-gray-400 text-xs text-center uppercase tracking-[0.4em]">
+        <p className="mb-12 font-bold text-[10px] text-gray-400 text-center uppercase tracking-[0.4em]">
           Trusted by Industry Leaders
         </p>
 
@@ -30,7 +30,7 @@ export default function OurSponsor() {
           spaceBetween={40}
           slidesPerView={2}
           loop={true}
-          speed={6000} 
+          speed={6000}
           freeMode={true}
           allowTouchMove={false}
           autoplay={{
@@ -45,20 +45,18 @@ export default function OurSponsor() {
           className="flex items-center sponsor-swiper"
         >
           {sponsors.map((sponsor) => (
-            
-            sponsor.img && (
-              <SwiperSlide key={sponsor.id} className="flex justify-center items-center">
-                <div className="relative w-32 md:w-40 h-14 md:h-20 transition-all duration-500">
-                  {/* <img
-                    src={sponsor.img}
-                    alt={`Partner Logo ${sponsor.id}`}
-                    fill
-                    sizes="(max-width: 768px) 120px, 200px"
-                    className="opacity-40 hover:opacity-100 brightness-110 grayscale hover:grayscale-0 object-contain transition-all duration-700"
-                  /> */}
-                </div>
-              </SwiperSlide>
-            )
+            <SwiperSlide key={sponsor.id} className="flex justify-center items-center">
+              <div className="relative w-32 md:w-40 h-14 md:h-20 transition-all duration-500">
+                {/* Fixed Image Component */}
+                <Image
+                  src={sponsor.img}
+                  alt={`Partner Logo ${sponsor.id}`}
+                  fill
+                  sizes="(max-width: 768px) 120px, 200px"
+                  className="opacity-40 hover:opacity-100 brightness-110 grayscale hover:grayscale-0 object-contain transition-all duration-700"
+                />
+              </div>
+            </SwiperSlide>
           ))}
         </Swiper>
       </div>
