@@ -9,7 +9,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { FaUser, FaLock, FaPaw } from "react-icons/fa";
 import { SocialButtons } from "./Socialform";
 
-const LoginForm = ({ isModal, closeModal, switchToRegister }) => {
+const LoginForm = ({ isModal, closeModal, switchToRegister, onClose }) => {
   const params = useSearchParams();
   const router = useRouter();
   const callback = params.get("callbackUrl") || "/";
@@ -82,7 +82,7 @@ const LoginForm = ({ isModal, closeModal, switchToRegister }) => {
           </div>
 
           <div className="flex justify-end">
-            <Link
+            <Link onClick={onClose}
               href="/forgot-password"
               className="text-xs text-accent hover:text-primary transition-colors"
             >
