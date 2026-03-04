@@ -26,7 +26,8 @@ const AuthButtons = () => {
 
       <AuthModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         {view === "login" ? (
-          <LoginForm 
+          <LoginForm
+            onClose={() => setIsModalOpen(false)}
             isModal={true} 
             closeModal={() => setIsModalOpen(false)} 
             switchToRegister={() => setView("register")} 
