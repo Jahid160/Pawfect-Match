@@ -130,7 +130,7 @@ export const RegisterForm = ({ isModal, closeModal, switchToLogin }) => {
               className="h-11 w-full rounded-lg bg-primary text-sm font-semibold text-white shadow-md 
             hover:opacity-90 active:scale-[0.98] transition-all"
             >
-              Register
+              Register Now
             </button>
           </form>
 
