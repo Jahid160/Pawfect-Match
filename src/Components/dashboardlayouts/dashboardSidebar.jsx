@@ -52,7 +52,7 @@ const DashboardSidebar = () => {
       {/* --- MOBILE HAMBURGER BUTTON --- */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-orange-400 text-white rounded-md shadow-lg"
+        className="lg:hidden top-4 left-4 z-[100] fixed bg-orange-400 shadow-lg p-2 rounded-md text-white"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -60,7 +60,7 @@ const DashboardSidebar = () => {
       {/* --- MOBILE OVERLAY --- */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-[80] lg:hidden"
+          className="lg:hidden z-[80] fixed inset-0 bg-black/50"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -74,21 +74,20 @@ const DashboardSidebar = () => {
       `}>
         
         {/* --- LOGO SECTION --- */}
-        <div className="py-6 mb-2 border-b border-orange-300/50">
-          <Link href="/" className="flex items-center justify-center">
-            <Logo />
-          </Link>
+        <div className="mb-2 py-6 border-orange-300/50 border-b">
+        <Logo />
+          
         </div>
 
         {/* TOP SECTION / NAV ITEMS */}
-        <div className="flex flex-col gap-1 flex-grow overflow-y-auto scrollbar-hide pt-4">
+        <div className="flex flex-col flex-grow gap-1 pt-4 overflow-y-auto scrollbar-hide">
           <Link 
             href="/dashboard" 
             onClick={() => setIsOpen(false)}
             className={`${getLinkStyle("/dashboard")} mb-4`}
           >
             <LayoutDashboard className={getIconStyle("/dashboard")} />
-            <span className="text-sm uppercase tracking-wider font-bold">Dashboard</span>
+            <span className="font-bold text-sm uppercase tracking-wider">Dashboard</span>
           </Link>
 
           <nav className="flex flex-col gap-1">
@@ -107,7 +106,7 @@ const DashboardSidebar = () => {
         </div>
 
         {/* BOTTOM SECTION */}
-        <div className="flex flex-col gap-1 border-t border-orange-300 pt-4 mt-4">
+        <div className="flex flex-col gap-1 mt-4 pt-4 border-orange-300 border-t">
           {bottomNavItems.map((item) => (
             <Link 
               key={item.href} 
