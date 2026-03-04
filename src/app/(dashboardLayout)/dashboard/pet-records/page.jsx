@@ -1,10 +1,10 @@
-import ManagePets from '@/components/dashboardlayouts/ManagePets';
+import PetRecords from '@/components/dashboardlayouts/PetRecords';
 import React from 'react';
 
 const page = () => {
   return (
     <div>
-      <ManagePets></ManagePets>
+      <PetRecords></PetRecords>
     </div>
   );
 };
