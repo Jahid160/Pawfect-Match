@@ -17,7 +17,7 @@ const RecentPets = async () => {
     return (
         <section className="bg-white py-24">
             <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-                
+
                 {/* Section Header */}
                 <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-6 mb-16">
                     <div className="max-w-2xl">
@@ -25,13 +25,13 @@ const RecentPets = async () => {
                             New Arrivals
                         </div>
                         <h2 className="font-black text-gray-900 text-5xl md:text-6xl leading-[1.1] tracking-tighter">
-                            Recent <span className="text-orange-500">Friends</span> <br /> 
+                            Recent <span className="text-orange-500">Friends</span> <br />
                             Waiting for Home
                         </h2>
                     </div>
-                    
-                    <Link 
-                        href="/all-pets" 
+
+                    <Link
+                        href="/all-pets"
                         className="group flex items-center gap-3 bg-orange-600 hover:bg-gray-900 shadow-gray-200 shadow-xl px-8 py-4 rounded-2xl font-bold text-white transition-all duration-300"
                     >
                         View All Pets
