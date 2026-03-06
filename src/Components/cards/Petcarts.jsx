@@ -11,11 +11,11 @@ export const PetCard = ({ pet }) => {
 
   return (
     <div className="group relative flex flex-col bg-white shadow-md hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all hover:-translate-y-2 duration-500">
-      
+
       {/* Image Section */}
-      <div className="relative bg-gray-200 w-full h-72 overflow-hidden">
+      <div className="relative bg-gray-100 w-full h-72 overflow-hidden">
         <Image
-          src={pet.images?.primary || pet.image || "/placeholder.jpg"}
+          src={pet.images?.primary || pet.image || "https://placehold.co/600x400?text=No+Image"}
           alt={pet.name || "Pet"}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -29,11 +29,6 @@ export const PetCard = ({ pet }) => {
           {pet.species || pet.category || "Pet"}
         </div>
 
-        {/* Wishlist Icon */}
-        <button className="top-4 right-4 z-10 absolute bg-white/80 hover:bg-white shadow-md backdrop-blur-md p-2.5 rounded-full text-gray-400 hover:text-red-500 active:scale-95 transition-all">
-          <FaHeart size={18} />
-        </button>
-
         {/* Gender Tag */}
         <div className="bottom-4 left-4 absolute flex items-center gap-1.5 bg-orange-500 shadow-lg px-3 py-1 rounded-lg font-bold text-white text-xs">
           <FaVenusMars size={12} />
@@ -44,15 +39,15 @@ export const PetCard = ({ pet }) => {
       {/* Content Section */}
       <div className="flex flex-col flex-1 p-6">
         <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="max-w-[150px] font-bold text-gray-800 group-hover:text-orange-600 text-2xl truncate transition-colors">
+          <div className="flex-1">
+            <h3 className="font-bold text-gray-800 group-hover:text-orange-600 text-2xl truncate transition-colors">
               {pet.name}
             </h3>
-            <p className="max-w-[150px] font-medium text-gray-400 text-sm truncate italic">
+            <p className="font-medium text-gray-400 text-sm truncate italic">
               {pet.breed || "Mixed Breed"}
             </p>
           </div>
-          <div className={`px-2.5 py-1 rounded-md font-bold text-[10px] uppercase ${pet.status === 'Available' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+          <div className={`shrink-0 px-2.5 py-1 rounded-md font-bold text-[10px] uppercase ${pet.status === 'Available' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
             {pet.status || "Available"}
           </div>
         </div>
@@ -64,13 +59,13 @@ export const PetCard = ({ pet }) => {
           </div>
           <div className="flex items-center gap-1.5 text-gray-500 text-xs">
             <FaMapMarkerAlt className="text-orange-400" />
-            <span className="max-w-[120px] font-semibold truncate">{pet.location || "Not specified"}</span>
+            <span className="max-w-[100px] font-semibold truncate">{pet.location || "Not specified"}</span>
           </div>
         </div>
 
         {/* Action Footer */}
         <div className="flex justify-between items-center mt-auto pt-5 border-gray-100 border-t">
-          <Link href={`/pet-details/${petId}`} className="font-black text-[11px] text-gray-400 group-hover:text-orange-600 uppercase tracking-[2px] transition-all">
+          <Link href={`/all-pets/${petId}`} className="font-black text-[11px] text-gray-400 group-hover:text-orange-600 uppercase tracking-[2px] transition-all">
             Meet {pet.name}
           </Link>
           <Link
@@ -91,29 +86,26 @@ const Petcarts = ({ pets = [] }) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("Newest");
 
-  // Filter & Sort Logic
   const filteredPets = useMemo(() => {
-    let result = [...pets];
+    let result = Array.isArray(pets) ? [...pets] : [];
 
-    // Search filter
     if (searchQuery) {
-      result = result.filter(pet => 
+      result = result.filter(pet =>
         pet.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pet.breed?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Category filter
     if (selectedCategory !== "All") {
-      result = result.filter(pet => 
+      result = result.filter(pet =>
         (pet.species || pet.category)?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
-    // Sort logic
     if (sortBy === "A-Z") {
-      result.sort((a, b) => a.name.localeCompare(b.name));
+      result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     } else if (sortBy === "Age") {
+      // Age sorting logic (assuming age is a string like "2 Mo" or number)
       result.sort((a, b) => parseFloat(a.age) - parseFloat(b.age));
     }
 
@@ -123,8 +115,7 @@ const Petcarts = ({ pets = [] }) => {
   const categories = ["All", "Dog", "Cat", "Bird", "Rabbit"];
 
   return (
-    <div className="bg-gray-50 px-4 sm:px-8 py-24 min-h-screen">
-      
+    <div className="bg-gray-50 px-4 sm:px-8 py-24 min-h-screen font-sans">
       {/* Header section */}
       <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-8 mx-auto mb-16 max-w-7xl">
         <div className="max-w-2xl">
@@ -132,7 +123,7 @@ const Petcarts = ({ pets = [] }) => {
             <span className="bg-orange-500 rounded-full w-2 h-2 animate-pulse"></span>
             Waiting for Home
           </div>
-          <h2 className="font-extrabold text-gray-900 text-5xl lg:text-7xl leading-[1] tracking-tighter">
+          <h2 className="font-extrabold text-gray-900 text-5xl lg:text-7xl leading-[1.1] tracking-tighter">
             Adopt a <span className="inline-block relative">
               Friend
               <svg className="-bottom-2 left-0 -z-10 absolute w-full h-4 text-orange-300" viewBox="0 0 100 12" preserveAspectRatio="none">
@@ -141,8 +132,7 @@ const Petcarts = ({ pets = [] }) => {
             </span>
           </h2>
         </div>
-
-        <div className="flex flex-col items-start md:items-end gap-6 max-w-md">
+        <div className="max-w-md">
           <p className="text-gray-500 text-lg text-start md:text-end italic leading-relaxed">
             "Every paw leaves a footprint in our hearts. Browse our gallery of loving pets waiting for you."
           </p>
@@ -152,12 +142,10 @@ const Petcarts = ({ pets = [] }) => {
       {/* Filter Bar */}
       <div className="bg-white shadow-sm hover:shadow-md mx-auto mb-12 p-4 lg:p-6 border border-gray-100 rounded-[2rem] max-w-7xl transition-shadow duration-300">
         <div className="flex lg:flex-row flex-col items-center gap-6">
-          
-          {/* Search */}
           <div className="relative flex-1 w-full">
-            <input 
-              type="text" 
-              placeholder="Search by name or breed..." 
+            <input
+              type="text"
+              placeholder="Search by name or breed..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-gray-50/50 py-4 pr-4 pl-12 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full transition-all"
@@ -165,28 +153,25 @@ const Petcarts = ({ pets = [] }) => {
             <FaSearch className="top-1/2 left-4 absolute text-gray-400 -translate-y-1/2" />
           </div>
 
-          {/* Categories */}
           <div className="flex flex-wrap justify-center gap-2">
             {categories.map((cat) => (
-              <button 
+              <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${
-                  selectedCategory === cat 
-                  ? "bg-orange-500 text-white shadow-lg shadow-orange-200" 
+                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${selectedCategory === cat
+                  ? "bg-orange-500 text-white shadow-lg shadow-orange-200"
                   : "bg-gray-50 text-gray-500 hover:bg-orange-50 hover:text-orange-600"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
             ))}
           </div>
 
-          {/* Sort */}
-          <select 
+          <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="bg-gray-50/50 px-6 py-4 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full lg:w-48 font-bold text-gray-600 text-sm"
+            className="bg-gray-50/50 px-6 py-4 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full lg:w-48 font-bold text-gray-600 text-sm appearance-none"
           >
             <option value="Newest">Newest First</option>
             <option value="A-Z">Name: A to Z</option>
@@ -204,7 +189,7 @@ const Petcarts = ({ pets = [] }) => {
         ) : (
           <div className="col-span-full py-20 text-center">
             <div className="flex justify-center mb-4">
-               <FaPaw className="opacity-20 text-gray-400 text-7xl animate-bounce" />
+              <FaPaw className="opacity-20 text-gray-400 text-7xl animate-bounce" />
             </div>
             <h3 className="font-bold text-gray-800 text-xl">No matching furry friends found</h3>
             <p className="text-gray-400 italic">Try adjusting your filters or search terms.</p>

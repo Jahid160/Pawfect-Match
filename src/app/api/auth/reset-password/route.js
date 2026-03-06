@@ -7,20 +7,31 @@ export async function POST(req) {
   try {
     const usersCollection = await dbConnect(collections.USERS);
 
-    const user = await usersCollection.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() },
-    });
+    // const user = await usersCollection.findOne({
+    //   resetToken: token,
+    //   resetTokenExpiry: { $gt: Date.now() },
+    // });
+
+const user = await usersCollection.findOne({
+  resetToken: token,
+  resetTokenExpiry: { $gt: new Date() }, // Use Date object for MongoDB comparison
+});
 
     if (!user) {
-      return Response.json({ message: "Invalid or expired token" }, { status: 400 });
+      return Response.json(
+        { message: "Invalid or expired token" },
+        { status: 400 },
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await usersCollection.updateOne(
       { resetToken: token },
-      { $set: { password: hashedPassword }, $unset: { resetToken: "", resetTokenExpiry: "" } }
+      {
+        $set: { password: hashedPassword },
+        $unset: { resetToken: "", resetTokenExpiry: "" },
+      },
     );
 
     return Response.json({ message: "Password reset successful" });

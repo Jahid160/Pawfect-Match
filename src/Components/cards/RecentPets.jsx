@@ -7,8 +7,7 @@ const RecentPets = async () => {
     let pets = [];
     try {
         const allPets = await getPets();
-        // Replace line 10 with this:
-        pets = Array.isArray(allPets) ? allPets.slice(0, 8) : [];
+        pets = Array.isArray(allPets) ? allPets.slice(0, 8) : []; 
     } catch (error) {
         console.error("Recent pets fetch error:", error);
     }

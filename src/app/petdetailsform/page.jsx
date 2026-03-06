@@ -1,4 +1,4 @@
-import PetDetailsForm from "@/Components/Form/PetDetailsForm";
+import PetDetailsForm from "@/components/Form/PetDetailsForm";
 import React from "react";
 
 const page = () => {
