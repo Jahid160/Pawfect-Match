@@ -98,18 +98,18 @@ export default function ShelterApplicationForm() {
             >
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${step.id < currentStep
-                    ? "bg-primary text-primary-content shadow-md"
-                    : step.id === currentStep
-                      ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
-                      : "bg-base-100 text-base-content/40 border-2 border-base-300"
+                  ? "bg-primary text-primary-content shadow-md"
+                  : step.id === currentStep
+                    ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
+                    : "bg-base-100 text-base-content/40 border-2 border-base-300"
                   }`}
               >
                 {step.id < currentStep ? "✓" : step.icon}
               </div>
               <span
                 className={`text-xs font-medium hidden sm:block ${step.id === currentStep
-                    ? "text-primary"
-                    : "text-base-content/50"
+                  ? "text-primary"
+                  : "text-base-content/50"
                   }`}
               >
                 {step.title}
