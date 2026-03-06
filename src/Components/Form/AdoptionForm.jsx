@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from 'next/link'
 import {
   User,
   Home,
@@ -477,16 +478,16 @@ const AdoptionForm = () => {
               <h3 className="text-4xl font-black text-slate-800 mb-4">
                 Application Sent!
               </h3>
-              <p className="text-slate-500 text-lg">
+              <p className="text-slate-500 text-lg mb-6 italic">
                 Thank you, {formData.fullName}. We will evaluate your profile
                 and contact you within 48 hours.
               </p>
-              <button
-                onClick={() => window.location.reload()}
+              <Link
+                href="/"
                 className="mt-10 px-8 py-4 bg-slate-800 text-white rounded-2xl font-bold"
               >
                 Return Home
-              </button>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>

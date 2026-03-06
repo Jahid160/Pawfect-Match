@@ -136,11 +136,9 @@ export default function PetAdoptionForm() {
     medicalHistory: "",
     specialNeeds: "",
     goodWithKids: "",
-    goodWithPets: "",
     activityLevel: "",
     indoorOutdoor: "",
     houseTrained: "",
-    basicCommands: "",
     reasonForAdoption: "",
     timeWithOwner: "",
     adoptionFee: "",
@@ -222,6 +220,7 @@ export default function PetAdoptionForm() {
           title: "Pet Listed!",
           text: "Your pet has been successfully listed for adoption.",
         });
+        setSubmitted(true);
       } else {
         Swal.fire({
           icon: "error",
@@ -1049,7 +1048,7 @@ export default function PetAdoptionForm() {
 
           {currentStep < steps.length ? (
             <button
-              type="submit"
+              type="button"
               onClick={() =>
                 setCurrentStep((s) => Math.min(steps.length, s + 1))
               }

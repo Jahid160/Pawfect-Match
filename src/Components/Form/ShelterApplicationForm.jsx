@@ -70,7 +70,7 @@ export default function ShelterApplicationForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+
 
 
     try {
