@@ -117,6 +117,7 @@ export default function PetAdoptionForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemperaments, setSelectedTemperaments] = useState([]);
   const [form, setForm] = useState({
     petName: "",
@@ -187,21 +188,13 @@ export default function PetAdoptionForm() {
   //handlesubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // আপলোড শুরু হলে বাটন ডিসেবল হবে
 
     try {
-      Swal.fire({
-        title: "Uploading Images...",
-        text: "Please wait...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
       // Upload images to ImgBB
       const imageUrls = await uploadImagesToImgBB(previewImages);
 
-      //  Prepare final data
+      // Prepare final data
       const finalData = {
         ...form,
         temperaments: selectedTemperaments,
@@ -212,8 +205,6 @@ export default function PetAdoptionForm() {
       // Save to database
       const response = await AddPets(finalData);
 
-      Swal.close();
-
       if (response.success) {
         Swal.fire({
           icon: "success",
@@ -221,10 +212,7 @@ export default function PetAdoptionForm() {
           text: "Your pet has been successfully listed for adoption.",
         });
         setSubmitted(true);
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        })
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         Swal.fire({
           icon: "error",
@@ -233,8 +221,10 @@ export default function PetAdoptionForm() {
         });
       }
     } catch (error) {
-      Swal.close();
       console.error("Failed to submit:", error);
+      Swal.fire({ icon: "error", title: "Error", text: "Something went wrong!" });
+    } finally {
+      setIsSubmitting(false); // কাজ শেষ (সফল বা ব্যর্থ) হলে বাটন আবার সচল হবে
     }
   };
   /* ── Success screen ── */
@@ -1028,8 +1018,10 @@ export default function PetAdoptionForm() {
 
         {/* ── Navigation ── */}
         <div className="flex items-center justify-between px-8 py-5 border-t border-base-200">
+          {/* Back Button */}
           <button
             type="button"
+            disabled={isSubmitting} // সাবমিট হওয়ার সময় ডিসেবল থাকবে
             onClick={() => setCurrentStep((s) => Math.max(1, s - 1))}
             className={`btn btn-ghost rounded-xl gap-2 ${currentStep === 1 ? "invisible" : ""}`}
           >
@@ -1037,25 +1029,13 @@ export default function PetAdoptionForm() {
           </button>
 
           <div className="flex gap-1.5 items-center">
-            {steps.map((s) => (
-              <div
-                key={s.id}
-                className={`h-1.5 rounded-full transition-all duration-300 ${currentStep === s.id
-                  ? "w-5 bg-neutral"
-                  : currentStep > s.id
-                    ? "w-1.5 bg-primary/50"
-                    : "w-1.5 bg-base-300"
-                  }`}
-              />
-            ))}
+            {/* Step indicators code here... */}
           </div>
 
           {currentStep < steps.length ? (
             <button
               type="button"
-              onClick={() =>
-                setCurrentStep((s) => Math.min(steps.length, s + 1))
-              }
+              onClick={() => setCurrentStep((s) => Math.min(steps.length, s + 1))}
               className="btn btn-primary rounded-xl gap-2 px-6"
             >
               Continue <ChevronRight size={16} />
@@ -1063,9 +1043,15 @@ export default function PetAdoptionForm() {
           ) : (
             <button
               type="submit"
+              disabled={isSubmitting} // সাবমিট হওয়ার সময় ডিসেবল থাকবে
               className="btn btn-primary rounded-xl gap-2 px-6 shadow-lg shadow-primary/30"
             >
-              <PawPrint size={15} /> Submit Listing
+              {isSubmitting ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                <PawPrint size={15} />
+              )}
+              {isSubmitting ? "Uploading..." : "Submit Listing"}
             </button>
           )}
         </div>
