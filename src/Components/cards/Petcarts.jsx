@@ -11,7 +11,7 @@ export const PetCard = ({ pet }) => {
 
   return (
     <div className="group relative flex flex-col bg-white shadow-md hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all hover:-translate-y-2 duration-500">
-      
+
       {/* Image Section */}
       <div className="relative bg-gray-100 w-full h-72 overflow-hidden">
         <Image
@@ -90,14 +90,14 @@ const Petcarts = ({ pets = [] }) => {
     let result = Array.isArray(pets) ? [...pets] : [];
 
     if (searchQuery) {
-      result = result.filter(pet => 
+      result = result.filter(pet =>
         pet.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pet.breed?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     if (selectedCategory !== "All") {
-      result = result.filter(pet => 
+      result = result.filter(pet =>
         (pet.species || pet.category)?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
@@ -143,9 +143,9 @@ const Petcarts = ({ pets = [] }) => {
       <div className="bg-white shadow-sm hover:shadow-md mx-auto mb-12 p-4 lg:p-6 border border-gray-100 rounded-[2rem] max-w-7xl transition-shadow duration-300">
         <div className="flex lg:flex-row flex-col items-center gap-6">
           <div className="relative flex-1 w-full">
-            <input 
-              type="text" 
-              placeholder="Search by name or breed..." 
+            <input
+              type="text"
+              placeholder="Search by name or breed..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-gray-50/50 py-4 pr-4 pl-12 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full transition-all"
@@ -155,21 +155,20 @@ const Petcarts = ({ pets = [] }) => {
 
           <div className="flex flex-wrap justify-center gap-2">
             {categories.map((cat) => (
-              <button 
+              <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${
-                  selectedCategory === cat 
-                  ? "bg-orange-500 text-white shadow-lg shadow-orange-200" 
+                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${selectedCategory === cat
+                  ? "bg-orange-500 text-white shadow-lg shadow-orange-200"
                   : "bg-gray-50 text-gray-500 hover:bg-orange-50 hover:text-orange-600"
-                }`}
+                  }`}
               >
                 {cat}
               </button>
             ))}
           </div>
 
-          <select 
+          <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="bg-gray-50/50 px-6 py-4 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-full lg:w-48 font-bold text-gray-600 text-sm appearance-none"
@@ -190,7 +189,7 @@ const Petcarts = ({ pets = [] }) => {
         ) : (
           <div className="col-span-full py-20 text-center">
             <div className="flex justify-center mb-4">
-               <FaPaw className="opacity-20 text-gray-400 text-7xl animate-bounce" />
+              <FaPaw className="opacity-20 text-gray-400 text-7xl animate-bounce" />
             </div>
             <h3 className="font-bold text-gray-800 text-xl">No matching furry friends found</h3>
             <p className="text-gray-400 italic">Try adjusting your filters or search terms.</p>
