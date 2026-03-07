@@ -1,4 +1,5 @@
-import DashboardNavbar from "@/Components/dashboardlayouts/DashboardNavbar";
+
+import DashboardNavbar from "@/components/dashboardlayouts/DashboardNavbar";
 import DashboardSidebar from "@/components/dashboardlayouts/dashboardSidebar";
 import React from "react";
 

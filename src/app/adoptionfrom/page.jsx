@@ -1,4 +1,4 @@
-import AdoptionForm from "@/Components/Form/AdoptionForm";
+import AdoptionForm from "@/components/Form/AdoptionForm";
 import React from "react";
 
 const page = () => {

@@ -1,10 +1,10 @@
-import PetDetailsForm from "@/components/Form/PetDetailsForm";
+import AddFoodForm from "@/Components/Form/AddFoodForm";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <PetDetailsForm></PetDetailsForm>
+      <AddFoodForm></AddFoodForm>
     </div>
   );
 };
