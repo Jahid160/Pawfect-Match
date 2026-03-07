@@ -50,7 +50,7 @@ export default function ShelterApplicationForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // 👈 আপলোড শুরু হওয়ার আগে loading true করুন
+    setLoading(true); //  after upload set loading
 
     try {
       const uploadToCloudinary = async (file) => {
@@ -58,15 +58,16 @@ export default function ShelterApplicationForm() {
         const data = new FormData();
         data.append("file", file);
         data.append("upload_preset", "paw_fect_preset");
+        data.append("cloud_name", "dyb72qpqm");
 
         const res = await fetch(
-          `https://api.cloudinary.com/v1_1/dyb72qpqm/auto/upload`, // সরাসরি cloud name বসিয়ে দিলাম
+          `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, // cloudName use 
           { method: "POST", body: data }
         );
         const fileData = await res.json();
         return fileData.secure_url;
       };
-
+      //upload files to cloudinary and get back the URLs
       const nidUrl = await uploadToCloudinary(formData.nidPhoto);
       const shelterUrl = await uploadToCloudinary(formData.shelterPhoto);
       const certUrl = formData.registrationCert ? await uploadToCloudinary(formData.registrationCert) : null;
@@ -80,6 +81,7 @@ export default function ShelterApplicationForm() {
         status: "pending"
       };
 
+      //server action call to save application data in database
       const response = await createShelterUser(finalData);
 
       if (response.success) {
@@ -93,7 +95,7 @@ export default function ShelterApplicationForm() {
       console.error("Upload failed", err);
       Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong!' });
     } finally {
-      setLoading(false); // 👈 সব কাজ শেষ হলে (Success/Error) loading false হবে
+      setLoading(false); // after upload finishes (success or error), set loading to false
     }
   };
 
@@ -524,10 +526,12 @@ export default function ShelterApplicationForm() {
                     type="button"
                     className="btn btn-ghost flex-1"
                     onClick={prevStep}
+                    disabled={loading} //  loading time button disable
                   >
                     ← Previous
                   </button>
                 )}
+
                 {currentStep < 4 ? (
                   <button
                     type="button"
@@ -540,9 +544,16 @@ export default function ShelterApplicationForm() {
                   <button
                     type="submit"
                     className="btn btn-primary flex-1"
-                    disabled={!formData.agreeTerms}
+                    disabled={loading || !formData.agreeTerms} // after loading buttons disable
                   >
-                    🐾 Submit Application
+                    {loading ? (
+                      <>
+                        <span className="loading loading-spinner"></span>
+                        Submitting...
+                      </>
+                    ) : (
+                      "🐾 Submit Application"
+                    )}
                   </button>
                 )}
               </div>
