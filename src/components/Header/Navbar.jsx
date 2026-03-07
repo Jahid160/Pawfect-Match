@@ -59,6 +59,7 @@ const Navbar = () => {
         { name: "Adoption Form", href: "/adoptionfrom" },
         { name: "Shelter Application", href: "/shelterForm" },
         { name: "Pet Details", href: "/petdetailsform" },
+        { name: "Add Food", href: "/addFoodForms" },
       ],
     },
     { name: "Contact", href: "/contact" },
@@ -66,10 +67,11 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${isScrolled
-        ? "bg-white/80 backdrop-blur-lg shadow-sm h-16"
-        : "bg-white h-20"
-        }`}
+      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${
+        isScrolled
+          ? "bg-white/80 backdrop-blur-lg shadow-sm h-16"
+          : "bg-white h-20"
+      }`}
     >
       <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
         {/* Logo */}
@@ -92,8 +94,9 @@ const Navbar = () => {
                     <div
                       tabIndex={0}
                       role="button"
-                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                        }`}
+                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                        isActive ? "text-orange-500" : "text-slate-700"
+                      }`}
                     >
                       {link.name}
                       <ChevronDown
@@ -121,8 +124,9 @@ const Navbar = () => {
                 ) : (
                   <Link
                     href={link.href}
-                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                      }`}
+                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                      isActive ? "text-orange-500" : "text-slate-700"
+                    }`}
                   >
                     {link.name}
                     {isActive && (
@@ -228,14 +232,16 @@ const Navbar = () => {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] lg:hidden transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] lg:hidden transition-opacity duration-300 ${
+          isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsMenuOpen(false)}
       />
 
       <div
-        className={`fixed top-0 left-0 w-[80%] max-w-sm h-full bg-white z-[120] lg:hidden transition-transform duration-500 ease-out shadow-2xl ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 w-[80%] max-w-sm h-full bg-white z-[120] lg:hidden transition-transform duration-500 ease-out shadow-2xl ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="p-6">
           <Logo />
