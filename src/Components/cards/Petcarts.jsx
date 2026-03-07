@@ -65,11 +65,11 @@ export const PetCard = ({ pet }) => {
 
         {/* Action Footer */}
         <div className="flex justify-between items-center mt-auto pt-5 border-gray-100 border-t">
-          <Link href={`/pet-details/${petId}`} className="font-black text-[11px] text-gray-400 group-hover:text-orange-600 uppercase tracking-[2px] transition-all">
+          <Link href={`/all-pets/${petId}`} className="font-black text-[11px] text-gray-400 group-hover:text-orange-600 uppercase tracking-[2px] transition-all">
             Meet {pet.name}
           </Link>
           <Link
-            href={`/pet-details/${petId}`}
+            href={`/all-pets/${petId}`}
             className="flex justify-center items-center bg-gray-100 group-hover:bg-orange-500 rounded-xl w-10 h-10 text-gray-400 group-hover:text-white transition-all group-hover:translate-x-1 duration-300"
           >
             <FaLongArrowAltRight size={20} />
