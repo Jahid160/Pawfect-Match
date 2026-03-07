@@ -1,5 +1,7 @@
 "use client";
+import { createShelterUser } from "@/action/server/Shelteruser";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const steps = [
   { id: 1, title: "Personal Info", icon: "👤" },
@@ -11,6 +13,7 @@ const steps = [
 export default function ShelterApplicationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -42,10 +45,62 @@ export default function ShelterApplicationForm() {
   const nextStep = () => setCurrentStep((s) => Math.min(s + 1, 4));
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = (e) => {
+
+  const cloudName = "dyb72qpqm"
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true); //  after upload set loading
+
+    try {
+      const uploadToCloudinary = async (file) => {
+        if (!file) return null;
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "paw_fect_preset");
+        data.append("cloud_name", "dyb72qpqm");
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, // cloudName use 
+          { method: "POST", body: data }
+        );
+        const fileData = await res.json();
+        return fileData.secure_url;
+      };
+      //upload files to cloudinary and get back the URLs
+      const nidUrl = await uploadToCloudinary(formData.nidPhoto);
+      const shelterUrl = await uploadToCloudinary(formData.shelterPhoto);
+      const certUrl = formData.registrationCert ? await uploadToCloudinary(formData.registrationCert) : null;
+
+      const finalData = {
+        ...formData,
+        nidPhoto: nidUrl,
+        shelterPhoto: shelterUrl,
+        registrationCert: certUrl,
+        submittedAt: new Date().toISOString(),
+        status: "pending"
+      };
+
+      //server action call to save application data in database
+      const response = await createShelterUser(finalData);
+
+      if (response.success) {
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        Swal.fire({ icon: 'error', title: 'Submission Failed', text: response.message });
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong!' });
+    } finally {
+      setLoading(false); // after upload finishes (success or error), set loading to false
+    }
   };
+
+
+
+
 
   if (submitted) {
     return (
@@ -470,10 +525,12 @@ export default function ShelterApplicationForm() {
                     type="button"
                     className="btn btn-ghost flex-1"
                     onClick={prevStep}
+                    disabled={loading} //  loading time button disable
                   >
                     ← Previous
                   </button>
                 )}
+
                 {currentStep < 4 ? (
                   <button
                     type="button"
@@ -486,9 +543,16 @@ export default function ShelterApplicationForm() {
                   <button
                     type="submit"
                     className="btn btn-primary flex-1"
-                    disabled={!formData.agreeTerms}
+                    disabled={loading || !formData.agreeTerms} // after loading buttons disable
                   >
-                    🐾 Submit Application
+                    {loading ? (
+                      <>
+                        <span className="loading loading-spinner"></span>
+                        Submitting...
+                      </>
+                    ) : (
+                      "🐾 Submit Application"
+                    )}
                   </button>
                 )}
               </div>
