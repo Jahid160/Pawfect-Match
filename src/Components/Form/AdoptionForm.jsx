@@ -84,12 +84,7 @@ const AdoptionForm = () => {
 
       if (response) {
         setIsCompleted(true);
-        Swal.fire({
-          title: "Successfully Submitted! 🐾",
-          text: "Our team will review your capability assessment soon.",
-          icon: "success",
-          confirmButtonColor: "#f97316",
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       Swal.fire({

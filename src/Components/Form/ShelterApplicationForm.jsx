@@ -86,7 +86,6 @@ export default function ShelterApplicationForm() {
 
       if (response.success) {
         setSubmitted(true);
-        Swal.fire({ icon: 'success', title: 'Application Submitted' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         Swal.fire({ icon: 'error', title: 'Submission Failed', text: response.message });

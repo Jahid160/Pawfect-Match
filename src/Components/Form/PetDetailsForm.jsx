@@ -206,11 +206,6 @@ export default function PetAdoptionForm() {
       const response = await AddPets(finalData);
 
       if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Pet Listed!",
-          text: "Your pet has been successfully listed for adoption.",
-        });
         setSubmitted(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
