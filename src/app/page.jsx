@@ -4,6 +4,7 @@ import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import Banner from "@/components/home/Banner";
 import FAQPage from "@/components/home/FAQPage";
 import HowItWorks from "@/components/home/HowItWorks";
+import InteractivePetFood from "@/components/home/InteractivePetFood";
 import Newsletter from "@/components/home/Newsletter";
 import OurSponsor from "@/components/home/OurSponsor";
 import PetCategories from "@/components/home/PetCategories";
@@ -21,14 +22,13 @@ const mainPage = () => {
         <RecentPets></RecentPets>
         <HowItWorks></HowItWorks>
         <ExpertSection></ExpertSection>
+        <InteractivePetFood></InteractivePetFood>
         <SuccessStories></SuccessStories>
         <OurSponsor></OurSponsor>
         <Newsletter></Newsletter>
       </section>
 
-      {/* <section>
-        <Petdetailscart></Petdetailscart>
-      </section> */}
+     
 
     </div>
   );
