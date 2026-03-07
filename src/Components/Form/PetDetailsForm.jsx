@@ -198,10 +198,10 @@ export default function PetAdoptionForm() {
         },
       });
 
-      // 🔥 1. Upload images to ImgBB
+      // Upload images to ImgBB
       const imageUrls = await uploadImagesToImgBB(previewImages);
 
-      // 🔥 2. Prepare final data
+      //  Prepare final data
       const finalData = {
         ...form,
         temperaments: selectedTemperaments,
@@ -209,7 +209,7 @@ export default function PetAdoptionForm() {
         createdAt: new Date(),
       };
 
-      // 🔥 3. Save to database
+      // Save to database
       const response = await AddPets(finalData);
 
       Swal.close();
@@ -221,6 +221,10 @@ export default function PetAdoptionForm() {
           text: "Your pet has been successfully listed for adoption.",
         });
         setSubmitted(true);
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        })
       } else {
         Swal.fire({
           icon: "error",

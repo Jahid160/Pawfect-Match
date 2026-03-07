@@ -13,6 +13,7 @@ const steps = [
 export default function ShelterApplicationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -45,78 +46,60 @@ export default function ShelterApplicationForm() {
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
 
-  const uploadImagesToImgBB = async (files) => {
-    const uploadedUrls = [];
-
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      // console.log("Upload response:", data);
-
-      if (data.success) {
-        uploadedUrls.push(data.url);
-      }
-    }
-
-    return uploadedUrls;
-  };
+  const cloudName = "dyb72qpqm"
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-
+    setLoading(true); // 👈 আপলোড শুরু হওয়ার আগে loading true করুন
 
     try {
-      Swal.fire({
-        title: "Uploading Images...",
-        text: "Please wait...",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+      const uploadToCloudinary = async (file) => {
+        if (!file) return null;
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "paw_fect_preset");
 
-      // 🔥 1. Upload images to ImgBB
-      const imageUrls = await uploadImagesToImgBB(previewImages);
-
-      // 🔥 2. Prepare final data
-      const finalData = {
-        ...formData,
-        temperaments: selectedTemperaments,
-        images: imageUrls,
-        createdAt: new Date(),
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/dyb72qpqm/auto/upload`, // সরাসরি cloud name বসিয়ে দিলাম
+          { method: "POST", body: data }
+        );
+        const fileData = await res.json();
+        return fileData.secure_url;
       };
 
-      //  3. Save to database
+      const nidUrl = await uploadToCloudinary(formData.nidPhoto);
+      const shelterUrl = await uploadToCloudinary(formData.shelterPhoto);
+      const certUrl = formData.registrationCert ? await uploadToCloudinary(formData.registrationCert) : null;
+
+      const finalData = {
+        ...formData,
+        nidPhoto: nidUrl,
+        shelterPhoto: shelterUrl,
+        registrationCert: certUrl,
+        submittedAt: new Date().toISOString(),
+        status: "pending"
+      };
+
       const response = await createShelterUser(finalData);
 
-      Swal.close();
-
       if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Application Submitted!",
-          text: "Your shelter role application has been submitted successfully.",
-        });
+        setSubmitted(true);
+        Swal.fire({ icon: 'success', title: 'Application Submitted' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed to Submit Application",
-          text: response.message || "An error occurred.",
-        });
+        Swal.fire({ icon: 'error', title: 'Submission Failed', text: response.message });
       }
-    } catch (error) {
-      Swal.close();
-      console.error("Failed to submit:", error);
+    } catch (err) {
+      console.error("Upload failed", err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong!' });
+    } finally {
+      setLoading(false); // 👈 সব কাজ শেষ হলে (Success/Error) loading false হবে
     }
   };
+
+
+
+
 
   if (submitted) {
     return (
