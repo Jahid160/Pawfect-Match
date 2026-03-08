@@ -10,6 +10,7 @@ export const collections = {
   PETS: 'pets',
   ADOPTIONS: 'adoptionsInfo',
   SHELTER: 'shelterInfo',
+  FOODS: 'foods'
 };
 
 const client = new MongoClient(uri, {
