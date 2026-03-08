@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from 'next/image'
-import { createFood } from "@/action/server/Foods";
 import Swal from "sweetalert2";
+import { createFood } from "@/action/server/foods";
 
 const PET_CATEGORIES = ["Dog", "Cat", "Bird", "Fish", "Rabbit", "Hamster", "Other"];
 const FOOD_TYPES = ["Dry Food", "Wet Food", "Raw Food", "Treats & Snacks", "Supplements", "Freeze-Dried"];
