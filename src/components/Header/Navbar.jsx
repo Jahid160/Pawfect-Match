@@ -32,10 +32,14 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
-  useEffect(() => {
+  // এই অংশটি মুছে ফেলুন (Delete this)
+  // useEffect(() => {
+  //   setIsMenuOpen(false);
+  // }, [pathname]);
+
+  const handleLinkClick = () => {
     setIsMenuOpen(false);
-  }, [pathname]);
+  };
 
   // Hide navbar inside dashboard pages (your logic)
   if (pathname.startsWith("/dashboard")) return null;
@@ -54,12 +58,11 @@ const Navbar = () => {
       ],
     },
     {
-      name: "Adoption ",
+      name: "Adoption",
       href: "/adoption",
       subLinks: [
         { name: "Adoption Form", href: "/adoptionfrom" },
         { name: "Shelter Application", href: "/shelterForm" },
-        { name: "Pet Details", href: "/petdetailsform" },
       ],
     },
     { name: "Contact", href: "/contact" },
@@ -243,7 +246,7 @@ const Navbar = () => {
         <div className="p-6">
           <Logo />
           <div className="space-y-4 mt-10">
-            {navLinks.map((link) => (
+            {/* {navLinks.map((link) => (
               <div key={link.name}>
                 <Link
                   href={link.href}
@@ -253,6 +256,15 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               </div>
+            ))} */}
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={handleLinkClick} // ক্লিক করলেই মেনু বন্ধ হবে
+              >
+                {link.name}
+              </Link>
             ))}
           </div>
 
