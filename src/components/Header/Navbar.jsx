@@ -53,12 +53,11 @@ const Navbar = () => {
       ],
     },
     {
-      name: "Forms",
-      href: "/forms",
+      name: "Adoption",
+      href: "/adoption",
       subLinks: [
         { name: "Adoption Form", href: "/adoptionfrom" },
         { name: "Shelter Application", href: "/shelterForm" },
-        { name: "Pet Details", href: "/petdetailsform" },
       ],
     },
     { name: "Contact", href: "/contact" },
