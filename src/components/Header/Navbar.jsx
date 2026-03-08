@@ -62,7 +62,9 @@ const Navbar = () => {
       href: "/adoption",
       subLinks: [
         { name: "Adoption Form", href: "/adoptionfrom" },
-        { name: "Shelter Application", href: "/shelterForm" },
+        { name: "Shelter Form ", href: "/shelterForm" },
+        { name: "Petdetails Form", href: "/petdetailsform" },
+        { name: "Foods  Form", href: "/addFoodForms" },
       ],
     },
     { name: "Contact", href: "/contact" },
