@@ -23,7 +23,8 @@ const Navbar = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  const user = session?.user; // ✅ this is your real user
+  const user = session?.user; // ✅ this is your real user\
+  console.log("Session Data:", session);
   const isLoggedIn = status === "authenticated";
 
   useEffect(() => {
@@ -32,10 +33,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // এই অংশটি মুছে ফেলুন (Delete this)
-  // useEffect(() => {
-  //   setIsMenuOpen(false);
-  // }, [pathname]);
+
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -61,12 +59,12 @@ const Navbar = () => {
       ],
     },
     {
-      name: "Adoption",
-      href: "/adoption",
+      name: "Forms",
+      href: "/forms",
       subLinks: [
         { name: "Adoption Form", href: "/adoptionfrom" },
         { name: "Shelter Form ", href: "/shelterForm" },
-        { name: "Petdetails Form", href: "/petdetailsform" },
+        { name: "Pet Entry Form", href: "/petdetailsform" },
         { name: "Foods  Form", href: "/addFoodForms" },
       ],
     },
@@ -251,17 +249,6 @@ const Navbar = () => {
         <div className="p-6">
           <Logo />
           <div className="space-y-4 mt-10">
-            {/* {navLinks.map((link) => (
-              <div key={link.name}>
-                <Link
-                  href={link.href}
-                  className="block py-2 font-black text-slate-800 hover:text-orange-500 text-lg transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              </div>
-            ))} */}
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -273,7 +260,7 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* ✅ Mobile dashboard link when logged in */}
+          {/*  Mobile dashboard link when logged in */}
           {isLoggedIn && (
             <div className="mt-6 pt-6 border-slate-100 border-t">
               <Link
