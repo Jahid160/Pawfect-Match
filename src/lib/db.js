@@ -8,7 +8,10 @@ const dbname = process.env.DBNAME;
 export const collections = {
   USERS: "users",
   PETS: 'pets',
-  ADOPTIONS: 'adoptionsInfo'
+  FOODS: 'foods',
+  ADOPTIONS: 'adoptionsInfo',
+  SHELTER: 'shelterInfo',
+  FOODS: 'foods'
 };
 
 const client = new MongoClient(uri, {
@@ -23,7 +26,7 @@ const client = new MongoClient(uri, {
 const setupIndices = async (db) => {
   try {
     await db.collection(collections.USERS).createIndex(
-      { email: 1 }, 
+      { email: 1 },
       { unique: true, name: "unique_email_idx" }
     );
     // console.log(" Database indices verified");

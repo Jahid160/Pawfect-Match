@@ -3,8 +3,10 @@ import RecentPets from "@/components/cards/RecentPets";
 import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import Banner from "@/components/home/Banner";
 import HowItWorks from "@/components/home/HowItWorks";
+import InteractivePetFood from "@/components/home/InteractivePetFood";
 import Newsletter from "@/components/home/Newsletter";
 import OurSponsor from "@/components/home/OurSponsor";
+import PetAccessoriesSection from "@/components/home/PetAccessoriesSection";
 import PetCategories from "@/components/home/PetCategories";
 import SuccessStories from "@/components/home/SuccessStories";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
@@ -20,14 +22,14 @@ const mainPage = () => {
         <RecentPets></RecentPets>
         <HowItWorks></HowItWorks>
         <ExpertSection></ExpertSection>
+        <InteractivePetFood></InteractivePetFood>
+        <PetAccessoriesSection></PetAccessoriesSection>
         <SuccessStories></SuccessStories>
         <OurSponsor></OurSponsor>
         <Newsletter></Newsletter>
       </section>
 
-      {/* <section>
-        <Petdetailscart></Petdetailscart>
-      </section> */}
+     
 
     </div>
   );
