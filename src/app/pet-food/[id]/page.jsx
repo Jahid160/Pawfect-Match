@@ -14,7 +14,9 @@ import {
 } from "react-icons/fa";
 
 const PetFoodDetailsPage = async ({ params }) => {
-  const food = await getSingleFood(params.id);
+  const { id } = await params;
+
+  const food = await getSingleFood(id);
 
   if (!food?._id) {
     return (
@@ -45,7 +47,7 @@ const PetFoodDetailsPage = async ({ params }) => {
     <main className="bg-base-200 px-4 sm:px-8 py-10 min-h-screen">
       <div className="mx-auto max-w-7xl">
         <Link
-          href="/petfoods"
+          href="/pet-food"
           className="inline-flex items-center gap-2 mb-8 font-bold text-primary hover:underline"
         >
           <FaArrowLeft />
@@ -71,7 +73,7 @@ const PetFoodDetailsPage = async ({ params }) => {
               alt={food.productName || "Pet Food"}
               width={700}
               height={700}
-              className={`object-contain p-8 max-h-[500px] w-auto h-auto ${
+              className={`object-contain p-8 max-h-[500px] w-auto  ${
                 isOutOfStock ? "grayscale opacity-70" : ""
               }`}
             />
@@ -242,7 +244,7 @@ const PetFoodDetailsPage = async ({ params }) => {
               </button>
 
               <Link
-                href="/petfoods"
+                href="/pet-food"
                 className="inline-flex items-center gap-3 bg-neutral hover:bg-neutral/90 px-8 py-4 rounded-2xl font-black text-white text-sm uppercase tracking-widest transition active:scale-95"
               >
                 Continue Shopping
