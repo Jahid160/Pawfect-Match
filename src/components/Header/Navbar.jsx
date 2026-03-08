@@ -14,6 +14,7 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
 import Logo from "./Logo";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -31,10 +32,14 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
-  useEffect(() => {
+  // এই অংশটি মুছে ফেলুন (Delete this)
+  // useEffect(() => {
+  //   setIsMenuOpen(false);
+  // }, [pathname]);
+
+  const handleLinkClick = () => {
     setIsMenuOpen(false);
-  }, [pathname]);
+  };
 
   // Hide navbar inside dashboard pages (your logic)
   if (pathname.startsWith("/dashboard")) return null;
@@ -68,14 +73,14 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${isScrolled
+      className={`fixed top-0 left-0 w-full z-100 transition-all duration-500 ${isScrolled
         ? "bg-white/80 backdrop-blur-lg shadow-sm h-16"
         : "bg-white h-20"
         }`}
     >
       <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
         {/* Logo */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Logo />
         </div>
 
@@ -106,7 +111,7 @@ const Navbar = () => {
 
                     <ul
                       tabIndex={0}
-                      className="z-[1] bg-white slide-in-from-top-2 shadow-xl p-3 border border-slate-50 rounded-2xl w-52 animate-in dropdown-content menu fade-in"
+                      className="z-1 bg-white slide-in-from-top-2 shadow-xl p-3 border border-slate-50 rounded-2xl w-52 animate-in dropdown-content menu fade-in"
                     >
                       {link.subLinks.map((sub) => (
                         <li key={sub.name}>
@@ -128,7 +133,7 @@ const Navbar = () => {
                   >
                     {link.name}
                     {isActive && (
-                      <span className="-bottom-1 left-0 absolute bg-orange-500 rounded-full w-full h-[2px]" />
+                      <span className="-bottom-1 left-0 absolute bg-orange-500 rounded-full w-full h-0.5" />
                     )}
                   </Link>
                 )}
@@ -148,7 +153,9 @@ const Navbar = () => {
               >
                 <div className="flex justify-center items-center bg-orange-500 shadow-sm rounded-full ring-2 ring-white w-8 h-8 overflow-hidden font-bold text-white text-xs">
                   {user?.image ? (
-                    <img
+                    <Image
+                      width={300}
+                      height={300}
                       src={user.image}
                       alt="user"
                       className="w-full h-full object-cover"
@@ -175,7 +182,7 @@ const Navbar = () => {
 
               <ul
                 tabIndex={0}
-                className="z-[1] bg-white shadow-2xl mt-4 p-2 border border-slate-50 rounded-[1.5rem] w-56 animate-in dropdown-content menu fade-in zoom-in-95"
+                className="z-1 bg-white shadow-2xl mt-4 p-2 border border-slate-50 rounded-3xl w-56 animate-in dropdown-content menu fade-in zoom-in-95"
               >
                 <div className="mb-1 px-4 py-3 border-slate-50 border-b">
                   <p className="font-black text-slate-800 text-xs">Account</p>
@@ -202,7 +209,7 @@ const Navbar = () => {
                   </Link>
                 </li>
 
-                <div className="bg-slate-50 mx-2 my-1 h-[1px]"></div>
+                <div className="bg-slate-50 mx-2 my-1 h-px"></div>
 
                 <li>
                   <button
@@ -230,19 +237,19 @@ const Navbar = () => {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] lg:hidden transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-110 lg:hidden transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         onClick={() => setIsMenuOpen(false)}
       />
 
       <div
-        className={`fixed top-0 left-0 w-[80%] max-w-sm h-full bg-white z-[120] lg:hidden transition-transform duration-500 ease-out shadow-2xl ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 left-0 w-[80%] max-w-sm h-full bg-white z-120 lg:hidden transition-transform duration-500 ease-out shadow-2xl ${isMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <div className="p-6">
           <Logo />
           <div className="space-y-4 mt-10">
-            {navLinks.map((link) => (
+            {/* {navLinks.map((link) => (
               <div key={link.name}>
                 <Link
                   href={link.href}
@@ -252,6 +259,15 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               </div>
+            ))} */}
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={handleLinkClick} // ক্লিক করলেই মেনু বন্ধ হবে
+              >
+                {link.name}
+              </Link>
             ))}
           </div>
 
