@@ -63,7 +63,8 @@ export const authOptions = {
               name: user?.name || null,
               image: user?.image || null,
               lastLoginAt: now,
-              lastAuthAt: now,
+              status: "active",
+              // lastAuthAt: now,
             },
           },
           { upsert: true }
