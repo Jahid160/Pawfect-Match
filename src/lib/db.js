@@ -8,8 +8,10 @@ const dbname = process.env.DBNAME;
 export const collections = {
   USERS: "users",
   PETS: 'pets',
+  FOODS: 'foods',
   ADOPTIONS: 'adoptionsInfo',
   SHELTER: 'shelterInfo',
+  FOODS: 'foods'
 };
 
 const client = new MongoClient(uri, {
