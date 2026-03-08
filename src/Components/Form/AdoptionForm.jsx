@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from 'next/link'
 import {
   User,
   Home,
@@ -83,12 +84,7 @@ const AdoptionForm = () => {
 
       if (response) {
         setIsCompleted(true);
-        Swal.fire({
-          title: "Successfully Submitted! 🐾",
-          text: "Our team will review your capability assessment soon.",
-          icon: "success",
-          confirmButtonColor: "#f97316",
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       Swal.fire({
@@ -112,7 +108,7 @@ const AdoptionForm = () => {
           Adoption Suitability 🐾
         </h2>
         <p className="relative text-white/90 font-light text-lg italic">
-          "A pet is a lifetime commitment. Help us ensure a perfect match."
+          A pet is a lifetime commitment. Help us ensure a perfect match .
         </p>
       </div>
 
@@ -269,7 +265,7 @@ const AdoptionForm = () => {
                             }
                           />
                           <span className="font-medium text-slate-600">
-                            No, I don't
+                            No, I do not
                           </span>
                         </label>
                       </div>
@@ -477,16 +473,16 @@ const AdoptionForm = () => {
               <h3 className="text-4xl font-black text-slate-800 mb-4">
                 Application Sent!
               </h3>
-              <p className="text-slate-500 text-lg">
+              <p className="text-slate-500 text-lg mb-6 italic">
                 Thank you, {formData.fullName}. We will evaluate your profile
                 and contact you within 48 hours.
               </p>
-              <button
-                onClick={() => window.location.reload()}
+              <Link
+                href="/"
                 className="mt-10 px-8 py-4 bg-slate-800 text-white rounded-2xl font-bold"
               >
                 Return Home
-              </button>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>
