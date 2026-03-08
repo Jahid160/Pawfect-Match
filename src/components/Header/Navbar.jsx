@@ -48,7 +48,7 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "All Pets", href: "/all-pets" },
     {
-      name: "Foods", href: "/petFoods"
+      name: "Foods", href: "/pet-food"
     },
     {
       name: "About",
