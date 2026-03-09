@@ -11,6 +11,8 @@ import {
   FaPlusCircle 
 } from "react-icons/fa";
 import Link from "next/link";
+// আপনার সার্ভার অ্যাকশনটি ইমপোর্ট করুন
+import { addVaccine } from "@/action/server/vaccines"; 
 
 export default function VaccinationForm() {
   const router = useRouter();
@@ -23,29 +25,24 @@ export default function VaccinationForm() {
     const formData = new FormData(e.target);
     const vaccineData = {
       vaccineName: formData.get("vaccineName"),
-      price: parseFloat(formData.get("price")), // Ensure number format
-      stock: parseInt(formData.get("stock")),   // Ensure number format
+      price: parseFloat(formData.get("price")),
+      stock: parseInt(formData.get("stock")),
       forPet: formData.get("forPet"),
     };
 
     try {
-      const response = await fetch("/api/vaccines", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(vaccineData),
-      });
+      // API fetch এর বদলে সরাসরি Server Action কল করা হয়েছে
+      const result = await addVaccine(vaccineData);
 
-      if (response.ok) {
-        // FIXED: Changed from /vaccinations to /vaccination
-        router.push("/vaccination"); 
-        router.refresh(); 
+      if (result.success) {
+        // সফল হলে ইনভেন্টরি পেজে পাঠিয়ে দিবে
+        router.push("/vaccination");
       } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.error || "Failed to add vaccine"}`);
+        alert(`Error: ${result.error || "Failed to add vaccine"}`);
       }
     } catch (error) {
       console.error("Submission Error:", error);
-      alert("An error occurred. Please check your connection.");
+      alert("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,8 +52,7 @@ export default function VaccinationForm() {
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 pt-28">
       <div className="max-w-xl mx-auto">
         
-        {/* Header Navigation */}
-        {/* FIXED: href changed to /vaccination */}
+        {/* Back Button - সঠিক পাথ সেট করা হয়েছে */}
         <Link 
           href="/vaccination" 
           className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-600 font-bold text-sm mb-6 transition-colors group"
@@ -66,7 +62,6 @@ export default function VaccinationForm() {
         </Link>
 
         <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
-          {/* Form Header */}
           <div className="bg-slate-900 p-8 text-white">
             <div className="flex items-center gap-3 mb-2">
               <FaPlusCircle className="text-orange-500" />
@@ -75,7 +70,6 @@ export default function VaccinationForm() {
             <h2 className="text-3xl font-black tracking-tight">Register Vaccine</h2>
           </div>
 
-          {/* Form Body */}
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             
             {/* Vaccine Name */}
@@ -92,8 +86,8 @@ export default function VaccinationForm() {
               />
             </div>
 
-            {/* Price & Stock Row */}
             <div className="grid grid-cols-2 gap-4">
+              {/* Price */}
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <FaMoneyBillWave className="text-orange-500" /> Price ($)
@@ -108,6 +102,7 @@ export default function VaccinationForm() {
                 />
               </div>
 
+              {/* Stock */}
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <FaBoxes className="text-orange-500" /> Stock Units
@@ -122,7 +117,7 @@ export default function VaccinationForm() {
               </div>
             </div>
 
-            {/* Pet Category Selection */}
+            {/* Targeted Pet */}
             <div className="space-y-2">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <FaPaw className="text-orange-500" /> Targeted Pet
@@ -140,7 +135,6 @@ export default function VaccinationForm() {
               </select>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -152,7 +146,6 @@ export default function VaccinationForm() {
             >
               {loading ? "Processing..." : "Add to Inventory"}
             </button>
-
           </form>
         </div>
       </div>
