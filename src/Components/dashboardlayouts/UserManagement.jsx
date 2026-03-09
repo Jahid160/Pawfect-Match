@@ -16,13 +16,18 @@ import {
 
 const UserManagement = ({ user = [] }) => {
   const users = [...user];
-
+console.log(users);
   // const users = [
   //   { id: 1, name: "Arif Ahmed", email: "arif@example.com", role: "Admin", status: "Active", joined: "12 Jan 2026" },
   //   { id: 2, name: "Sumaiya Jahan", email: "sumi@example.com", role: "Moderator", status: "Active", joined: "05 Feb 2026" },
   //   { id: 3, name: "Rakib Hasan", email: "rakib@example.com", role: "User", status: "Inactive", joined: "20 Feb 2026" },
   //   { id: 4, name: "Nusrat Fari", email: "fari@example.com", role: "User", status: "Active", joined: "01 Mar 2026" },
   // ];
+
+
+  const handleBlock = (id)=>{
+    alert(id)
+  }
 
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
@@ -128,13 +133,13 @@ const UserManagement = ({ user = [] }) => {
                       }`}
                     >
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${user.status === "Active" ? "bg-emerald-500" : "bg-rose-500"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${user.status === "active" ? "bg-emerald-500" : "bg-rose-500"}`}
                       ></span>
                       {user.status}
                     </span>
                   </td>
                   <td className="px-6 py-5 font-medium text-slate-400 text-sm">
-                    {user.joined}
+                    {new Date(user.createdAt).toLocaleString()}
                   </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex justify-end gap-2">
@@ -151,8 +156,8 @@ const UserManagement = ({ user = [] }) => {
                       >
                         <UserCheck size={18} />
                       </button>
-
                       <button
+                      onClick={()=>handleBlock(user._id)}
                         title="Suspend/Block"
                         className="hover:bg-rose-50 p-2 rounded-xl text-slate-400 hover:text-rose-600 transition-all"
                       >
