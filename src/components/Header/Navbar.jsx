@@ -1,15 +1,9 @@
-"use client";
+"use client"
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  ChevronDown,
-  X,
-  LayoutDashboard,
-  LogOut,
-  Settings,
+import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
