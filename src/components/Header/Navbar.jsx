@@ -112,8 +112,9 @@ const Navbar = () => {
                     <div
                       tabIndex={0}
                       role="button"
-                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                        }`}
+                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                        isActive ? "text-orange-500" : "text-slate-700"
+                      }`}
                     >
                       {link.name}
                       <ChevronDown
@@ -142,8 +143,9 @@ const Navbar = () => {
                 ) : (
                   <Link
                     href={link.href}
-                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                      }`}
+                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                      isActive ? "text-orange-500" : "text-slate-700"
+                    }`}
                   >
                     {link.name}
                     {isActive && (

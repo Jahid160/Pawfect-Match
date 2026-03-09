@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -16,6 +17,8 @@ import {
   Info,
   Stethoscope,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const InfoCard = ({ icon: Icon, title, value }) => {
@@ -72,6 +75,8 @@ const formatDate = (dateValue) => {
 };
 
 export default function PetProfile({ pet }) {
+  const [selectedImage, setSelectedImage] = useState(0);
+
   if (!pet || Object.keys(pet).length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-orange-50 px-4">
@@ -81,7 +86,7 @@ export default function PetProfile({ pet }) {
             The pet profile you are looking for does not exist.
           </p>
           <Link
-            href="/all-pets"
+            href="/pets"
             className="mt-6 inline-flex items-center rounded-full bg-orange-500 px-5 py-3 font-medium text-white transition hover:bg-orange-600"
           >
             Back to Pets
@@ -125,17 +130,32 @@ export default function PetProfile({ pet }) {
     createdAt,
   } = pet || {};
 
+  const safeImages =
+    images?.length > 0 ? images : ["/placeholder-pet.jpg"];
+
+  const currentImage = safeImages[selectedImage];
+
+  const handlePrev = () => {
+    setSelectedImage((prev) =>
+      prev === 0 ? safeImages.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setSelectedImage((prev) =>
+      prev === safeImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
   const ageText = `${ageYears || 0} year${Number(ageYears) === 1 ? "" : "s"} ${
     ageMonths ? `${ageMonths} month${Number(ageMonths) === 1 ? "" : "s"}` : ""
   }`.trim();
-
-  const mainImage = images?.[0] || "/placeholder-pet.jpg";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-50">
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
         <Link
-          href="/all-pets"
+          href="/pets"
           className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-orange-300 hover:text-orange-600"
         >
           <ArrowLeft size={18} />
@@ -148,21 +168,44 @@ export default function PetProfile({ pet }) {
             <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm">
               <div className="relative h-[320px] w-full sm:h-[420px]">
                 <Image
-                  src={mainImage}
+                  src={currentImage}
                   alt={petName || "Pet image"}
                   fill
-                  className="object-cover"
+                  className="object-cover transition duration-300"
                   unoptimized
                 />
+
+                {safeImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrev}
+                      className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-md transition hover:bg-orange-500 hover:text-white"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+
+                    <button
+                      onClick={handleNext}
+                      className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-md transition hover:bg-orange-500 hover:text-white"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
-            {images?.length > 1 && (
-              <div className="grid grid-cols-5 gap-3">
-                {images.slice(0, 5).map((img, index) => (
-                  <div
+            {safeImages.length > 1 && (
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                {safeImages.map((img, index) => (
+                  <button
                     key={index}
-                    className="relative h-28 overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm"
+                    onClick={() => setSelectedImage(index)}
+                    className={`relative h-24 overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition ${
+                      selectedImage === index
+                        ? "border-orange-500 ring-2 ring-orange-200"
+                        : "border-orange-100 hover:border-orange-300"
+                    }`}
                   >
                     <Image
                       src={img}
@@ -171,7 +214,7 @@ export default function PetProfile({ pet }) {
                       className="object-cover"
                       unoptimized
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -227,18 +270,10 @@ export default function PetProfile({ pet }) {
                 <InfoCard icon={PawPrint} title="Species" value={species} />
                 <InfoCard icon={Sparkles} title="Breed" value={breed} />
                 <InfoCard icon={Calendar} title="Age" value={ageText} />
-                <InfoCard
-                  icon={Info}
-                  title="Gender"
-                  value={gender || "Not specified"}
-                />
+                <InfoCard icon={Info} title="Gender" value={gender || "Not specified"} />
                 <InfoCard icon={Sparkles} title="Color" value={color} />
                 <InfoCard icon={Info} title="Markings" value={markings} />
-                <InfoCard
-                  icon={Weight}
-                  title="Weight"
-                  value={weight ? `${weight} kg` : ""}
-                />
+                <InfoCard icon={Weight} title="Weight" value={weight ? `${weight} kg` : ""} />
                 <InfoCard icon={Heart} title="Size" value={size} />
               </div>
             </Section>
@@ -372,9 +407,7 @@ export default function PetProfile({ pet }) {
                 <div className="flex items-start gap-3">
                   <Phone className="mt-1 text-orange-500" size={18} />
                   <div>
-                    <p className="text-sm text-gray-700">
-                      {phone || "Not specified"}
-                    </p>
+                    <p className="text-sm text-gray-700">{phone || "Not specified"}</p>
                   </div>
                 </div>
 
