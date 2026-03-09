@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link"; // 1. Import Link
 import { 
   FaSyringe, 
   FaTag, 
@@ -10,9 +11,11 @@ import {
 } from "react-icons/fa";
 
 export const VaccinationCard = ({ vaccine }) => {
-  // Stock status logic
   const isLowStock = vaccine.stock > 0 && vaccine.stock <= 10;
   const isOutOfStock = vaccine.stock === 0;
+  
+  // 2. Determine the ID for the URL (handling MongoDB _id or standard id)
+  const vaccineId = vaccine._id || vaccine.id;
 
   return (
     <div className="group bg-white border border-slate-200 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col gap-4">
@@ -68,18 +71,23 @@ export const VaccinationCard = ({ vaccine }) => {
         </div>
       </div>
 
-      {/* Action Button */}
-      <button 
-        disabled={isOutOfStock}
-        className={`mt-2 w-full flex justify-center items-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all ${
-          isOutOfStock 
-          ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
-          : "bg-slate-900 text-white hover:bg-orange-600 shadow-lg shadow-slate-200 hover:shadow-orange-200 active:scale-95"
-        }`}
-      >
-        {isOutOfStock ? "Restocking Soon" : "View Details"}
-        {!isOutOfStock && <FaChevronRight size={12} />}
-      </button>
+      {/* 3. Action Link (Replaced Button with Link) */}
+      {isOutOfStock ? (
+        <button 
+          disabled
+          className="mt-2 w-full flex justify-center items-center gap-2 py-3 rounded-2xl font-bold text-sm bg-slate-100 text-slate-400 cursor-not-allowed"
+        >
+          Restocking Soon
+        </button>
+      ) : (
+        <Link 
+          href={`/vaccination/${vaccineId}`}
+          className="mt-2 w-full flex justify-center items-center gap-2 py-3 rounded-2xl font-bold text-sm bg-slate-900 text-white hover:bg-orange-600 shadow-lg shadow-slate-200 hover:shadow-orange-200 active:scale-95 transition-all"
+        >
+          View Details
+          <FaChevronRight size={12} />
+        </Link>
+      )}
     </div>
   );
 };

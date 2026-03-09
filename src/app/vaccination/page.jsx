@@ -24,7 +24,7 @@ function Vaccination() {
     },
     {
       id: 3,
-      vaccineName: "Feline Viral Rhinotracheitis",
+      vaccineName: "Feline Viral",
       price: 50.00,
       stock: 0, // This will trigger the "Out of Stock" state
       forPet: "Cats",
