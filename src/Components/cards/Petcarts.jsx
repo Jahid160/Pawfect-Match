@@ -164,8 +164,8 @@ const Petcarts = ({ pets = [] }) => {
         </div>
         <div className="max-w-md">
           <p className="text-gray-500 text-lg text-start md:text-end italic leading-relaxed">
-            "Every paw leaves a footprint in our hearts. Browse our gallery of
-            loving pets waiting for you."
+            Every paw leaves a footprint in our hearts. Browse our gallery of
+            loving pets waiting for you.
           </p>
         </div>
       </div>
