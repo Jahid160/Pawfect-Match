@@ -101,7 +101,7 @@ export const FoodCard = ({ food }) => {
           </div>
           
           <Link
-            href={`/pet-foods/${foodId}`}
+            href={`/pet-food/${foodId}`}
             className="flex items-center gap-2 bg-neutral hover:bg-primary px-5 py-3 rounded-2xl font-bold text-white text-xs transition-all active:scale-95"
           >
             Details <FaChevronRight size={10} />
