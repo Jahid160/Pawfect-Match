@@ -16,18 +16,15 @@ import {
 
 const UserManagement = ({ user = [] }) => {
   const users = [...user];
-console.log(users);
-  // const users = [
-  //   { id: 1, name: "Arif Ahmed", email: "arif@example.com", role: "Admin", status: "Active", joined: "12 Jan 2026" },
-  //   { id: 2, name: "Sumaiya Jahan", email: "sumi@example.com", role: "Moderator", status: "Active", joined: "05 Feb 2026" },
-  //   { id: 3, name: "Rakib Hasan", email: "rakib@example.com", role: "User", status: "Inactive", joined: "20 Feb 2026" },
-  //   { id: 4, name: "Nusrat Fari", email: "fari@example.com", role: "User", status: "Active", joined: "01 Mar 2026" },
-  // ];
+  console.log(users);
 
+  // const handleBlock = (id) => {
+  //   alert(id);
+  // };
 
-  const handleBlock = (id)=>{
-    alert(id)
-  }
+  const handleActive = (id) => {
+    alert(id);
+  };
 
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
@@ -82,6 +79,7 @@ console.log(users);
                 <th className="px-6 py-5">Role</th>
                 <th className="px-6 py-5">Status</th>
                 <th className="px-6 py-5">Joined Date</th>
+                <th className="px-6 py-5">Last login</th>
                 <th className="px-6 py-5 text-right">Actions</th>
               </tr>
             </thead>
@@ -141,6 +139,9 @@ console.log(users);
                   <td className="px-6 py-5 font-medium text-slate-400 text-sm">
                     {new Date(user.createdAt).toLocaleString()}
                   </td>
+                  <td className="px-6 py-5 font-medium text-slate-400 text-sm">
+                    {new Date(user.lastLoginAt).toLocaleString()}
+                  </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex justify-end gap-2">
                       <button
@@ -157,13 +158,16 @@ console.log(users);
                         <UserCheck size={18} />
                       </button>
                       <button
-                      onClick={()=>handleBlock(user._id)}
+                        // onClick={() => handleBlock(user._id)}
                         title="Suspend/Block"
                         className="hover:bg-rose-50 p-2 rounded-xl text-slate-400 hover:text-rose-600 transition-all"
                       >
                         <UserX size={18} />
                       </button>
-                      <button className="hover:bg-white hover:shadow-md p-2 rounded-xl text-slate-400 transition-all">
+                      <button
+                        onClick={() => handleActive(user._id)}
+                        className="hover:bg-white hover:shadow-md p-2 rounded-xl text-slate-400 transition-all"
+                      >
                         <MoreVertical size={18} />
                       </button>
                     </div>
