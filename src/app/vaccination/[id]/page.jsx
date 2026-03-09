@@ -36,7 +36,7 @@ function VaccineDetails({ params }) {
         
         {/* Navigation */}
         <Link 
-          href="/vaccinations" 
+          href="/vaccination" 
           className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-600 font-bold text-sm transition-colors mb-8 group"
         >
           <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
@@ -138,7 +138,7 @@ function VaccineDetails({ params }) {
                   : "bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-200"
                 }`}
               >
-                Place Order / Restock
+                Place Order
               </button>
             </div>
 

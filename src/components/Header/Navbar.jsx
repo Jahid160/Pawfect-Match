@@ -61,6 +61,7 @@ const Navbar = () => {
         { name: "Shelter Form", href: "/shelterForm", roles: ["user", "shelter", "admin"] },
         { name: "Pet Entry Form", href: "/petdetailsform", roles: ["shelter", "admin"] },
         { name: "Foods Form", href: "/addFoodForms", roles: ["shelter", "admin"] },
+        { name: "Vaccination Form", href: "/vaccination/add", roles: ["user", "shelter", "admin"] },
       ],
     },
     { name: "Contact", href: "/contact" },
