@@ -19,7 +19,7 @@ const AuthModal = ({ isOpen, onClose, children }) => {
   if (!isOpen || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-999 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
@@ -27,7 +27,7 @@ const AuthModal = ({ isOpen, onClose, children }) => {
       />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-[95vw] md:max-w-[920px] animate-in fade-in zoom-in duration-200 bg-white rounded-2xl overflow-hidden">
+      <div className="relative w-full max-w-[95vw] md:max-w-230 animate-in fade-in zoom-in duration-200 bg-white rounded-2xl overflow-hidden">
         {/* Close Button */}
         <button
           onClick={onClose}

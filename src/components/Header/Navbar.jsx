@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,
+import {
+  Menu, ChevronDown, X, LayoutDashboard, LogOut, Settings,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
@@ -18,7 +19,6 @@ const Navbar = () => {
   const { data: session, status } = useSession();
 
   const user = session?.user;
-  console.log(user); // ✅ this is your real user
   const isLoggedIn = status === "authenticated";
 
   useEffect(() => {
