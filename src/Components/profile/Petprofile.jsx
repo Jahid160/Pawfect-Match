@@ -1,449 +1,504 @@
 "use client";
 
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-  Calendar,
-  Weight,
-  PawPrint,
   Heart,
+  MapPin,
+  Smile,
+  Syringe,
+  Home,
+  Scissors,
+  Venus,
+  Rabbit,
+  Clock,
+  Palette,
+  Scale,
+  Ruler,
+  Share2,
   ShieldCheck,
-  Info,
-  Stethoscope,
-  Sparkles,
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  Dog,
+  Info,
+  Stethoscope,
+  User,
+  Phone,
+  Mail,
 } from "lucide-react";
 
-const InfoCard = ({ icon: Icon, title, value }) => {
-  if (!value && value !== 0) return null;
+const PetProfile = ({ pet }) => {
+  const gallery = useMemo(() => {
+    if (!pet?.images || !Array.isArray(pet.images) || pet.images.length === 0) {
+      return ["/placeholder-pet.jpg"];
+    }
+    return pet.images;
+  }, [pet]);
 
-  return (
-    <div className="rounded-2xl border border-orange-100 bg-white p-4 shadow-sm">
-      <div className="mb-2 flex items-center gap-2 text-orange-500">
-        <Icon size={18} />
-        <h3 className="text-sm font-semibold">{title}</h3>
-      </div>
-      <p className="text-sm text-gray-700">{value}</p>
-    </div>
-  );
-};
-
-const Badge = ({ children }) => (
-  <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
-    {children}
-  </span>
-);
-
-const Section = ({ title, children }) => (
-  <div className="rounded-3xl border border-orange-100 bg-white p-6 shadow-sm">
-    <h2 className="mb-4 text-xl font-bold text-gray-900">{title}</h2>
-    {children}
-  </div>
-);
-
-const formatBoolean = (value) => {
-  if (value === true || value === "true") return "Yes";
-  if (value === false || value === "false") return "No";
-  if (value === "") return "Not specified";
-  return value || "Not specified";
-};
-
-const formatDate = (dateValue) => {
-  try {
-    const date =
-      typeof dateValue === "object" && dateValue?.$date
-        ? new Date(dateValue.$date)
-        : new Date(dateValue);
-
-    if (isNaN(date.getTime())) return "Not available";
-
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  } catch {
-    return "Not available";
-  }
-};
-
-export default function PetProfile({ pet }) {
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [activeImage, setActiveImage] = useState(gallery[0]);
 
   if (!pet || Object.keys(pet).length === 0) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-orange-50 px-4">
-        <div className="rounded-3xl bg-white p-10 text-center shadow-md">
-          <h2 className="text-2xl font-bold text-gray-900">Pet not found</h2>
-          <p className="mt-2 text-gray-600">
-            The pet profile you are looking for does not exist.
-          </p>
-          <Link
-            href="/pets"
-            className="mt-6 inline-flex items-center rounded-full bg-orange-500 px-5 py-3 font-medium text-white transition hover:bg-orange-600"
-          >
-            Back to Pets
-          </Link>
-        </div>
-      </div>
-    );
+    return <div className="p-10 text-center">Loading pet details...</div>;
   }
 
-  const {
-    petName,
-    species,
-    breed,
-    ageYears,
-    ageMonths,
-    gender,
-    color,
-    markings,
-    size,
-    weight,
-    vaccinated,
-    neutered,
-    microchipped,
-    healthCondition,
-    medicalHistory,
-    specialNeeds,
-    goodWithKids,
-    activityLevel,
-    indoorOutdoor,
-    houseTrained,
-    reasonForAdoption,
-    timeWithOwner,
-    adoptionFee,
-    location,
-    ownerName,
-    phone,
-    email,
-    ownerType,
-    temperaments = [],
-    images = [],
-    createdAt,
-  } = pet || {};
+  const getStatIcon = (type) => {
+    switch (type) {
+      case "gender":
+        return <Venus className="h-5 w-5" />;
+      case "breed":
+        return <Dog className="h-5 w-5" />;
+      case "age":
+        return <Clock className="h-5 w-5" />;
+      case "color":
+        return <Palette className="h-5 w-5" />;
+      case "weight":
+        return <Scale className="h-5 w-5" />;
+      case "size":
+        return <Ruler className="h-5 w-5" />;
+      default:
+        return <Info className="h-5 w-5" />;
+    }
+  };
 
-  const safeImages =
-    images?.length > 0 ? images : ["/placeholder-pet.jpg"];
-
-  const currentImage = safeImages[selectedImage];
+  const getTraitIcon = (type) => {
+    switch (type) {
+      case "smile":
+        return <Smile className="h-5 w-5" />;
+      case "syringe":
+        return <Syringe className="h-5 w-5" />;
+      case "home":
+        return <Home className="h-5 w-5" />;
+      case "scissors":
+        return <Scissors className="h-5 w-5" />;
+      default:
+        return <Heart className="h-5 w-5" />;
+    }
+  };
 
   const handlePrev = () => {
-    setSelectedImage((prev) =>
-      prev === 0 ? safeImages.length - 1 : prev - 1
-    );
+    const currentIndex = gallery.indexOf(activeImage);
+    const prevIndex =
+      currentIndex === 0 ? gallery.length - 1 : currentIndex - 1;
+    setActiveImage(gallery[prevIndex]);
   };
 
   const handleNext = () => {
-    setSelectedImage((prev) =>
-      prev === safeImages.length - 1 ? 0 : prev + 1
-    );
+    const currentIndex = gallery.indexOf(activeImage);
+    const nextIndex =
+      currentIndex === gallery.length - 1 ? 0 : currentIndex + 1;
+    setActiveImage(gallery[nextIndex]);
   };
 
-  const ageText = `${ageYears || 0} year${Number(ageYears) === 1 ? "" : "s"} ${
-    ageMonths ? `${ageMonths} month${Number(ageMonths) === 1 ? "" : "s"}` : ""
-  }`.trim();
+  const formatBoolean = (value) => {
+    if (value === true || value === "true") return "Yes";
+    if (value === false || value === "false") return "No";
+    if (value === "") return "Not specified";
+    return value || "Not specified";
+  };
+
+  const formatDate = (dateValue) => {
+    try {
+      const date =
+        typeof dateValue === "object" && dateValue?.$date
+          ? new Date(dateValue.$date)
+          : new Date(dateValue);
+
+      if (isNaN(date.getTime())) return "Not available";
+
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "Not available";
+    }
+  };
+
+  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${
+    pet.ageMonths
+      ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}`
+      : ""
+  }`;
+
+  const quickStats = [
+    {
+      label: "Gender",
+      value: pet.gender || "Not specified",
+      type: "gender",
+    },
+    {
+      label: "Breed",
+      value: pet.breed || "Not specified",
+      type: "breed",
+    },
+    {
+      label: "Age",
+      value: ageText || "Not specified",
+      type: "age",
+    },
+    {
+      label: "Color",
+      value: pet.color || "Not specified",
+      type: "color",
+    },
+    {
+      label: "Weight",
+      value: pet.weight ? `${pet.weight} kg` : "Not specified",
+      type: "weight",
+    },
+    {
+      label: "Size",
+      value: pet.size || "Not specified",
+      type: "size",
+    },
+  ];
+
+  const traits = [
+    {
+      label: pet.goodWithKids
+        ? `Good with kids: ${pet.goodWithKids}`
+        : "Good with kids not specified",
+      type: "smile",
+    },
+    {
+      label: `Vaccinated: ${formatBoolean(pet.vaccinated)}`,
+      type: "syringe",
+    },
+    {
+      label: `Indoor/Outdoor: ${pet.indoorOutdoor || "Not specified"}`,
+      type: "home",
+    },
+    {
+      label: `Neutered: ${formatBoolean(pet.neutered)}`,
+      type: "scissors",
+    },
+  ];
+
+  const healthMilestones = [
+    {
+      label: "Vaccination",
+      done: !!pet.vaccinated,
+      values: [formatBoolean(pet.vaccinated)],
+    },
+    {
+      label: "Neutered",
+      done: !!pet.neutered,
+      values: [formatBoolean(pet.neutered)],
+    },
+    {
+      label: "Microchipped",
+      done: !!pet.microchipped,
+      values: [formatBoolean(pet.microchipped)],
+    },
+    {
+      label: "Health Status",
+      done: !!pet.healthCondition,
+      values: [pet.healthCondition || "Not specified"],
+    },
+  ];
+
+  const description =
+    pet.reasonForAdoption ||
+    pet.specialNeeds ||
+    pet.medicalHistory ||
+    `${pet.petName || "This pet"} is looking for a caring new home.`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
+    <div className="min-h-screen bg-base-100 font-['Quicksand'] text-neutral antialiased">
+      <nav className="mx-auto max-w-6xl px-6 pt-8">
         <Link
-          href="/pets"
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-orange-300 hover:text-orange-600"
+          href="/all-pets"
+          className="group flex items-center gap-2 font-bold text-neutral/60 transition-all duration-300 hover:text-primary"
         >
-          <ArrowLeft size={18} />
-          Back to Pets
+          <div className="rounded-full bg-base-200 p-2 shadow-sm transition-all group-hover:-translate-x-1 group-hover:bg-primary group-hover:text-white group-hover:shadow-md">
+            <ArrowLeft size={20} />
+          </div>
+          <span className="text-sm tracking-wide">Return to listings</span>
         </Link>
+      </nav>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Left side */}
-          <div className="space-y-4">
-            <div className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm">
-              <div className="relative h-[320px] w-full sm:h-[420px]">
+      <header className="mx-auto flex max-w-6xl flex-col justify-between gap-4 px-6 pb-6 pt-6 md:flex-row md:items-end">
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary">
+            <ShieldCheck size={18} />
+            Verified Adoption Listing
+          </div>
+
+          <h1 className="text-5xl font-extrabold tracking-tight text-neutral">
+            {pet.petName || "Unnamed Pet"}
+          </h1>
+
+          <div className="mt-2 flex items-center gap-2 font-medium text-neutral/60">
+            <MapPin size={18} className="text-primary" />
+            <span>{pet.location || "Location not specified"}</span>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
+            <Share2 size={20} />
+          </button>
+          <button className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
+            <Heart size={20} />
+          </button>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 pb-24">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+          <div className="space-y-12 lg:col-span-7">
+            <section className="space-y-6">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[2.5rem] border border-white/20 bg-base-200 shadow-2xl">
                 <Image
-                  src={currentImage}
-                  alt={petName || "Pet image"}
                   fill
-                  className="object-cover transition duration-300"
+                  src={activeImage}
+                  alt={pet.petName || "Pet image"}
+                  className="object-cover"
+                  priority
                   unoptimized
                 />
 
-                {safeImages.length > 1 && (
+                {gallery.length > 1 && (
                   <>
                     <button
                       onClick={handlePrev}
-                      className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-md transition hover:bg-orange-500 hover:text-white"
+                      className="absolute left-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-neutral shadow-md transition hover:bg-primary hover:text-white"
                     >
                       <ChevronLeft size={20} />
                     </button>
 
                     <button
                       onClick={handleNext}
-                      className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-md transition hover:bg-orange-500 hover:text-white"
+                      className="absolute right-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-neutral shadow-md transition hover:bg-primary hover:text-white"
                     >
                       <ChevronRight size={20} />
                     </button>
                   </>
                 )}
               </div>
-            </div>
 
-            {safeImages.length > 1 && (
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {safeImages.map((img, index) => (
+              <div className="grid grid-cols-4 gap-4">
+                {gallery.map((thumb, idx) => (
                   <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative h-24 overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition ${
-                      selectedImage === index
-                        ? "border-orange-500 ring-2 ring-orange-200"
-                        : "border-orange-100 hover:border-orange-300"
+                    key={idx}
+                    onClick={() => setActiveImage(thumb)}
+                    className={`relative aspect-square overflow-hidden rounded-2xl border-4 transition-all duration-300 ${
+                      activeImage === thumb
+                        ? "scale-95 border-primary shadow-lg"
+                        : "border-transparent opacity-70 hover:opacity-100"
                     }`}
                   >
                     <Image
-                      src={img}
-                      alt={`${petName || "Pet"} ${index + 1}`}
                       fill
+                      src={thumb}
+                      alt={`${pet.petName || "Pet"} image ${idx + 1}`}
                       className="object-cover"
                       unoptimized
                     />
                   </button>
                 ))}
               </div>
-            )}
+            </section>
+
+            <section className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-1.5 rounded-full bg-primary"></div>
+                  <h3 className="text-2xl font-bold italic">Health Journey</h3>
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-neutral/40">
+                  Last Updated: {formatDate(pet.createdAt)}
+                </span>
+              </div>
+
+              <div className="relative space-y-4 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:-translate-x-px before:bg-gradient-to-b before:from-primary before:via-base-300 before:to-transparent md:before:mx-auto md:before:translate-x-0">
+                {healthMilestones.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className={`group relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse ${
+                      item.done ? "is-completed" : "opacity-70"
+                    }`}
+                  >
+                    <div
+                      className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-base-100 shadow transition-colors duration-300 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${
+                        item.done
+                          ? "bg-primary text-white"
+                          : "bg-base-200 text-neutral/30"
+                      }`}
+                    >
+                      {item.done ? (
+                        <ShieldCheck size={16} />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-current" />
+                      )}
+                    </div>
+
+                    <div className="w-[calc(100%-3rem)] rounded-[2rem] border border-neutral/5 bg-white p-5 shadow-sm transition-all hover:shadow-md md:w-[calc(50%-2.5rem)]">
+                      <div className="mb-2 flex items-center justify-between">
+                        <time className="text-sm font-black uppercase tracking-tighter text-primary">
+                          {item.label}
+                        </time>
+
+                        {item.done ? (
+                          <span className="badge badge-success badge-sm gap-1 text-[9px] font-bold uppercase text-white">
+                            Verified
+                          </span>
+                        ) : (
+                          <span className="badge badge-ghost badge-sm text-[9px] font-bold uppercase">
+                            Pending
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="font-medium text-neutral/80">
+                        <div className="flex flex-wrap gap-2">
+                          {item.values.map((v, i) => (
+                            <span
+                              key={i}
+                              className="rounded-full bg-base-200 px-3 py-1 text-[11px] font-bold"
+                            >
+                              {v}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-[2rem] border border-neutral/5 bg-white p-6 shadow-sm">
+                <h3 className="mb-3 flex items-center gap-2 text-lg font-bold">
+                  <Stethoscope className="text-primary" size={20} />
+                  Medical History
+                </h3>
+                <p className="leading-relaxed text-neutral/70">
+                  {pet.medicalHistory || "No medical history provided."}
+                </p>
+
+                <h3 className="mb-3 mt-6 text-lg font-bold">Special Needs</h3>
+                <p className="leading-relaxed text-neutral/70">
+                  {pet.specialNeeds || "No special needs mentioned."}
+                </p>
+              </div>
+            </section>
           </div>
 
-          {/* Right side */}
-          <div className="space-y-6">
-            <div className="rounded-3xl border border-orange-100 bg-white p-6 shadow-sm">
-              <div className="mb-4 flex flex-wrap gap-2">
-                {species && <Badge>{species}</Badge>}
-                {size && <Badge>{size}</Badge>}
-                {healthCondition && <Badge>{healthCondition}</Badge>}
-              </div>
-
-              <h1 className="text-3xl font-extrabold text-gray-900 md:text-4xl">
-                {petName || "Unnamed Pet"}
-              </h1>
-
-              <p className="mt-2 text-lg text-gray-600">
-                {breed || "Breed not specified"}
-              </p>
-
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                {location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} className="text-orange-500" />
-                    <span>{location}</span>
+          <div className="space-y-8 lg:col-span-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {quickStats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-col items-center justify-center rounded-3xl border border-neutral/5 bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    {getStatIcon(stat.type)}
                   </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} className="text-orange-500" />
-                  <span>{ageText || "Age not specified"}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">
+                    {stat.label}
+                  </span>
+                  <span className="mt-1 text-sm font-black text-neutral">
+                    {stat.value}
+                  </span>
                 </div>
-              </div>
-
-              {temperaments?.length > 0 && (
-                <div className="mt-5">
-                  <p className="mb-2 text-sm font-semibold text-gray-800">
-                    Temperaments
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {temperaments.map((item, index) => (
-                      <Badge key={index}>{item}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
 
-            <Section title="Quick Information">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <InfoCard icon={PawPrint} title="Species" value={species} />
-                <InfoCard icon={Sparkles} title="Breed" value={breed} />
-                <InfoCard icon={Calendar} title="Age" value={ageText} />
-                <InfoCard icon={Info} title="Gender" value={gender || "Not specified"} />
-                <InfoCard icon={Sparkles} title="Color" value={color} />
-                <InfoCard icon={Info} title="Markings" value={markings} />
-                <InfoCard icon={Weight} title="Weight" value={weight ? `${weight} kg` : ""} />
-                <InfoCard icon={Heart} title="Size" value={size} />
-              </div>
-            </Section>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-8 lg:grid-cols-3">
-          <div className="space-y-8 lg:col-span-2">
-            <Section title="Health & Care">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <InfoCard
-                  icon={ShieldCheck}
-                  title="Vaccinated"
-                  value={formatBoolean(vaccinated)}
-                />
-                <InfoCard
-                  icon={ShieldCheck}
-                  title="Neutered"
-                  value={formatBoolean(neutered)}
-                />
-                <InfoCard
-                  icon={ShieldCheck}
-                  title="Microchipped"
-                  value={formatBoolean(microchipped)}
-                />
-                <InfoCard
-                  icon={Stethoscope}
-                  title="Health Condition"
-                  value={healthCondition}
-                />
+            <div className="overflow-hidden rounded-[2rem] border border-neutral/5 bg-white shadow-xl">
+              <div className="border-b border-secondary/20 bg-secondary/20 p-6">
+                <h2 className="flex items-center gap-2 text-xl font-black text-neutral">
+                  <Rabbit size={24} className="text-primary" />
+                  About {pet.petName}
+                </h2>
               </div>
 
-              <div className="mt-6 space-y-4">
-                <div>
-                  <h3 className="mb-2 font-semibold text-gray-900">
-                    Medical History
-                  </h3>
-                  <p className="text-sm leading-7 text-gray-600">
-                    {medicalHistory || "Not specified"}
-                  </p>
-                </div>
+              <div className="space-y-6 p-8">
+                <p className="leading-relaxed font-medium text-neutral/70">
+                  {description}
+                </p>
 
-                <div>
-                  <h3 className="mb-2 font-semibold text-gray-900">
-                    Special Needs
-                  </h3>
-                  <p className="text-sm leading-7 text-gray-600">
-                    {specialNeeds || "Not specified"}
-                  </p>
-                </div>
-              </div>
-            </Section>
-
-            <Section title="Behavior & Lifestyle">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <InfoCard
-                  icon={Heart}
-                  title="Good With Kids"
-                  value={formatBoolean(goodWithKids)}
-                />
-                <InfoCard
-                  icon={Sparkles}
-                  title="Activity Level"
-                  value={activityLevel || "Not specified"}
-                />
-                <InfoCard
-                  icon={Info}
-                  title="Indoor / Outdoor"
-                  value={indoorOutdoor || "Not specified"}
-                />
-                <InfoCard
-                  icon={Info}
-                  title="House Trained"
-                  value={formatBoolean(houseTrained)}
-                />
-              </div>
-            </Section>
-
-            <Section title="Adoption Details">
-              <div className="space-y-4 text-sm text-gray-700">
-                <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
-                    Reason for Adoption
-                  </h3>
-                  <p>{reasonForAdoption || "Not specified"}</p>
-                </div>
-
-                <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
-                    Time With Owner
-                  </h3>
-                  <p>{timeWithOwner || "Not specified"}</p>
-                </div>
-
-                <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
-                    Adoption Fee
-                  </h3>
-                  <p>{adoptionFee ? `${adoptionFee} BDT` : "Not specified"}</p>
-                </div>
-
-                <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
-                    Posted On
-                  </h3>
-                  <p>{formatDate(createdAt)}</p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {traits.map((trait, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 rounded-2xl bg-base-200/50 p-3"
+                    >
+                      <div className="text-primary">
+                        {getTraitIcon(trait.type)}
+                      </div>
+                      <span className="text-xs font-bold text-neutral/80">
+                        {trait.label}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </Section>
-          </div>
+            </div>
 
-          <div>
-            <div className="sticky top-24 rounded-3xl border border-orange-100 bg-white p-6 shadow-sm">
-              <h2 className="mb-5 text-xl font-bold text-gray-900">
-                Owner Information
-              </h2>
+            <div className="rounded-[2rem] bg-white p-6 shadow-xl border border-neutral/5">
+              <h3 className="mb-5 text-xl font-bold text-neutral">
+                Owner Contact
+              </h3>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <User className="mt-1 text-orange-500" size={18} />
+                  <User size={18} className="mt-1 text-primary" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {ownerName || "Not specified"}
+                    <p className="font-semibold">
+                      {pet.ownerName || "Not specified"}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {ownerType || "Owner"}
+                    <p className="text-sm text-neutral/60">
+                      {pet.ownerType || "Owner"}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="mt-1 text-orange-500" size={18} />
-                  <div>
-                    <p className="text-sm text-gray-700">{phone || "Not specified"}</p>
-                  </div>
+                  <Phone size={18} className="mt-1 text-primary" />
+                  <p className="text-sm text-neutral/80">
+                    {pet.phone || "Not specified"}
+                  </p>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Mail className="mt-1 text-orange-500" size={18} />
-                  <div>
-                    <p className="break-all text-sm text-gray-700">
-                      {email || "Not specified"}
-                    </p>
-                  </div>
+                  <Mail size={18} className="mt-1 text-primary" />
+                  <p className="break-all text-sm text-neutral/80">
+                    {pet.email || "Not specified"}
+                  </p>
                 </div>
+              </div>
+            </div>
 
-                <div className="pt-4">
-                  {phone ? (
-                    <a
-                      href={`tel:${phone}`}
-                      className="mb-3 block w-full rounded-full bg-orange-500 px-5 py-3 text-center font-semibold text-white transition hover:bg-orange-600"
-                    >
-                      Call Owner
-                    </a>
-                  ) : null}
+            <div className="relative overflow-hidden rounded-[2rem] bg-neutral p-10 text-center shadow-2xl">
+              <div className="absolute left-0 top-0 h-1.5 w-full bg-primary"></div>
 
-                  {email ? (
-                    <a
-                      href={`mailto:${email}?subject=Interested in adopting ${petName || "your pet"}`}
-                      className="block w-full rounded-full border border-orange-200 bg-orange-50 px-5 py-3 text-center font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-100"
-                    >
-                      Email Owner
-                    </a>
-                  ) : null}
+              <div className="relative z-10 space-y-6">
+                <h3 className="text-2xl font-bold leading-tight text-white">
+                  Interested in making <br /> {pet.petName || "this pet"} part
+                  of your family?
+                </h3>
+
+                <Link
+                  href="/adoptionfrom"
+                  className="btn btn-primary btn-lg h-16 w-full rounded-2xl border-none text-white shadow-lg transition-all hover:scale-[1.02]"
+                >
+                  Start Application
+                </Link>
+
+                <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  <ShieldCheck size={12} />
+                  Safe & Secure Adoption
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
-}
+};
+
+export default PetProfile;
