@@ -49,7 +49,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+      className={`fixed top-0 left-0 w-full z-100 transition-all duration-300 ${
         isScrolled
           ? "bg-white shadow-md h-16"
           : "bg-white/95 backdrop-blur-md h-20"
@@ -57,7 +57,7 @@ const Navbar = () => {
     >
       <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
         {/* Logo */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Logo />
         </div>
 
@@ -85,7 +85,7 @@ const Navbar = () => {
                       </div>
                       <ul
                         tabIndex={0}
-                        className="z-[1] bg-white shadow-xl p-2 border border-base-200 rounded-xl w-48 dropdown-content menu"
+                        className="z-1 bg-white shadow-xl p-2 border border-base-200 rounded-xl w-48 dropdown-content menu"
                       >
                         {link.subLinks.map((sub) => (
                           <li key={sub.name}>
@@ -135,7 +135,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Sidebar/Drawer */}
       <div
-        className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-[110] ${
+        className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-110 ${
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -143,7 +143,7 @@ const Navbar = () => {
           <div className="mb-8">
             <Logo />
           </div>
-          <ul className="flex flex-col flex-grow gap-4 p-0 list-none">
+          <ul className="flex flex-col grow gap-4 p-0 list-none">
             {navLinks.map((link) => (
               <li key={link.name}>
                 <Link
@@ -166,7 +166,7 @@ const Navbar = () => {
       {/* Mobile Overlay */}
       {isMenuOpen && (
         <div
-          className="lg:hidden z-[105] fixed inset-0 bg-black/20 backdrop-blur-sm"
+          className="lg:hidden z-105 fixed inset-0 bg-black/20 backdrop-blur-sm"
           onClick={() => setIsMenuOpen(false)}
         />
       )}
