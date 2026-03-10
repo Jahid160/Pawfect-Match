@@ -1,7 +1,6 @@
 import RecentPets from "@/components/cards/RecentPets";
 import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import Banner from "@/components/home/Banner";
-import FAQPage from "@/components/home/FAQPage";
 import HowItWorks from "@/components/home/HowItWorks";
 import InteractivePetFood from "@/components/home/InteractivePetFood";
 import Newsletter from "@/components/home/Newsletter";

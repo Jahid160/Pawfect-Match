@@ -1,15 +1,9 @@
-"use client";
+"use client"
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  ChevronDown,
-  X,
-  LayoutDashboard,
-  LogOut,
-  Settings,
+import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,ShoppingCart,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
@@ -32,8 +26,6 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -118,8 +110,9 @@ const Navbar = () => {
                     <div
                       tabIndex={0}
                       role="button"
-                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                        }`}
+                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                        isActive ? "text-orange-500" : "text-slate-700"
+                      }`}
                     >
                       {link.name}
                       <ChevronDown
@@ -148,8 +141,9 @@ const Navbar = () => {
                 ) : (
                   <Link
                     href={link.href}
-                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                      }`}
+                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                      isActive ? "text-orange-500" : "text-slate-700"
+                    }`}
                   >
                     {link.name}
                     {isActive && (
@@ -164,6 +158,13 @@ const Navbar = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
+          <Link
+            href="/cart"
+            className="relative flex items-center justify-center bg-slate-50 hover:bg-orange-50 border border-slate-100 rounded-full w-11 h-11 text-slate-700 hover:text-orange-500 transition-all duration-300"
+          >
+            <ShoppingCart size={20} />
+          </Link>
+
           {isLoggedIn ? (
             <div className="dropdown dropdown-end">
               <div
