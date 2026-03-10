@@ -1,11 +1,13 @@
 "use client";
 
+import { createAccessory } from "@/action/server/accessories";
 import React, { useState } from "react";
+import Swal from "sweetalert2";
 
 const AdminPetForm = () => {
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -46,13 +48,60 @@ const AdminPetForm = () => {
   const nextStep = () => validateStep() && setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.image) {
-      setErrors({ image: "Mandatory: Please upload a product image!" });
-      return;
+    setLoading(true);
+
+    try {
+      // image add 
+      if (!formData.image) {
+        setErrors({ image: "Mandatory: Please upload a product image!" });
+        setLoading(false);
+        return;
+      }
+
+      //  (Internal API call)
+      const uploadToImgBB = async (file) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append("image", file);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Upload failed");
+        return data.url; //  get ImgBB  URL
+      };
+
+      //  collect form data and upload image to get URL
+      const imageUrl = await uploadToImgBB(formData.image);
+
+      //  Image url make 
+      const finalData = {
+        ...formData,
+        image: imageUrl, // File from state change to URL from ImgBB
+      };
+
+      //  MongoDB create accessory (Internal API call)
+      const response = await createAccessory(finalData);
+
+      if (response.success) {
+        setIsSubmitted(true);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: response.error || "Failed to publish product!",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Something went wrong!");
+    } finally {
+      setLoading(false); // loading state reset after operation completes
     }
-    setIsSubmitted(true);
   };
 
   if (isSubmitted) {
@@ -371,15 +420,27 @@ const AdminPetForm = () => {
                   <button
                     type="button"
                     onClick={prevStep}
+                    // loading state diable button to prevent multiple submissions
+                    disabled={loading}
                     className="btn btn-ghost text-neutral"
                   >
                     Back
                   </button>
+
                   <button
                     type="submit"
+                    // loading state diable button to prevent multiple submissions
+                    disabled={loading}
                     className="btn btn-primary px-16 text-white shadow-xl"
                   >
-                    Complete & Publish
+                    {loading ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Publishing...
+                      </>
+                    ) : (
+                      "Complete & Publish"
+                    )}
                   </button>
                 </div>
               </div>

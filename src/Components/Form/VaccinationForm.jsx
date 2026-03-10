@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  FaSyringe, 
-  FaMoneyBillWave, 
-  FaBoxes, 
-  FaPaw, 
+import {
+  FaSyringe,
+  FaMoneyBillWave,
+  FaBoxes,
+  FaPaw,
   FaArrowLeft,
-  FaPlusCircle 
+  FaPlusCircle
 } from "react-icons/fa";
 import Link from "next/link";
 // আপনার সার্ভার অ্যাকশনটি ইমপোর্ট করুন
-import { addVaccine } from "@/action/server/vaccines"; 
+import { addVaccine } from "@/action/server/vaccines";
 
 export default function VaccinationForm() {
   const router = useRouter();
@@ -51,10 +51,10 @@ export default function VaccinationForm() {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 pt-28">
       <div className="max-w-xl mx-auto">
-        
+
         {/* Back Button - সঠিক পাথ সেট করা হয়েছে */}
-        <Link 
-          href="/vaccination" 
+        <Link
+          href="/vaccination"
           className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-600 font-bold text-sm mb-6 transition-colors group"
         >
           <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
@@ -71,7 +71,7 @@ export default function VaccinationForm() {
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            
+
             {/* Vaccine Name */}
             <div className="space-y-2">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -138,11 +138,10 @@ export default function VaccinationForm() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-5 rounded-[1.5rem] font-black text-sm uppercase tracking-[2px] transition-all shadow-lg ${
-                loading 
-                ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+              className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-[2px] transition-all shadow-lg ${loading
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                 : "bg-orange-500 text-white hover:bg-orange-600 shadow-orange-200 active:scale-95"
-              }`}
+                }`}
             >
               {loading ? "Processing..." : "Add to Inventory"}
             </button>
