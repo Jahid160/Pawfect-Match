@@ -11,7 +11,8 @@ export const collections = {
   FOODS: 'foods',
   ADOPTIONS: 'adoptionsInfo',
   SHELTER: 'shelterInfo',
-  FOODS: 'foods'
+  FOODS: 'foods',
+  CART:'cart',
 };
 
 const client = new MongoClient(uri, {

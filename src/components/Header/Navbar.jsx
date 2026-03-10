@@ -1,15 +1,9 @@
-"use client";
+"use client"
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  ChevronDown,
-  X,
-  LayoutDashboard,
-  LogOut,
-  Settings,
+import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,ShoppingCart,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
@@ -23,7 +17,8 @@ const Navbar = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
-  const user = session?.user; // ✅ this is your real user
+  const user = session?.user;
+  console.log(user); // ✅ this is your real user
   const isLoggedIn = status === "authenticated";
 
   useEffect(() => {
@@ -32,11 +27,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // এই অংশটি মুছে ফেলুন (Delete this)
-  // useEffect(() => {
-  //   setIsMenuOpen(false);
-  // }, [pathname]);
-
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
@@ -44,12 +34,11 @@ const Navbar = () => {
   // Hide navbar inside dashboard pages (your logic)
   if (pathname.startsWith("/dashboard")) return null;
 
+  // NavLinks definition
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "All Pets", href: "/all-pets" },
-    {
-      name: "Foods", href: "/pet-food"
-    },
+    { name: "Foods", href: "/pet-food" },
     {
       name: "About",
       href: "/about",
@@ -61,17 +50,25 @@ const Navbar = () => {
       ],
     },
     {
-      name: "Adoption",
-      href: "/adoption",
+      name: "Forms",
+      href: "/forms",
+      requiresAuth: true, // Login required to see this link
       subLinks: [
-        { name: "Adoption Form", href: "/adoptionfrom" },
-        { name: "Shelter Form ", href: "/shelterForm" },
-        { name: "Petdetails Form", href: "/petdetailsform" },
-        { name: "Foods  Form", href: "/addFoodForms" },
+        { name: "Adoption Form", href: "/adoptionfrom", roles: ["user", "shelter", "admin"] },
+        { name: "Shelter Form", href: "/shelterForm", roles: ["user", "shelter", "admin"] },
+        { name: "Pet Entry Form", href: "/petdetailsform", roles: ["shelter", "admin"] },
+        { name: "Foods Form", href: "/addFoodForms", roles: ["shelter", "admin"] },
       ],
     },
     { name: "Contact", href: "/contact" },
   ];
+
+  // Logic to filter links based on user session and roles
+  const filteredNavLinks = navLinks.filter((link) => {
+    // 1. Jodi login na thake ebong link-ti auth dorkar hoy, tobe dekhabe na
+    if (link.requiresAuth && !isLoggedIn) return false;
+    return true;
+  });
 
   return (
     <nav
@@ -89,7 +86,18 @@ const Navbar = () => {
         {/* Center Links (Desktop) */}
         <div className="hidden lg:flex items-center gap-1 h-full">
           {navLinks.map((link) => {
+            // 1. Logic: Login chara 'Forms' dropdown hide kora
+            if (link.requiresAuth && !isLoggedIn) return null;
+
             const isActive = pathname === link.href;
+
+            // 2. Logic: Role onujayi sub-links filter kora
+            let visibleSubLinks = link.subLinks;
+            if (link.name === "Forms" && user?.role) {
+              visibleSubLinks = link.subLinks.filter((sub) =>
+                sub.roles.includes(user.role)
+              );
+            }
 
             return (
               <div
@@ -101,8 +109,9 @@ const Navbar = () => {
                     <div
                       tabIndex={0}
                       role="button"
-                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                        }`}
+                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                        isActive ? "text-orange-500" : "text-slate-700"
+                      }`}
                     >
                       {link.name}
                       <ChevronDown
@@ -115,7 +124,8 @@ const Navbar = () => {
                       tabIndex={0}
                       className="z-1 bg-white slide-in-from-top-2 shadow-xl p-3 border border-slate-50 rounded-2xl w-52 animate-in dropdown-content menu fade-in"
                     >
-                      {link.subLinks.map((sub) => (
+                      {/* visibleSubLinks map kora hoyeche */}
+                      {visibleSubLinks?.map((sub) => (
                         <li key={sub.name}>
                           <Link
                             href={sub.href}
@@ -130,8 +140,9 @@ const Navbar = () => {
                 ) : (
                   <Link
                     href={link.href}
-                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
-                      }`}
+                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
+                      isActive ? "text-orange-500" : "text-slate-700"
+                    }`}
                   >
                     {link.name}
                     {isActive && (
@@ -146,6 +157,13 @@ const Navbar = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
+          <Link
+            href="/cart"
+            className="relative flex items-center justify-center bg-slate-50 hover:bg-orange-50 border border-slate-100 rounded-full w-11 h-11 text-slate-700 hover:text-orange-500 transition-all duration-300"
+          >
+            <ShoppingCart size={20} />
+          </Link>
+
           {isLoggedIn ? (
             <div className="dropdown dropdown-end">
               <div
@@ -251,29 +269,33 @@ const Navbar = () => {
         <div className="p-6">
           <Logo />
           <div className="space-y-4 mt-10">
-            {/* {navLinks.map((link) => (
-              <div key={link.name}>
+            {navLinks.map((link) => {
+              // 1. Logic: Login chara 'Forms' link hide kora
+              if (link.requiresAuth && !isLoggedIn) return null;
+
+              // 2. Logic: Jodi kono link-er subLinks thake (jemon Forms), 
+              // kintu user role onujayi kono sublink-er permission na thake, tobe main link-o dekhabo na.
+              // (Forms-er khetre role 'user' holeo at least 2ta link thakbe, tai eti true hobe)
+              const hasAccess = !link.subLinks || link.subLinks.some(sub =>
+                !sub.roles || sub.roles.includes(user?.role)
+              );
+
+              if (!hasAccess) return null;
+
+              return (
                 <Link
+                  key={link.name}
                   href={link.href}
-                  className="block py-2 font-black text-slate-800 hover:text-orange-500 text-lg transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={handleLinkClick}
+                  className="block text-lg font-semibold text-slate-700 hover:text-orange-500 transition-colors"
                 >
                   {link.name}
                 </Link>
-              </div>
-            ))} */}
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={handleLinkClick} // ক্লিক করলেই মেনু বন্ধ হবে
-              >
-                {link.name}
-              </Link>
-            ))}
+              );
+            })}
           </div>
 
-          {/* ✅ Mobile dashboard link when logged in */}
+          {/* Mobile dashboard link when logged in */}
           {isLoggedIn && (
             <div className="mt-6 pt-6 border-slate-100 border-t">
               <Link
