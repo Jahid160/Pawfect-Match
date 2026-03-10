@@ -62,7 +62,7 @@ const AdminPetForm = () => {
           <div className="text-7xl mb-4">✨</div>
           <h2 className="text-3xl font-black text-neutral">SUCCESS!</h2>
           <p className="py-4 text-neutral/60 italic">
-            Product "{formData.title}" is now added with SKU: {formData.sku}
+            Product `{formData.title}` is now added with SKU: {formData.sku}
           </p>
           <button
             onClick={() => window.location.reload()}
