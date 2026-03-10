@@ -83,6 +83,7 @@ const Navbar = () => {
           <Logo />
         </div>
 
+
         {/* Center Links (Desktop) */}
         <div className="hidden lg:flex items-center gap-1 h-full">
           {navLinks.map((link) => {

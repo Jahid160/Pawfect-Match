@@ -1,5 +1,8 @@
 "use server";
 import { collections, dbConnect } from "@/lib/db";
+import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
+import {cookies} from "next/headers"
 
 const userCollectionPromise = dbConnect(collections.USERS);
 
@@ -17,3 +20,26 @@ export const getUsers = async () => {
     return [];
   }
 };
+
+export async function blockUser(id) {
+      const UserCollection = await userCollectionPromise;
+
+  await UserCollection.updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: { status: "block" },
+    }
+  );
+    revalidatePath("/dashboard/users");
+}
+export async function activeUser(id) {
+      const UserCollection = await userCollectionPromise;
+
+  await UserCollection.updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: { status: "active" },
+    }
+  );
+    revalidatePath("/dashboard/users");
+}
