@@ -1,4 +1,5 @@
 "use server";
+import { verifyAdmin } from "@/lib/adminAuth";
 import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
@@ -22,6 +23,7 @@ export const getUsers = async () => {
 };
 
 export async function blockUser(id) {
+  await verifyAdmin();
       const UserCollection = await userCollectionPromise;
 
   await UserCollection.updateOne(
@@ -33,6 +35,7 @@ export async function blockUser(id) {
     revalidatePath("/dashboard/users");
 }
 export async function activeUser(id) {
+  await verifyAdmin();
       const UserCollection = await userCollectionPromise;
 
   await UserCollection.updateOne(
