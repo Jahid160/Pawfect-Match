@@ -19,7 +19,7 @@ const PetFoodDetailsPage = async ({ params }) => {
 
   if (!food?._id) {
     return (
-      <div className="flex flex-col justify-center items-center px-4 min-h-screen bg-base-200 text-center">
+      <div className="flex flex-col justify-center items-center bg-base-200 px-4 min-h-screen text-center">
         <h2 className="font-black text-3xl">Food not found</h2>
         <Link href="/petfoods" className="mt-4 btn btn-primary">
           Back to Foods
@@ -52,7 +52,7 @@ const PetFoodDetailsPage = async ({ params }) => {
             <div className="relative flex justify-center items-center bg-base-200 rounded-2xl min-h-[450px]">
 
               {hasDiscount && (
-                <span className="top-5 left-5 absolute bg-red-500 px-4 py-1 rounded-full font-bold text-xs text-white">
+                <span className="top-5 left-5 absolute bg-red-500 px-4 py-1 rounded-full font-bold text-white text-xs">
                   SALE
                 </span>
               )}
@@ -62,7 +62,7 @@ const PetFoodDetailsPage = async ({ params }) => {
                 alt={food.productName}
                 width={600}
                 height={600}
-                className="object-contain max-h-[420px]"
+                className="max-h-[420px] object-contain"
               />
             </div>
           </div>
