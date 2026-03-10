@@ -10,6 +10,7 @@ export const collections = {
   ACCESSORIES: "accessories", 
   ADOPTIONS: "adoptionsInfo",
   SHELTER: "shelterInfo",
+  
 };
 
 const client = new MongoClient(uri, {
