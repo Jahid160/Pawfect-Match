@@ -1,14 +1,12 @@
+import ManagePets from '@/components/dashboardlayouts/ManagePets';
 import React from 'react';
 
-const managePets = () => {
-    return (
-        <div className=''>
-            <h1 className='text-center text-4xl font-bold'>
-
-            Manage Pets
-            </h1>
-        </div>
-    );
+const page = () => {
+  return (
+    <div>
+      <ManagePets></ManagePets>
+    </div>
+  );
 };
 
-export default managePets;
+export default page;

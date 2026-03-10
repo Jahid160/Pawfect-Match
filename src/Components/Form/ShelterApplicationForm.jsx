@@ -1,5 +1,7 @@
 "use client";
+import { createShelterUser } from "@/action/server/Shelteruser";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const steps = [
   { id: 1, title: "Personal Info", icon: "👤" },
@@ -11,6 +13,7 @@ const steps = [
 export default function ShelterApplicationForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -42,10 +45,62 @@ export default function ShelterApplicationForm() {
   const nextStep = () => setCurrentStep((s) => Math.min(s + 1, 4));
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = (e) => {
+
+  const cloudName = "dyb72qpqm"
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true); //  after upload set loading
+
+    try {
+      const uploadToCloudinary = async (file) => {
+        if (!file) return null;
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "paw_fect_preset");
+        data.append("cloud_name", "dyb72qpqm");
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, // cloudName use 
+          { method: "POST", body: data }
+        );
+        const fileData = await res.json();
+        return fileData.secure_url;
+      };
+      //upload files to cloudinary and get back the URLs
+      const nidUrl = await uploadToCloudinary(formData.nidPhoto);
+      const shelterUrl = await uploadToCloudinary(formData.shelterPhoto);
+      const certUrl = formData.registrationCert ? await uploadToCloudinary(formData.registrationCert) : null;
+
+      const finalData = {
+        ...formData,
+        nidPhoto: nidUrl,
+        shelterPhoto: shelterUrl,
+        registrationCert: certUrl,
+        submittedAt: new Date().toISOString(),
+        status: "pending"
+      };
+
+      //server action call to save application data in database
+      const response = await createShelterUser(finalData);
+
+      if (response.success) {
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        Swal.fire({ icon: 'error', title: 'Submission Failed', text: response.message });
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong!' });
+    } finally {
+      setLoading(false); // after upload finishes (success or error), set loading to false
+    }
   };
+
+
+
+
 
   if (submitted) {
     return (
@@ -86,9 +141,9 @@ export default function ShelterApplicationForm() {
 
         {/* Stepper */}
         <div className="flex items-center justify-between mb-8 relative">
-          <div className="absolute top-5 left-0 right-0 h-0.5 bg-base-300 -z-0" />
+          <div className="absolute top-5 left-0 right-0 h-0.5 bg-base-300 z-0" />
           <div
-            className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-500 -z-0"
+            className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-500 z-0"
             style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
           />
           {steps.map((step) => (
@@ -97,22 +152,20 @@ export default function ShelterApplicationForm() {
               className="flex flex-col items-center gap-1 z-10"
             >
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
-                  step.id < currentStep
-                    ? "bg-primary text-primary-content shadow-md"
-                    : step.id === currentStep
-                      ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
-                      : "bg-base-100 text-base-content/40 border-2 border-base-300"
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${step.id < currentStep
+                  ? "bg-primary text-primary-content shadow-md"
+                  : step.id === currentStep
+                    ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
+                    : "bg-base-100 text-base-content/40 border-2 border-base-300"
+                  }`}
               >
                 {step.id < currentStep ? "✓" : step.icon}
               </div>
               <span
-                className={`text-xs font-medium hidden sm:block ${
-                  step.id === currentStep
-                    ? "text-primary"
-                    : "text-base-content/50"
-                }`}
+                className={`text-xs font-medium hidden sm:block ${step.id === currentStep
+                  ? "text-primary"
+                  : "text-base-content/50"
+                  }`}
               >
                 {step.title}
               </span>
@@ -472,10 +525,12 @@ export default function ShelterApplicationForm() {
                     type="button"
                     className="btn btn-ghost flex-1"
                     onClick={prevStep}
+                    disabled={loading} //  loading time button disable
                   >
                     ← Previous
                   </button>
                 )}
+
                 {currentStep < 4 ? (
                   <button
                     type="button"
@@ -488,9 +543,16 @@ export default function ShelterApplicationForm() {
                   <button
                     type="submit"
                     className="btn btn-primary flex-1"
-                    disabled={!formData.agreeTerms}
+                    disabled={loading || !formData.agreeTerms} // after loading buttons disable
                   >
-                    🐾 Submit Application
+                    {loading ? (
+                      <>
+                        <span className="loading loading-spinner"></span>
+                        Submitting...
+                      </>
+                    ) : (
+                      "🐾 Submit Application"
+                    )}
                   </button>
                 )}
               </div>
