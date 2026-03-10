@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,
+import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,ShoppingCart,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
@@ -18,7 +18,7 @@ const Navbar = () => {
   const { data: session, status } = useSession();
 
   const user = session?.user;
-  console.log(user); // ✅ this is your real user
+  console.log(user); 
   const isLoggedIn = status === "authenticated";
 
   useEffect(() => {
@@ -26,8 +26,6 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -162,6 +160,13 @@ const Navbar = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-4">
+          <Link
+            href="/cart"
+            className="relative flex items-center justify-center bg-slate-50 hover:bg-orange-50 border border-slate-100 rounded-full w-11 h-11 text-slate-700 hover:text-orange-500 transition-all duration-300"
+          >
+            <ShoppingCart size={20} />
+          </Link>
+
           {isLoggedIn ? (
             <div className="dropdown dropdown-end">
               <div
@@ -232,7 +237,7 @@ const Navbar = () => {
                 <li>
                   <button
                     onClick={() => signOut()}
-                    className="w-full text-left flex items-center gap-3 hover:bg-rose-50 py-3 rounded-xl font-bold text-rose-500 text-sm transition-colors"
+                    className="flex items-center gap-3 hover:bg-rose-50 py-3 rounded-xl w-full font-bold text-rose-500 text-sm text-left transition-colors"
                   >
                     <LogOut size={18} /> Logout
                   </button>
@@ -285,7 +290,7 @@ const Navbar = () => {
                   key={link.name}
                   href={link.href}
                   onClick={handleLinkClick}
-                  className="block text-lg font-semibold text-slate-700 hover:text-orange-500 transition-colors"
+                  className="block font-semibold text-slate-700 hover:text-orange-500 text-lg transition-colors"
                 >
                   {link.name}
                 </Link>
@@ -299,7 +304,7 @@ const Navbar = () => {
               <Link
                 href="/dashboard"
                 onClick={() => setIsMenuOpen(false)}
-                className="btn btn-primary w-full"
+                className="w-full btn btn-primary"
               >
                 Dashboard
               </Link>
