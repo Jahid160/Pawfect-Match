@@ -1,8 +1,6 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const uri = process.env.URI;
-
-
 const dbname = process.env.DBNAME;
 
 export const collections = {
@@ -31,7 +29,6 @@ const setupIndices = async (db) => {
       { email: 1 },
       { unique: true, name: "unique_email_idx" }
     );
-    // console.log(" Database indices verified");
   } catch (error) {
     console.error(" Failed to setup indices:", error);
   }
@@ -40,11 +37,19 @@ const setupIndices = async (db) => {
 let dbInstance = null;
 
 export const dbConnect = async (cname) => {
+  if (!cname) {
+    throw new Error("Collection name is required for dbConnect!");
+  }
+
+  if (!client.connect) {
+    await client.connect();
+  }
+
   if (!dbInstance) {
     await client.connect();
     dbInstance = client.db(dbname);
-    // Run index setup only once when the connection is first established
     await setupIndices(dbInstance);
   }
+
   return dbInstance.collection(cname);
 };
