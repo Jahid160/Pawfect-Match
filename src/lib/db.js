@@ -5,13 +5,13 @@ const dbname = process.env.DBNAME;
 
 export const collections = {
   USERS: "users",
-  PETS: "pets",
-  FOODS: "foods",
-  ACCESSORIES: "accessories",
-  ADOPTIONS: "adoptionsInfo",
-  SHELTER: "shelterInfo",
-  CART: 'cart',
-  VACCINES: 'vaccines'
+  PETS: 'pets',
+  FOODS: 'foods',
+  ADOPTIONS: 'adoptionsInfo',
+  SHELTER: 'shelterInfo',
+  FOODS: 'foods',
+  VACCINES: 'vaccines',
+  ORDERS: "vaccine_orders",
 };
 
 const client = new MongoClient(uri, {

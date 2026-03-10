@@ -1,12 +1,7 @@
-import DoctorManagement from '@/components/dashboardlayouts/DoctorsProfiles';
-import React from 'react';
+import { getAllOrders } from "@/action/server/orders";
+import DoctorManagement from "@/Components/dashboardlayouts/DoctorsProfiles";
 
-const page = () => {
-  return (
-    <div>
-      <DoctorManagement></DoctorManagement>
-    </div>
-  );
-};
-
-export default page;
+export default async function Page() {
+  const orders = await getAllOrders();
+  return <DoctorManagement allOrders={orders} />;
+}
