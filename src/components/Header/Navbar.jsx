@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {Menu,ChevronDown,X,LayoutDashboard,LogOut,Settings,ShoppingCart,
+import {
+  Menu, ChevronDown, X, LayoutDashboard, LogOut, Settings, ShoppingCart,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import AuthButtons from "../button/AuthButtons";
@@ -18,7 +19,6 @@ const Navbar = () => {
   const { data: session, status } = useSession();
 
   const user = session?.user;
-  console.log(user); 
   const isLoggedIn = status === "authenticated";
 
   useEffect(() => {
@@ -58,7 +58,8 @@ const Navbar = () => {
         { name: "Adoption Form", href: "/adoptionfrom", roles: ["user", "shelter", "admin"] },
         { name: "Shelter Form", href: "/shelterForm", roles: ["user", "shelter", "admin"] },
         { name: "Pet Entry Form", href: "/petdetailsform", roles: ["shelter", "admin"] },
-        { name: "Foods Form", href: "/addFoodForms", roles: ["shelter", "admin"] },
+        { name: "Foods Form", href: "/addFoodForms", roles: ["admin"] },
+        { name: "Accessories Form", href: "/addAccessoryForm", roles: ["admin"] },
         { name: "Vaccination Form", href: "/vaccination/add", roles: ["user", "shelter", "admin"] },
       ],
     },
@@ -112,9 +113,8 @@ const Navbar = () => {
                     <div
                       tabIndex={0}
                       role="button"
-                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
-                        isActive ? "text-orange-500" : "text-slate-700"
-                      }`}
+                      className={`flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
+                        }`}
                     >
                       {link.name}
                       <ChevronDown
@@ -143,9 +143,8 @@ const Navbar = () => {
                 ) : (
                   <Link
                     href={link.href}
-                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${
-                      isActive ? "text-orange-500" : "text-slate-700"
-                    }`}
+                    className={`relative text-sm font-bold transition-all duration-300 hover:text-orange-500 ${isActive ? "text-orange-500" : "text-slate-700"
+                      }`}
                   >
                     {link.name}
                     {isActive && (
