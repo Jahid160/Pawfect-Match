@@ -18,7 +18,7 @@ const Navbar = () => {
   const { data: session, status } = useSession();
 
   const user = session?.user;
-  console.log(user); // ✅ this is your real user
+  console.log(user); 
   const isLoggedIn = status === "authenticated";
 
   useEffect(() => {
@@ -235,7 +235,7 @@ const Navbar = () => {
                 <li>
                   <button
                     onClick={() => signOut()}
-                    className="w-full text-left flex items-center gap-3 hover:bg-rose-50 py-3 rounded-xl font-bold text-rose-500 text-sm transition-colors"
+                    className="flex items-center gap-3 hover:bg-rose-50 py-3 rounded-xl w-full font-bold text-rose-500 text-sm text-left transition-colors"
                   >
                     <LogOut size={18} /> Logout
                   </button>
@@ -288,7 +288,7 @@ const Navbar = () => {
                   key={link.name}
                   href={link.href}
                   onClick={handleLinkClick}
-                  className="block text-lg font-semibold text-slate-700 hover:text-orange-500 transition-colors"
+                  className="block font-semibold text-slate-700 hover:text-orange-500 text-lg transition-colors"
                 >
                   {link.name}
                 </Link>
@@ -302,7 +302,7 @@ const Navbar = () => {
               <Link
                 href="/dashboard"
                 onClick={() => setIsMenuOpen(false)}
-                className="btn btn-primary w-full"
+                className="w-full btn btn-primary"
               >
                 Dashboard
               </Link>
