@@ -5,7 +5,7 @@ export default async function Vaccination() {
   const vaccines = await getVaccines();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 mt-10 gap-6">
+    <div className="bg-base-200 grid grid-cols-1 md:grid-cols-4 mt-10 gap-6 p-5">
       {vaccines.map((v) => (
         <VaccinationCard key={v._id} vaccine={v} />
       ))}
