@@ -60,7 +60,7 @@ const Navbar = () => {
         { name: "Pet Entry Form", href: "/petdetailsform", roles: ["shelter", "admin"] },
         { name: "Foods Form", href: "/addFoodForms", roles: ["admin"] },
         { name: "Accessories Form", href: "/addAccessoryForm", roles: ["admin"] },
-        { name: "Vaccination Form", href: "/vaccination/add", roles: ["user", "shelter", "admin"] },
+        { name: "Vaccination Form", href: "/vaccination/add", roles: ["admin"] },
       ],
     },
     { name: "Contact", href: "/contact" },

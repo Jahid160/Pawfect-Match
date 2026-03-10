@@ -1,23 +1,41 @@
 "use server";
 
 import { collections, dbConnect } from "@/lib/db";
-import { ObjectId } from "mongodb";
-
-const accessoriesCollectionPromise = dbConnect(collections.ACCESSORIES);
 
 export const createAccessory = async (data) => {
      try {
-          const accessoriesCollection = await accessoriesCollectionPromise;
+          const accessoriesCollection = await (await dbConnect(collections.ACCESSORIES));
 
-          const result = await accessoriesCollection.insertOne({
-               ...data,
+          // Data cleanup (e.g., converting string to number)
+          const newAccessory = {
+               title: data.title,
+               category: data.category,
+               sku: data.sku,
+               tags: data.tags,
+               brand: data.brand,
+               targetPet: data.targetPet,
+               stock: Number(data.stock), // Convert string to number
+               price: Number(data.price), // Convert string to number
+               discountPrice: data.discountPrice ? Number(data.discountPrice) : 0,
+               weight: data.weight,
+               size: data.size,
+               image: data.image, // This must be a URL string
+               description: data.description,
+               material: data.material,
+               warranty: data.warranty,
                createdAt: new Date(),
-          });
+          };
 
-          return { success: true, id: result.insertedId.toString() };
+          const result = await accessoriesCollection.insertOne(newAccessory);
+
+          return {
+               success: true,
+               id: result.insertedId.toString(),
+               message: "Accessory added successfully"
+          };
      } catch (error) {
           console.error("createAccessory error:", error);
-          return { success: false, error: error.message };
+          return { success: false, error: "Failed to save data to database." };
      }
 };
 
