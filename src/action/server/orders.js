@@ -14,11 +14,11 @@ export const placeVaccineOrder = async (data) => {
       adminAccepted: false,
       doctorAssigned: false,
       isCompleted: false,
-      deadlineDate: null, // ডক্টর পরে সেট করবে
+      deadlineDate: null, 
       createdAt: new Date(),
     };
     await orderCollection.insertOne(newOrder);
-    revalidatePath("/dashboard/vaccination-management");
+    revalidatePath("/dashboard/vaccinations");
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -33,19 +33,20 @@ export const adminAcceptOrder = async (orderId) => {
       { _id: new ObjectId(orderId) },
       { $set: { status: "AdminAccepted", adminAccepted: true } }
     );
-    revalidatePath("/dashboard/vaccination-management");
+    revalidatePath("/dashboard/vaccinations");
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৩. ডক্টর শিডিউল দেওয়ার ফাংশন (Doctor-side)
+// ৩. ডক্টর শিডিউল দেওয়ার ফাংশন (Doctor-side)
 export const doctorScheduleOrder = async (orderId, days) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
     const deadline = new Date();
-    deadline.setDate(deadline.getDate() + days); // ২ বা ৫ দিন যোগ করা
+    // ১ দিন বা তার বেশি দিনের ডেডলাইন সেট করা
+    deadline.setDate(deadline.getDate() + parseInt(days)); 
 
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
@@ -56,20 +57,37 @@ export const doctorScheduleOrder = async (orderId, days) => {
         } 
       }
     );
-    revalidatePath("/dashboard/vaccination-management");
+    revalidatePath("/dashboard/vaccinations");
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৪. ড্যাশবোর্ডের জন্য সব অর্ডার নিয়ে আসার ফাংশন
+// ৪. ভ্যাকসিনেশন কমপ্লিট করার ফাংশন (New)
+export const completeVaccination = async (orderId) => {
+  try {
+    const orderCollection = await dbConnect(collections.ORDERS);
+    await orderCollection.updateOne(
+      { _id: new ObjectId(orderId) },
+      { $set: { 
+          status: "Completed", 
+          isCompleted: true 
+        } 
+      }
+    );
+    revalidatePath("/dashboard/vaccinations");
+    return { success: true };
+  } catch (error) {
+    return { success: false };
+  }
+};
+
+// ৫. সব অর্ডার নিয়ে আসার ফাংশন
 export const getAllOrders = async () => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
     const orders = await orderCollection.find({}).sort({ createdAt: -1 }).toArray();
-    
-    // MongoDB ObjectId কে স্ট্রিং এ কনভার্ট করা (Next.js এর জন্য জরুরি)
     return JSON.parse(JSON.stringify(orders));
   } catch (error) {
     return [];
