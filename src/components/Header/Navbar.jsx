@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Menu, ChevronDown, X, LayoutDashboard, LogOut, Settings, ShoppingCart, ChevronRight
 } from "lucide-react";
@@ -11,6 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import AuthButtons from "../button/AuthButtons";
 import Logo from "./Logo";
 import Image from "next/image";
+import { useAuthModal } from "@/provider/AuthModalProvider";
+
 
 // ১. NavLinks (Optimized Performance)
 const navLinks = [
@@ -48,17 +50,34 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState(null);
-
+  const searchParams = useSearchParams();
+  const { openLoginModal } = useAuthModal();
+  const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const user = session?.user;
   const isLoggedIn = status === "authenticated";
 
+  useEffect(() => {
+    const loginTrigger = searchParams.get('loginTrigger');
+
+    if (loginTrigger === 'true') {
+      // ১. login Model open 
+      openLoginModal();
+
+      // ২. URL পরিষ্কার করুন (যাতে রিফ্রেশ দিলে মোডাল বারবার না আসে)
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('loginTrigger');
+      const newPath = pathname + (params.toString() ? `?${params.toString()}` : '');
+      router.replace(newPath);
+    }
+  }, [searchParams, openLoginModal, router, pathname]);
+
   // ২. স্ক্রল এবং বডি লক হ্যান্ডলার
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener("scroll", handleScroll);
-    
+
     // মোবাইল মেনু ওপেন হলে পেছনের স্ক্রল বন্ধ রাখা
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -84,9 +103,8 @@ const Navbar = () => {
   return (
     <>
       {/* মেইন নেভবার - Z-index বাড়িয়ে ৯৯৯ করা হয়েছে */}
-      <nav className={`fixed top-0 left-0 w-full z-[999] transition-all duration-500 ${
-        isScrolled ? "bg-white/90 backdrop-blur-md shadow-md h-16" : "bg-white h-20"
-      }`}>
+      <nav className={`fixed top-0 left-0 w-full z-999 transition-all duration-500 ${isScrolled ? "bg-white/90 backdrop-blur-md shadow-md h-16" : "bg-white h-20"
+        }`}>
         <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
           {/* Logo */}
           <div className="shrink-0 scale-90 sm:scale-100">
@@ -102,6 +120,7 @@ const Navbar = () => {
                 visibleSubLinks = link.subLinks.filter(sub => sub.roles.includes(user.role));
               }
 
+
               return (
                 <div key={link.name} className="group relative flex items-center px-3 h-full">
                   {link.subLinks ? (
@@ -109,7 +128,7 @@ const Navbar = () => {
                       <div tabIndex={0} role="button" className={`flex items-center gap-1 text-sm font-bold hover:text-orange-500 transition-colors ${isActive ? "text-orange-500" : "text-slate-700"}`}>
                         {link.name} <ChevronDown size={14} className="group-hover:rotate-180 transition-transform" />
                       </div>
-                      <ul tabIndex={0} className="dropdown-content menu p-3 shadow-2xl bg-white border border-slate-50 rounded-2xl w-52 z-[1000]">
+                      <ul tabIndex={0} className="dropdown-content menu p-3 shadow-2xl bg-white border border-slate-50 rounded-2xl w-52 z-1000">
                         {visibleSubLinks?.map((sub) => (
                           <li key={sub.name}>
                             <Link href={sub.href} className="hover:bg-orange-50 py-2 rounded-xl font-medium hover:text-orange-600 transition-all">
@@ -148,14 +167,14 @@ const Navbar = () => {
                   </div>
                   <ChevronDown size={12} className="text-slate-400 group-hover:text-orange-500" />
                 </div>
-                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-white border border-slate-50 rounded-2xl w-52 mt-4 z-[1000]">
+                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-white border border-slate-50 rounded-2xl w-52 mt-4 z-1000">
                   <li className="px-4 py-2 border-b border-slate-50 mb-1">
                     <p className="text-[10px] font-bold text-slate-400 truncate">{user?.email}</p>
                   </li>
-                  <li><Link href="/dashboard" className="flex items-center gap-3 font-bold text-sm text-slate-600 hover:bg-orange-50 rounded-xl py-3"><LayoutDashboard size={18} className="text-orange-500"/> Dashboard</Link></li>
-                  <li><Link href="/dashboard/profile" className="flex items-center gap-3 font-bold text-sm text-slate-600 hover:bg-orange-50 rounded-xl py-3"><Settings size={18} className="text-blue-500"/> Settings</Link></li>
+                  <li><Link href="/dashboard" className="flex items-center gap-3 font-bold text-sm text-slate-600 hover:bg-orange-50 rounded-xl py-3"><LayoutDashboard size={18} className="text-orange-500" /> Dashboard</Link></li>
+                  <li><Link href="/dashboard/profile" className="flex items-center gap-3 font-bold text-sm text-slate-600 hover:bg-orange-50 rounded-xl py-3"><Settings size={18} className="text-blue-500" /> Settings</Link></li>
                   <div className="h-px bg-slate-100 my-1 mx-2" />
-                  <li><button onClick={() => signOut()} className="flex items-center gap-3 font-bold text-sm text-rose-500 hover:bg-rose-50 rounded-xl py-3 w-full"><LogOut size={18}/> Logout</button></li>
+                  <li><button onClick={() => signOut()} className="flex items-center gap-3 font-bold text-sm text-rose-500 hover:bg-rose-50 rounded-xl py-3 w-full"><LogOut size={18} /> Logout</button></li>
                 </ul>
               </div>
             ) : (
@@ -174,25 +193,25 @@ const Navbar = () => {
           {isMenuOpen && (
             <>
               {/* ব্যাকড্রপ - Z-index ১০০০ */}
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                exit={{ opacity: 0 }} 
-                onClick={() => setIsMenuOpen(false)} 
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[1000] lg:hidden" 
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMenuOpen(false)}
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-1000 lg:hidden"
               />
-              
+
               {/* ড্রয়ার বডি - Z-index ১০০১ */}
-              <motion.div 
-                initial={{ x: "-100%" }} 
-                animate={{ x: 0 }} 
-                exit={{ x: "-100%" }} 
-                transition={{ type: "spring", damping: 25, stiffness: 200 }} 
-                className="fixed top-0 left-0 w-[85%] max-w-[300px] h-full bg-white z-[1001] lg:hidden flex flex-col shadow-2xl"
+              <motion.div
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed top-0 left-0 w-[85%] max-w-75 h-full bg-white z-1001 lg:hidden flex flex-col shadow-2xl"
               >
                 <div className="p-6 flex flex-col h-full">
                   <Logo />
-                  
+
                   <div className="mt-10 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     <div className="space-y-1">
                       {filteredNavLinks.map((link) => {
@@ -206,22 +225,22 @@ const Navbar = () => {
                                 {link.name}
                               </Link>
                               {hasSub && (
-                                <button 
-                                  onClick={() => setActiveMobileSub(isOpen ? null : link.name)} 
+                                <button
+                                  onClick={() => setActiveMobileSub(isOpen ? null : link.name)}
                                   className={`p-2 rounded-lg transition-all ${isOpen ? "bg-orange-500 text-white rotate-90" : "bg-slate-50 text-slate-400"}`}
                                 >
                                   <ChevronRight size={18} />
                                 </button>
                               )}
                             </div>
-                            
+
                             {/* কলাপসিবল সাব-লিঙ্ক এনিমেশন */}
                             <AnimatePresence>
                               {hasSub && isOpen && (
-                                <motion.div 
-                                  initial={{ height: 0, opacity: 0 }} 
-                                  animate={{ height: "auto", opacity: 1 }} 
-                                  exit={{ height: 0, opacity: 0 }} 
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
                                   className="overflow-hidden bg-slate-50 rounded-2xl mb-4 shadow-inner"
                                 >
                                   <div className="p-2 space-y-1">
