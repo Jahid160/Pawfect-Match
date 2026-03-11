@@ -1,5 +1,5 @@
 import { getVaccines } from "@/action/server/vaccines";
-import { VaccinationCard } from "@/Components/cards/VaccinationCard";
+import { VaccinationCard } from "@/components/cards/VaccinationCard";
 
 export default async function Vaccination() {
   const vaccines = await getVaccines();

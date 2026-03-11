@@ -7,6 +7,7 @@ import Navbar from "@/components/Header/Navbar";
 import Footer from "@/components/Footer/Footer";
 import SupportButton from "@/components/HelpCenter/SupportButton";
 import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -26,14 +27,15 @@ export default function RootLayout({ children }) {
           {/* এখানে <AuthModalProvider> ওপেনিং ট্যাগটি যোগ করা হয়েছে */}
           <AuthModalProvider>
             <Toaster position="top-center" reverseOrder={false} />
-            
+
             <header className="mx-auto py-2 md:w-11/12 mb-15">
-              <Navbar />
+              <Suspense fallback={<div className="h-16 bg-base-100" />}>
+                <Navbar />
+              </Suspense>
             </header>
 
             <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
               {children}
-
             </main>
             <Toaster position="top-right" />
 
