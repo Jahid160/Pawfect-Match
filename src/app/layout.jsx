@@ -1,6 +1,8 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
+import AuthModalProvider from "@/provider/AuthModalProvider";
+
 import Navbar from "@/components/Header/Navbar";
 import Footer from "@/components/Footer/Footer";
 import Script from "next/script";
@@ -28,15 +30,16 @@ export default function RootLayout({ children }) {
             <Navbar></Navbar>
           </header>
 
-          <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
-            {children}
-          </main>
+            <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
+              {children}
+            </main>
 
           <SupportButton></SupportButton>
 
-          <footer>
-            <Footer></Footer>
-          </footer>
+            <footer>
+              <Footer />
+            </footer>
+          </AuthModalProvider>
         </NextAuthProvider>
       </body>
     </html>

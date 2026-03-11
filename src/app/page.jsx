@@ -1,4 +1,3 @@
-import Petcarts from "@/components/cards/Petcarts";
 import RecentPets from "@/components/cards/RecentPets";
 import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import Banner from "@/components/home/Banner";
