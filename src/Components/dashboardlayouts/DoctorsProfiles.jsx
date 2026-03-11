@@ -1,11 +1,10 @@
 "use client";
 
 import React from 'react';
-import { motion } from "framer-motion";
 import { 
-  Stethoscope, Search, Plus, Phone, Clock, Award, 
-  MoreVertical, Activity, HeartPulse, Syringe, CheckCircle2,
-  Check, CalendarCheck
+  Stethoscope, Plus, Phone, Award, 
+  MoreVertical, Activity, Syringe, CheckCircle2,
+  Check, CalendarCheck, Clock8, Calendar
 } from 'lucide-react';
 import { doctorScheduleOrder, completeVaccination } from "@/action/server/orders";
 import { toast } from "react-hot-toast";
@@ -16,9 +15,22 @@ const DoctorManagement = ({ allOrders = [] }) => {
   const activeSchedules = allOrders.filter(order => order.status === "DoctorAccepted");
   const completedCount = allOrders.filter(order => order.status === "Completed" || order.isCompleted).length;
 
-  // ২. হ্যান্ডলার ফাংশনস
+  // ২. ডেট ফরম্যাট ফাংশন
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
+  };
+
+  // ৩. হ্যান্ডলার ফাংশনস
   const handleAccept = async (id) => {
-    const res = await doctorScheduleOrder(id, 1); // ১ দিনের ডেডলাইন
+    const res = await doctorScheduleOrder(id, 1);
     if (res.success) toast.success("Accepted! 1-day deadline set.");
   };
 
@@ -28,9 +40,9 @@ const DoctorManagement = ({ allOrders = [] }) => {
   };
 
   const doctors = [
-    { id: 1, name: "Dr. Rakibul Islam", specialty: "Veterinary Surgeon", experience: "8 Years", status: "On Call", assignedShelter: "Happy Paws Sanctuary", contact: "+880 1712-345678" },
-    { id: 2, name: "Dr. Sarah Ahmed", specialty: "General Physician", experience: "5 Years", status: "Available", assignedShelter: "Urban Pet Haven", contact: "+880 1512-987654" },
-    { id: 3, name: "Dr. Mahim Khan", specialty: "Vaccination Specialist", experience: "12 Years", status: "Busy", assignedShelter: "Safe Tails Shelter", contact: "+880 1912-112233" }
+    { id: 1, name: "Dr. Rakibul Islam", specialty: "Veterinary Surgeon", status: "On Call", contact: "+880 1712-345678" },
+    { id: 2, name: "Dr. Sarah Ahmed", specialty: "General Physician", status: "Available", contact: "+880 1512-987654" },
+    { id: 3, name: "Dr. Mahim Khan", specialty: "Vaccination Specialist", status: "Busy", contact: "+880 1912-112233" }
   ];
 
   return (
@@ -40,7 +52,7 @@ const DoctorManagement = ({ allOrders = [] }) => {
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-10">
         <div>
           <h1 className="flex items-center gap-3 font-black text-slate-900 text-4xl tracking-tight">
-            Vet <span className="text-orange-500 decoration-8 decoration-blue-100 underline underline-offset-[-2px]">Specialists</span>
+            Vet <span className="text-orange-500 underline decoration-8 decoration-blue-100 underline-offset-[-2px]">Specialists</span>
           </h1>
           <p className="mt-2 font-medium text-slate-500">Coordinate with your medical team and manage schedules.</p>
         </div>
@@ -60,15 +72,13 @@ const DoctorManagement = ({ allOrders = [] }) => {
 
       {/* --- DOCTOR DIRECTORY --- */}
       <div className="gap-8 grid grid-cols-1 lg:grid-cols-2">
-        {doctors.map((doctor, i) => {
+        {doctors.map((doctor) => {
           const isVaccinator = doctor.specialty === "Vaccination Specialist";
 
           return (
-            <motion.div 
+            <div 
               key={doctor.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white shadow-sm hover:shadow-xl p-8 border border-slate-100 rounded-[2.5rem] transition-all"
+              className="bg-white shadow-sm p-8 border border-slate-100 rounded-[2.5rem]"
             >
               <div className="flex sm:flex-row flex-col items-start gap-6">
                 <div className="bg-blue-100 rounded-3xl w-20 h-20 text-blue-600 shrink-0 flex items-center justify-center">
@@ -85,7 +95,7 @@ const DoctorManagement = ({ allOrders = [] }) => {
                     </div>
                   </div>
 
-                  {/* ৪. ডক্টর পেন্ডিং টাস্ক সেকশন (Actionable) */}
+                  {/* Task Queue Section */}
                   {isVaccinator && (pendingVaccinations.length > 0 || activeSchedules.length > 0) && (
                     <div className="mt-6 p-5 bg-slate-50 rounded-[2rem] border border-slate-100">
                       <p className="mb-4 font-black text-[10px] text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -93,36 +103,40 @@ const DoctorManagement = ({ allOrders = [] }) => {
                       </p>
                       
                       <div className="space-y-3">
-                        {/* New Requests to Accept */}
+                        {/* New Requests */}
                         {pendingVaccinations.map(order => (
-                          <div key={order._id} className="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+                          <div key={order._id} className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                             <div>
                               <p className="text-xs font-black text-slate-700">{order.vaccineName}</p>
-                              <p className="text-[10px] text-purple-500 font-bold">New Request</p>
+                              <div className="flex items-center gap-1.5 mt-1 text-[10px] font-bold text-slate-400">
+                                <Clock8 size={12} className="text-purple-400" />
+                                <span>Requested: {formatDateTime(order.createdAt)}</span>
+                              </div>
                             </div>
                             <button 
                               onClick={() => handleAccept(order._id)}
-                              className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-xl transition-all"
-                              title="Accept & Set 1 Day Deadline"
+                              className="bg-purple-600 hover:bg-purple-700 text-white p-2.5 rounded-xl transition-all shadow-lg shadow-purple-100"
                             >
-                              <CalendarCheck size={16} />
+                              <CalendarCheck size={18} />
                             </button>
                           </div>
                         ))}
 
-                        {/* Active Schedules to Complete */}
+                        {/* Active Schedules */}
                         {activeSchedules.map(order => (
-                          <div key={order._id} className="flex items-center justify-between bg-blue-50/50 p-3 rounded-2xl border border-blue-100">
+                          <div key={order._id} className="flex items-center justify-between bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
                             <div>
                               <p className="text-xs font-black text-blue-800">{order.vaccineName}</p>
-                              <p className="text-[10px] text-blue-500 font-bold italic">Deadline: Tomorrow</p>
+                              <div className="flex items-center gap-1.5 mt-1 text-[10px] font-bold text-blue-400">
+                                <Calendar size={12} />
+                                <span>Deadline: {new Date(order.deadlineDate).toLocaleDateString()}</span>
+                              </div>
                             </div>
                             <button 
                               onClick={() => handleComplete(order._id)}
-                              className="bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-xl transition-all"
-                              title="Mark as Completed"
+                              className="bg-emerald-500 hover:bg-emerald-600 text-white p-2.5 rounded-xl transition-all shadow-lg shadow-emerald-100"
                             >
-                              <Check size={16} />
+                              <Check size={18} />
                             </button>
                           </div>
                         ))}
@@ -138,7 +152,7 @@ const DoctorManagement = ({ allOrders = [] }) => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
