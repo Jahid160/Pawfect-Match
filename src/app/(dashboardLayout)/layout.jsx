@@ -17,7 +17,7 @@ const layout = ({ children }) => {
       <div className="flex">
         {/* 2. The Sidebar */}
         <DashboardSidebar />
-
+        
         {/* 3. Main Content Area */}
         {/* - lg:ml-[240px]: Push content right only on desktop.
             - pt-[80px]: Space for the fixed navbar (adjust based on navbar height).
