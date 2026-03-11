@@ -12,6 +12,8 @@ export const collections = {
   FOODS: 'foods',
   VACCINES: 'vaccines',
   ORDERS: "vaccine_orders",
+  CART: 'cart',
+  ORDER:'order',
 };
 
 const client = new MongoClient(uri, {
