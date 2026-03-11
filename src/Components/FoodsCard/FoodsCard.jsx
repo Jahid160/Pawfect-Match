@@ -17,6 +17,7 @@ import {
 } from "react-icons/fa";
 import { addToCart } from "@/action/server/cart";
 import { useAuthModal } from "@/provider/AuthModalProvider";
+import toast from "react-hot-toast";
 
 // --- FoodCard Component ---
 export const FoodCard = ({ food }) => {
@@ -40,34 +41,32 @@ export const FoodCard = ({ food }) => {
     : 0;
 
   const handleAddToCart = () => {
-    if (!session?.user?.email) {
-      openLoginModal();
-      return;
-    }
+  if (!session?.user?.email) {
+    openLoginModal();
+    return;
+  }
 
-    setMessage("");
-
-    startTransition(async () => {
-      const result = await addToCart({
-        userEmail: session.user.email,
-        foodId: food._id?.toString() || food.id,
-        productName: food.productName,
-        image: food.image,
-        price: displayPrice,
-        stock: food.stock,
-        brand: food.brand,
-        weight: food.weight,
-        weightUnit: food.weightUnit,
-        inStock: food.inStock,
-      });
-
-      setMessage(result?.message || "Added to cart");
-
-      if (result?.acknowledged || result?.insertedId || result?.success || result?.message) {
-        router.push("/cart");
-      }
+  startTransition(async () => {
+    const result = await addToCart({
+      userEmail: session.user.email,
+      foodId: food._id?.toString() || food.id,
+      productName: food.productName,
+      image: food.image,
+      price: displayPrice,
+      stock: food.stock,
+      brand: food.brand,
+      weight: food.weight,
+      weightUnit: food.weightUnit,
+      inStock: food.inStock,
     });
-  };
+
+    if (result?.acknowledged || result?.insertedId || result?.success) {
+      toast.success("Added to cart successfully 🛒");
+    } else {
+      toast.error(result?.message || "Failed to add to cart");
+    }
+  });
+};
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">

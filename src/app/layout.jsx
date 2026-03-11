@@ -7,6 +7,7 @@ import Navbar from "@/components/Header/Navbar";
 import Footer from "@/components/Footer/Footer";
 import Script from "next/script";
 import SupportButton from "@/components/HelpCenter/SupportButton";
+import { Toaster } from "react-hot-toast";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,7 +31,9 @@ export default function RootLayout({ children }) {
 
             <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
               {children}
+
             </main>
+            <Toaster position="top-right" />
 
             {/* <Script
               src="//code.tidio.co/bnnskbd4agggqkgqz1jtpiuiiw8yt0s7.js"
