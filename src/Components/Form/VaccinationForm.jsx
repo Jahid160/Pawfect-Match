@@ -4,15 +4,19 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FaSyringe,
-  FaMoneyBillWave,
-  FaBoxes,
   FaPaw,
   FaArrowLeft,
-  FaPlusCircle
+  FaPlusCircle,
+  FaIndustry,
+  FaHashtag,
+  FaRegCalendarTimes,
+  FaFileAlt
 } from "react-icons/fa";
 import Link from "next/link";
 // আপনার সার্ভার অ্যাকশনটি ইমপোর্ট করুন
 import { addVaccine } from "@/action/server/vaccines";
+import { FaBoxesStacked, FaMoneyBill1Wave } from "react-icons/fa6";
+import toast from "react-hot-toast";
 
 export default function VaccinationForm() {
   const router = useRouter();
@@ -28,10 +32,10 @@ export default function VaccinationForm() {
       price: parseFloat(formData.get("price")),
       stock: parseInt(formData.get("stock")),
       forPet: formData.get("forPet"),
-      manufacturer: formData.get("manufacturer"), 
-      batchNumber: formData.get("batchNumber"),  
-      expiryDate: formData.get("expiryDate"),     
-      description: formData.get("description"),  
+      manufacturer: formData.get("manufacturer"),
+      batchNumber: formData.get("batchNumber"),
+      expiryDate: formData.get("expiryDate"),
+      description: formData.get("description"),
     };
 
     try {
@@ -119,7 +123,7 @@ export default function VaccinationForm() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <FaMoneyBillWave className="text-orange-500" /> Price ($)
+                  <FaMoneyBill1Wave className="text-orange-500" /> Price ($)
                 </label>
                 <input
                   name="price"
@@ -132,7 +136,7 @@ export default function VaccinationForm() {
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <FaBoxes className="text-orange-500" /> Stock
+                  <FaBoxesStacked className="text-orange-500" /> Stock
                 </label>
                 <input
                   name="stock"
@@ -144,7 +148,7 @@ export default function VaccinationForm() {
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <FaCalendarTimes className="text-orange-500" /> Expiry Date
+                  <FaRegCalendarTimes className="text-orange-500" /> Expiry Date
                 </label>
                 <input
                   name="expiryDate"
