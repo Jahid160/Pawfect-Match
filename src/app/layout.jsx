@@ -33,7 +33,9 @@ export default function RootLayout({ children }) {
 
             <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
               {children}
+
             </main>
+            <Toaster position="top-right" />
 
             <SupportButton />
 

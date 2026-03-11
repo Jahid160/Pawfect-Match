@@ -137,7 +137,7 @@ const DashboardNavbar = () => {
           </button>
           
           <div className="hidden md:block">
-            <p className="font-black text-slate-800 text-sm leading-none">Opu Nath</p>
+            <p className="font-black text-slate-800 text-sm leading-none">Md Zahid Hasan</p>
             <p className="mt-1 font-bold text-[10px] text-slate-400 italic uppercase tracking-tighter">Super Admin</p>
           </div>
         </div>
