@@ -11,6 +11,7 @@ export const collections = {
   ADOPTIONS: "adoptionsInfo",
   SHELTER: "shelterInfo",
   CART: 'cart',
+  ORDER:'order',
   VACCINES: 'vaccines'
 };
 

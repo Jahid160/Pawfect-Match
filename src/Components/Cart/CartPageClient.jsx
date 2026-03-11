@@ -248,10 +248,12 @@ const CartPageClient = () => {
                 </div>
               </div>
             </div>
+            <Link href='/checkout'>
 
             <button className="bg-primary hover:bg-primary/90 mt-6 py-4 rounded-xl w-full font-black text-white">
               Checkout
             </button>
+            </Link>
           </div>
         </div>
       </div>
