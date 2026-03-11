@@ -28,21 +28,22 @@ export default function VaccinationForm() {
       price: parseFloat(formData.get("price")),
       stock: parseInt(formData.get("stock")),
       forPet: formData.get("forPet"),
+      manufacturer: formData.get("manufacturer"), 
+      batchNumber: formData.get("batchNumber"),  
+      expiryDate: formData.get("expiryDate"),     
+      description: formData.get("description"),  
     };
 
     try {
-      // API fetch এর বদলে সরাসরি Server Action কল করা হয়েছে
       const result = await addVaccine(vaccineData);
-
       if (result.success) {
-        // সফল হলে ইনভেন্টরি পেজে পাঠিয়ে দিবে
+        toast.success("Vaccine added successfully!");
         router.push("/vaccination");
       } else {
-        alert(`Error: ${result.error || "Failed to add vaccine"}`);
+        toast.error(result.error || "Failed to add vaccine");
       }
     } catch (error) {
-      console.error("Submission Error:", error);
-      alert("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -62,10 +63,10 @@ export default function VaccinationForm() {
         </Link>
 
         <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
-          <div className="bg-slate-900 p-8 text-white">
+          <div className="bg-slate-900 p-8 text-white relative">
             <div className="flex items-center gap-3 mb-2">
               <FaPlusCircle className="text-orange-500" />
-              <span className="text-orange-400 font-black text-[10px] uppercase tracking-[3px]">New Entry</span>
+              <span className="text-orange-400 font-black text-[10px] uppercase tracking-[3px]">New Medical Entry</span>
             </div>
             <h2 className="text-3xl font-black tracking-tight">Register Vaccine</h2>
           </div>
@@ -86,8 +87,36 @@ export default function VaccinationForm() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Price */}
+            {/* Row 2: Manufacturer & Batch Number */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <FaIndustry className="text-orange-500" /> Manufacturer
+                </label>
+                <input
+                  name="manufacturer"
+                  type="text"
+                  placeholder="e.g. Zoetis / Merck"
+                  required
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-slate-700"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <FaHashtag className="text-orange-500" /> Batch Number
+                </label>
+                <input
+                  name="batchNumber"
+                  type="text"
+                  placeholder="e.g. BATCH-2024-001"
+                  required
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* Row 3: Price, Stock & Expiry */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <FaMoneyBillWave className="text-orange-500" /> Price ($)
@@ -101,11 +130,9 @@ export default function VaccinationForm() {
                   className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-slate-700"
                 />
               </div>
-
-              {/* Stock */}
               <div className="space-y-2">
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <FaBoxes className="text-orange-500" /> Stock Units
+                  <FaBoxes className="text-orange-500" /> Stock
                 </label>
                 <input
                   name="stock"
@@ -115,12 +142,23 @@ export default function VaccinationForm() {
                   className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-slate-700"
                 />
               </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <FaCalendarTimes className="text-orange-500" /> Expiry Date
+                </label>
+                <input
+                  name="expiryDate"
+                  type="date"
+                  required
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-slate-700"
+                />
+              </div>
             </div>
 
-            {/* Targeted Pet */}
+            {/* Row 4: Targeted Pet */}
             <div className="space-y-2">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <FaPaw className="text-orange-500" /> Targeted Pet
+                <FaPaw className="text-orange-500" /> Targeted Pet Species
               </label>
               <select
                 name="forPet"
@@ -135,6 +173,19 @@ export default function VaccinationForm() {
               </select>
             </div>
 
+            {/* Row 5: Description */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <FaFileAlt className="text-orange-500" /> Vaccine Description
+              </label>
+              <textarea
+                name="description"
+                rows="3"
+                placeholder="Describe dosage instructions, storage conditions or side effects..."
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-slate-700 resize-none"
+              ></textarea>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -143,7 +194,7 @@ export default function VaccinationForm() {
                 : "bg-orange-500 text-white hover:bg-orange-600 shadow-orange-200 active:scale-95"
                 }`}
             >
-              {loading ? "Processing..." : "Add to Inventory"}
+              {loading ? "Registering..." : "Add to Medical Inventory"}
             </button>
           </form>
         </div>

@@ -1,19 +1,18 @@
-// src/app/vaccination/[id]/page.jsx
 import React from "react";
-import { 
-  FaSyringe, FaArrowLeft, FaCheckCircle, FaShieldAlt, 
-  FaExclamationTriangle, FaPaw, FaMoneyBillWave, 
-  FaWarehouse, FaCalendarAlt, FaHistory, FaClinicMedical 
+import {
+  FaSyringe, FaArrowLeft, FaCheckCircle, FaShieldAlt,
+  FaExclamationTriangle, FaPaw, FaMoneyBillWave,
+  FaWarehouse, FaCalendarAlt, FaHistory, FaClinicMedical
 } from "react-icons/fa";
 import Link from "next/link";
-import { getVaccineById } from "@/action/server/vaccines"; 
+import { getVaccineById } from "@/action/server/vaccines";
 import { notFound } from "next/navigation";
+import OrderButton from "./OrderButton";
 
 async function VaccineDetails({ params }) {
-  // Next.js 15+ Fix: params must be awaited
-  const resolvedParams = await params; 
+  const resolvedParams = await params;
   const id = resolvedParams.id;
-  
+
   const vaccine = await getVaccineById(id);
 
   if (!vaccine) {
@@ -26,11 +25,11 @@ async function VaccineDetails({ params }) {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 pt-28">
       <div className="max-w-5xl mx-auto">
-        
+
         {/* Navigation */}
         <div className="flex justify-between items-center mb-8">
-          <Link 
-            href="/vaccination" 
+          <Link
+            href="/vaccination"
             className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-600 font-bold text-sm transition-colors group"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
@@ -42,7 +41,7 @@ async function VaccineDetails({ params }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Left Column: Profile & Stats */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
@@ -81,10 +80,9 @@ async function VaccineDetails({ params }) {
                   <FaCheckCircle className="text-orange-500" /> Clinical Overview
                 </h3>
                 <p className="text-slate-600 leading-relaxed text-lg italic mb-8">
-                  {vaccine.description || `This ${vaccine.vaccineName} provides essential immunization for ${vaccine.forPet}. It is formulated to meet international veterinary standards for long-term health protection.`}
+                  {vaccine.description || `This ${vaccine.vaccineName} provides essential immunization.`}
                 </p>
 
-                {/* Secondary Info Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 border-t border-slate-100">
                   <div className="flex gap-4">
                     <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center shrink-0">
@@ -92,7 +90,7 @@ async function VaccineDetails({ params }) {
                     </div>
                     <div>
                       <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Dosage Schedule</h4>
-                      <p className="text-slate-700 font-bold italic">Standard 1.0ml subcutaneous or as directed by vet.</p>
+                      <p className="text-slate-700 font-bold italic">Standard 1.0ml dosage.</p>
                     </div>
                   </div>
                   <div className="flex gap-4">
@@ -101,7 +99,7 @@ async function VaccineDetails({ params }) {
                     </div>
                     <div>
                       <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Validity Period</h4>
-                      <p className="text-slate-700 font-bold italic">Typically effective for 12-36 months.</p>
+                      <p className="text-slate-700 font-bold italic">Effective for 12-36 months.</p>
                     </div>
                   </div>
                 </div>
@@ -111,62 +109,41 @@ async function VaccineDetails({ params }) {
 
           {/* Right Column: Inventory & Actions */}
           <div className="space-y-6">
-            {/* Price Card */}
             <div className="bg-white p-8 rounded-[2rem] shadow-lg shadow-slate-200/40 border border-slate-100">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Unit Price</span>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-black text-slate-900">${vaccine.price}</span>
                 <span className="text-slate-400 font-bold text-sm">/per dose</span>
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between text-xs font-bold text-slate-500">
-                <span>Tax: Included</span>
-                <FaMoneyBillWave className="text-emerald-500" />
-              </div>
             </div>
 
-            {/* Inventory Card */}
-            <div className={`p-8 rounded-[2rem] border-2 shadow-lg ${
-              isOutOfStock ? 'bg-red-50 border-red-100 shadow-red-100' : 
-              isLowStock ? 'bg-amber-50 border-amber-100 shadow-amber-100' : 
-              'bg-emerald-50 border-emerald-100 shadow-emerald-100'
-            }`}>
-              <span className={`text-[10px] font-black uppercase tracking-widest block mb-2 ${
-                isOutOfStock ? 'text-red-400' : 'text-emerald-500'
-              }`}>Current Stock Level</span>
-              <div className="flex items-center justify-between">
-                <span className={`text-5xl font-black ${
-                  isOutOfStock ? 'text-red-600' : 'text-emerald-700'
-                }`}>{vaccine.stock}</span>
-                <FaWarehouse size={30} className={isOutOfStock ? 'text-red-200' : 'text-emerald-200'} />
-              </div>
-              <p className={`mt-4 text-xs font-bold ${
-                isOutOfStock ? 'text-red-500' : 'text-emerald-600'
+            <div className={`p-8 rounded-[2rem] border-2 shadow-lg ${isOutOfStock ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'
               }`}>
-                {isOutOfStock ? 'Requires immediate restock' : isLowStock ? 'Warning: Low inventory' : 'Stock level is healthy'}
-              </p>
+              <span className="text-[10px] font-black uppercase tracking-widest block mb-2">Stock Level</span>
+              <div className="flex items-center justify-between">
+                <span className="text-5xl font-black">{vaccine.stock}</span>
+                <FaWarehouse size={30} className="opacity-20" />
+              </div>
             </div>
 
-            {/* Warning Message */}
-            {(isOutOfStock || isLowStock) && (
-              <div className="flex items-start gap-3 bg-white p-5 rounded-2xl border border-amber-200 shadow-sm">
-                <FaExclamationTriangle className="text-amber-500 shrink-0 mt-1" />
-                <p className="text-[12px] font-medium text-slate-600 leading-snug">
-                  {isOutOfStock ? 'Ordering system is temporarily disabled due to zero stock.' : 'Inventory is running low. Please reorder soon to avoid disruption.'}
-                </p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
+            {/* Action Buttons Section */}
             <div className="space-y-3 pt-4">
-              <button 
-                disabled={isOutOfStock}
-                className={`w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${
-                  isOutOfStock ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-orange-500 text-white hover:bg-orange-600 shadow-xl shadow-orange-200 hover:-translate-y-1 active:scale-95"
-                }`}
-              >
-                Place Order
-              </button>
-              <button className="w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-slate-600 border-2 border-slate-100 hover:bg-slate-50 transition-colors">
+              {/* ইমপ্লিমেন্ট করা বাটন */}
+              {!isOutOfStock ? (
+                <OrderButton
+                  vaccineId={id}
+                  vaccineName={vaccine.vaccineName}
+                />
+              ) : (
+                <button
+                  disabled
+                  className="w-full py-5 rounded-2xl font-black text-sm uppercase bg-slate-200 text-slate-400 cursor-not-allowed"
+                >
+                  Out of Stock
+                </button>
+              )}
+
+              <button className="w-full py-4 rounded-2xl font-black text-sm uppercase text-slate-600 border-2 border-slate-100 hover:bg-slate-50 transition-colors">
                 Print Report
               </button>
             </div>
