@@ -22,13 +22,13 @@ export const authOptions = {
       },
     }),
 
-    //  Google
+    // 🌐 Google
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
 
-    //  GitHub
+    // 🐙 GitHub
     GitHubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
@@ -37,7 +37,7 @@ export const authOptions = {
 
   callbacks: {
     /**
-     * Runs on every successful authentication
+     * সাইন ইন করার সময় ইউজারকে ডাটাবেজে সেভ বা আপডেট করা
      */
     async signIn({ user, account }) {
       try {
@@ -46,61 +46,64 @@ export const authOptions = {
         const usersCollection = await dbConnect(collections.USERS);
         const now = new Date();
 
-        // Single atomic upsert (NO duplicate field conflicts)
+        // ইউজার থাকলে শুধু লগইন টাইম আপডেট হবে, না থাকলে নতুন ক্রিয়েট হবে
         const result = await usersCollection.updateOne(
           { email: user.email },
           {
-            // Only fields that NEVER change
             $setOnInsert: {
               email: user.email,
               role: "user",
               createdAt: now,
+              location: "Savar, Dhaka", // ডিফল্ট লোকেশন
             },
-
-            // Fields that can change anytime
             $set: {
               provider: account?.provider || "credentials",
-              name: user?.name || null,
-              image: user?.image || null,
               lastLoginAt: now,
               status: "active",
-              // lastAuthAt: now,
             },
           },
           { upsert: true }
         );
 
-        //  Detect register vs login
-        const action =
-          result.upsertedCount > 0 ? "register" : "login";
-
+        // নতুন ইউজার নাকি পুরাতন তা ডিটেক্ট করা
+        const action = result.upsertedCount > 0 ? "register" : "login";
         await usersCollection.updateOne(
           { email: user.email },
-          {
-            $set: { lastAuthAction: action },
-          }
+          { $set: { lastAuthAction: action } }
         );
 
         return true;
       } catch (error) {
         console.error("signIn DB update error:", error);
-        return false; // prevents 403 loop
+        return false;
       }
     },
 
     /**
-     * Attach custom fields to JWT
+     * JWT টোকেনে কাস্টম ডাটা (role, id, location, image) সেট করা
      */
-    async jwt({ token, user }) {
-      if (user?.email) {
-        const usersCollection = await dbConnect(collections.USERS);
+    async jwt({ token, user, trigger, session }) {
+      const usersCollection = await dbConnect(collections.USERS);
+
+      // যদি ক্লায়েন্ট সাইড থেকে update() কল করা হয় (যেমন প্রোফাইল পিকচার চেঞ্জ করলে)
+      if (trigger === "update" && session) {
+        token.name = session.name || token.name;
+        token.picture = session.image || token.picture;
+        token.location = session.location || token.location;
+      }
+
+      // ইনিশিয়াল লগইন বা টোকেন রিফ্রেশ করার সময় DB থেকে ডাটা আনা
+      if (user?.email || token?.email) {
         const dbUser = await usersCollection.findOne({
-          email: user.email,
+          email: user?.email || token.email,
         });
 
         if (dbUser) {
-          token.role = dbUser.role;
           token.id = dbUser._id?.toString();
+          token.role = dbUser.role;
+          token.location = dbUser.location;
+          token.picture = dbUser.image || user?.image || token.picture;
+          token.name = dbUser.name || user?.name || token.name;
         }
       }
 
@@ -108,14 +111,16 @@ export const authOptions = {
     },
 
     /**
-     * Expose fields to client session
+     * সেশনে টোকেনের ডাটাগুলো এক্সপোজ করা যাতে useSession() দিয়ে পাওয়া যায়
      */
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.location = token.location;
+        session.user.image = token.picture;
+        session.user.name = token.name;
       }
-
       return session;
     },
   },
@@ -125,7 +130,7 @@ export const authOptions = {
   },
 
   pages: {
-    signIn: "/login", // optional custom login page
+    signIn: "/login",
   },
 
   secret: process.env.NEXTAUTH_SECRET,

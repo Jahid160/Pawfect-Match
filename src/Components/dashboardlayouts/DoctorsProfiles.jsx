@@ -44,7 +44,6 @@ const DoctorManagement = ({ allOrders = [] }) => {
     { id: 2, name: "Dr. Sarah Ahmed", specialty: "General Physician", status: "Available", contact: "+880 1512-987654" },
     { id: 3, name: "Dr. Mahim Khan", specialty: "Vaccination Specialist", status: "Busy", contact: "+880 1912-112233" }
   ];
-
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900 pt-28">
       
