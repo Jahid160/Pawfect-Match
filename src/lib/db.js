@@ -13,6 +13,7 @@ export const collections = {
   SHELTER: 'shelterInfo',
   FOODS: 'foods',
   CART:'cart',
+  ORDER:'order'
 };
 
 const client = new MongoClient(uri, {
