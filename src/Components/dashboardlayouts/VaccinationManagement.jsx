@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from "next/navigation"; // রিফ্রেশ করার জন্য যোগ করা হয়েছে
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Plus, AlertCircle, Calendar, 
@@ -16,34 +16,52 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [orders, setOrders] = useState(initialOrders);
 
-  // সার্ভার থেকে নতুন ডাটা আসলে স্টেট আপডেট হবে
   useEffect(() => {
     setOrders(initialOrders);
   }, [initialOrders]);
 
+  // --- হ্যান্ডলার: অ্যাডমিন একসেপ্ট ---
+  const handleAdminAccept = async (id) => {
+    const previousOrders = [...orders];
+    try {
+      // Optimistic Update
+      setOrders(prev => prev.map(order => 
+        order._id === id ? { ...order, status: "AdminAccepted", adminAccepted: true } : order
+      ));
+
+      const res = await adminAcceptOrder(id);
+      if (res.success) {
+        toast.success("Order accepted by Admin");
+        router.refresh();
+      } else {
+        setOrders(previousOrders);
+        toast.error("Failed to accept order");
+      }
+    } catch (error) {
+      setOrders(previousOrders);
+      toast.error("An error occurred");
+    }
+  };
+
+  // --- হ্যান্ডলার: ডক্টর শিডিউল ---
   const handleDoctorSchedule = async (id, days) => {
     const previousOrders = [...orders];
-    
-    // ১. তৎক্ষণাৎ নতুন ডেডলাইন ক্যালকুলেট করা
     const optimisticDeadline = new Date();
     optimisticDeadline.setDate(optimisticDeadline.getDate() + parseInt(days));
 
     try {
-      // ২. Optimistic Update: সার্ভার কল করার আগেই UI আপডেট
       setOrders(prev => prev.map(order => 
         order._id === id ? { 
           ...order, 
           status: "DoctorAccepted", 
           doctorAssigned: true, 
-          deadlineDate: optimisticDeadline.toISOString() // এখানে সরাসরি ISO স্ট্রিং সেট হচ্ছে
+          deadlineDate: optimisticDeadline.toISOString() 
         } : order
       ));
 
       const res = await doctorScheduleOrder(id, days);
-      
       if (res.success) {
         toast.success(`Scheduled for ${days} days`);
-        // ৩. গুরুত্বপূর্ণ: সার্ভার ডাটা সিঙ্ক করার জন্য রাউটার রিফ্রেশ
         router.refresh(); 
       } else {
         setOrders(previousOrders);
@@ -59,14 +77,12 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
     if (order.isCompleted || order.status === "Completed") {
       return { label: "Completed", color: "bg-emerald-50 text-emerald-600", icon: <CheckCircle2 size={12}/> };
     }
-    
     if (order.deadlineDate) {
       const isOverdue = new Date() > new Date(order.deadlineDate);
       return isOverdue 
         ? { label: "Overdue", color: "bg-rose-50 text-rose-600 animate-pulse", icon: <AlertCircle size={12}/> }
         : { label: "Upcoming", color: "bg-blue-50 text-blue-600", icon: <Clock size={12}/> };
     }
-    
     return { label: order.status || "Pending", color: "bg-slate-100 text-slate-500", icon: <Clock size={12}/> };
   };
 
@@ -76,8 +92,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
 
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900 pt-28">
-      
-      {/* HEADER & STATS (আগের মতোই থাকবে) */}
+      {/* HEADER */}
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-10">
         <h1 className="font-black text-slate-900 text-4xl tracking-tight">
           Vaccination <span className="text-blue-600 underline decoration-8 decoration-blue-100 underline-offset-[-2px]">Registry</span>
@@ -116,12 +131,11 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                           </div>
                           <div>
                             <p className="font-black text-slate-800 text-sm">{order.vaccineName}</p>
-                            <p className="text-[10px] text-slate-400">ID: {order._id.slice(-6)}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: {order._id.slice(-6)}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5 text-center">
-                        {/* তারিখ দেখানোর জন্য এই কন্ডিশনটি আপডেট করা হয়েছে */}
                         <p className={`text-xs font-black ${status.label === 'Overdue' ? 'text-rose-500' : 'text-slate-700'}`}>
                           {order.deadlineDate 
                             ? new Date(order.deadlineDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) 
@@ -135,6 +149,18 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex justify-end gap-2">
+                          
+                          {/* ১. Accept Button: যদি স্ট্যাটাস Pending থাকে */}
+                          {(order.status === "Pending" || !order.status) && (
+                            <button 
+                              onClick={() => handleAdminAccept(order._id)}
+                              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-100"
+                            >
+                              <UserCheck size={14}/> Accept Order
+                            </button>
+                          )}
+
+                          {/* ২. Schedule Buttons: যদি অ্যাডমিন একসেপ্ট করে থাকে */}
                           {order.status === "AdminAccepted" && (
                             <div className="flex gap-2">
                               <button 
@@ -151,11 +177,14 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                               </button>
                             </div>
                           )}
+
+                          {/* ৩. Completed/Doctor Assigned Icon */}
                           {(order.status === "DoctorAccepted" || order.status === "Completed") && (
-                             <div className="bg-emerald-50 text-emerald-600 p-2 rounded-lg">
-                               <CheckCircle2 size={18} />
+                             <div className="bg-emerald-50 text-emerald-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                               <CheckCircle2 size={16} /> Assigned
                              </div>
                           )}
+
                         </div>
                       </td>
                     </motion.tr>
