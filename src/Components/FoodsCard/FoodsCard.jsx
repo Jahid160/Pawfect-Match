@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useTransition } from "react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   FaLeaf,
   FaShoppingCart,
@@ -13,18 +15,59 @@ import {
   FaStar,
   FaFilter,
 } from "react-icons/fa";
+import { addToCart } from "@/action/server/cart";
+import { useAuthModal } from "@/provider/AuthModalProvider";
 
 // --- FoodCard Component ---
 export const FoodCard = ({ food }) => {
   const foodId = food._id?.toString() || food.id;
+  const { data: session } = useSession();
+  const router = useRouter();
+  const { openLoginModal } = useAuthModal();
+
+  const [isPending, startTransition] = useTransition();
+  const [message, setMessage] = useState("");
+
   const hasDiscount =
     food.discountPrice && Number(food.discountPrice) < Number(food.price);
+
   const isOutOfStock = food.inStock === false || food.stock <= 0;
 
   const displayPrice = hasDiscount ? food.discountPrice : food.price;
+
   const discountPercent = hasDiscount
     ? Math.round(((food.price - food.discountPrice) / food.price) * 100)
     : 0;
+
+  const handleAddToCart = () => {
+    if (!session?.user?.email) {
+      openLoginModal();
+      return;
+    }
+
+    setMessage("");
+
+    startTransition(async () => {
+      const result = await addToCart({
+        userEmail: session.user.email,
+        foodId: food._id?.toString() || food.id,
+        productName: food.productName,
+        image: food.image,
+        price: displayPrice,
+        stock: food.stock,
+        brand: food.brand,
+        weight: food.weight,
+        weightUnit: food.weightUnit,
+        inStock: food.inStock,
+      });
+
+      setMessage(result?.message || "Added to cart");
+
+      if (result?.acknowledged || result?.insertedId || result?.success || result?.message) {
+        router.push("/cart");
+      }
+    });
+  };
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -74,7 +117,9 @@ export const FoodCard = ({ food }) => {
         {/* Quick cart button */}
         {!isOutOfStock && (
           <button
-            className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-3 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-110"
+            onClick={handleAddToCart}
+            disabled={isPending}
+            className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-3 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-110 disabled:cursor-not-allowed disabled:opacity-70"
             aria-label="Add to cart"
           >
             <FaShoppingCart size={18} />
@@ -119,12 +164,6 @@ export const FoodCard = ({ food }) => {
           </div>
         </div>
 
-        {/* Short description */}
-        {/* <p className="mb-5 line-clamp-2 text-sm leading-6 text-gray-500">
-          Premium nutrition made for your pet’s daily health, energy, and
-          happiness.
-        </p> */}
-
         {/* Price + CTA */}
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
           <div className="flex flex-col">
@@ -151,6 +190,10 @@ export const FoodCard = ({ food }) => {
             View Details <FaChevronRight size={10} />
           </Link>
         </div>
+
+        {message && (
+          <p className="mt-3 text-xs font-medium text-green-600">{message}</p>
+        )}
       </div>
     </div>
   );
