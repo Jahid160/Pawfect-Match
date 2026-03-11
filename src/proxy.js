@@ -20,7 +20,7 @@ export async function proxy(req) {
 
      if (isPrivateRoute) {
           if (!isAuthenticated) {
-               return NextResponse.redirect(new URL(`/login?callbackUrl=${pathname}`, req.url))
+               return NextResponse.redirect(new URL(`/?loginTrigger=true&callbackUrl=${pathname}`, req.url))
           }
 
           const allowedRoutes = ROLE_PERMISSIONS[userRole] || []
