@@ -1,5 +1,5 @@
 import { getSingleFood } from "@/action/server/foods";
-import FoodDetails from "@/components/FoodDetails/FoodDetails";
+import FoodDetails from "@/Components/FoodDetails/FoodDetails";
 
 const PetFoodDetailsPage = async ({ params }) => {
   const { id } = await params;

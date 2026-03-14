@@ -1,4 +1,4 @@
-import DashboardMainLayout from "@/components/dashboardlayouts/DashboardMainLayout";
+import DashboardMainLayout from "@/Components/dashboardlayouts/DashboardMainLayout";
 import React from "react";
 
 const DashboardPage = () => {

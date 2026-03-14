@@ -1,5 +1,5 @@
 import { getPetAccessories } from "@/action/server/accessories";
-import { AccessoriesCard } from "@/components/AccessoriesCard/AccessoriesCard";
+import { AccessoriesCard } from "@/Components/AccessoriesCard/AccessoriesCard";
 import React from "react";
 import { FaExclamationTriangle, FaShoppingBasket } from "react-icons/fa";
 

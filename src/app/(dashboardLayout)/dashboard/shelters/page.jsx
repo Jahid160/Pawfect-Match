@@ -1,4 +1,4 @@
-import ShelterManagement from '@/components/dashboardlayouts/ShelterManagement';
+import ShelterManagement from '@/Components/dashboardlayouts/ShelterManagement';
 import React from 'react';
 
 const page = () => {

@@ -1,5 +1,5 @@
 import { getPets } from "@/action/server/pets";
-import Petcarts from "@/components/cards/Petcarts";
+import Petcarts from "@/Components/cards/Petcarts";
 import React from "react";
 import { FaPaw, FaExclamationTriangle } from "react-icons/fa";
 

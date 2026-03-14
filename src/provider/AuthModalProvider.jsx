@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useMemo, useState } from "react";
-import AuthModal from "@/components/Modal/AuthModal";
-import LoginForm from "@/components/auth/LoginForm";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import AuthModal from "@/Components/Modal/AuthModal";
+import LoginForm from "@/Components/auth/LoginForm";
+import { RegisterForm } from "@/Components/auth/RegisterForm";
 
 const AuthModalContext = createContext(null);
 
