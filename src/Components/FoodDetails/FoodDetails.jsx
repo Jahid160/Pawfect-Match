@@ -21,7 +21,6 @@ const FoodDetails = ({ food }) => {
   const router = useRouter();
   const { data: session } = useSession();
   const { openLoginModal } = useAuthModal();
-
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -195,11 +194,10 @@ const FoodDetails = ({ food }) => {
               <button
                 onClick={handleAddToCart}
                 disabled={isOutOfStock || isPending}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition ${
-                  isOutOfStock || isPending
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-primary hover:bg-primary/90 text-white"
-                }`}
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition ${isOutOfStock || isPending
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-primary hover:bg-primary/90 text-white"
+                  }`}
               >
                 <FaShoppingCart />
                 {isPending ? "Adding..." : "Add to Cart"}
@@ -208,11 +206,10 @@ const FoodDetails = ({ food }) => {
               <button
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
-                className={`px-8 py-4 rounded-xl font-bold transition ${
-                  isOutOfStock
-                    ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                    : "bg-gray-900 hover:bg-black text-white"
-                }`}
+                className={`px-8 py-4 rounded-xl font-bold transition ${isOutOfStock
+                  ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                  : "bg-gray-900 hover:bg-black text-white"
+                  }`}
               >
                 Buy Now
               </button>

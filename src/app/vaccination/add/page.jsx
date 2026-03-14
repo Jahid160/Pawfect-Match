@@ -1,4 +1,4 @@
-import VaccinationForm from "@/Components/Form/VaccinationForm";
+import VaccinationForm from "@/components/Form/VaccinationForm";
 
 function vaccinationForm() {
   return (
