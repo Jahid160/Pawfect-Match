@@ -7,13 +7,14 @@ export const collections = {
   USERS: "users",
   PETS: 'pets',
   FOODS: 'foods',
+  ACCESSORIES: "accessories",
   ADOPTIONS: 'adoptionsInfo',
   SHELTER: 'shelterInfo',
   FOODS: 'foods',
   VACCINES: 'vaccines',
   ORDERS: "vaccine_orders",
   CART: 'cart',
-  ORDER:'order',
+  ORDER: 'order',
 };
 
 const client = new MongoClient(uri, {
