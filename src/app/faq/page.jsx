@@ -1,4 +1,4 @@
-import FAQPage from '@/components/home/FAQPage';
+import FAQPage from '@/Components/home/FAQPage';
 import React from 'react';
 
 const Faq = () => {

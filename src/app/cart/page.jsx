@@ -1,4 +1,4 @@
-import CartPageClient from "@/components/Cart/CartPageClient";
+import CartPageClient from "@/Components/Cart/CartPageClient";
 import { Suspense } from "react";
 // import CartPageClient from "@/components/Cart/CartPageClient"; // পাথ ঠিক আছে কি না চেক করে নিন
 

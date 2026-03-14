@@ -1,6 +1,6 @@
 
-import DashboardNavbar from "@/components/dashboardlayouts/DashboardNavbar";
-import DashboardSidebar from "@/components/dashboardlayouts/dashboardSidebar";
+import DashboardNavbar from "@/Components/dashboardlayouts/DashboardNavbar";
+import DashboardSidebar from "@/Components/dashboardlayouts/dashboardSidebar";
 import React from "react";
 
 const layout = ({ children }) => {

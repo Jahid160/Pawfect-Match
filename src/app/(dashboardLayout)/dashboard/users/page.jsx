@@ -1,5 +1,5 @@
 import { getUsers } from '@/action/server/users';
-import UserManagement from '@/components/dashboardlayouts/UserManagement';
+import UserManagement from '@/Components/dashboardlayouts/UserManagement';
 import React from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
 

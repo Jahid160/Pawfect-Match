@@ -1,4 +1,4 @@
-import ReportAnalysis from '@/components/dashboardlayouts/ReportAndAnalysis';
+import ReportAnalysis from '@/Components/dashboardlayouts/ReportAndAnalysis';
 import React from 'react';
 
 const page = () => {
