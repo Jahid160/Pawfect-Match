@@ -207,7 +207,7 @@ const PetProfile = ({ pet }) => {
     `${pet.petName || "This pet"} is looking for a caring new home.`;
 
   return (
-    <div className="min-h-screen bg-base-100 font-['Quicksand'] text-neutral antialiased">
+    <div className="min-h-screen bg-base-100  text-neutral antialiased">
       <nav className="mx-auto max-w-6xl px-6 pt-8">
         <Link
           href="/all-pets"
