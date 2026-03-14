@@ -1,5 +1,5 @@
 import { getSinglePets } from "@/action/server/pets";
-import PetProfile from "@/Components/profile/Petprofile";
+import PetProfile from "@/components/profile/Petprofile";
 import React from "react";
 
 export default async function Page({ params }) {
