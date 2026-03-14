@@ -1,5 +1,5 @@
 import { getPetFoods } from "@/action/server/foods"; // Assuming this is your action
-import PetFoods from "@/components/FoodsCard/FoodsCard";
+import PetFoods from "@/Components/FoodsCard/FoodsCard";
 import React from "react";
 import { FaLeaf, FaExclamationTriangle, FaShoppingBasket } from "react-icons/fa";
 

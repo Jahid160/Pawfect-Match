@@ -1,5 +1,5 @@
-import HelpCenter from '@/components/HelpCenter/HelpCenter';
-import AdoptionProcess from '@/components/home/AdoptionProcess';
+import HelpCenter from '@/Components/HelpCenter/HelpCenter';
+import AdoptionProcess from '@/Components/home/AdoptionProcess';
 import React from 'react';
 
 const HelpCenterPage = () => {
