@@ -22,9 +22,9 @@ export const PetCard = ({ pet }) => {
       <div className="relative bg-gray-100 w-full h-72 overflow-hidden">
         <Image
           src={
-            pet.images?.primary ||
+            pet.images?.[0] ||
             pet.image ||
-            "https://placehold.co/600x400?text=No+Image"
+            "https://placehold.co/600x400/png?text=No+Image"
           }
           alt={pet.name || "Pet"}
           fill
