@@ -10,6 +10,7 @@ import { createOrderFromCart } from "@/action/server/order";
 import { FaArrowLeft, FaShoppingBag } from "react-icons/fa";
 import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
+import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 
 const CheckoutPageClient = () => {
   const { data: session, status } = useSession();
@@ -79,34 +80,54 @@ const CheckoutPageClient = () => {
   };
 
   const handlePlaceOrder = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!session?.user?.email) {
-      Swal.fire("Login Required", "Please login first.", "warning");
-      return;
-    }
+  if (!session?.user?.email) {
+    Swal.fire("Login Required", "Please login first.", "warning");
+    return;
+  }
 
-    if (!cartItems.length) {
-      Swal.fire("Cart Empty", "Please add products before checkout.", "warning");
-      return;
-    }
+  if (!cartItems.length) {
+    Swal.fire("Cart Empty", "Please add products before checkout.", "warning");
+    return;
+  }
 
-    startTransition(async () => {
-      const result = await createOrderFromCart({
-        userEmail: session.user.email,
-        ...formData,
-      });
+  startTransition(async () => {
 
-      if (!result?.success) {
-        Swal.fire("Error", result?.message || "Order failed.", "error");
-        return;
-      }
+    if (formData.paymentMethod === "Online Payment") {
 
-      Swal.fire("Success", "Your order has been placed successfully.", "success");
-      router.push(`/checkout/success?orderId=${result.insertedId}`);
-      router.refresh();
+  const result = await createStripeCheckoutFromCart({
+  userEmail: session.user.email,
+  ...formData,
+});
+
+  if (!result?.success) {
+    Swal.fire("Error", "Payment session failed", "error");
+    return;
+  }
+
+  window.location.href = result.url;
+  return;
+}
+
+    // Cash on Delivery
+    const result = await createOrderFromCart({
+      userEmail: session.user.email,
+      ...formData,
     });
-  };
+
+    if (!result?.success) {
+      Swal.fire("Error", result?.message || "Order failed.", "error");
+      return;
+    }
+
+    Swal.fire("Success", "Your order has been placed successfully.", "success");
+
+    router.push(`/checkout/success?orderId=${result.insertedId}`);
+    router.refresh();
+  });
+};
+
 
   if (status === "loading" || loading) {
     return (
