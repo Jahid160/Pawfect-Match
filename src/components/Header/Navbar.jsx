@@ -120,20 +120,19 @@ const Navbar = () => {
 
   return (
     <>
-      {/* ডেস্কটপ ও মেইন নেভবার */}
+      {/* desktop nav */}
       <nav
-        className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${
-          isScrolled
+        className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${isScrolled
             ? "bg-white/90 backdrop-blur-md shadow-md h-16"
             : "bg-white h-20"
-        }`}
+          }`}
       >
         <div className="flex justify-between items-center mx-auto px-6 max-w-7xl h-full">
           <div className="shrink-0 scale-90 sm:scale-100">
             <Logo />
           </div>
 
-          {/* ডেস্কটপ মেনু আইটেম */}
+          {/* desktop menu items */}
           <div className="hidden lg:flex items-center gap-1 h-full">
             {filteredNavLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -195,7 +194,7 @@ const Navbar = () => {
             })}
           </div>
 
-          {/* ইউজার অ্যাকশন বাটনসমূহ */}
+          {/* user action buttons */}
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/cart"
@@ -289,12 +288,12 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* --- মোবাইল সাইডবার ড্রয়ার --- */}
-        {/* --- মোবাইল সাইডবার ড্রয়ার --- */}
+        {/* --- mobile sidebar drawer --- */}
+        {/* --- mobile sidebar drawer --- */}
         <AnimatePresence>
           {isMenuOpen && (
             <>
-              {/* ১. ব্যাকড্রপ - একদম ফিক্সড এবং পুরো স্ক্রিন জুড়ে */}
+              {/* backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -310,7 +309,7 @@ const Navbar = () => {
                 }}
               />
 
-              {/* ২. ড্রয়ার বডি - z-index অনেক বাড়িয়ে দেওয়া হয়েছে */}
+              {/* ২. sidebar body */}
               <motion.div
                 initial={{ x: "-100%" }}
                 animate={{ x: 0 }}
@@ -319,7 +318,7 @@ const Navbar = () => {
                 className="fixed top-0 left-0 w-[85%] max-w-[300px] h-screen bg-white z-[9999] lg:hidden flex flex-col shadow-2xl"
                 style={{ position: "fixed", height: "100vh" }}
               >
-                {/* মেনুর ভেতরের কন্টেন্ট */}
+                {/* sidebar content */}
                 <div className="p-6 flex flex-col h-full overflow-hidden">
                   <div className="flex items-center justify-between mb-8">
                     <Logo />
@@ -331,7 +330,7 @@ const Navbar = () => {
                     </button>
                   </div>
 
-                  {/* স্ক্রলযোগ্য লিঙ্ক এরিয়া */}
+                  {/* scrollable link area */}
                   <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     <div className="space-y-1">
                       {filteredNavLinks.map((link) => {
@@ -400,7 +399,7 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  {/* নিচের ড্যাশবোর্ড বাটন - এটিকে একদম নিচে ফিক্সড করে দেওয়া হয়েছে */}
+                  {/* bottom dashboard button - this is fixed at the bottom */}
                   <div className="mt-auto pt-6 border-t border-slate-100">
                     {isLoggedIn ? (
                       <Link
@@ -426,7 +425,7 @@ const Navbar = () => {
         </AnimatePresence>
       </nav>
 
-      {/* নেভবার স্পেসার */}
+      {/* navbar spacer */}
       <div
         className={`${isScrolled ? "h-16" : "h-20"} transition-all duration-500 lg:block hidden`}
       />
