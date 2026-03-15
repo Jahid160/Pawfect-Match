@@ -53,16 +53,56 @@ const navLinks = [
 ];
 
 const Navbar = () => {
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeMobileSub, setActiveMobileSub] = useState(null);
-
   const profileRef = useRef(null);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const user = session?.user;
   const isLoggedIn = status === "authenticated";
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { openLoginModal } = useAuthModal(); const userRole = user?.role;
+
+  const filteredNavLinks = useMemo(() => {
+    return navLinks
+      .filter((link) => {
+        if (!link.requiresAuth) return true;
+        if (!isLoggedIn) return false;
+        if (link.roles && !link.roles.includes(userRole)) return false;
+        return true;
+      })
+      .map((link) => {
+        if (link.subLinks) {
+          const filteredSubs = link.subLinks.filter((sub) => {
+            if (sub.roles) {
+              return sub.roles.includes(userRole);
+            }
+            return true;
+          });
+          return { ...link, subLinks: filteredSubs.length > 0 ? filteredSubs : null };
+        }
+        return link;
+      })
+      .filter((link) => {
+        if (link.subLinks === null && link.name === "Forms") return false;
+        return true;
+      });
+  }, [isLoggedIn, userRole]);
+  useEffect(() => {
+    const loginTrigger = searchParams.get('loginTrigger');
+
+    if (loginTrigger === 'true') {
+      openLoginModal();
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('loginTrigger');
+      const newPath = pathname + (params.toString() ? `?${params.toString()}` : '');
+      router.replace(newPath);
+    }
+  }, [searchParams, openLoginModal, router, pathname]);
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -91,10 +131,6 @@ const Navbar = () => {
       document.body.style.overflow = "unset";
     };
   }, [isMenuOpen]);
-
-  const filteredNavLinks = useMemo(() => {
-    return navLinks.filter((link) => !link.requiresAuth || isLoggedIn);
-  }, [isLoggedIn]);
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
