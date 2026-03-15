@@ -12,11 +12,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 const DashboardNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-
+  const session = useSession()
   // Fake Notification Data
   const notifications = [
     {
@@ -153,15 +154,16 @@ const DashboardNavbar = () => {
         {/* Profile Avatar */}
         <div className="flex items-center gap-3 pl-2 border-slate-100 border-l">
           <button className="flex justify-center items-center bg-orange-100 border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 text-orange-600 transition-all">
-            <User size={22} strokeWidth={2.5} />
+            {/* <User size={22} strokeWidth={2.5} /> */}
+            <img src={session?.data?.user?.image} alt="" />
           </button>
 
           <div className="hidden md:block">
             <p className="font-black text-slate-800 text-sm leading-none">
-              Md Zahid Hasan
+              {session?.data?.user?.name}
             </p>
             <p className="mt-1 font-bold text-[10px] text-slate-400 italic uppercase tracking-tighter">
-              Super Admin
+              {session?.data?.user?.role}
             </p>
           </div>
         </div>
