@@ -1,7 +1,7 @@
 "use client"
 
-import LoginForm from "@/components/auth/LoginForm";
-import AuthModal from "@/components/Modal/AuthModal";
+import LoginForm from "@/Components/auth/LoginForm";
+import AuthModal from "@/Components/Modal/AuthModal";
 import React, { useState } from "react";
 
 const LoginPage = () => {
