@@ -22,6 +22,42 @@ export const getPets = async () => {
   }
 };
 
+//admin dashboard manage pets api
+export async function getAllPetsAction() {
+  try {
+    const Petcollection = await petCollectionPromise;
+
+    // Fetch all pets and convert Mongoose documents to plain JS objects
+    const pets = await Petcollection.find({}).lean();
+
+    // Map through pets to ensure uniform data structure
+    const formattedPets = pets.map((pet) => {
+      return {
+        _id: pet._id.toString(),
+        name: pet.name,
+        breed: pet.breed,
+        age: pet.age,
+        type: pet.type,
+        image: pet.image,
+        // The logic you requested: Default to "Available" if status is missing
+        status: pet.status || "Available", 
+      };
+    });
+
+    return {
+      success: true,
+      data: formattedPets,
+    };
+  } catch (error) {
+    console.error("Error fetching pets:", error);
+    return {
+      success: false,
+      message: "Failed to fetch pets data.",
+      data: [],
+    };
+  }
+}
+
 export const getSinglePets = async (id) => {
   if (id?.length !== 24) return {};
 
@@ -46,6 +82,7 @@ export const AddPets = async (petdata) => {
     const Petcollection = await petCollectionPromise;
     const result = await Petcollection.insertOne({
       ...petdata,
+      status: "available"
     });
     return { success: Boolean(result.insertedId) };
   } catch (error) {
@@ -90,3 +127,4 @@ export const UpdatePets = async (id, petdata = {}) => {
     return { success: false, error: error.message };
   }
 };
+
