@@ -282,7 +282,7 @@ const AdminPetForm = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">Price *</span>
+                      <span className="label-text font-bold">Prices *</span>
                     </label>
                     <input
                       type="number"
