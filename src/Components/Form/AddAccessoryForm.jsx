@@ -204,6 +204,20 @@ const AdminPetForm = () => {
                       </span>
                     )}
                   </div>
+                  {/* Tags Field */}
+                  <div className="form-control md:col-span-2">
+                    <label className="label">
+                      <span className="label-text font-bold">Tags</span>
+                    </label>
+                    <input
+                      value={formData.tags}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tags: e.target.value })
+                      }
+                      className="input input-bordered"
+                      placeholder="e.g. funny, toy, organic (comma separated)"
+                    />
+                  </div>
 
                   <div className="form-control">
                     <label className="label">
