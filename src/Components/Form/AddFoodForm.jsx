@@ -1,29 +1,43 @@
 "use client";
 
 import { useState } from "react";
+import Image from 'next/image'
+import Swal from "sweetalert2";
+import { createFood } from "@/action/server/foods";
 
 const PET_CATEGORIES = ["Dog", "Cat", "Bird", "Fish", "Rabbit", "Hamster", "Other"];
 const FOOD_TYPES = ["Dry Food", "Wet Food", "Raw Food", "Treats & Snacks", "Supplements", "Freeze-Dried"];
 const WEIGHT_UNITS = ["g", "kg", "oz", "lb"];
 const AGE_GROUPS = ["Puppy / Kitten", "Adult", "Senior", "All Ages"];
 const SECTIONS = [
-  { id: "basic",   label: "Basic Info", icon: "🏷️" },
-  { id: "details", label: "Details",    icon: "📦" },
-  { id: "pricing", label: "Pricing",    icon: "💰" },
-  { id: "media",   label: "Media",      icon: "📸" },
+  { id: "basic", label: "Basic Info", icon: "🏷️" },
+  { id: "details", label: "Details", icon: "📦" },
+  { id: "pricing", label: "Pricing", icon: "💰" },
+  { id: "media", label: "Media", icon: "📸" },
 ];
 
 export default function AddFoodPage() {
   const [form, setForm] = useState({
-    productName: "", brand: "", category: "", foodType: "",
-    price: "", discountPrice: "", stock: "", weight: "",
-    weightUnit: "kg", ageGroup: [], ingredients: "",
-    description: "", tags: "", inStock: true, featured: false,
+    productName: "",
+    brand: "",
+    category: "",
+    foodType: "",
+    price: "",
+    discountPrice: "",
+    stock: "",
+    weight: "",
+    weightUnit: "kg",
+    ageGroup: [],
+    ingredients: "",
+    description: "",
+    tags: "",
+    inStock: true,
+    featured: false,
   });
   const [imagePreview, setImagePreview] = useState(null);
-  const [submitted, setSubmitted]       = useState(false);
-  const [loading, setLoading]           = useState(false);
-  const [errors, setErrors]             = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const [activeSection, setActiveSection] = useState("basic");
 
   /* ── handlers ── */
@@ -44,6 +58,30 @@ export default function AddFoodPage() {
     if (errors[name]) setErrors(p => ({ ...p, [name]: "" }));
   };
 
+  //  Image upload function
+  const uploadImagesToImgBB = async (files) => {
+    const uploadedUrls = [];
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      // console.log("Upload response:", data);
+
+      if (data.success) {
+        uploadedUrls.push(data.url);
+      }
+    }
+
+    return uploadedUrls;
+  };
+
   const handleImage = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -54,30 +92,74 @@ export default function AddFoodPage() {
 
   const validate = () => {
     const e = {};
-    if (!form.productName.trim())                             e.productName  = "Product name is required";
-    if (!form.brand.trim())                                   e.brand        = "Brand is required";
-    if (!form.category)                                       e.category     = "Select a pet category";
-    if (!form.foodType)                                       e.foodType     = "Select a food type";
-    if (!form.price || isNaN(form.price) || +form.price <= 0) e.price        = "Enter a valid price";
-    if (!form.stock || isNaN(form.stock) || +form.stock <  0) e.stock        = "Enter valid stock quantity";
-    if (!form.weight|| isNaN(form.weight)|| +form.weight<= 0) e.weight       = "Enter valid weight";
-    if (!form.description.trim())                             e.description  = "Description is required";
+    if (!form.productName.trim()) e.productName = "Product name is required";
+    if (!form.brand.trim()) e.brand = "Brand is required";
+    if (!form.category) e.category = "Select a pet category";
+    if (!form.foodType) e.foodType = "Select a food type";
+    if (!form.price || isNaN(form.price) || +form.price <= 0) e.price = "Enter a valid price";
+    if (!form.stock || isNaN(form.stock) || +form.stock < 0) e.stock = "Enter valid stock quantity";
+    if (!form.weight || isNaN(form.weight) || +form.weight <= 0) e.weight = "Enter valid weight";
+    if (!form.description.trim()) e.description = "Description is required";
     return e;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ১. Validation
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); setActiveSection("basic"); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
 
     setLoading(true);
-    // ── replace this block with your real API call, e.g.:
-    // await fetch("/api/foods", { method: "POST", body: JSON.stringify(form) });
-    await new Promise(r => setTimeout(r, 1800));
-    setLoading(false);
-    setSubmitted(true);
-  };
 
+    try {
+      // ২. Image Upload kora (ImgBB-te)
+      let imageUrl = "";
+      const fileInput = document.getElementById('foodImage').files[0];
+
+      if (fileInput) {
+        // Amader banano function-ti call korlam
+        const uploadedUrls = await uploadImagesToImgBB([fileInput]);
+        if (uploadedUrls.length > 0) {
+          imageUrl = uploadedUrls[0]; // Prothom image-er link-ta nilam
+        }
+      }
+
+      // ৩. Data structure ready kora (Eikhane image URL-ti add kora hoyeche)
+      const formData = {
+        ...form,
+        image: imageUrl, // Database-e ei URL-ti jabe
+        price: Number(form.price),
+        discountPrice: form.discountPrice ? Number(form.discountPrice) : null,
+        stock: Number(form.stock),
+        weight: Number(form.weight),
+        tags: form.tags.split(',').map(tag => tag.trim()),
+        createdAt: new Date(),
+      };
+
+      // ৪. Server Action call kora (MongoDB-te save hobe)
+      const response = await createFood(formData);
+
+      if (response.success) {
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error(response.error);
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message || 'Something went wrong!',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleReset = () => {
     setForm({
       productName: "", brand: "", category: "", foodType: "",
@@ -92,8 +174,8 @@ export default function AddFoodPage() {
   };
 
   const sectionIdx = SECTIONS.findIndex(s => s.id === activeSection);
-  const pct        = Math.round(((sectionIdx + 1) / SECTIONS.length) * 100);
-  const discount   = form.price && form.discountPrice
+  const pct = Math.round(((sectionIdx + 1) / SECTIONS.length) * 100);
+  const discount = form.price && form.discountPrice
     ? Math.round(((form.price - form.discountPrice) / form.price) * 100)
     : null;
 
@@ -173,11 +255,10 @@ export default function AddFoodPage() {
               key={s.id}
               type="button"
               onClick={() => setActiveSection(s.id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-semibold transition-all ${
-                activeSection === s.id
-                  ? "bg-primary text-white shadow"
-                  : "text-neutral/40 hover:text-neutral hover:bg-base-200"
-              }`}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-semibold transition-all ${activeSection === s.id
+                ? "bg-primary text-white shadow"
+                : "text-neutral/40 hover:text-neutral hover:bg-base-200"
+                }`}
             >
               <span>{s.icon}</span>
               <span className="hidden sm:inline">{s.label}</span>
@@ -268,7 +349,7 @@ export default function AddFoodPage() {
                       placeholder="500" min="0"
                       className={`${inputCls(errors.weight)} flex-1`} />
                     <select name="weightUnit" value={form.weightUnit} onChange={handleChange}
-                      className={`${inputCls()} !w-20`}>
+                      className={`${inputCls()} w-20!`}>
                       {WEIGHT_UNITS.map(u => <option key={u}>{u}</option>)}
                     </select>
                   </div>
@@ -361,7 +442,11 @@ export default function AddFoodPage() {
                 <input id="foodImage" type="file" accept="image/*" onChange={handleImage} className="hidden" />
                 {imagePreview ? (
                   <div className="relative inline-block">
-                    <img src={imagePreview} alt="Preview"
+                    <Image
+                      width={300}
+                      height={300}
+                      src={imagePreview}
+                      alt="Preview"
                       className="w-44 h-44 object-cover rounded-xl shadow-lg mx-auto" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl
                                     opacity-0 group-hover:opacity-100 transition-opacity">
@@ -388,14 +473,14 @@ export default function AddFoodPage() {
                   <p className="text-[10px] text-neutral/40 uppercase tracking-widest font-bold mb-3">Order Summary</p>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
                     {[
-                      ["Name",      form.productName],
-                      ["Brand",     form.brand],
-                      ["Category",  form.category],
+                      ["Name", form.productName],
+                      ["Brand", form.brand],
+                      ["Category", form.category],
                       ["Food Type", form.foodType],
-                      ["Weight",    form.weight ? `${form.weight} ${form.weightUnit}` : ""],
-                      ["Price",     form.price ? `৳${form.price}` : ""],
-                      ["Stock",     form.stock ? `${form.stock} units` : ""],
-                      ["Status",    form.inStock ? "✅ In Stock" : "❌ Out of Stock"],
+                      ["Weight", form.weight ? `${form.weight} ${form.weightUnit}` : ""],
+                      ["Price", form.price ? `৳${form.price}` : ""],
+                      ["Stock", form.stock ? `${form.stock} units` : ""],
+                      ["Status", form.inStock ? "✅ In Stock" : "❌ Out of Stock"],
                     ].filter(([, v]) => v).map(([k, v]) => (
                       <div key={k}>
                         <span className="text-neutral/40 font-medium">{k}: </span>
@@ -419,15 +504,20 @@ export default function AddFoodPage() {
               {/* submit row */}
               <div className="flex gap-3 mt-4">
                 <button
-                  type="button" onClick={() => setActiveSection("pricing")}
-                  className="btn btn-ghost rounded-xl border border-base-300 flex-1 font-semibold"
+                  type="button"
+                  onClick={() => setActiveSection("pricing")}
+                  // Loading thakle button-ti disable hobe ebong visual change-er jonno opacity komanu hoyeche
+                  disabled={loading}
+                  className="btn btn-ghost rounded-xl border border-base-300 flex-1 font-semibold disabled:opacity-50"
                 >
                   ← Back
                 </button>
+
                 <button
-                  type="submit" disabled={loading}
-                  className="btn btn-primary rounded-xl flex-[3] font-bold text-base
-                             shadow-lg shadow-primary/25 disabled:opacity-70"
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary rounded-xl flex-3 font-bold text-base
+               shadow-lg shadow-primary/25 disabled:opacity-70"
                 >
                   {loading
                     ? <><span className="loading loading-spinner loading-sm mr-1" /> Publishing...</>

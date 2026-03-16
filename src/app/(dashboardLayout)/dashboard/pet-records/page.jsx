@@ -1,4 +1,4 @@
-import PetRecords from '@/components/dashboardlayouts/PetRecords';
+import PetRecords from '@/Components/dashboardlayouts/PetRecords';
 import React from 'react';
 
 const page = () => {

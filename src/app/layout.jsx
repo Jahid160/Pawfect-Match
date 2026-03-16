@@ -1,10 +1,13 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
-import Navbar from "@/components/Header/Navbar";
-import Footer from "@/components/Footer/Footer";
-import Script from "next/script"; // Next.js এর Script কম্পোনেন্ট
-import SupportButton from "@/components/HelpCenter/SupportButton";
+import AuthModalProvider from "@/provider/AuthModalProvider"; // এটি ইমপোর্ট করা আছে
+
+import Navbar from "@/Components/Header/Navbar";
+import Footer from "@/Components/Footer/Footer";
+import SupportButton from "@/Components/HelpCenter/SupportButton";
+import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,24 +24,27 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <NextAuthProvider>
-          <header className="mx-auto py-2 md:w-11/12 mb-15">
-            <Navbar></Navbar>
-          </header>
+          {/* এখানে <AuthModalProvider> ওপেনিং ট্যাগটি যোগ করা হয়েছে */}
+          <AuthModalProvider>
+            <Toaster position="top-center" reverseOrder={false} />
 
-          <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
-            {children}
-          </main>
+            <header className="mx-auto py-2 md:w-11/12 mb-15">
+              <Suspense fallback={<div className="h-16 bg-base-100" />}>
+                <Navbar />
+              </Suspense>
+            </header>
 
-          {/* <Script
-            src="//code.tidio.co/bnnskbd4agggqkgqz1jtpiuiiw8yt0s7.js"
-            strategy="afterInteractive"
-          /> */}
+            <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
+              {children}
+            </main>
+            <Toaster position="top-right" />
 
-          <SupportButton></SupportButton>
+            <SupportButton />
 
-          <footer>
-            <Footer></Footer>
-          </footer>
+            <footer>
+              <Footer />
+            </footer>
+          </AuthModalProvider>
         </NextAuthProvider>
       </body>
     </html>

@@ -1,4 +1,4 @@
-import ServiceRequest from '@/components/dashboardlayouts/ServiceRequest';
+import ServiceRequest from '@/Components/dashboardlayouts/ServiceRequest';
 import React from 'react';
 
 const page = () => {

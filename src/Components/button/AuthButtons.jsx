@@ -2,14 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import AuthModal from "../Modal/AuthModal";
-import LoginForm from "../auth/LoginForm";
-import { RegisterForm } from "../auth/RegisterForm";
+import { useAuthModal } from "@/provider/AuthModalProvider";
 
 const AuthButtons = () => {
   const { status } = useSession();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [view, setView] = useState("login");
+  const { openLoginModal } = useAuthModal();
 
   if (status === "authenticated") {
     return (
@@ -26,13 +23,7 @@ const AuthButtons = () => {
 
   return (
     <div>
-      <button
-        onClick={() => {
-          setView("login");
-          setIsModalOpen(true);
-        }}
-        className="btn btn-primary"
-      >
+      <button onClick={openLoginModal} className="btn btn-primary">
         Login
       </button>
 
