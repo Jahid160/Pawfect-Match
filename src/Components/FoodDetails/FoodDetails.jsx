@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import { addToCart } from "@/action/server/cart";
 import { useAuthModal } from "@/provider/AuthModalProvider";
+import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 
 const FoodDetails = ({ food }) => {
   const router = useRouter();
@@ -74,13 +75,20 @@ const FoodDetails = ({ food }) => {
   };
 
   const handleBuyNow = () => {
-    if (!session?.user?.email) {
-      openLoginModal();
-      return;
-    }
+  if (!session?.user?.email) {
+    openLoginModal();
+    return;
+  }
 
-    router.push(`/checkout?foodId=${food._id}`);
-  };
+  startTransition(async () => {
+    const result = await createStripeCheckoutFromCart(food, session.user.email);
+
+    if (result?.url) {
+      window.location.href = result.url;
+    }
+  });
+};
+
 
   return (
     <div className="bg-base-200 min-h-screen px-6 py-10">

@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^8.9.0",
     "bcryptjs": "^3.0.3",
     "daisyui": "^5.5.19",
     "framer-motion": "^12.34.3",
@@ -21,6 +22,7 @@
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
+    "stripe": "^20.4.1",
     "sweetalert2": "^11.26.21",
     "swiper": "^12.1.2"
   },

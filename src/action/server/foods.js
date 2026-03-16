@@ -5,58 +5,164 @@ import { ObjectId } from "mongodb";
 
 const foodCollectionPromise = dbConnect(collections.FOODS);
 
+
+// =============================
+// CREATE FOOD
+// =============================
 export const createFood = async (data) => {
-     try {
-          const foodsCollection = await foodCollectionPromise;
+  try {
+    const foodsCollection = await foodCollectionPromise;
 
-          const result = await foodsCollection.insertOne({
-               ...data,
-               createdAt: new Date(),
-          });
+    const result = await foodsCollection.insertOne({
+      ...data,
+      stock: Number(data.stock) || 0,
+      inStock: Number(data.stock) > 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
-          return { success: true, id: result.insertedId.toString() };
-     } catch (error) {
-          return { success: false, error: error.message };
-     }
+    return {
+      success: true,
+      id: result.insertedId.toString(),
+    };
+  } catch (error) {
+    console.error("createFood error:", error);
+    return { success: false, error: error.message };
+  }
 };
 
+
+// =============================
+// GET ALL FOODS
+// =============================
 export const getPetFoods = async () => {
-     try {
-          const foodsCollection = await foodCollectionPromise;
-          const foods = await foodsCollection.find().toArray();
+  try {
+    const foodsCollection = await foodCollectionPromise;
 
-          return foods.map((food) => ({
-               ...food,
-               _id: food._id.toString(),
-               createdAt: food.createdAt?.toISOString?.() || food.createdAt,
-          }));
-     } catch (error) {
-          console.error("Error:", error);
-          return [];
-     }
+    const foods = await foodsCollection
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return foods.map((food) => ({
+      ...food,
+      _id: food._id.toString(),
+      createdAt: food.createdAt?.toISOString?.() || food.createdAt,
+      updatedAt: food.updatedAt?.toISOString?.() || food.updatedAt,
+    }));
+  } catch (error) {
+    console.error("getPetFoods error:", error);
+    return [];
+  }
 };
 
+
+// =============================
+// GET SINGLE FOOD
+// =============================
 export const getSingleFood = async (id) => {
-     try {
-          if (!ObjectId.isValid(id)) {
-               return {};
-          }
+  try {
+    if (!ObjectId.isValid(id)) return {};
 
-          const foodsCollection = await foodCollectionPromise;
+    const foodsCollection = await foodCollectionPromise;
 
-          const food = await foodsCollection.findOne({
-               _id: new ObjectId(id),
-          });
+    const food = await foodsCollection.findOne({
+      _id: new ObjectId(id),
+    });
 
-          if (!food) return {};
+    if (!food) return {};
 
-          return {
-               ...food,
-               _id: food._id.toString(),
-               createdAt: food.createdAt?.toISOString?.() || food.createdAt,
-          };
-     } catch (error) {
-          console.error("getSingleFood error:", error);
-          return {};
-     }
+    return {
+      ...food,
+      _id: food._id.toString(),
+      createdAt: food.createdAt?.toISOString?.() || food.createdAt,
+      updatedAt: food.updatedAt?.toISOString?.() || food.updatedAt,
+    };
+  } catch (error) {
+    console.error("getSingleFood error:", error);
+    return {};
+  }
+};
+
+
+// =============================
+// REDUCE FOOD STOCK (MULTIPLE ITEMS)
+// =============================
+export const reduceFoodStock = async (items = []) => {
+  try {
+    if (!items.length) return { success: false };
+
+    const foodsCollection = await foodCollectionPromise;
+
+    for (const item of items) {
+
+      if (!ObjectId.isValid(item.productId)) continue;
+
+      const quantity = Number(item.quantity) || 1;
+
+      const result = await foodsCollection.updateOne(
+        {
+          _id: new ObjectId(item.productId),
+          stock: { $gte: quantity }, // prevent negative stock
+        },
+        {
+          $inc: { stock: -quantity },
+          $set: {
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      if (!result.modifiedCount) {
+        console.warn(`Stock update failed for product ${item.productId}`);
+      }
+    }
+
+    // Update inStock automatically if stock becomes 0
+    await foodsCollection.updateMany(
+      { stock: { $lte: 0 } },
+      {
+        $set: { inStock: false },
+      }
+    );
+
+    return { success: true };
+
+  } catch (error) {
+    console.error("reduceFoodStock error:", error);
+    return { success: false };
+  }
+};
+
+
+// =============================
+// INCREASE STOCK (OPTIONAL)
+// =============================
+export const increaseFoodStock = async (items = []) => {
+  try {
+    const foodsCollection = await foodCollectionPromise;
+
+    for (const item of items) {
+
+      if (!ObjectId.isValid(item.productId)) continue;
+
+      const quantity = Number(item.quantity) || 1;
+
+      await foodsCollection.updateOne(
+        { _id: new ObjectId(item.productId) },
+        {
+          $inc: { stock: quantity },
+          $set: {
+            inStock: true,
+            updatedAt: new Date(),
+          },
+        }
+      );
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("increaseFoodStock error:", error);
+    return { success: false };
+  }
 };
