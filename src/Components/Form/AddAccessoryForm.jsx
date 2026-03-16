@@ -60,7 +60,6 @@ const AdminPetForm = () => {
     if (!validateStep()) return;
     setLoading(true);
     try {
-      // image add
       if (!formData.image) {
         setErrors({ image: "Mandatory: Please upload a product image!" });
         setLoading(false);
@@ -79,16 +78,16 @@ const AdminPetForm = () => {
         return data.url;
       };
 
+      // ইমেজ আপলোড করে URL পাওয়া
       const imageUrl = await uploadToImgBB(formData.image);
 
-
-      //  Image url make
+      // ডুপ্লিকেট সমস্যা সমাধান করা হয়েছে এখানে
       const finalData = {
         ...formData,
-        image: imageUrl, // File from state change to URL from ImgBB
+        image: imageUrl,
       };
 
-      //  MongoDB create accessory (Internal API call)
+      // MongoDB create accessory (Internal API call)
       const response = await createAccessory(finalData);
       if (response.success) {
         setIsSubmitted(true);
@@ -150,7 +149,6 @@ const AdminPetForm = () => {
       </h2>
 
       <div className="max-w-4xl mx-auto">
-        {/* Step Bar */}
         <ul className="steps w-full mb-10">
           {stepConfig.map(({ num, label }) => (
             <li
@@ -164,7 +162,6 @@ const AdminPetForm = () => {
 
         <div className="card bg-base-100 shadow-xl border border-base-300">
           <form onSubmit={handleSubmit}>
-            {/* STEP 1: Identity */}
             {step === 1 && (
               <div className="card-body">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -184,7 +181,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="title" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Brand *</span>
@@ -199,7 +195,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="brand" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">SKU Code *</span>
@@ -214,7 +209,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="sku" />
                   </div>
-
                   <div className="form-control md:col-span-2">
                     <label className="label">
                       <span className="label-text font-bold">Tags</span>
@@ -228,7 +222,6 @@ const AdminPetForm = () => {
                       placeholder="e.g. funny, toy, organic (comma separated)"
                     />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Category *</span>
@@ -247,7 +240,6 @@ const AdminPetForm = () => {
                     </select>
                     <ErrMsg field="category" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Targeted Pet</span>
@@ -265,7 +257,6 @@ const AdminPetForm = () => {
                     </select>
                   </div>
                 </div>
-
                 <div className="card-actions justify-end mt-8">
                   <button
                     type="button"
@@ -278,10 +269,11 @@ const AdminPetForm = () => {
               </div>
             )}
 
-            {/* STEP 2: Logistics & Pricing */}
             {step === 2 && (
               <div className="card-body bg-secondary/20">
+                {/* Logistics fields */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* (কোড একই থাকবে, শুধু ফিল্ডগুলো আগের মতো রাখুন) */}
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Stock *</span>
@@ -298,7 +290,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="stock" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Price *</span>
@@ -316,7 +307,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="price" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">
@@ -338,7 +328,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="discountPrice" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Weight *</span>
@@ -353,7 +342,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="weight" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Size *</span>
@@ -368,7 +356,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="size" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Material *</span>
@@ -383,7 +370,6 @@ const AdminPetForm = () => {
                     />
                     <ErrMsg field="material" />
                   </div>
-
                   <div className="form-control md:col-span-3">
                     <label className="label">
                       <span className="label-text font-bold">Warranty *</span>
@@ -403,7 +389,6 @@ const AdminPetForm = () => {
                     <ErrMsg field="warranty" />
                   </div>
                 </div>
-
                 <div className="card-actions justify-between mt-8">
                   <button
                     type="button"
@@ -423,9 +408,9 @@ const AdminPetForm = () => {
               </div>
             )}
 
-            {/* STEP 3: Media & Finalize */}
             {step === 3 && (
               <div className="card-body">
+                {/* Media fields */}
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text font-bold">Main Image *</span>
@@ -436,13 +421,10 @@ const AdminPetForm = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, image: e.target.files[0] })
                     }
-                    className={`file-input file-input-bordered file-input-primary w-full ${
-                      errors.image ? "file-input-error" : ""
-                    }`}
+                    className={`file-input file-input-bordered file-input-primary w-full ${errors.image ? "file-input-error" : ""}`}
                   />
                   <ErrMsg field="image" />
                 </div>
-
                 <div className="form-control mt-4">
                   <label className="label">
                     <span className="label-text font-bold">Description</span>
@@ -456,7 +438,6 @@ const AdminPetForm = () => {
                     placeholder="Write a short product description..."
                   />
                 </div>
-
                 <div className="card-actions justify-between mt-8">
                   <button
                     type="button"
