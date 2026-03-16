@@ -1,6 +1,7 @@
 "use client";
 import { createShelterUser } from "@/action/server/Shelteruser";
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 const steps = [
@@ -11,6 +12,7 @@ const steps = [
 ];
 
 export default function ShelterApplicationForm() {
+  const { data: session, } = useSession()
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,6 +40,15 @@ export default function ShelterApplicationForm() {
     registrationCert: null,
     agreeTerms: false,
   });
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: session.user.email,
+      }));
+    }
+  }, [session]);
 
   const update = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -115,7 +126,7 @@ export default function ShelterApplicationForm() {
             be notified via email/SMS once the review is complete.
           </p>
           <div className="badge badge-primary badge-lg">
-            Within 3–5 Business Days
+            Within 3-5 Business Days
           </div>
         </div>
       </div>
@@ -215,10 +226,10 @@ export default function ShelterApplicationForm() {
                   <Field label="Email Address *">
                     <input
                       type="email"
-                      className="input input-bordered w-full"
+                      className="input input-bordered w-full bg-slate-100 cursor-not-allowed"
                       placeholder="example@email.com"
                       value={formData.email}
-                      onChange={(e) => update("email", e.target.value)}
+                      readOnly
                       required
                     />
                   </Field>

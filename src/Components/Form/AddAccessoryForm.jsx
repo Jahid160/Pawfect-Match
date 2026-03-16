@@ -84,7 +84,7 @@ const AdminPetForm = () => {
       };
 
       const imageUrl = await uploadToImgBB(formData.image);
-      const finalData = { ...formData, image: imageUrl };
+
 
       //  Image url make
       const finalData = {
