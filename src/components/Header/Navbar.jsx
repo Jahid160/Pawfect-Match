@@ -32,7 +32,7 @@ const navLinks = [
     subLinks: [
       { name: "Experts", href: "/experts" },
       { name: "FAQ", href: "/faq" },
-      { name: "Our Mission", href: "/about/mission" },
+      { name: "Our Mission", href: "/ourmission" },
       { name: "Team", href: "/about/team" },
     ],
   },
