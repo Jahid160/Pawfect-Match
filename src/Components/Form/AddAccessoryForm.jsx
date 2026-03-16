@@ -14,7 +14,7 @@ const AdminPetForm = () => {
     sku: "",
     tags: "",
     brand: "",
-    targetPet: "All",
+    targetPet: "All Pets",
     stock: "",
     price: "",
     discountPrice: "",
@@ -23,24 +23,34 @@ const AdminPetForm = () => {
     image: null,
     description: "",
     material: "",
-    warranty: "No Warranty",
+    warranty: "",
   });
 
   const [errors, setErrors] = useState({});
 
   const validateStep = () => {
     let newErrors = {};
+
     if (step === 1) {
       if (!formData.title.trim()) newErrors.title = "Title is required!";
       if (!formData.category) newErrors.category = "Category is required!";
-      if (!formData.sku.trim())
-        newErrors.sku = "SKU Code is required for tracking!";
+      if (!formData.sku.trim()) newErrors.sku = "SKU Code is required!";
+      if (!formData.brand.trim()) newErrors.brand = "Brand name is required!";
     } else if (step === 2) {
       if (!formData.stock || formData.stock < 1)
         newErrors.stock = "Stock must be 1 or more!";
       if (!formData.price || formData.price <= 0)
         newErrors.price = "Valid Price is required!";
+      if (!formData.discountPrice)
+        newErrors.discountPrice = "Discount Price is required! (Put 0 if none)";
+      if (!formData.weight.trim()) newErrors.weight = "Weight is required!";
+      if (!formData.size.trim()) newErrors.size = "Size is required!";
+      if (!formData.material.trim())
+        newErrors.material = "Material is required!";
+      if (!formData.warranty)
+        newErrors.warranty = "Please select warranty status!";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -50,68 +60,56 @@ const AdminPetForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    if (!validateStep()) return;
 
+    setLoading(true);
     try {
-      // image add 
       if (!formData.image) {
         setErrors({ image: "Mandatory: Please upload a product image!" });
         setLoading(false);
         return;
       }
 
-      //  (Internal API call)
       const uploadToImgBB = async (file) => {
         const uploadFormData = new FormData();
         uploadFormData.append("image", file);
-
         const res = await fetch("/api/upload", {
           method: "POST",
           body: uploadFormData,
         });
-
         const data = await res.json();
         if (!data.success) throw new Error(data.error || "Upload failed");
-        return data.url; //  get ImgBB  URL
+        return data.url;
       };
 
-      //  collect form data and upload image to get URL
       const imageUrl = await uploadToImgBB(formData.image);
+      const finalData = { ...formData, image: imageUrl };
 
-      //  Image url make 
-      const finalData = {
-        ...formData,
-        image: imageUrl, // File from state change to URL from ImgBB
-      };
-
-      //  MongoDB create accessory (Internal API call)
       const response = await createAccessory(finalData);
-
       if (response.success) {
         setIsSubmitted(true);
       } else {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: response.error || "Failed to publish product!",
+          text: response.error || "Failed to publish!",
         });
       }
     } catch (err) {
-      console.error(err);
       alert(err.message || "Something went wrong!");
     } finally {
-      setLoading(false); // loading state reset after operation completes
+      setLoading(false);
     }
   };
 
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200 p-6">
-        <div className="card w-full max-w-md bg-base-100 shadow-2xl text-center p-10 border-b-8 border-primary animate-pulse">
+        <div className="card w-full max-w-md bg-base-100 shadow-2xl text-center p-10 border-b-8 border-primary">
           <div className="text-7xl mb-4">✨</div>
           <h2 className="text-3xl font-black text-neutral">SUCCESS!</h2>
           <p className="py-4 text-neutral/60 italic">
-            Product `{formData.title}` is now added with SKU: {formData.sku}
+            Product `{formData.title}` is added!
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -128,9 +126,8 @@ const AdminPetForm = () => {
     <div className="min-h-screen bg-base-200 py-12 px-4">
       <h2 className="text-primary text-3xl pb-5 font-bold text-center">
         Add New Accessory
-      </h2>{" "}
+      </h2>
       <div className="max-w-4xl mx-auto">
-        {/* Step Indicator */}
         <div className="steps w-full mb-10">
           <li className={`step ${step >= 1 ? "step-primary font-bold" : ""}`}>
             Identity
@@ -148,30 +145,20 @@ const AdminPetForm = () => {
             {/* STEP 1: Identity */}
             {step === 1 && (
               <div className="card-body">
-                <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-primary border-l-4 border-primary pl-3">
-                    Product Identity
-                  </h3>
-                  <p className="text-sm text-base-content/60 pl-4">
-                    Provide basic information about the product to get started.
-                  </p>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="form-control md:col-span-2">
                     <label className="label">
                       <span className="label-text font-bold">
-                        Product Title <span className="text-error">*</span>
+                        Product Title *
                       </span>
                     </label>
                     <input
-                      name="title"
                       value={formData.title}
-                      onChange={(e) => {
-                        setFormData({ ...formData, title: e.target.value });
-                        setErrors({ ...errors, title: "" });
-                      }}
-                      className={`input input-bordered ${errors.title ? "border-error bg-error/5" : "focus:border-primary"}`}
-                      placeholder="e.g. Ultra-Soft Pet Bed"
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                      className={`input input-bordered ${errors.title ? "border-error" : ""}`}
+                      placeholder="Title"
                     />
                     {errors.title && (
                       <span className="text-error text-xs mt-1 font-bold">
@@ -182,20 +169,34 @@ const AdminPetForm = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">
-                        SKU Code (Unique ID){" "}
-                        <span className="text-error">*</span>
-                      </span>
+                      <span className="label-text font-bold">Brand *</span>
                     </label>
                     <input
-                      name="sku"
+                      value={formData.brand}
+                      onChange={(e) =>
+                        setFormData({ ...formData, brand: e.target.value })
+                      }
+                      className={`input input-bordered ${errors.brand ? "border-error" : ""}`}
+                      placeholder="Brand Name"
+                    />
+                    {errors.brand && (
+                      <span className="text-error text-xs mt-1 font-bold">
+                        {errors.brand}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-bold">SKU Code *</span>
+                    </label>
+                    <input
                       value={formData.sku}
-                      onChange={(e) => {
-                        setFormData({ ...formData, sku: e.target.value });
-                        setErrors({ ...errors, sku: "" });
-                      }}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sku: e.target.value })
+                      }
                       className={`input input-bordered ${errors.sku ? "border-error" : ""}`}
-                      placeholder="e.g. PET-BD-001"
+                      placeholder="SKU-001"
                     />
                     {errors.sku && (
                       <span className="text-error text-xs mt-1 font-bold">
@@ -206,17 +207,13 @@ const AdminPetForm = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">
-                        Category <span className="text-error">*</span>
-                      </span>
+                      <span className="label-text font-bold">Category *</span>
                     </label>
                     <select
-                      name="category"
                       value={formData.category}
-                      onChange={(e) => {
-                        setFormData({ ...formData, category: e.target.value });
-                        setErrors({ ...errors, category: "" });
-                      }}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
                       className={`select select-bordered ${errors.category ? "border-error" : ""}`}
                     >
                       <option value="">Select Category</option>
@@ -233,30 +230,14 @@ const AdminPetForm = () => {
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">
-                        Product Tags (Keywords)
-                      </span>
-                    </label>
-                    <input
-                      name="tags"
-                      onChange={(e) =>
-                        setFormData({ ...formData, tags: e.target.value })
-                      }
-                      className="input input-bordered"
-                      placeholder="e.g. eco-friendly, summer"
-                    />
-                  </div>
-
-                  <div className="form-control">
-                    <label className="label">
                       <span className="label-text font-bold">Targeted Pet</span>
                     </label>
                     <select
-                      name="targetPet"
-                      className="select select-bordered"
+                      value={formData.targetPet}
                       onChange={(e) =>
                         setFormData({ ...formData, targetPet: e.target.value })
                       }
+                      className="select select-bordered"
                     >
                       <option>Dogs</option>
                       <option>Cats</option>
@@ -268,7 +249,7 @@ const AdminPetForm = () => {
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="btn btn-primary px-12 text-white shadow-lg"
+                    className="btn btn-primary px-12 text-white"
                   >
                     Next Step
                   </button>
@@ -279,30 +260,18 @@ const AdminPetForm = () => {
             {/* STEP 2: Logistics & Pricing */}
             {step === 2 && (
               <div className="card-body bg-secondary/5">
-                <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-primary border-l-4 border-primary pl-3">
-                    Logistics & Pricing
-                  </h3>
-                  <p className="text-sm text-base-content/60 pl-4">
-                    Define stock levels and pricing strategy for your inventory.
-                  </p>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">
-                        Stock Level <span className="text-error">*</span>
-                      </span>
+                      <span className="label-text font-bold">Stock *</span>
                     </label>
                     <input
                       type="number"
-                      name="stock"
-                      onChange={(e) => {
-                        setFormData({ ...formData, stock: e.target.value });
-                        setErrors({ ...errors, stock: "" });
-                      }}
+                      value={formData.stock}
+                      onChange={(e) =>
+                        setFormData({ ...formData, stock: e.target.value })
+                      }
                       className={`input input-bordered ${errors.stock ? "border-error" : ""}`}
-                      placeholder="0"
                     />
                     {errors.stock && (
                       <span className="text-error text-xs mt-1 font-bold">
@@ -310,21 +279,18 @@ const AdminPetForm = () => {
                       </span>
                     )}
                   </div>
+
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">
-                        Regular Price <span className="text-error">*</span>
-                      </span>
+                      <span className="label-text font-bold">Prices *</span>
                     </label>
                     <input
                       type="number"
-                      name="price"
-                      onChange={(e) => {
-                        setFormData({ ...formData, price: e.target.value });
-                        setErrors({ ...errors, price: "" });
-                      }}
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
                       className={`input input-bordered ${errors.price ? "border-error" : ""}`}
-                      placeholder="$ 0.00"
                     />
                     {errors.price && (
                       <span className="text-error text-xs mt-1 font-bold">
@@ -332,18 +298,110 @@ const AdminPetForm = () => {
                       </span>
                     )}
                   </div>
+
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">
-                        Discount Price
+                        Discount Price *
                       </span>
                     </label>
                     <input
                       type="number"
-                      name="discountPrice"
-                      className="input input-bordered"
-                      placeholder="Optional"
+                      value={formData.discountPrice}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          discountPrice: e.target.value,
+                        })
+                      }
+                      className={`input input-bordered ${errors.discountPrice ? "border-error" : ""}`}
+                      placeholder="0"
                     />
+                    {errors.discountPrice && (
+                      <span className="text-error text-xs mt-1 font-bold">
+                        {errors.discountPrice}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-bold">Weight *</span>
+                    </label>
+                    <input
+                      value={formData.weight}
+                      onChange={(e) =>
+                        setFormData({ ...formData, weight: e.target.value })
+                      }
+                      className={`input input-bordered ${errors.weight ? "border-error" : ""}`}
+                      placeholder="e.g. 500g"
+                    />
+                    {errors.weight && (
+                      <span className="text-error text-xs mt-1 font-bold">
+                        {errors.weight}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-bold">Size *</span>
+                    </label>
+                    <input
+                      value={formData.size}
+                      onChange={(e) =>
+                        setFormData({ ...formData, size: e.target.value })
+                      }
+                      className={`input input-bordered ${errors.size ? "border-error" : ""}`}
+                      placeholder="e.g. Large / 10x12"
+                    />
+                    {errors.size && (
+                      <span className="text-error text-xs mt-1 font-bold">
+                        {errors.size}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-bold">Material *</span>
+                    </label>
+                    <input
+                      value={formData.material}
+                      onChange={(e) =>
+                        setFormData({ ...formData, material: e.target.value })
+                      }
+                      className={`input input-bordered ${errors.material ? "border-error" : ""}`}
+                      placeholder="e.g. Cotton"
+                    />
+                    {errors.material && (
+                      <span className="text-error text-xs mt-1 font-bold">
+                        {errors.material}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-control md:col-span-3">
+                    <label className="label">
+                      <span className="label-text font-bold">Warranty *</span>
+                    </label>
+                    <select
+                      value={formData.warranty}
+                      onChange={(e) =>
+                        setFormData({ ...formData, warranty: e.target.value })
+                      }
+                      className={`select select-bordered ${errors.warranty ? "border-error" : ""}`}
+                    >
+                      <option value="">Select Warranty</option>
+                      <option>No Warranty</option>
+                      <option>6 Months</option>
+                      <option>1 Year</option>
+                    </select>
+                    {errors.warranty && (
+                      <span className="text-error text-xs mt-1 font-bold">
+                        {errors.warranty}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="card-actions justify-between mt-8">
@@ -368,76 +426,50 @@ const AdminPetForm = () => {
             {/* STEP 3: Media & Finalize */}
             {step === 3 && (
               <div className="card-body">
-                <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-primary border-l-4 border-primary pl-3">
-                    Media & Details
-                  </h3>
-                  <p className="text-sm text-base-content/60 pl-4">
-                    Upload high-quality images and add a descriptive overview.
-                  </p>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-bold">Main Image *</span>
+                  </label>
+                  <input
+                    type="file"
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.files[0] })
+                    }
+                    className={`file-input file-input-bordered file-input-primary ${errors.image ? "file-input-error" : ""}`}
+                  />
+                  {errors.image && (
+                    <p className="text-error text-xs mt-1 font-bold">
+                      {errors.image}
+                    </p>
+                  )}
                 </div>
-                <div className="space-y-6">
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-bold uppercase text-xs tracking-widest">
-                        Main Product Image <span className="text-error">*</span>
-                      </span>
-                    </label>
-                    <input
-                      type="file"
-                      onChange={(e) => {
-                        setFormData({ ...formData, image: e.target.files[0] });
-                        setErrors({ ...errors, image: "" });
-                      }}
-                      className={`file-input file-input-bordered file-input-primary w-full ${errors.image ? "file-input-error" : ""}`}
-                    />
-                    {errors.image && (
-                      <p className="text-error text-xs mt-1 font-bold">
-                        {errors.image}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-bold">
-                        Full Product Description
-                      </span>
-                    </label>
-                    <textarea
-                      className="textarea textarea-bordered h-28"
-                      placeholder="Enter all details here..."
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                    ></textarea>
-                  </div>
+                <div className="form-control mt-4">
+                  <label className="label">
+                    <span className="label-text font-bold">Description</span>
+                  </label>
+                  <textarea
+                    className="textarea textarea-bordered h-28"
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                  ></textarea>
                 </div>
                 <div className="card-actions justify-between mt-8">
                   <button
                     type="button"
                     onClick={prevStep}
-                    // loading state diable button to prevent multiple submissions
                     disabled={loading}
-                    className="btn btn-ghost text-neutral"
+                    className="btn btn-ghost"
                   >
                     Back
                   </button>
-
                   <button
                     type="submit"
-                    // loading state diable button to prevent multiple submissions
                     disabled={loading}
-                    className="btn btn-primary px-16 text-white shadow-xl"
+                    className="btn btn-primary px-16 text-white"
                   >
                     {loading ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Publishing...
-                      </>
+                      <span className="loading loading-spinner"></span>
                     ) : (
                       "Complete & Publish"
                     )}
