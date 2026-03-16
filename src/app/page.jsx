@@ -3,7 +3,7 @@ import WhyChooseUs from "@/components/home/WhyChooseUs";
 import PetCategories from "@/components/home/PetCategories";
 import RecentPets from "@/components/cards/RecentPets";
 import HowItWorks from "@/components/home/HowItWorks";
-import VaccinationSection from "@/components/home/VaccinationSection"; // Health First
+import VaccinationSection from "@/components/home/VaccinationSection";
 import InteractivePetFood from "@/components/home/InteractivePetFood";
 import PetAccessoriesSection from "@/components/home/PetAccessoriesSection";
 import ExpertSection from "@/components/ExpertSection/ExpertSection";
