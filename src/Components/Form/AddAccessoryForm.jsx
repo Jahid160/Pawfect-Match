@@ -25,12 +25,10 @@ const AdminPetForm = () => {
     material: "",
     warranty: "",
   });
-
   const [errors, setErrors] = useState({});
 
   const validateStep = () => {
     let newErrors = {};
-
     if (step === 1) {
       if (!formData.title.trim()) newErrors.title = "Title is required!";
       if (!formData.category) newErrors.category = "Category is required!";
@@ -41,7 +39,7 @@ const AdminPetForm = () => {
         newErrors.stock = "Stock must be 1 or more!";
       if (!formData.price || formData.price <= 0)
         newErrors.price = "Valid Price is required!";
-      if (!formData.discountPrice)
+      if (formData.discountPrice === "")
         newErrors.discountPrice = "Discount Price is required! (Put 0 if none)";
       if (!formData.weight.trim()) newErrors.weight = "Weight is required!";
       if (!formData.size.trim()) newErrors.size = "Size is required!";
@@ -50,7 +48,6 @@ const AdminPetForm = () => {
       if (!formData.warranty)
         newErrors.warranty = "Please select warranty status!";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -61,7 +58,6 @@ const AdminPetForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep()) return;
-
     setLoading(true);
     try {
       // image add
@@ -110,6 +106,23 @@ const AdminPetForm = () => {
     }
   };
 
+  const inputClass = (field) =>
+    `input input-bordered w-full ${errors[field] ? "input-error" : ""}`;
+
+  const selectClass = (field) =>
+    `select select-bordered w-full ${errors[field] ? "select-error" : ""}`;
+
+  const ErrMsg = ({ field }) =>
+    errors[field] ? (
+      <span className="text-error text-xs mt-1 font-bold">{errors[field]}</span>
+    ) : null;
+
+  const stepConfig = [
+    { num: 1, label: "Identity" },
+    { num: 2, label: "Logistics" },
+    { num: 3, label: "Media" },
+  ];
+
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200 p-6">
@@ -135,18 +148,19 @@ const AdminPetForm = () => {
       <h2 className="text-primary text-3xl pb-5 font-bold text-center">
         Add New Accessory
       </h2>
+
       <div className="max-w-4xl mx-auto">
-        <div className="steps w-full mb-10">
-          <li className={`step ${step >= 1 ? "step-primary font-bold" : ""}`}>
-            Identity
-          </li>
-          <li className={`step ${step >= 2 ? "step-primary font-bold" : ""}`}>
-            Logistics
-          </li>
-          <li className={`step ${step >= 3 ? "step-primary font-bold" : ""}`}>
-            Media
-          </li>
-        </div>
+        {/* Step Bar */}
+        <ul className="steps w-full mb-10">
+          {stepConfig.map(({ num, label }) => (
+            <li
+              key={num}
+              className={`step ${step >= num ? "step-primary font-bold" : ""}`}
+            >
+              {label}
+            </li>
+          ))}
+        </ul>
 
         <div className="card bg-base-100 shadow-xl border border-base-300">
           <form onSubmit={handleSubmit}>
@@ -165,14 +179,10 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, title: e.target.value })
                       }
-                      className={`input input-bordered ${errors.title ? "border-error" : ""}`}
+                      className={inputClass("title")}
                       placeholder="Title"
                     />
-                    {errors.title && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.title}
-                      </span>
-                    )}
+                    <ErrMsg field="title" />
                   </div>
 
                   <div className="form-control">
@@ -184,14 +194,10 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, brand: e.target.value })
                       }
-                      className={`input input-bordered ${errors.brand ? "border-error" : ""}`}
+                      className={inputClass("brand")}
                       placeholder="Brand Name"
                     />
-                    {errors.brand && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.brand}
-                      </span>
-                    )}
+                    <ErrMsg field="brand" />
                   </div>
 
                   <div className="form-control">
@@ -203,14 +209,24 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, sku: e.target.value })
                       }
-                      className={`input input-bordered ${errors.sku ? "border-error" : ""}`}
+                      className={inputClass("sku")}
                       placeholder="SKU-001"
                     />
-                    {errors.sku && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.sku}
-                      </span>
-                    )}
+                    <ErrMsg field="sku" />
+                  </div>
+
+                  <div className="form-control md:col-span-2">
+                    <label className="label">
+                      <span className="label-text font-bold">Tags</span>
+                    </label>
+                    <input
+                      value={formData.tags}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tags: e.target.value })
+                      }
+                      className="input input-bordered w-full"
+                      placeholder="e.g. funny, toy, organic (comma separated)"
+                    />
                   </div>
 
                   <div className="form-control">
@@ -222,18 +238,14 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className={`select select-bordered ${errors.category ? "border-error" : ""}`}
+                      className={selectClass("category")}
                     >
                       <option value="">Select Category</option>
                       <option>Toys</option>
                       <option>Food</option>
                       <option>Accessories</option>
                     </select>
-                    {errors.category && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.category}
-                      </span>
-                    )}
+                    <ErrMsg field="category" />
                   </div>
 
                   <div className="form-control">
@@ -245,7 +257,7 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, targetPet: e.target.value })
                       }
-                      className="select select-bordered"
+                      className="select select-bordered w-full"
                     >
                       <option>Dogs</option>
                       <option>Cats</option>
@@ -253,6 +265,7 @@ const AdminPetForm = () => {
                     </select>
                   </div>
                 </div>
+
                 <div className="card-actions justify-end mt-8">
                   <button
                     type="button"
@@ -267,7 +280,7 @@ const AdminPetForm = () => {
 
             {/* STEP 2: Logistics & Pricing */}
             {step === 2 && (
-              <div className="card-body bg-secondary/5">
+              <div className="card-body bg-secondary/20">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="form-control">
                     <label className="label">
@@ -279,18 +292,16 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, stock: e.target.value })
                       }
-                      className={`input input-bordered ${errors.stock ? "border-error" : ""}`}
+                      className={inputClass("stock")}
+                      placeholder="0"
+                      min="1"
                     />
-                    {errors.stock && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.stock}
-                      </span>
-                    )}
+                    <ErrMsg field="stock" />
                   </div>
 
                   <div className="form-control">
                     <label className="label">
-                      <span className="label-text font-bold">Prices *</span>
+                      <span className="label-text font-bold">Price *</span>
                     </label>
                     <input
                       type="number"
@@ -298,13 +309,12 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, price: e.target.value })
                       }
-                      className={`input input-bordered ${errors.price ? "border-error" : ""}`}
+                      className={inputClass("price")}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
                     />
-                    {errors.price && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.price}
-                      </span>
-                    )}
+                    <ErrMsg field="price" />
                   </div>
 
                   <div className="form-control">
@@ -322,14 +332,11 @@ const AdminPetForm = () => {
                           discountPrice: e.target.value,
                         })
                       }
-                      className={`input input-bordered ${errors.discountPrice ? "border-error" : ""}`}
+                      className={inputClass("discountPrice")}
                       placeholder="0"
+                      min="0"
                     />
-                    {errors.discountPrice && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.discountPrice}
-                      </span>
-                    )}
+                    <ErrMsg field="discountPrice" />
                   </div>
 
                   <div className="form-control">
@@ -341,14 +348,10 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, weight: e.target.value })
                       }
-                      className={`input input-bordered ${errors.weight ? "border-error" : ""}`}
+                      className={inputClass("weight")}
                       placeholder="e.g. 500g"
                     />
-                    {errors.weight && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.weight}
-                      </span>
-                    )}
+                    <ErrMsg field="weight" />
                   </div>
 
                   <div className="form-control">
@@ -360,14 +363,10 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, size: e.target.value })
                       }
-                      className={`input input-bordered ${errors.size ? "border-error" : ""}`}
+                      className={inputClass("size")}
                       placeholder="e.g. Large / 10x12"
                     />
-                    {errors.size && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.size}
-                      </span>
-                    )}
+                    <ErrMsg field="size" />
                   </div>
 
                   <div className="form-control">
@@ -379,14 +378,10 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, material: e.target.value })
                       }
-                      className={`input input-bordered ${errors.material ? "border-error" : ""}`}
+                      className={inputClass("material")}
                       placeholder="e.g. Cotton"
                     />
-                    {errors.material && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.material}
-                      </span>
-                    )}
+                    <ErrMsg field="material" />
                   </div>
 
                   <div className="form-control md:col-span-3">
@@ -398,20 +393,17 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, warranty: e.target.value })
                       }
-                      className={`select select-bordered ${errors.warranty ? "border-error" : ""}`}
+                      className={selectClass("warranty")}
                     >
                       <option value="">Select Warranty</option>
                       <option>No Warranty</option>
                       <option>6 Months</option>
                       <option>1 Year</option>
                     </select>
-                    {errors.warranty && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.warranty}
-                      </span>
-                    )}
+                    <ErrMsg field="warranty" />
                   </div>
                 </div>
+
                 <div className="card-actions justify-between mt-8">
                   <button
                     type="button"
@@ -440,28 +432,31 @@ const AdminPetForm = () => {
                   </label>
                   <input
                     type="file"
+                    accept="image/*"
                     onChange={(e) =>
                       setFormData({ ...formData, image: e.target.files[0] })
                     }
-                    className={`file-input file-input-bordered file-input-primary ${errors.image ? "file-input-error" : ""}`}
+                    className={`file-input file-input-bordered file-input-primary w-full ${
+                      errors.image ? "file-input-error" : ""
+                    }`}
                   />
-                  {errors.image && (
-                    <p className="text-error text-xs mt-1 font-bold">
-                      {errors.image}
-                    </p>
-                  )}
+                  <ErrMsg field="image" />
                 </div>
+
                 <div className="form-control mt-4">
                   <label className="label">
                     <span className="label-text font-bold">Description</span>
                   </label>
                   <textarea
                     className="textarea textarea-bordered h-28"
+                    value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                  ></textarea>
+                    placeholder="Write a short product description..."
+                  />
                 </div>
+
                 <div className="card-actions justify-between mt-8">
                   <button
                     type="button"
@@ -477,7 +472,7 @@ const AdminPetForm = () => {
                     className="btn btn-primary px-16 text-white"
                   >
                     {loading ? (
-                      <span className="loading loading-spinner"></span>
+                      <span className="loading loading-spinner" />
                     ) : (
                       "Complete & Publish"
                     )}
