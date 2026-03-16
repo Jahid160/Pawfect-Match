@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import {
   getCartItems,
   updateCartQuantity,
@@ -32,10 +32,14 @@ const CartPageClient = () => {
       return;
     }
 
-    setLoading(true);
-    const items = await getCartItems(session.user.email);
-    setCartItems(items || []);
-    setLoading(false);
+    try {
+      const items = await getCartItems(session.user.email);
+      setCartItems(items || []);
+    } catch (error) {
+      console.error("Cart loading failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -55,6 +59,7 @@ const CartPageClient = () => {
   }, [cartItems]);
 
   const handleQuantityChange = (cartId, quantity) => {
+    if (quantity < 1) return;
     startTransition(async () => {
       await updateCartQuantity({
         cartId,
@@ -76,53 +81,55 @@ const CartPageClient = () => {
   };
 
   const handleClearCart = () => {
-    startTransition(async () => {
-      await clearCart(session.user.email);
-      await loadCart();
-    });
+    if (window.confirm("Are you sure you want to clear your cart?")) {
+      startTransition(async () => {
+        await clearCart(session.user.email);
+        await loadCart();
+      });
+    }
   };
 
   if (status === "loading" || loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="font-bold text-lg">Loading cart...</p>
+       <div className="flex justify-center items-center min-h-screen bg-base-200">
+        <span className="loading loading-dots loading-lg text-primary"></span>
       </div>
     );
   }
 
   if (!session?.user) {
     return (
-      <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center">
-        <div className="bg-base-200 mb-6 p-8 rounded-full">
-          <FaShoppingCart className="text-primary text-5xl" />
+      <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center bg-base-200">
+        <div className="bg-base-100 mb-6 p-10 rounded-full shadow-lg">
+          <FaShoppingCart className="text-primary text-6xl" />
         </div>
-        <h2 className="font-black text-3xl">Please login first</h2>
-        <p className="mt-3 text-gray-500">
-          You need an account to view and use the cart.
+        <h2 className="font-black text-3xl text-neutral">Login Required</h2>
+        <p className="mt-3 text-neutral/60 max-w-sm">
+          You need to be logged in to manage your shopping cart.
         </p>
-
-        <AuthButtons/>
+        <div className="mt-8">
+            <AuthButtons/>
+        </div>
       </div>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center">
-        <div className="bg-base-200 mb-6 p-8 rounded-full">
-          <FaShoppingCart className="text-primary text-5xl" />
+      <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center bg-base-200">
+        <div className="bg-base-100 mb-6 p-10 rounded-full shadow-lg">
+          <FaShoppingCart className="text-primary/20 text-6xl" />
         </div>
-        <h2 className="font-black text-3xl">Your cart is empty</h2>
-        <p className="mt-3 text-gray-500">
-          Add some pet food and it will appear here.
+        <h2 className="font-black text-3xl text-neutral">Your cart is empty</h2>
+        <p className="mt-3 text-neutral/60">
+          Looks like you haven&apos;t added any treats for your furry friends yet!
         </p>
-
         <Link
           href="/pet-food"
-          className="inline-flex items-center gap-2 bg-primary mt-6 px-6 py-3 rounded-xl font-bold text-white"
+          className="inline-flex items-center gap-2 bg-primary mt-8 px-8 py-4 rounded-2xl font-black text-white shadow-xl hover:scale-105 transition-transform"
         >
           <FaArrowLeft />
-          Continue Shopping
+          Start Shopping
         </Link>
       </div>
     );
@@ -133,87 +140,85 @@ const CartPageClient = () => {
       <div className="mx-auto max-w-7xl">
         <Link
           href="/pet-food"
-          className="inline-flex items-center gap-2 mb-8 font-bold text-primary"
+          className="inline-flex items-center gap-2 mb-8 font-bold text-primary hover:underline"
         >
           <FaArrowLeft />
           Continue Shopping
         </Link>
 
         <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
-          <div className="lg:col-span-2 bg-base-100 shadow p-6 rounded-3xl">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="font-black text-3xl">Shopping Cart</h1>
-
+          <div className="lg:col-span-2 bg-base-100 shadow-xl p-8 rounded-[2.5rem] border border-base-300">
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="font-black text-3xl text-neutral">Cart Details</h1>
               <button
                 onClick={handleClearCart}
                 disabled={isPending}
-                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl font-bold text-white"
+                className="btn btn-error btn-sm rounded-xl font-bold text-white capitalize"
               >
                 Clear Cart
               </button>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-6">
               {cartItems.map((item) => (
                 <div
                   key={item._id}
-                  className="flex md:flex-row flex-col gap-5 bg-base-200 p-4 rounded-2xl"
+                  className="flex md:flex-row flex-col gap-6 bg-base-200 p-5 rounded-3xl border border-transparent hover:border-primary/10 transition-all group"
                 >
-                  <div className="relative bg-white rounded-2xl w-full md:w-36 h-36 overflow-hidden">
+                  {/* Image Container */}
+                  <div className="relative bg-white rounded-2xl w-full md:w-32 h-32 overflow-hidden shadow-inner shrink-0">
                     <Image
                       src={item.image || "https://placehold.co/300x300"}
                       alt={item.productName}
                       fill
-                      className="object-contain p-4"
+                      className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
 
-                  <div className="flex-1">
-                    <h3 className="font-black text-xl">{item.productName}</h3>
-                    <p className="mt-1 text-gray-500 text-sm">{item.brand}</p>
-                    <p className="mt-1 text-gray-500 text-sm">
-                      {item.weight} {item.weightUnit}
-                    </p>
-                    <p className="mt-2 font-bold text-primary text-lg">
-                      ${item.price}
-                    </p>
-
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-between py-1">
+                    <div>
+                        <h3 className="font-black text-xl text-neutral leading-tight">{item.productName}</h3>
+                        <div className="flex gap-3 mt-1 text-xs font-bold text-neutral/40 uppercase">
+                           <span>{item.brand}</span>
+                           <span>•</span>
+                           <span>{item.weight} {item.weightUnit}</span>
+                        </div>
+                    </div>
+                    
                     <div className="flex flex-wrap items-center gap-3 mt-4">
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(item._id, item.quantity - 1)
-                        }
-                        className="flex justify-center items-center bg-white rounded-lg w-10 h-10"
-                      >
-                        <FaMinus />
-                      </button>
-
-                      <span className="min-w-[30px] font-bold text-center">
-                        {item.quantity}
-                      </span>
-
-                      <button
-                        onClick={() =>
-                          handleQuantityChange(item._id, item.quantity + 1)
-                        }
-                        disabled={item.quantity >= item.stock}
-                        className="flex justify-center items-center bg-white disabled:opacity-50 rounded-lg w-10 h-10"
-                      >
-                        <FaPlus />
-                      </button>
+                      <div className="flex items-center bg-white rounded-xl p-1 shadow-sm border border-base-300">
+                        <button
+                          onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
+                          className="flex justify-center items-center w-8 h-8 hover:text-primary transition-colors"
+                        >
+                          <FaMinus size={12} />
+                        </button>
+                        <span className="min-w-[40px] font-black text-center text-lg">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
+                          disabled={item.quantity >= item.stock}
+                          className="flex justify-center items-center w-8 h-8 hover:text-primary disabled:opacity-30 transition-colors"
+                        >
+                          <FaPlus size={12} />
+                        </button>
+                      </div>
 
                       <button
                         onClick={() => handleRemove(item._id)}
-                        className="inline-flex items-center gap-2 bg-red-100 hover:bg-red-200 ml-2 px-4 py-2 rounded-xl font-bold text-red-600"
+                        className="btn btn-ghost btn-sm text-error/60 hover:text-error hover:bg-error/10 rounded-xl"
                       >
                         <FaTrash />
-                        Remove
+                        <span className="font-bold">Remove</span>
                       </button>
                     </div>
                   </div>
 
-                  <div className="flex md:justify-end items-end">
-                    <p className="font-black text-xl">
+                  <div className="flex md:flex-col justify-between items-end md:text-right">
+                    <p className="text-sm font-bold text-neutral/30">Price</p>
+                    <p className="font-black text-2xl text-primary">
                       ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
                     </p>
                   </div>
@@ -222,36 +227,41 @@ const CartPageClient = () => {
             </div>
           </div>
 
-          <div className="bg-base-100 shadow p-6 rounded-3xl h-fit">
-            <h2 className="mb-6 font-black text-2xl">Order Summary</h2>
+          {/* Summary Sidebar */}
+          <div className="bg-base-100 shadow-xl p-8 rounded-[2.5rem] border border-base-300 h-fit sticky top-24">
+            <h2 className="mb-8 font-black text-2xl text-neutral border-b border-base-200 pb-4">Order Summary</h2>
 
-            <div className="space-y-4 text-sm">
+            <div className="space-y-4 font-bold text-neutral/70">
               <div className="flex justify-between">
                 <span>Total Items</span>
-                <span className="font-bold">{totalItems}</span>
+                <span className="text-neutral">{totalItems}</span>
               </div>
-
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="font-bold">${subtotal.toFixed(2)}</span>
+                <span className="text-neutral">${subtotal.toFixed(2)}</span>
               </div>
-
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span className="font-bold">Free</span>
+                <span className="text-success">FREE</span>
               </div>
 
-              <div className="pt-4 border-t">
-                <div className="flex justify-between font-black text-lg">
+              <div className="pt-6 mt-6 border-t-2 border-dashed border-base-200">
+                <div className="flex justify-between font-black text-2xl text-neutral">
                   <span>Total</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span className="text-primary">${subtotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
-            <button className="bg-primary hover:bg-primary/90 mt-6 py-4 rounded-xl w-full font-black text-white">
-              Checkout
-            </button>
+            <Link href='/checkout' className="block mt-10">
+              <button className="bg-primary hover:bg-primary/90 py-5 rounded-2xl w-full font-black text-white text-lg shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95">
+                Proceed to Checkout
+              </button>
+            </Link>
+            
+            <p className="mt-4 text-[10px] text-center font-bold text-neutral/30 uppercase tracking-widest">
+              Secure Checkout • Powered by Pawfect Match
+            </p>
           </div>
         </div>
       </div>
@@ -260,4 +270,3 @@ const CartPageClient = () => {
 };
 
 export default CartPageClient;
-

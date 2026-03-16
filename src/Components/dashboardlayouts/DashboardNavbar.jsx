@@ -2,13 +2,22 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Bell, User, Check, MessageSquare, Heart, AlertCircle, ArrowRight } from "lucide-react";
+import {
+  Bell,
+  User,
+  Check,
+  MessageSquare,
+  Heart,
+  AlertCircle,
+  ArrowRight,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 const DashboardNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-
+  const session = useSession()
   // Fake Notification Data
   const notifications = [
     {
@@ -53,7 +62,6 @@ const DashboardNavbar = () => {
 
   return (
     <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 py-3 border-gray-100 border-b">
-      
       {/* LEFT SIDE: Logo */}
       <div>
         <h1 className="hover:opacity-80 ml-9 lg:ml-1 font-black text-slate-800 text-xl tracking-tight transition-opacity">
@@ -63,13 +71,14 @@ const DashboardNavbar = () => {
 
       {/* RIGHT SIDE: Notifications & Profile */}
       <div className="flex items-center gap-5">
-        
         {/* Notification Container */}
         <div className="relative" ref={dropdownRef}>
-          <button 
+          <button
             onClick={() => setIsOpen(!isOpen)}
             className={`relative p-2.5 rounded-2xl transition-all duration-300 ${
-              isOpen ? 'bg-orange-50 text-orange-600' : 'hover:bg-slate-50 text-slate-500'
+              isOpen
+                ? "bg-orange-50 text-orange-600"
+                : "hover:bg-slate-50 text-slate-500"
             }`}
           >
             <Bell size={22} strokeWidth={2.5} />
@@ -89,26 +98,38 @@ const DashboardNavbar = () => {
               >
                 {/* Dropdown Header */}
                 <div className="flex justify-between items-center bg-slate-50/50 p-5 border-slate-50 border-b">
-                  <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">Notifications</h3>
-                  <span className="bg-orange-500 px-2 py-0.5 rounded-full font-black text-[10px] text-white">2 NEW</span>
+                  <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">
+                    Notifications
+                  </h3>
+                  <span className="bg-orange-500 px-2 py-0.5 rounded-full font-black text-[10px] text-white">
+                    2 NEW
+                  </span>
                 </div>
 
                 {/* Notification List */}
                 <div className="max-h-[400px] overflow-y-auto">
                   {notifications.map((notif) => (
-                    <div 
+                    <div
                       key={notif.id}
-                      className={`p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-50 last:border-0 relative ${notif.isUnread ? 'bg-blue-50/20' : ''}`}
+                      className={`p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-50 last:border-0 relative ${notif.isUnread ? "bg-blue-50/20" : ""}`}
                     >
-                      <div className={`${notif.bg} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}>
+                      <div
+                        className={`${notif.bg} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}
+                      >
                         {notif.icon}
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-slate-800 text-sm leading-tight">{notif.title}</h4>
-                          <span className="font-medium text-[10px] text-slate-400">{notif.time}</span>
+                          <h4 className="font-bold text-slate-800 text-sm leading-tight">
+                            {notif.title}
+                          </h4>
+                          <span className="font-medium text-[10px] text-slate-400">
+                            {notif.time}
+                          </span>
                         </div>
-                        <p className="mt-1 font-medium text-slate-500 text-xs line-clamp-2 leading-relaxed">{notif.desc}</p>
+                        <p className="mt-1 font-medium text-slate-500 text-xs line-clamp-2 leading-relaxed">
+                          {notif.desc}
+                        </p>
                       </div>
                       {notif.isUnread && (
                         <div className="top-1/2 right-2 absolute bg-blue-500 rounded-full w-1.5 h-1.5 -translate-y-1/2"></div>
@@ -118,8 +139,8 @@ const DashboardNavbar = () => {
                 </div>
 
                 {/* View All Button */}
-                <Link 
-                  href="/notifications" 
+                <Link
+                  href="/notifications"
                   onClick={() => setIsOpen(false)}
                   className="block flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-4 font-black text-orange-500 hover:text-white text-xs text-center uppercase tracking-widest transition-all"
                 >
@@ -133,15 +154,19 @@ const DashboardNavbar = () => {
         {/* Profile Avatar */}
         <div className="flex items-center gap-3 pl-2 border-slate-100 border-l">
           <button className="flex justify-center items-center bg-orange-100 border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 text-orange-600 transition-all">
-            <User size={22} strokeWidth={2.5} />
+            {/* <User size={22} strokeWidth={2.5} /> */}
+            <img src={session?.data?.user?.image} alt="" />
           </button>
-          
+
           <div className="hidden md:block">
-            <p className="font-black text-slate-800 text-sm leading-none">Opu Nath</p>
-            <p className="mt-1 font-bold text-[10px] text-slate-400 italic uppercase tracking-tighter">Super Admin</p>
+            <p className="font-black text-slate-800 text-sm leading-none">
+              {session?.data?.user?.name}
+            </p>
+            <p className="mt-1 font-bold text-[10px] text-slate-400 italic uppercase tracking-tighter">
+              {session?.data?.user?.role}
+            </p>
           </div>
         </div>
-        
       </div>
     </nav>
   );

@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState, useTransition } from "react";
-import { useSession, signIn } from "next-auth/react";
 import {
   FaArrowLeft,
   FaWeightHanging,
@@ -14,10 +15,12 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import { addToCart } from "@/action/server/cart";
-import AuthButtons from "../button/AuthButtons";
+import { useAuthModal } from "@/provider/AuthModalProvider";
 
 const FoodDetails = ({ food }) => {
+  const router = useRouter();
   const { data: session } = useSession();
+  const { openLoginModal } = useAuthModal();
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -26,8 +29,9 @@ const FoodDetails = ({ food }) => {
       <div className="flex flex-col justify-center items-center min-h-screen">
         <FaTimesCircle className="mb-4 text-red-500 text-4xl" />
         <h2 className="font-bold text-2xl">Food not found</h2>
+
         <Link
-          href="/pet-food"
+          href="/petfoods"
           className="bg-primary mt-6 px-6 py-3 rounded-xl text-white"
         >
           Back to Foods
@@ -40,13 +44,16 @@ const FoodDetails = ({ food }) => {
     food.discountPrice && Number(food.discountPrice) < Number(food.price);
 
   const isOutOfStock = food.inStock === false || food.stock <= 0;
+
   const finalPrice = hasDiscount ? food.discountPrice : food.price;
 
   const handleAddToCart = () => {
     if (!session?.user?.email) {
-      setMessage("Please login first to add items to cart");
+      openLoginModal();
       return;
     }
+
+    setMessage("");
 
     startTransition(async () => {
       const result = await addToCart({
@@ -66,11 +73,20 @@ const FoodDetails = ({ food }) => {
     });
   };
 
+  const handleBuyNow = () => {
+    if (!session?.user?.email) {
+      openLoginModal();
+      return;
+    }
+
+    router.push(`/checkout?foodId=${food._id}`);
+  };
+
   return (
     <div className="bg-base-200 min-h-screen px-6 py-10">
       <div className="mx-auto max-w-7xl">
         <Link
-          href="/pet-food"
+          href="/petfoods"
           className="flex items-center gap-2 mb-8 font-bold text-primary"
         >
           <FaArrowLeft /> Back to foods
@@ -79,14 +95,14 @@ const FoodDetails = ({ food }) => {
         <div className="grid md:grid-cols-2 gap-10 bg-base-100 shadow p-8 rounded-3xl">
           <div className="relative flex justify-center items-center bg-base-200 rounded-2xl min-h-[450px]">
             {hasDiscount && (
-              <span className="top-5 left-5 absolute bg-red-500 px-4 py-1 rounded-full font-bold text-white text-xs">
+              <span className="top-5 left-5 absolute bg-red-500 px-4 py-1 rounded-full font-bold text-xs text-white">
                 SALE
               </span>
             )}
 
             <Image
               src={food.image || "https://placehold.co/700x700"}
-              alt={food.productName}
+              alt={food.productName || "Pet Food"}
               width={600}
               height={600}
               className="object-contain max-h-[420px]"
@@ -112,6 +128,7 @@ const FoodDetails = ({ food }) => {
                   <span className="font-black text-4xl text-error">
                     ${food.discountPrice}
                   </span>
+
                   <span className="text-gray-400 text-lg line-through">
                     ${food.price}
                   </span>
@@ -121,7 +138,7 @@ const FoodDetails = ({ food }) => {
               )}
             </div>
 
-            <div className="space-y-3 mb-6 text-sm">
+            <div className="space-y-3 text-sm mb-6">
               <p className="flex items-center gap-2">
                 <FaWeightHanging /> {food.weight}
                 {food.weightUnit}
@@ -148,14 +165,14 @@ const FoodDetails = ({ food }) => {
 
             {food.description && (
               <div className="mb-6">
-                <h3 className="mb-2 font-bold text-lg">Description</h3>
+                <h3 className="font-bold text-lg mb-2">Description</h3>
                 <p className="text-gray-500">{food.description}</p>
               </div>
             )}
 
             {food.ingredients && (
               <div className="mb-6">
-                <h3 className="mb-2 font-bold text-lg">Ingredients</h3>
+                <h3 className="font-bold text-lg mb-2">Ingredients</h3>
                 <p className="text-gray-500">{food.ingredients}</p>
               </div>
             )}
@@ -177,29 +194,25 @@ const FoodDetails = ({ food }) => {
               <button
                 onClick={handleAddToCart}
                 disabled={isOutOfStock || isPending}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition ${
-                  isOutOfStock || isPending
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-primary hover:bg-primary/90 text-white"
-                }`}
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition ${isOutOfStock || isPending
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-primary hover:bg-primary/90 text-white"
+                  }`}
               >
                 <FaShoppingCart />
                 {isPending ? "Adding..." : "Add to Cart"}
               </button>
 
-              
-                <button
-                  // onClick={handleBuyNow}
-                  disabled={isOutOfStock}
-                  className={`px-8 py-4 rounded-xl font-bold transition ${
-                    isOutOfStock
-                      ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                      : "bg-gray-900 hover:bg-black text-white"
+              <button
+                onClick={handleBuyNow}
+                disabled={isOutOfStock}
+                className={`px-8 py-4 rounded-xl font-bold transition ${isOutOfStock
+                  ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                  : "bg-gray-900 hover:bg-black text-white"
                   }`}
-                >
-                  Buy Now
-                </button>
-              
+              >
+                Buy Now
+              </button>
             </div>
 
             {message && (

@@ -5,11 +5,16 @@ const dbname = process.env.DBNAME;
 
 export const collections = {
   USERS: "users",
-  PETS: "pets",
-  FOODS: "foods",
-  ACCESSORIES: "accessories", 
-  ADOPTIONS: "adoptionsInfo",
-  SHELTER: "shelterInfo",
+  PETS: 'pets',
+  FOODS: 'foods',
+  ACCESSORIES: "accessories",
+  ADOPTIONS: 'adoptionsInfo',
+  SHELTER: 'shelterInfo',
+  FOODS: 'foods',
+  VACCINES: 'vaccines',
+  ORDERS: "vaccine_orders",
+  CART: 'cart',
+  ORDER: 'order',
 };
 
 const client = new MongoClient(uri, {
@@ -40,7 +45,7 @@ export const dbConnect = async (cname) => {
   }
 
   if (!client.connect) {
-     await client.connect();
+    await client.connect();
   }
 
   if (!dbInstance) {
@@ -48,6 +53,6 @@ export const dbConnect = async (cname) => {
     dbInstance = client.db(dbname);
     await setupIndices(dbInstance);
   }
-  
+
   return dbInstance.collection(cname);
 };

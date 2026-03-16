@@ -1,6 +1,6 @@
 
-import DashboardNavbar from "@/components/dashboardlayouts/DashboardNavbar";
-import DashboardSidebar from "@/components/dashboardlayouts/dashboardSidebar";
+import DashboardNavbar from "@/Components/dashboardlayouts/DashboardNavbar";
+import DashboardSidebar from "@/Components/dashboardlayouts/dashboardSidebar";
 import React from "react";
 
 const layout = ({ children }) => {
@@ -17,7 +17,7 @@ const layout = ({ children }) => {
       <div className="flex">
         {/* 2. The Sidebar */}
         <DashboardSidebar />
-
+        
         {/* 3. Main Content Area */}
         {/* - lg:ml-[240px]: Push content right only on desktop.
             - pt-[80px]: Space for the fixed navbar (adjust based on navbar height).
