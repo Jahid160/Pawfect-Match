@@ -64,6 +64,7 @@ const AdminPetForm = () => {
 
     setLoading(true);
     try {
+      // image add
       if (!formData.image) {
         setErrors({ image: "Mandatory: Please upload a product image!" });
         setLoading(false);
@@ -85,6 +86,13 @@ const AdminPetForm = () => {
       const imageUrl = await uploadToImgBB(formData.image);
       const finalData = { ...formData, image: imageUrl };
 
+      //  Image url make
+      const finalData = {
+        ...formData,
+        image: imageUrl, // File from state change to URL from ImgBB
+      };
+
+      //  MongoDB create accessory (Internal API call)
       const response = await createAccessory(finalData);
       if (response.success) {
         setIsSubmitted(true);
@@ -107,7 +115,7 @@ const AdminPetForm = () => {
       <div className="min-h-screen flex items-center justify-center bg-base-200 p-6">
         <div className="card w-full max-w-md bg-base-100 shadow-2xl text-center p-10 border-b-8 border-primary">
           <div className="text-7xl mb-4">✨</div>
-          <h2 className="text-3xl font-black text-neutral">SUCCESS!</h2>
+          <h2 className="text-3xl font-black text-neutral">Success!</h2>
           <p className="py-4 text-neutral/60 italic">
             Product `{formData.title}` is added!
           </p>
