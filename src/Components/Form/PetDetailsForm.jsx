@@ -1,5 +1,5 @@
 "use client";
-import Image from 'next/image'
+import Image from "next/image";
 import { useState } from "react";
 import {
   PawPrint,
@@ -29,8 +29,8 @@ import {
   RotateCcw,
   CircleCheck,
 } from "lucide-react";
-import Swal from 'sweetalert2';
-import { AddPets } from '@/action/server/pets';
+import Swal from "sweetalert2";
+import { AddPets } from "@/action/server/pets";
 
 const steps = [
   { id: 1, label: "Basic Info", icon: PawPrint },
@@ -60,9 +60,6 @@ const temperamentOptions = [
   "Protective",
 ];
 
-
-
-/* ── Reusable pill-style radio ── */
 function Pill({ value, current, onChange, icon: Icon, label, wide }) {
   const active = current === value;
   return (
@@ -83,7 +80,6 @@ function Pill({ value, current, onChange, icon: Icon, label, wide }) {
   );
 }
 
-/* ── Input with leading icon ── */
 function IconInput({ icon: Icon, className = "", ...props }) {
   return (
     <div className="relative">
@@ -100,7 +96,6 @@ function IconInput({ icon: Icon, className = "", ...props }) {
   );
 }
 
-/* ── Section divider label ── */
 function SectionLabel({ icon: Icon, children }) {
   return (
     <div className="flex items-center gap-2 py-1">
@@ -113,12 +108,25 @@ function SectionLabel({ icon: Icon, children }) {
   );
 }
 
+/* ── Error message component ── */
+function FieldError({ msg }) {
+  if (!msg) return null;
+  return (
+    <p className="text-xs text-error font-semibold flex items-center gap-1 mt-1">
+      <AlertCircle size={11} />
+      {msg}
+    </p>
+  );
+}
+
 export default function PetAdoptionForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemperaments, setSelectedTemperaments] = useState([]);
+  const [errors, setErrors] = useState({});
+
   const [form, setForm] = useState({
     petName: "",
     species: "",
@@ -150,64 +158,115 @@ export default function PetAdoptionForm() {
     ownerType: "",
   });
 
-  const update = (f, v) => setForm((p) => ({ ...p, [f]: v }));
+  const update = (f, v) => {
+    setForm((p) => ({ ...p, [f]: v }));
+    if (errors[f]) setErrors((p) => ({ ...p, [f]: "" }));
+  };
+
   const toggleT = (t) =>
     setSelectedTemperaments((p) =>
       p.includes(t) ? p.filter((x) => x !== t) : [...p, t],
     );
+
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    setPreviewImages((prev) =>
-      [...prev, ...files].slice(0, 6)
-    );
+    setPreviewImages((prev) => [...prev, ...files].slice(0, 6));
   };
 
-  //  Image upload function
+  /* ── Per-step validation ── */
+  const validateStep = (step) => {
+    const e = {};
+
+    if (step === 1) {
+      if (!form.petName.trim()) e.petName = "Pet name is required";
+      if (!form.species) e.species = "Please select a species";
+      if (!form.gender) e.gender = "Please select a gender";
+    }
+
+    if (step === 2) {
+      if (!form.vaccinated) e.vaccinated = "Please select vaccination status";
+      if (!form.neutered) e.neutered = "Please select neutered/spayed status";
+      if (!form.microchipped) e.microchipped = "Please select microchip status";
+      if (!form.healthCondition)
+        e.healthCondition = "Please select health condition";
+    }
+
+    if (step === 3) {
+      if (selectedTemperaments.length === 0)
+        e.temperaments = "Please select at least one temperament";
+      if (!form.activityLevel) e.activityLevel = "Please select activity level";
+      if (!form.indoorOutdoor)
+        e.indoorOutdoor = "Please select indoor/outdoor preference";
+    }
+
+    if (step === 4) {
+      if (!form.location.trim()) e.location = "Location is required";
+    }
+
+    if (step === 5) {
+      if (!form.ownerType) e.ownerType = "Please select owner type";
+      if (!form.ownerName.trim()) e.ownerName = "Full name is required";
+      if (!form.phone.trim()) e.phone = "Phone number is required";
+      if (!form.email.trim()) e.email = "Email address is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+        e.email = "Enter a valid email address";
+    }
+
+    return e;
+  };
+
+  /* ── Handle Next with validation ── */
+  const handleNext = () => {
+    const errs = validateStep(currentStep);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      // Scroll to first error
+      setTimeout(() => {
+        const firstErr = document.querySelector('[data-error="true"]');
+        if (firstErr)
+          firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+      return;
+    }
+    setErrors({});
+    setCurrentStep((s) => Math.min(steps.length, s + 1));
+  };
+
   const uploadImagesToImgBB = async (files) => {
     const uploadedUrls = [];
-
     for (const file of files) {
       const formData = new FormData();
       formData.append("image", file);
-
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
-
       const data = await res.json();
-      // console.log("Upload response:", data);
-
-      if (data.success) {
-        uploadedUrls.push(data.url);
-      }
+      if (data.success) uploadedUrls.push(data.url);
     }
-
     return uploadedUrls;
   };
-  //handlesubmit function
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // আপলোড শুরু হলে বাটন ডিসেবল হবে
-
+    const errs = validateStep(5);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+    setIsSubmitting(true);
     try {
-      // Upload images to ImgBB
       const imageUrls = await uploadImagesToImgBB(previewImages);
-
-      // Prepare final data
       const finalData = {
         ...form,
         temperaments: selectedTemperaments,
         images: imageUrls,
         createdAt: new Date(),
       };
-
-      // Save to database
       const response = await AddPets(finalData);
-
       if (response.success) {
         setSubmitted(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         Swal.fire({
           icon: "error",
@@ -217,11 +276,16 @@ export default function PetAdoptionForm() {
       }
     } catch (error) {
       console.error("Failed to submit:", error);
-      Swal.fire({ icon: "error", title: "Error", text: "Something went wrong!" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong!",
+      });
     } finally {
-      setIsSubmitting(false); // কাজ শেষ (সফল বা ব্যর্থ) হলে বাটন আবার সচল হবে
+      setIsSubmitting(false);
     }
   };
+
   /* ── Success screen ── */
   if (submitted) {
     return (
@@ -237,7 +301,7 @@ export default function PetAdoptionForm() {
             <p className="text-white/80 text-sm leading-relaxed">
               <span className="font-bold text-white">
                 {form.petName || "Your pet"}
-              </span>
+              </span>{" "}
               profile is under review. We will publish it soon so they can find
               their forever home. 🐾
             </p>
@@ -251,6 +315,7 @@ export default function PetAdoptionForm() {
                 setForm({});
                 setPreviewImages([]);
                 setSelectedTemperaments([]);
+                setErrors({});
               }}
             >
               <RotateCcw size={15} /> Add Another Pet
@@ -265,7 +330,7 @@ export default function PetAdoptionForm() {
 
   return (
     <div className="min-h-screen bg-base-200 py-12 px-4">
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div className="max-w-2xl mx-auto text-center mb-10">
         <div className="badge badge-primary badge-outline gap-1.5 mb-4 font-semibold tracking-widest text-[11px] uppercase px-4 py-3">
           <PawPrint size={11} /> PawFind Adoption Portal
@@ -280,7 +345,7 @@ export default function PetAdoptionForm() {
         </p>
       </div>
 
-      {/* ── Step Indicators ── */}
+      {/* Step Indicators */}
       <div className="flex items-center justify-center max-w-2xl mx-auto mb-8">
         {steps.map((s, i) => {
           const Icon = s.icon;
@@ -323,10 +388,9 @@ export default function PetAdoptionForm() {
         })}
       </div>
 
-      {/* ── Form Card ── */}
+      {/* Form Card */}
       <form
         onSubmit={handleSubmit}
-
         className="card bg-base-100 shadow-2xl max-w-2xl mx-auto rounded-3xl overflow-hidden"
       >
         {/* Card Header */}
@@ -362,11 +426,14 @@ export default function PetAdoptionForm() {
               <SectionLabel icon={Sparkles}>Identification</SectionLabel>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="form-control gap-1.5">
+                <div
+                  className="form-control gap-1.5"
+                  data-error={!!errors.petName}
+                >
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <PawPrint size={12} className="text-primary" />
-                      Pet Name *
+                      <PawPrint size={12} className="text-primary" /> Pet Name{" "}
+                      <span className="text-error">*</span>
                     </span>
                   </label>
                   <IconInput
@@ -374,35 +441,40 @@ export default function PetAdoptionForm() {
                     placeholder="e.g. Buddy"
                     value={form.petName}
                     onChange={(e) => update("petName", e.target.value)}
-                    required
+                    className={
+                      errors.petName ? "border-error focus:border-error" : ""
+                    }
                   />
+                  <FieldError msg={errors.petName} />
                 </div>
 
-                <div className="form-control gap-1.5">
+                <div
+                  className="form-control gap-1.5"
+                  data-error={!!errors.species}
+                >
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Dog size={12} className="text-primary" />
-                      Species *
+                      <Dog size={12} className="text-primary" /> Species{" "}
+                      <span className="text-error">*</span>
                     </span>
                   </label>
                   <select
-                    className="select select-bordered bg-base-200/60 focus:select-primary w-full"
+                    className={`select select-bordered bg-base-200/60 focus:select-primary w-full ${errors.species ? "border-error" : ""}`}
                     value={form.species}
                     onChange={(e) => update("species", e.target.value)}
-                    required
                   >
                     <option value="">Select species</option>
                     {speciesOptions.map((s) => (
                       <option key={s}>{s}</option>
                     ))}
                   </select>
+                  <FieldError msg={errors.species} />
                 </div>
 
                 <div className="form-control gap-1.5">
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Star size={12} className="text-primary" />
-                      Breed
+                      <Star size={12} className="text-primary" /> Breed
                     </span>
                   </label>
                   <input
@@ -416,8 +488,7 @@ export default function PetAdoptionForm() {
                 <div className="form-control gap-1.5">
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Activity size={12} className="text-primary" />
-                      Size
+                      <Activity size={12} className="text-primary" /> Size
                     </span>
                   </label>
                   <select
@@ -433,11 +504,18 @@ export default function PetAdoptionForm() {
                 </div>
               </div>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.gender}
+              >
                 <label className="label py-0">
-                  <span className="label-text font-semibold">Gender *</span>
+                  <span className="label-text font-semibold">
+                    Gender <span className="text-error">*</span>
+                  </span>
                 </label>
-                <div className="flex gap-3">
+                <div
+                  className={`flex gap-3 p-2 rounded-xl transition-colors ${errors.gender ? "bg-error/5 border border-error/30" : ""}`}
+                >
                   <Pill
                     value="Male"
                     current={form.gender}
@@ -451,14 +529,14 @@ export default function PetAdoptionForm() {
                     label="♀ Female"
                   />
                 </div>
+                <FieldError msg={errors.gender} />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="form-control gap-1.5">
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Clock size={12} className="text-primary" />
-                      Age
+                      <Clock size={12} className="text-primary" /> Age
                     </span>
                   </label>
                   <div className="flex gap-2">
@@ -486,8 +564,8 @@ export default function PetAdoptionForm() {
                 <div className="form-control gap-1.5">
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Activity size={12} className="text-primary" />
-                      Weight (kg)
+                      <Activity size={12} className="text-primary" /> Weight
+                      (kg)
                     </span>
                   </label>
                   <input
@@ -542,11 +620,19 @@ export default function PetAdoptionForm() {
                 { label: "Neutered / Spayed?", field: "neutered" },
                 { label: "Microchipped?", field: "microchipped" },
               ].map(({ label, field }) => (
-                <div className="form-control gap-1.5" key={field}>
+                <div
+                  className="form-control gap-1.5"
+                  key={field}
+                  data-error={!!errors[field]}
+                >
                   <label className="label py-0">
-                    <span className="label-text font-semibold">{label}</span>
+                    <span className="label-text font-semibold">
+                      {label} <span className="text-error">*</span>
+                    </span>
                   </label>
-                  <div className="flex gap-2">
+                  <div
+                    className={`flex gap-2 p-2 rounded-xl transition-colors ${errors[field] ? "bg-error/5 border border-error/30" : ""}`}
+                  >
                     {[
                       { v: "Yes", Icon: Check },
                       { v: "No", Icon: X },
@@ -562,6 +648,7 @@ export default function PetAdoptionForm() {
                       />
                     ))}
                   </div>
+                  <FieldError msg={errors[field]} />
                 </div>
               ))}
 
@@ -569,15 +656,19 @@ export default function PetAdoptionForm() {
                 Medical Details
               </div>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.healthCondition}
+              >
                 <label className="label py-0">
                   <span className="label-text font-semibold flex items-center gap-1.5">
                     <Stethoscope size={12} className="text-primary" />
-                    Current Health Condition
+                    Current Health Condition{" "}
+                    <span className="text-error">*</span>
                   </span>
                 </label>
                 <select
-                  className="select select-bordered bg-base-200/60 focus:select-primary w-full"
+                  className={`select select-bordered bg-base-200/60 focus:select-primary w-full ${errors.healthCondition ? "border-error" : ""}`}
                   value={form.healthCondition}
                   onChange={(e) => update("healthCondition", e.target.value)}
                 >
@@ -587,6 +678,7 @@ export default function PetAdoptionForm() {
                   <option>Fair - Minor Issues</option>
                   <option>Needs Veterinary Care</option>
                 </select>
+                <FieldError msg={errors.healthCondition} />
               </div>
 
               <div className="form-control gap-1.5">
@@ -624,28 +716,39 @@ export default function PetAdoptionForm() {
             <div className="space-y-5">
               <SectionLabel icon={Smile}>Temperament</SectionLabel>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.temperaments}
+              >
                 <label className="label py-0">
                   <span className="label-text font-semibold">
-                    Select all that apply
+                    Select all that apply <span className="text-error">*</span>
                   </span>
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div
+                  className={`flex flex-wrap gap-2 p-2 rounded-xl transition-colors ${errors.temperaments ? "bg-error/5 border border-error/30" : ""}`}
+                >
                   {temperamentOptions.map((t) => (
                     <button
                       key={t}
                       type="button"
-                      onClick={() => toggleT(t)}
-                      className={`btn btn-sm rounded-full font-semibold transition-all duration-200 gap-1.5 ${selectedTemperaments.includes(t)
-                        ? "btn-primary shadow-md shadow-primary/25"
-                        : "btn-ghost border border-base-300 hover:border-primary/50 hover:text-primary"
-                        }`}
+                      onClick={() => {
+                        toggleT(t);
+                        if (errors.temperaments)
+                          setErrors((p) => ({ ...p, temperaments: "" }));
+                      }}
+                      className={`btn btn-sm rounded-full font-semibold transition-all duration-200 gap-1.5 ${
+                        selectedTemperaments.includes(t)
+                          ? "btn-primary shadow-md shadow-primary/25"
+                          : "btn-ghost border border-base-300 hover:border-primary/50 hover:text-primary"
+                      }`}
                     >
                       {selectedTemperaments.includes(t) && <Check size={11} />}
                       {t}
                     </button>
                   ))}
                 </div>
+                <FieldError msg={errors.temperaments} />
               </div>
 
               <div className="divider my-1 text-xs opacity-40">
@@ -678,8 +781,7 @@ export default function PetAdoptionForm() {
                   <div className="form-control gap-1.5" key={field}>
                     <label className="label py-0">
                       <span className="label-text font-semibold flex items-center gap-1.5">
-                        <Icon size={12} className="text-primary" />
-                        {label}
+                        <Icon size={12} className="text-primary" /> {label}
                       </span>
                     </label>
                     <div className="flex gap-2">
@@ -702,14 +804,19 @@ export default function PetAdoptionForm() {
                 ))}
               </div>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.activityLevel}
+              >
                 <label className="label py-0">
                   <span className="label-text font-semibold flex items-center gap-1.5">
-                    <Zap size={12} className="text-primary" />
-                    Activity Level
+                    <Zap size={12} className="text-primary" /> Activity Level{" "}
+                    <span className="text-error">*</span>
                   </span>
                 </label>
-                <div className="flex gap-3">
+                <div
+                  className={`flex gap-3 p-2 rounded-xl transition-colors ${errors.activityLevel ? "bg-error/5 border border-error/30" : ""}`}
+                >
                   <Pill
                     value="Low"
                     current={form.activityLevel}
@@ -729,16 +836,22 @@ export default function PetAdoptionForm() {
                     label="⚡ High"
                   />
                 </div>
+                <FieldError msg={errors.activityLevel} />
               </div>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.indoorOutdoor}
+              >
                 <label className="label py-0">
                   <span className="label-text font-semibold flex items-center gap-1.5">
-                    <Home size={12} className="text-primary" />
-                    Indoor / Outdoor
+                    <Home size={12} className="text-primary" /> Indoor / Outdoor{" "}
+                    <span className="text-error">*</span>
                   </span>
                 </label>
-                <div className="flex gap-3">
+                <div
+                  className={`flex gap-3 p-2 rounded-xl transition-colors ${errors.indoorOutdoor ? "bg-error/5 border border-error/30" : ""}`}
+                >
                   <Pill
                     value="Indoor"
                     current={form.indoorOutdoor}
@@ -758,6 +871,7 @@ export default function PetAdoptionForm() {
                     label="🔄 Both"
                   />
                 </div>
+                <FieldError msg={errors.indoorOutdoor} />
               </div>
 
               <div className="divider my-1 text-xs opacity-40">
@@ -784,8 +898,8 @@ export default function PetAdoptionForm() {
                   <div className="form-control gap-1.5">
                     <label className="label py-0">
                       <span className="label-text font-semibold flex items-center gap-1.5">
-                        <Clock size={12} className="text-primary" />
-                        Time with Owner
+                        <Clock size={12} className="text-primary" /> Time with
+                        Owner
                       </span>
                     </label>
                     <input
@@ -798,7 +912,7 @@ export default function PetAdoptionForm() {
                   <div className="form-control gap-1.5">
                     <label className="label py-0">
                       <span className="label-text font-semibold flex items-center gap-1.5">
-                        <DollarSign size={12} className="text-primary" />
+                        <DollarSign size={12} className="text-primary" />{" "}
                         Adoption Fee (BDT)
                       </span>
                     </label>
@@ -849,25 +963,21 @@ export default function PetAdoptionForm() {
                     className="relative group rounded-xl overflow-hidden aspect-square bg-base-200"
                   >
                     <Image
-                      src={URL.createObjectURL(file)}   // 🔥 এখানে পরিবর্তন
+                      src={URL.createObjectURL(file)}
                       width={300}
                       height={300}
                       alt="Pet Photo"
                       className="w-full h-full object-cover"
                     />
-
                     <button
                       type="button"
                       onClick={() =>
-                        setPreviewImages((p) =>
-                          p.filter((_, idx) => idx !== i),
-                        )
+                        setPreviewImages((p) => p.filter((_, idx) => idx !== i))
                       }
                       className="absolute top-2 right-2 btn btn-xs btn-circle btn-neutral opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X size={11} />
                     </button>
-
                     {i === 0 && (
                       <span className="absolute bottom-2 left-2 badge badge-primary badge-xs font-bold tracking-wider uppercase">
                         Main
@@ -876,13 +986,17 @@ export default function PetAdoptionForm() {
                   </div>
                 ))}
               </div>
+
               <div className="divider my-1 text-xs opacity-40">Location</div>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.location}
+              >
                 <label className="label py-0">
                   <span className="label-text font-semibold flex items-center gap-1.5">
-                    <MapPin size={12} className="text-primary" />
-                    City / Area *
+                    <MapPin size={12} className="text-primary" /> City / Area{" "}
+                    <span className="text-error">*</span>
                   </span>
                 </label>
                 <IconInput
@@ -890,8 +1004,11 @@ export default function PetAdoptionForm() {
                   placeholder="e.g. Dhaka, Chittagong"
                   value={form.location}
                   onChange={(e) => update("location", e.target.value)}
-                  required
+                  className={
+                    errors.location ? "border-error focus:border-error" : ""
+                  }
                 />
+                <FieldError msg={errors.location} />
               </div>
             </div>
           )}
@@ -901,11 +1018,18 @@ export default function PetAdoptionForm() {
             <div className="space-y-5">
               <SectionLabel icon={User}>Owner Type</SectionLabel>
 
-              <div className="form-control gap-1.5">
+              <div
+                className="form-control gap-1.5"
+                data-error={!!errors.ownerType}
+              >
                 <label className="label py-0">
-                  <span className="label-text font-semibold">You are a *</span>
+                  <span className="label-text font-semibold">
+                    You are a <span className="text-error">*</span>
+                  </span>
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div
+                  className={`flex flex-wrap gap-2 p-2 rounded-xl transition-colors ${errors.ownerType ? "bg-error/5 border border-error/30" : ""}`}
+                >
                   {["Individual Owner", "Shelter / NGO", "Rescue Group"].map(
                     (t) => (
                       <Pill
@@ -919,6 +1043,7 @@ export default function PetAdoptionForm() {
                     ),
                   )}
                 </div>
+                <FieldError msg={errors.ownerType} />
               </div>
 
               <div className="divider my-1 text-xs opacity-40">
@@ -926,11 +1051,14 @@ export default function PetAdoptionForm() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="form-control gap-1.5">
+                <div
+                  className="form-control gap-1.5"
+                  data-error={!!errors.ownerName}
+                >
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <User size={12} className="text-primary" />
-                      Full Name *
+                      <User size={12} className="text-primary" /> Full Name{" "}
+                      <span className="text-error">*</span>
                     </span>
                   </label>
                   <IconInput
@@ -938,14 +1066,21 @@ export default function PetAdoptionForm() {
                     placeholder="Your full name"
                     value={form.ownerName}
                     onChange={(e) => update("ownerName", e.target.value)}
-                    required
+                    className={
+                      errors.ownerName ? "border-error focus:border-error" : ""
+                    }
                   />
+                  <FieldError msg={errors.ownerName} />
                 </div>
-                <div className="form-control gap-1.5">
+
+                <div
+                  className="form-control gap-1.5"
+                  data-error={!!errors.phone}
+                >
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Phone size={12} className="text-primary" />
-                      Phone Number *
+                      <Phone size={12} className="text-primary" /> Phone Number{" "}
+                      <span className="text-error">*</span>
                     </span>
                   </label>
                   <IconInput
@@ -954,14 +1089,21 @@ export default function PetAdoptionForm() {
                     placeholder="+880 1XXXXXXXXX"
                     value={form.phone}
                     onChange={(e) => update("phone", e.target.value)}
-                    required
+                    className={
+                      errors.phone ? "border-error focus:border-error" : ""
+                    }
                   />
+                  <FieldError msg={errors.phone} />
                 </div>
-                <div className="form-control gap-1.5 sm:col-span-2">
+
+                <div
+                  className="form-control gap-1.5 sm:col-span-2"
+                  data-error={!!errors.email}
+                >
                   <label className="label py-0">
                     <span className="label-text font-semibold flex items-center gap-1.5">
-                      <Mail size={12} className="text-primary" />
-                      Email Address *
+                      <Mail size={12} className="text-primary" /> Email Address{" "}
+                      <span className="text-error">*</span>
                     </span>
                   </label>
                   <IconInput
@@ -970,8 +1112,11 @@ export default function PetAdoptionForm() {
                     placeholder="you@example.com"
                     value={form.email}
                     onChange={(e) => update("email", e.target.value)}
-                    required
+                    className={
+                      errors.email ? "border-error focus:border-error" : ""
+                    }
                   />
+                  <FieldError msg={errors.email} />
                 </div>
               </div>
 
@@ -1011,26 +1156,33 @@ export default function PetAdoptionForm() {
           )}
         </div>
 
-        {/* ── Navigation ── */}
+        {/* Navigation */}
         <div className="flex items-center justify-between px-8 py-5 border-t border-base-200">
-          {/* Back Button */}
           <button
             type="button"
-            disabled={isSubmitting} // সাবমিট হওয়ার সময় ডিসেবল থাকবে
-            onClick={() => setCurrentStep((s) => Math.max(1, s - 1))}
+            disabled={isSubmitting}
+            onClick={() => {
+              setErrors({});
+              setCurrentStep((s) => Math.max(1, s - 1));
+            }}
             className={`btn btn-ghost rounded-xl gap-2 ${currentStep === 1 ? "invisible" : ""}`}
           >
             <ChevronLeft size={16} /> Back
           </button>
 
           <div className="flex gap-1.5 items-center">
-            {/* Step indicators code here... */}
+            {steps.map((s) => (
+              <div
+                key={s.id}
+                className={`rounded-full transition-all duration-300 ${currentStep === s.id ? "w-6 h-2 bg-primary" : currentStep > s.id ? "w-2 h-2 bg-primary/50" : "w-2 h-2 bg-base-300"}`}
+              />
+            ))}
           </div>
 
           {currentStep < steps.length ? (
             <button
               type="button"
-              onClick={() => setCurrentStep((s) => Math.min(steps.length, s + 1))}
+              onClick={handleNext}
               className="btn btn-primary rounded-xl gap-2 px-6"
             >
               Continue <ChevronRight size={16} />
@@ -1038,7 +1190,7 @@ export default function PetAdoptionForm() {
           ) : (
             <button
               type="submit"
-              disabled={isSubmitting} // সাবমিট হওয়ার সময় ডিসেবল থাকবে
+              disabled={isSubmitting}
               className="btn btn-primary rounded-xl gap-2 px-6 shadow-lg shadow-primary/30"
             >
               {isSubmitting ? (
