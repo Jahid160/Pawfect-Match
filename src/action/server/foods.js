@@ -84,7 +84,21 @@ export const getSingleFood = async (id) => {
   }
 };
 
-
+// =============================
+// DELETE FOOD
+// =============================
+export const deleteFood = async (id) => {
+  try {
+    if (!ObjectId.isValid(id)) return { success: false, error: "Invalid ID" };
+    const foodsCollection = await foodCollectionPromise;
+    const result = await foodsCollection.deleteOne({ _id: new ObjectId(id) });
+    
+    return { success: result.deletedCount === 1 };
+  } catch (error) {
+    console.error("deleteFood error:", error);
+    return { success: false, error: error.message };
+  }
+};
 // =============================
 // REDUCE FOOD STOCK (MULTIPLE ITEMS)
 // =============================
@@ -92,42 +106,41 @@ export const reduceFoodStock = async (items = []) => {
   try {
     if (!items.length) return { success: false };
 
-    const foodsCollection = await foodCollectionPromise;
+    const foodsCollection = await dbConnect(collections.FOODS);
 
     for (const item of items) {
-
-      if (!ObjectId.isValid(item.productId)) continue;
+      // 1. Identify the ID (check both productId and product_id)
+      const idStr = item.productId || item.product_id;
+      
+      if (!idStr || !ObjectId.isValid(idStr)) {
+        console.error("Invalid ID found in reduction list:", idStr);
+        continue;
+      }
 
       const quantity = Number(item.quantity) || 1;
 
+      // 2. Perform the update
       const result = await foodsCollection.updateOne(
-        {
-          _id: new ObjectId(item.productId),
-          stock: { $gte: quantity }, // prevent negative stock
+        { 
+          _id: new ObjectId(idStr), // Ensure this matches the _id in your JSON
+          stock: { $gte: quantity } 
         },
-        {
+        { 
           $inc: { stock: -quantity },
-          $set: {
-            updatedAt: new Date(),
-          },
+          $set: { updatedAt: new Date() }
         }
       );
 
-      if (!result.modifiedCount) {
-        console.warn(`Stock update failed for product ${item.productId}`);
-      }
+      console.log(`Product ${idStr} updated: ${result.modifiedCount} documents modified.`);
     }
 
-    // Update inStock automatically if stock becomes 0
+    // 3. Cleanup: Set inStock to false if stock hit 0
     await foodsCollection.updateMany(
       { stock: { $lte: 0 } },
-      {
-        $set: { inStock: false },
-      }
+      { $set: { inStock: false } }
     );
 
     return { success: true };
-
   } catch (error) {
     console.error("reduceFoodStock error:", error);
     return { success: false };

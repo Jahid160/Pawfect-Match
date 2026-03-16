@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   Menu,
   X,
+  Bone
 } from "lucide-react";
 
 import { FaUserGroup } from "react-icons/fa6";
@@ -39,6 +40,7 @@ const DashboardSidebar = () => {
     { name: "Doctors Profiles", href: "/dashboard/doctors", icon: Stethoscope },
     { name: "Vaccination Management", href: "/dashboard/vaccinations", icon: Syringe },
     { name: "Pet Records", href: "/dashboard/pet-records", icon: FileText },
+    { name: "Food Management", href: "/dashboard/food", icon: Bone },
     { name: "Service Request", href: "/dashboard/requests", icon: ClipboardCheck },
     { name: "Report & Analysis", href: "/dashboard/reports", icon: BarChart3 },
     { name: "Manage Pets", href: "/dashboard/manage-pets", icon: PawPrint },
