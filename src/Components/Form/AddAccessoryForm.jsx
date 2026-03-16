@@ -53,7 +53,7 @@ const AdminPetForm = () => {
     setLoading(true);
 
     try {
-      // image add 
+      // image add
       if (!formData.image) {
         setErrors({ image: "Mandatory: Please upload a product image!" });
         setLoading(false);
@@ -78,7 +78,7 @@ const AdminPetForm = () => {
       //  collect form data and upload image to get URL
       const imageUrl = await uploadToImgBB(formData.image);
 
-      //  Image url make 
+      //  Image url make
       const finalData = {
         ...formData,
         image: imageUrl, // File from state change to URL from ImgBB
@@ -109,7 +109,7 @@ const AdminPetForm = () => {
       <div className="min-h-screen flex items-center justify-center bg-base-200 p-6">
         <div className="card w-full max-w-md bg-base-100 shadow-2xl text-center p-10 border-b-8 border-primary animate-pulse">
           <div className="text-7xl mb-4">✨</div>
-          <h2 className="text-3xl font-black text-neutral">SUCCESS!</h2>
+          <h2 className="text-3xl font-black text-neutral">Success!</h2>
           <p className="py-4 text-neutral/60 italic">
             Product `{formData.title}` is now added with SKU: {formData.sku}
           </p>
