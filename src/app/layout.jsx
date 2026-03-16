@@ -3,9 +3,9 @@ import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
 import AuthModalProvider from "@/provider/AuthModalProvider"; // এটি ইমপোর্ট করা আছে
 
-import Navbar from "@/components/Header/Navbar";
-import Footer from "@/components/Footer/Footer";
-import SupportButton from "@/components/HelpCenter/SupportButton";
+import Navbar from "@/Components/Header/Navbar";
+import Footer from "@/Components/Footer/Footer";
+import SupportButton from "@/Components/HelpCenter/SupportButton";
 import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
 

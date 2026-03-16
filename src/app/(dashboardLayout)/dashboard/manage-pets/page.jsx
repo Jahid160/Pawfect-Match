@@ -1,4 +1,4 @@
-import ManagePets from '@/components/dashboardlayouts/ManagePets';
+import ManagePets from '@/Components/dashboardlayouts/ManagePets';
 import React from 'react';
 
 const page = () => {

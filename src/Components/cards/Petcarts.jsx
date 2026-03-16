@@ -22,9 +22,9 @@ export const PetCard = ({ pet }) => {
       <div className="relative bg-gray-100 w-full h-72 overflow-hidden">
         <Image
           src={
-            pet.images?.primary ||
+            pet.images?.[0] ||
             pet.image ||
-            "https://placehold.co/600x400?text=No+Image"
+            "https://placehold.co/600x400/png?text=No+Image"
           }
           alt={pet.name || "Pet"}
           fill
@@ -67,7 +67,8 @@ export const PetCard = ({ pet }) => {
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 border border-gray-100 rounded-full text-xs">
             <span className="font-medium text-gray-400 uppercase">Age:</span>
-            <span className="font-bold text-gray-700">{pet.age || "N/A"}</span>
+            <span className="font-bold text-gray-700">{pet.
+              ageYears || "N/A"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-gray-500 text-xs">
             <FaMapMarkerAlt className="text-orange-400" />
@@ -189,11 +190,10 @@ const Petcarts = ({ pets = [] }) => {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${
-                  selectedCategory === cat
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-200"
-                    : "bg-gray-50 text-gray-500 hover:bg-orange-50 hover:text-orange-600"
-                }`}
+                className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95 ${selectedCategory === cat
+                  ? "bg-orange-500 text-white shadow-lg shadow-orange-200"
+                  : "bg-gray-50 text-gray-500 hover:bg-orange-50 hover:text-orange-600"
+                  }`}
               >
                 {cat}
               </button>
