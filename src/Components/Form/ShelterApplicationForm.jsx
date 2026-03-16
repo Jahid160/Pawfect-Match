@@ -380,12 +380,12 @@ export default function ShelterApplicationForm() {
                   </Field>
                   <Field label="Current Address *" error={errors.address}>
                     <textarea
-                      className={textareaCls(errors.address)}
+                      className={`${textareaCls(errors.address)} resize-none h-32 w-full`}
                       placeholder="House/flat number, street, area..."
                       rows={2}
                       value={formData.address}
                       onChange={(e) => update("address", e.target.value)}
-                    />
+                    />{" "}
                   </Field>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="City / District *" error={errors.city}>
@@ -443,7 +443,7 @@ export default function ShelterApplicationForm() {
                     error={errors.shelterAddress}
                   >
                     <textarea
-                      className={textareaCls(errors.shelterAddress)}
+                      className={`${textareaCls(errors.shelterAddress)} resize-none h-32 w-full`}
                       placeholder="Full address of the shelter"
                       rows={2}
                       value={formData.shelterAddress}
@@ -528,7 +528,7 @@ export default function ShelterApplicationForm() {
                     error={errors.petExperience}
                   >
                     <textarea
-                      className={textareaCls(errors.petExperience)}
+                      className={`${textareaCls(errors.petExperience)} resize-none h-32 w-full`}
                       placeholder="How many years, what types of animals, where..."
                       rows={3}
                       value={formData.petExperience}
@@ -613,7 +613,7 @@ export default function ShelterApplicationForm() {
                     error={errors.motivation}
                   >
                     <textarea
-                      className={textareaCls(errors.motivation)}
+                      className={`${textareaCls(errors.motivation)} resize-none h-32 w-full`}
                       placeholder="Share your motivation and goals..."
                       rows={3}
                       value={formData.motivation}
