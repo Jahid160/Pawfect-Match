@@ -1,9 +1,11 @@
 "use server";
 
+import { verifyAdmin } from "@/lib/adminAuth";
 import { authOptions } from "@/lib/authOptions";
 import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
+import { revalidatePath } from "next/cache";
 
 const petCollectionPromise = dbConnect(collections.PETS);
 
@@ -28,19 +30,18 @@ export async function getAllPetsAction() {
     const Petcollection = await petCollectionPromise;
 
     // Fetch all pets and convert Mongoose documents to plain JS objects
-    const pets = await Petcollection.find({}).lean();
+    const pets = await Petcollection.find({}).toArray();
 
     // Map through pets to ensure uniform data structure
     const formattedPets = pets.map((pet) => {
       return {
         _id: pet._id.toString(),
-        name: pet.name,
+        name: pet.petName,
         breed: pet.breed,
         age: pet.age,
-        type: pet.type,
-        image: pet.image,
-        // The logic you requested: Default to "Available" if status is missing
-        status: pet.status || "Available", 
+        type: pet.species,
+        image: pet.images[0],
+        status: pet.status || "Available",
       };
     });
 
@@ -82,7 +83,7 @@ export const AddPets = async (petdata) => {
     const Petcollection = await petCollectionPromise;
     const result = await Petcollection.insertOne({
       ...petdata,
-      status: "available"
+      status: "available",
     });
     return { success: Boolean(result.insertedId) };
   } catch (error) {
@@ -90,20 +91,26 @@ export const AddPets = async (petdata) => {
   }
 };
 
+// admin action
 export const DeletePets = async (id) => {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return { success: false, message: "Unauthorized" };
+verifyAdmin()
 
-  if (id?.length !== 24) return { success: false, message: "Invalid ID" };
+  if (!id || id.length !== 24) return { success: false, message: "Invalid ID" };
 
   try {
-    const Petcollection = await petCollectionPromise;
-    const query = { _id: new ObjectId(id), email: session.user.email };
-    const result = await Petcollection.deleteOne(query);
+    const PetCollection = await petCollectionPromise;
 
-    return { success: Boolean(result.deletedCount) };
+    const result = await PetCollection.deleteOne({ _id: new ObjectId(id) });
+
+    // Revalidate the page route (optional if using server component)
+    revalidatePath("/dashboard/manage-pets");
+
+    return {
+      success: result.deletedCount > 0,
+      message: result.deletedCount > 0 ? "Pet deleted successfully" : "Pet not found",
+    };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, message: error.message };
   }
 };
 
@@ -128,3 +135,58 @@ export const UpdatePets = async (id, petdata = {}) => {
   }
 };
 
+
+export const UpdatePetStatus = async (id) => {
+  verifyAdmin();
+
+  if (id?.length !== 24) return { success: false, message: "Invalid ID" };
+
+  try {
+    const PetCollection = await petCollectionPromise;
+    const query = { _id: new ObjectId(id)};
+    const updateStatus = {
+      $set: {
+        status: "adopted",
+      },
+    };
+    const result = await PetCollection.updateOne(query, updateStatus);
+    revalidatePath("/dashboard/manage-pets");
+
+    return {
+      success: result.modifiedCount > 0,
+      message:
+        result.modifiedCount > 0
+          ? "Pet adopted successfully"
+          : "Pet status was not pending",
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+export const UpdatePetStatusReject = async (id) => {
+  verifyAdmin();
+
+  if (id?.length !== 24) return { success: false, message: "Invalid ID" };
+
+  try {
+    const PetCollection = await petCollectionPromise;
+    const query = { _id: new ObjectId(id)};
+    const updateStatus = {
+      $set: {
+        status: "available",
+      },
+    };
+    const result = await PetCollection.updateOne(query, updateStatus);
+    revalidatePath("/dashboard/manage-pets");
+
+    return {
+      success: result.modifiedCount > 0,
+      message:
+        result.modifiedCount > 0
+          ? "Pet adopted successfully"
+          : "Pet status was not pending",
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};

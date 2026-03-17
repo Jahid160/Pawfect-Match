@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -16,157 +16,126 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { DeletePets, UpdatePetStatus, UpdatePetStatusReject } from "@/action/server/pets";
+import Image from "next/image"
+import Swal from "sweetalert2";
 
-const ManagePets = () => {
+
+const ManagePets = ({ initialPets }) => {
+  const [pets, setPets] = useState(initialPets);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All Status");
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 5;
 
-  const initialPets = [
-    {
-      _id: "PET-001",
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType, filterStatus]);
 
-      name: "Buddy",
-
-      breed: "Golden Retriever",
-
-      age: "2 Years",
-
-      type: "Dog",
-
-      // status: "Available",
-
-      image:
-        "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=150",
-    },
-
-    {
-      _id: "PET-002",
-
-      name: "Luna",
-
-      breed: "Persian Cat",
-
-      age: "6 Months",
-
-      type: "Cat",
-
-      status: "Pending",
-
-      image:
-        "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=150",
-    },
-
-    {
-      _id: "PET-003",
-
-      name: "Max",
-
-      breed: "German Shepherd",
-
-      age: "4 Years",
-
-      type: "Dog",
-
-      status: "Adopted",
-
-      image:
-        "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&q=80&w=150",
-    },
-
-    {
-      _id: "PET-004",
-
-      name: "Bella",
-
-      breed: "Siberian Husky",
-
-      age: "1 Year",
-
-      type: "Dog",
-
-      status: "Available",
-
-      image:
-        "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=150",
-    },
-
-    {
-      _id: "PET-005",
-
-      name: "Milo",
-
-      breed: "Siamese Cat",
-
-      age: "3 Years",
-
-      type: "Cat",
-
-      status: "Available",
-
-      image:
-        "https://images.unsplash.com/photo-1513245543132-31f507417b26?auto=format&fit=crop&q=80&w=150",
-    },
-
-    {
-      _id: "PET-006",
-
-      name: "Charlie",
-
-      breed: "Beagle",
-
-      age: "2 Years",
-
-      type: "Dog",
-
-      status: "Pending",
-
-      image:
-        "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=150",
-    },
-  ];
-
-  // Enhanced Filtering Logic
   const filteredPets = useMemo(() => {
-    return initialPets.filter((pet) => {
+    return pets.filter((pet) => {
       const matchesSearch =
-        pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pet._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pet.breed.toLowerCase().includes(searchTerm.toLowerCase());
+        pet.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pet._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pet.breed?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesType = filterType === "All" || pet.type === filterType;
+      const matchesType =
+        filterType === "All" ||
+        pet.type?.toLowerCase() === filterType.toLowerCase();
 
-      // Fallback to "Available" if status is missing
-      const currentStatus = pet.status || "Available";
       const matchesStatus =
-        filterStatus === "All Status" || currentStatus === filterStatus;
+        filterStatus === "All Status" || pet.status === filterStatus;
 
       return matchesSearch && matchesType && matchesStatus;
     });
-  }, [searchTerm, filterType, filterStatus]);
+  }, [pets, searchTerm, filterType, filterStatus]);
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredPets.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredPets.slice(indexOfFirstItem, indexOfLastItem);
-
+  console.log(currentItems);
   const handleFilterChange = (setter, value) => {
     setter(value);
     setCurrentPage(1);
   };
 
-  // Status Action Handlers
-  const handleUpdateStatus = (id) => alert(`Approving: ${id}`);
-  const handleReject = (id) => alert(`Rejecting: ${id}`);
-  const handleDelete = (id) => alert(`Deleting: ${id}`);
-  const handleEdit = (id) => alert(`Editing: ${id}`);
+  const handleApprove = async (id) => {
+    // 1️⃣ Update UI immediately
+    setPets((prev) =>
+      prev.map((pet) => (pet._id === id ? { ...pet, status: "Adopted" } : pet)),
+    );
+
+    // 2️⃣ Call server action
+    const result = await UpdatePetStatus(id);
+
+    if (!result.success) {
+      // rollback if server fails
+      setPets((prev) =>
+        prev.map((pet) =>
+          pet._id === id ? { ...pet, status: "Pending" } : pet,
+        ),
+      );
+      alert("Failed to update status");
+    }
+  };
+  const handleReject = async (id) => {
+    const result = await UpdatePetStatusReject(id);
+
+    if (result.success) {
+      alert("Pet adopted successfully");
+    } else {
+      alert("something went wrong");
+    }
+  };
+  const handleEdit = (id) => {
+    alert("handleEdit id", id);
+  };
+const handleDelete = async (id) => {
+  const confirm = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#64748b",
+    confirmButtonText: "Yes, delete it!",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  // 1️⃣ Optimistic UI update
+  const originalPets = [...pets];
+  setPets((prev) => prev.filter((pet) => pet._id !== id));
+
+  // 2️⃣ Call server action
+  const result = await DeletePets(id);
+
+  // 3️⃣ Handle result
+  if (!result.success) {
+    setPets(originalPets);
+
+    Swal.fire({
+      icon: "error",
+      title: "Failed!",
+      text: result.message || "Failed to delete pet",
+    });
+  } else {
+    Swal.fire({
+      icon: "success",
+      title: "Deleted!",
+      text: "Pet has been deleted successfully.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  }
+};
 
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
-      {/* Header Section */}
+      {/* HEADER */}
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-10">
         <div>
           <h1 className="flex items-center gap-3 font-black text-slate-900 text-4xl tracking-tight">
@@ -176,19 +145,19 @@ const ManagePets = () => {
             </span>
           </h1>
           <p className="mt-2 font-medium text-slate-500">
-            Track and manage adoption requests efficiently.
+            Showing {filteredPets.length} pets from database.
           </p>
         </div>
         <button className="group flex justify-center items-center gap-2 bg-orange-500 hover:bg-slate-900 shadow-lg px-8 py-4 rounded-2xl font-black text-white transition-all">
           <Plus
             size={20}
             className="group-hover:rotate-90 transition-transform"
-          />{" "}
+          />
           Add New Pet
         </button>
       </div>
 
-      {/* Toolbar: Search and Filters */}
+      {/* TOOLBAR */}
       <div className="flex lg:flex-row flex-col gap-4 mb-8">
         <div className="relative flex-1 max-w-xl">
           <Search
@@ -200,47 +169,47 @@ const ManagePets = () => {
             value={searchTerm}
             onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
             placeholder="Search by name, ID, or breed..."
-            className="bg-white shadow-sm py-4 pr-4 pl-12 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-orange-500/10 outline-none w-full font-medium transition-all"
+            className="bg-white shadow-sm py-4 pr-4 pl-12 border border-slate-200 rounded-2xl outline-none w-full font-medium transition-all focus:ring-4 focus:ring-orange-500/10"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Status Select Filter */}
-          <div className="relative">
-            <Filter
-              className="top-1/2 left-4 absolute text-slate-400 -translate-y-1/2 pointer-events-none"
-              size={16}
-            />
-            <select
-              value={filterStatus}
-              onChange={(e) =>
-                handleFilterChange(setFilterStatus, e.target.value)
-              }
-              className="bg-white shadow-sm py-4 pr-8 pl-11 border border-slate-200 rounded-2xl font-bold text-slate-600 text-xs outline-none focus:ring-2 focus:ring-orange-500/20 appearance-none cursor-pointer"
-            >
-              <option value="All Status">All Status</option>
-              <option value="Available">Available</option>
-              <option value="Pending">Pending</option>
-              <option value="Adopted">Adopted</option>
-            </select>
-          </div>
+        <div className="relative">
+          <Filter
+            className="top-1/2 left-4 absolute text-slate-400 -translate-y-1/2 pointer-events-none"
+            size={16}
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) =>
+              handleFilterChange(setFilterStatus, e.target.value)
+            }
+            className="bg-white shadow-sm py-4 pr-8 pl-11 border border-slate-200 rounded-2xl font-bold text-slate-600 text-xs outline-none cursor-pointer appearance-none"
+          >
+            <option value="All Status">All Status</option>
+            <option value="Available">Available</option>
+            <option value="pending">Pending</option>
+            <option value="adopted">Adopted</option>
+          </select>
+        </div>
 
-          {/* Type Selection Tabs */}
-          <div className="flex bg-white shadow-sm p-1 border border-slate-100 rounded-2xl">
-            {["All", "Dog", "Cat"].map((type) => (
-              <button
-                key={type}
-                onClick={() => handleFilterChange(setFilterType, type)}
-                className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${filterType === type ? "bg-slate-900 text-white shadow-md" : "text-slate-400 hover:text-slate-600"}`}
-              >
-                {type === "Dog" ? "Dogs" : type === "Cat" ? "Cats" : "All"}
-              </button>
-            ))}
-          </div>
+        <div className="flex bg-white shadow-sm p-1 border border-slate-100 rounded-2xl">
+          {["All", "Dog", "Cat", "Fish"].map((type) => (
+            <button
+              key={type}
+              onClick={() => handleFilterChange(setFilterType, type)}
+              className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${
+                filterType === type
+                  ? "bg-slate-900 text-white shadow-md"
+                  : "text-slate-400 hover:text-slate-600"
+              }`}
+            >
+              {type === "All" ? "All" : `${type}s`}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main Table Content */}
+      {/* TABLE */}
       <div className="bg-white shadow-sm border border-slate-100 rounded-[2.5rem] overflow-hidden">
         <div className="p-4 overflow-x-auto">
           <table className="w-full text-left border-separate border-spacing-y-2">
@@ -248,137 +217,149 @@ const ManagePets = () => {
               <tr className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
                 <th className="px-8 py-4">Pet Profile</th>
                 <th className="px-6 py-4">Type & Breed</th>
-                <th className="px-6 py-4">Age</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-8 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               <AnimatePresence mode="popLayout">
-                {currentItems.map((pet) => {
-                  const petStatus = pet.status || "Available";
-
-                  return (
-                    <motion.tr
-                      layout
-                      key={pet._id}
-                      className="group hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="px-8 py-4 bg-white group-hover:bg-slate-50 rounded-l-2xl">
-                        <div className="flex items-center gap-4">
-                          <img
-                            src={pet.image}
-                            className="w-12 h-12 rounded-xl object-cover ring-2 ring-white shadow-sm"
-                            alt=""
-                          />
-                          <div>
-                            <p className="font-bold text-slate-800 text-sm">
-                              {pet.name}
-                            </p>
-                            <p className="text-[10px] text-orange-500 font-black uppercase tracking-tighter">
-                              {pet._id}
-                            </p>
-                          </div>
+                {currentItems.map((pet) => (
+                  <motion.tr
+                    layout
+                    key={pet._id}
+                    className="group hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="px-8 py-4 rounded-l-2xl">
+                      <div className="flex items-center gap-4">
+                        <Image
+                        width={12}
+                        height={12}
+                          src={pet?.image}
+                          className="w-12 h-12 rounded-xl object-cover ring-2 ring-white shadow-sm"
+                          alt=""
+                        />
+                        <div>
+                          <p className="font-bold text-sm">{pet.name}</p>
+                          <p className="text-[10px] text-orange-500 font-black tracking-tighter">
+                            {pet._id?.slice(-6)}
+                          </p>
                         </div>
-                      </td>
+                      </div>
+                    </td>
 
-                      <td className="px-6 py-4 bg-white group-hover:bg-slate-50 font-bold text-slate-700 text-sm">
-                        {pet.breed}
-                      </td>
+                    <td className="px-6 py-4">
+                      <p className="font-bold text-sm">{pet.breed}</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-black">
+                        {pet.type}
+                      </p>
+                    </td>
 
-                      <td className="px-6 py-4 bg-white group-hover:bg-slate-50 font-bold text-slate-600 text-sm">
-                        {pet.age}
-                      </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${
+                          pet.status === "Available"
+                            ? "bg-emerald-50 text-emerald-600"
+                            : pet.status === "adopted"
+                              ? "bg-blue-50 text-blue-600"
+                              : "bg-amber-50 text-amber-600"
+                        }`}
+                      >
+                        {pet.status === "Available" ? (
+                          <CheckCircle size={10} />
+                        ) : (
+                          <Clock size={10} />
+                        )}
+                        {pet.status}
+                      </span>
+                    </td>
 
-                      <td className="px-6 py-4 bg-white group-hover:bg-slate-50">
-                        <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${
-                            petStatus === "Available"
-                              ? "bg-emerald-50 text-emerald-600"
-                              : petStatus === "Adopted"
-                                ? "bg-blue-50 text-blue-600"
-                                : "bg-amber-50 text-amber-600"
-                          }`}
-                        >
-                          {petStatus === "Available" ? (
-                            <CheckCircle size={10} />
-                          ) : (
-                            <Clock size={10} />
-                          )}
-                          {petStatus}
-                        </span>
-                      </td>
+                    {/* ACTION BUTTONS WITH DYNAMIC LOGIC */}
+                    <td className="px-8 py-4 text-right rounded-r-2xl">
+                      <div className="flex justify-end gap-1">
+                        {pet.status.toLowerCase() === "pending" && (
+                          <>
+                            {/* Approve (Pending -> Adopted) */}
+                            <button
+                              onClick={() => handleApprove(pet._id)}
+                              title="Approve"
+                              className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                            >
+                              <Check size={16} />
+                            </button>
 
-                      {/* Dynamic Action Buttons based on Status */}
-                      <td className="px-8 py-4 bg-white group-hover:bg-slate-50 rounded-r-2xl text-right">
-                        <div className="flex justify-end gap-1">
-                          {petStatus === "Adopted" ? (
-                            <>
-                              <button
-                                disabled
-                                className="p-2 text-slate-200 cursor-not-allowed"
-                              >
-                                <Edit3 size={16} />
-                              </button>
-                              <button
-                                disabled
-                                className="p-2 text-slate-200 cursor-not-allowed"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </>
-                          ) : petStatus === "Pending" ? (
-                            <>
-                              <button
-                                onClick={() => handleUpdateStatus(pet._id)}
-                                title="Approve"
-                                className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
-                              >
-                                <Check size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleReject(pet._id)}
-                                title="Reject"
-                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                              >
-                                <X size={16} />
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => handleEdit(pet._id)}
-                                title="Edit"
-                                className="p-2 text-slate-400 hover:text-orange-500 transition-all"
-                              >
-                                <Edit3 size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(pet._id)}
-                                title="Delete"
-                                className="p-2 text-slate-400 hover:text-rose-600 transition-all"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </>
-                          )}
-                          <button
-                            title="View Details"
-                            className="p-2 text-slate-400 hover:text-blue-500 transition-all"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
+                            {/* Reject (Pending -> Available) */}
+                            <button
+                              onClick={() => handleReject(pet._id)}
+                              title="Reject"
+                              className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                            >
+                              <X size={16} />
+                            </button>
+                            <button className="p-2 ">
+                              <Eye size={16} />
+                            </button>
+                          </>
+                        )}
+
+                        {pet.status.toLowerCase() === "available" && (
+                          <>
+                            {/* Edit */}
+                            <button
+                              onClick={() => handleEdit(pet._id)}
+                              title="Edit"
+                              className="p-2 text-slate-400 hover:text-orange-500 transition-all"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+
+                            {/* Delete */}
+                            <button
+                              onClick={() => handleDelete(pet._id)}
+                              title="Delete"
+                              className="p-2 text-slate-400 hover:text-rose-600 transition-all"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <button className="p-2 ">
+                              <Eye size={16} />
+                            </button>
+                          </>
+                        )}
+
+                        {pet.status.toLowerCase() === "adopted" && (
+                          <>
+                            {/* Edit Disabled */}
+                            <button
+                              disabled
+                              title="Adopted pets cannot be edited"
+                              className="p-2 text-slate-200 cursor-not-allowed transition-all"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+
+                            {/* Delete Disabled */}
+                            <button
+                              disabled
+                              title="Adopted pets cannot be deleted"
+                              className="p-2 text-slate-200 cursor-not-allowed transition-all"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <button className="p-2 ">
+                              <Eye size={16} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
               </AnimatePresence>
             </tbody>
           </table>
         </div>
 
-        {/* Pagination Controls */}
+        {/* PAGINATION */}
         <div className="flex sm:flex-row flex-col justify-between items-center gap-4 bg-slate-50/50 p-6 border-slate-100 border-t">
           <p className="font-bold text-slate-400 text-xs">
             <span className="text-slate-800">{filteredPets.length}</span>{" "}
@@ -392,9 +373,6 @@ const ManagePets = () => {
             >
               <ChevronLeft size={16} /> Previous
             </button>
-            <div className="hidden md:flex bg-white px-4 py-2.5 border border-slate-100 rounded-xl shadow-inner font-black text-xs text-orange-500">
-              {currentPage} / {totalPages || 1}
-            </div>
             <button
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage((p) => p + 1)}
