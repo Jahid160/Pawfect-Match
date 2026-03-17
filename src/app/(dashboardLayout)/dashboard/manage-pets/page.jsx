@@ -1,12 +1,15 @@
-import ManagePets from '@/Components/dashboardlayouts/ManagePets';
-import React from 'react';
+import { getAllPetsAction } from "@/action/server/pets";
+import ManagePets from "@/Components/dashboardlayouts/ManagePets";
+import React from "react";
 
-const page = () => {
+const managePetsPage = async () => {
+  const result = await getAllPetsAction();
+  const pets = result.success ? result.data : [];
   return (
     <div>
-      <ManagePets></ManagePets>
+      <ManagePets initialPets={pets}></ManagePets>
     </div>
   );
 };
 
-export default page;
+export default managePetsPage;
