@@ -7,6 +7,7 @@ import { GrDocumentPdf } from "react-icons/gr";
 import { MdAccessTime, MdCheckCircle, MdCancel, MdBlock } from "react-icons/md";
 import { LuUserRoundCheck } from "react-icons/lu";
 import { FaUserSlash } from "react-icons/fa";
+import { updateShelterStatus } from '@/action/server/Shelteruser';
 
 const VerificationTab = ({ requests, setRequests }) => {
      const [searchTerm, setSearchTerm] = useState("");
@@ -22,18 +23,26 @@ const VerificationTab = ({ requests, setRequests }) => {
      ];
 
      const handleStatusUpdate = async (id, newStatus) => {
-          // ১. ইউজারের কাছ থেকে কনফার্মেশন নেওয়া
+
           const confirmBox = window.confirm(`Are you sure you want to change status to ${newStatus}?`);
           if (!confirmBox) return;
 
           try {
                // ২. আপনার API বা Server Function কল করা (ধরে নিচ্ছি updateShelterStatus একটি ফাংশন)
-               // const result = await updateShelterStatus(id, newStatus); 
+               const result = await updateShelterStatus(id, newStatus);
 
-               // এখানে আপনার ডাটাবেস আপডেট লজিক বসবে। 
-               // যদি আপডেট সফল হয় (success: true), তবে নিচের কাজগুলো হবে:
+               if (result.success) {
+                    setRequests((prevRequests) =>
+                         prevRequests.map((req) =>
+                              req._id === id ? { ...req, status: newStatus } : req
+                         )
+                    );
+                    alert("Status successfully updated!");
+               } else {
+                    alert("Status update korte somossa hoyeche!");
+                    return;
+               }
 
-               // ৩. ফ্রন্টএন্ড স্টেট আপডেট করা (যাতে সাথে সাথে UI পরিবর্তন হয়)
                setRequests((prevRequests) =>
                     prevRequests.map((req) =>
                          req._id === id ? { ...req, status: newStatus } : req
