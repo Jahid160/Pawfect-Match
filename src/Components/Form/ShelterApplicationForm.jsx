@@ -1,6 +1,7 @@
 "use client";
 import { createShelterUser } from "@/action/server/Shelteruser";
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Link from "next/link";
 
@@ -12,6 +13,7 @@ const steps = [
 ];
 
 export default function ShelterApplicationForm() {
+  const { data: session, } = useSession()
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,13 +37,23 @@ export default function ShelterApplicationForm() {
     rescueDetails: "",
     hasVetContact: "",
     motivation: "",
-    nidPhoto: null,
+    nidPdf: null,
     shelterPhoto: null,
     registrationCert: null,
     agreeTerms: false,
   });
 
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: session.user.email,
+      }));
+    }
+  }, [session]);
   const update = (field, value) => {
+
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
@@ -84,7 +96,7 @@ export default function ShelterApplicationForm() {
         e.motivation = "Please share your motivation";
     }
     if (step === 4) {
-      if (!formData.nidPhoto) e.nidPhoto = "NID photo is required";
+      if (!formData.nidPhoto) e.nidPhoto = "NID PDF is required";
       if (!formData.shelterPhoto) e.shelterPhoto = "Shelter photo is required";
       if (formData.shelterType === "ngo" && !formData.registrationCert)
         e.registrationCert = "Registration certificate is required for NGOs";
@@ -145,7 +157,7 @@ export default function ShelterApplicationForm() {
         shelterPhoto: shelterUrl,
         registrationCert: certUrl,
         submittedAt: new Date().toISOString(),
-        status: "pending",
+        status: "Pending",
       };
 
       const response = await createShelterUser(finalData);
@@ -309,22 +321,20 @@ export default function ShelterApplicationForm() {
               className="flex flex-col items-center gap-1 z-10"
             >
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${
-                  step.id < currentStep
-                    ? "bg-primary text-primary-content shadow-md"
-                    : step.id === currentStep
-                      ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
-                      : "bg-base-100 text-base-content/40 border-2 border-base-300"
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 ${step.id < currentStep
+                  ? "bg-primary text-primary-content shadow-md"
+                  : step.id === currentStep
+                    ? "bg-primary text-primary-content shadow-lg scale-110 ring-4 ring-primary/30"
+                    : "bg-base-100 text-base-content/40 border-2 border-base-300"
+                  }`}
               >
                 {step.id < currentStep ? "✓" : step.icon}
               </div>
               <span
-                className={`text-xs font-medium hidden sm:block ${
-                  step.id === currentStep
-                    ? "text-primary"
-                    : "text-base-content/50"
-                }`}
+                className={`text-xs font-medium hidden sm:block ${step.id === currentStep
+                  ? "text-primary"
+                  : "text-base-content/50"
+                  }`}
               >
                 {step.title}
               </span>
@@ -372,10 +382,11 @@ export default function ShelterApplicationForm() {
                   <Field label="Email Address *" error={errors.email}>
                     <input
                       type="email"
-                      className={inputCls(errors.email)}
+                      className={`input input-bordered w-full bg-slate-100 cursor-not-allowed ${inputCls(errors.email)}`}
                       placeholder="example@email.com"
                       value={formData.email}
-                      onChange={(e) => update("email", e.target.value)}
+                      readOnly
+                      required
                     />
                   </Field>
                   <Field label="Current Address *" error={errors.address}>
@@ -634,7 +645,7 @@ export default function ShelterApplicationForm() {
                   </div>
 
                   <UploadField
-                    label="National ID Card Photo (NID) *"
+                    label="National ID Card PDF (NID) *"
                     hint="Both front and back sides together"
                     error={errors.nidPhoto}
                     onChange={(e) => {
