@@ -23,11 +23,11 @@ const VerificationTab = () => {
      ];
 
      const options = [
-          { value: "All", label: "All Status", color: "bg-slate-400" },
+          { value: "All", label: "All Status", color: "bg-amber-500" },
           { value: "Pending", label: "Pending Requests", color: "bg-orange-500" },
           { value: "Approved", label: "Approved Shelters", color: "bg-emerald-500" },
           { value: "Rejected", label: "Rejected Applications", color: "bg-rose-500" },
-          { value: "Suspended", label: "Suspended Shelters", color: "bg-amber-500" },
+          { value: "Suspended", label: "Suspended Shelters", color: "bg-slate-400" },
      ];
 
      return (

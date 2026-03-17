@@ -157,7 +157,7 @@ export default function ShelterApplicationForm() {
         shelterPhoto: shelterUrl,
         registrationCert: certUrl,
         submittedAt: new Date().toISOString(),
-        status: "pending",
+        status: "Pending",
       };
 
       const response = await createShelterUser(finalData);

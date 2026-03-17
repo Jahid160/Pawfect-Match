@@ -10,9 +10,6 @@ import {
   MapPin,
   TrendingUp,
 } from 'lucide-react';
-import { BiUserCheck } from "react-icons/bi";
-import { BiUserX } from "react-icons/bi";
-import { GrDocumentPdf } from "react-icons/gr";
 import VerificationTab from './VerificationTab';
 
 
