@@ -41,14 +41,14 @@ export const createStripeCheckoutFromCart = async (payload) => {
     line_items,
 
     metadata: {
-      userEmail,
-      customerName,
-      phone,
-      address,
-      city,
-      area,
-      note,
-    },
+    userEmail,
+    customerName,
+    phone,
+    address,
+    city,
+    area,
+    note: note || "", // Ensure no nulls
+  },
 
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
