@@ -42,6 +42,7 @@ export async function getAllPetsAction() {
         type: pet.species,
         image: pet.images[0],
         status: pet.status || "Available",
+        adoptionCode: pet.adoptionCode
       };
     });
 
