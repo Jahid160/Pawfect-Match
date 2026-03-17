@@ -163,3 +163,17 @@ export const getSingleOrder = async (id, userEmail) => {
     return null;
   }
 };
+
+export const getAllOrders = async () => {
+  try {
+    const orderCollection = await dbConnect(collections.ORDER);
+    const orders = await orderCollection.find({}).sort({ createdAt: -1 }).toArray();
+    return orders.map(order => ({
+      ...order,
+      _id: order._id.toString(),
+    }));
+  } catch (error) {
+    console.error("getAllOrders error:", error);
+    return [];
+  }
+};
