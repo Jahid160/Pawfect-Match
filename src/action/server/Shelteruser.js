@@ -2,6 +2,7 @@
 
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
+import { ObjectId } from "mongodb";
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -55,3 +56,31 @@ export const getShelterRequests = async () => {
           return { success: false, error: error.message };
      }
 }
+
+
+
+export const updateShelterStatus = async (id, newStatus) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+
+
+          const result = await shelterRequestsCollection.updateOne(
+               { _id: new ObjectId(id) },
+               {
+                    $set: {
+                         status: newStatus,
+                         updatedAt: new Date()
+                    }
+               }
+          );
+
+          if (result.matchedCount === 0) {
+               return { success: false, message: "Request not found." };
+          }
+
+          return { success: true, message: "Status updated successfully." };
+     } catch (error) {
+          console.error("Database Error:", error);
+          return { success: false, message: "Something went wrong while updating status." };
+     }
+};
