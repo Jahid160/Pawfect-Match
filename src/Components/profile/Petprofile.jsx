@@ -482,7 +482,7 @@ const PetProfile = ({ pet }) => {
                 </h3>
 
                 <Link
-                  href="/adoptionfrom"
+                  href={`/adoptionfrom?petId=${pet._id}`}
                   className="btn btn-primary btn-lg h-16 w-full rounded-2xl border-none text-white shadow-lg transition-all hover:scale-[1.02]"
                 >
                   Start Application

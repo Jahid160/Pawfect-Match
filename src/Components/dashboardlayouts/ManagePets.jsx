@@ -16,10 +16,14 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { DeletePets, UpdatePetStatus, UpdatePetStatusReject } from "@/action/server/pets";
-import Image from "next/image"
+import {
+  DeletePets,
+  UpdatePetStatus,
+  UpdatePetStatusReject,
+} from "@/action/server/pets";
+import Image from "next/image";
 import Swal from "sweetalert2";
-
+import PetDetailsModal from "./PetDetailsModal";
 
 const ManagePets = ({ initialPets }) => {
   const [pets, setPets] = useState(initialPets);
@@ -27,7 +31,8 @@ const ManagePets = ({ initialPets }) => {
   const [filterType, setFilterType] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All Status");
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPet, setSelectedPet] = useState(null);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -93,46 +98,50 @@ const ManagePets = ({ initialPets }) => {
   const handleEdit = (id) => {
     alert("handleEdit id", id);
   };
-const handleDelete = async (id) => {
-  const confirm = await Swal.fire({
-    title: "Are you sure?",
-    text: "You won't be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#ef4444",
-    cancelButtonColor: "#64748b",
-    confirmButtonText: "Yes, delete it!",
-  });
-
-  if (!confirm.isConfirmed) return;
-
-  // 1️⃣ Optimistic UI update
-  const originalPets = [...pets];
-  setPets((prev) => prev.filter((pet) => pet._id !== id));
-
-  // 2️⃣ Call server action
-  const result = await DeletePets(id);
-
-  // 3️⃣ Handle result
-  if (!result.success) {
-    setPets(originalPets);
-
-    Swal.fire({
-      icon: "error",
-      title: "Failed!",
-      text: result.message || "Failed to delete pet",
+  const handleDelete = async (id) => {
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Yes, delete it!",
     });
-  } else {
-    Swal.fire({
-      icon: "success",
-      title: "Deleted!",
-      text: "Pet has been deleted successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  }
-};
 
+    if (!confirm.isConfirmed) return;
+
+    // 1️⃣ Optimistic UI update
+    const originalPets = [...pets];
+    setPets((prev) => prev.filter((pet) => pet._id !== id));
+
+    // 2️⃣ Call server action
+    const result = await DeletePets(id);
+
+    // 3️⃣ Handle result
+    if (!result.success) {
+      setPets(originalPets);
+
+      Swal.fire({
+        icon: "error",
+        title: "Failed!",
+        text: result.message || "Failed to delete pet",
+      });
+    } else {
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Pet has been deleted successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+  const handleApproveEye = async (pet) => {
+    setSelectedPet(pet);
+    setIsModalOpen(true);
+  };
+  // pihyl@mailinator.com
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
       {/* HEADER */}
@@ -232,8 +241,8 @@ const handleDelete = async (id) => {
                     <td className="px-8 py-4 rounded-l-2xl">
                       <div className="flex items-center gap-4">
                         <Image
-                        width={12}
-                        height={12}
+                          width={12}
+                          height={12}
                           src={pet?.image}
                           className="w-12 h-12 rounded-xl object-cover ring-2 ring-white shadow-sm"
                           alt=""
@@ -345,7 +354,10 @@ const handleDelete = async (id) => {
                             >
                               <Trash2 size={16} />
                             </button>
-                            <button className="p-2 ">
+                            <button
+                              onClick={() => handleApproveEye(pet)}
+                              className="p-2 "
+                            >
                               <Eye size={16} />
                             </button>
                           </>
@@ -380,6 +392,11 @@ const handleDelete = async (id) => {
             >
               Next <ChevronRight size={16} />
             </button>
+            <PetDetailsModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              petData={selectedPet}
+            />
           </div>
         </div>
       </div>

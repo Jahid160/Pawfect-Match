@@ -93,7 +93,7 @@ export const AddPets = async (petdata) => {
 
 // admin action
 export const DeletePets = async (id) => {
-verifyAdmin()
+  verifyAdmin();
 
   if (!id || id.length !== 24) return { success: false, message: "Invalid ID" };
 
@@ -107,7 +107,8 @@ verifyAdmin()
 
     return {
       success: result.deletedCount > 0,
-      message: result.deletedCount > 0 ? "Pet deleted successfully" : "Pet not found",
+      message:
+        result.deletedCount > 0 ? "Pet deleted successfully" : "Pet not found",
     };
   } catch (error) {
     return { success: false, message: error.message };
@@ -135,20 +136,30 @@ export const UpdatePets = async (id, petdata = {}) => {
   }
 };
 
-
 export const UpdatePetStatus = async (id) => {
-  verifyAdmin();
+  let admin;
+  try {
+    admin = await verifyAdmin();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+
+  const adminEmail = admin.email;
+  console.log("Action performed by:", adminEmail);
 
   if (id?.length !== 24) return { success: false, message: "Invalid ID" };
 
   try {
     const PetCollection = await petCollectionPromise;
-    const query = { _id: new ObjectId(id)};
+    const query = { _id: new ObjectId(id) };
+
     const updateStatus = {
       $set: {
         status: "adopted",
+        updatedBy: adminEmail,
       },
     };
+
     const result = await PetCollection.updateOne(query, updateStatus);
     revalidatePath("/dashboard/manage-pets");
 
@@ -157,12 +168,13 @@ export const UpdatePetStatus = async (id) => {
       message:
         result.modifiedCount > 0
           ? "Pet adopted successfully"
-          : "Pet status was not pending",
+          : "Status was already updated or not found",
     };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
+
 export const UpdatePetStatusReject = async (id) => {
   verifyAdmin();
 
@@ -170,7 +182,7 @@ export const UpdatePetStatusReject = async (id) => {
 
   try {
     const PetCollection = await petCollectionPromise;
-    const query = { _id: new ObjectId(id)};
+    const query = { _id: new ObjectId(id) };
     const updateStatus = {
       $set: {
         status: "available",
