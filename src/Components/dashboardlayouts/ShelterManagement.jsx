@@ -8,8 +8,13 @@ import {
   Eye,
   Trash2,
   MapPin,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
+import { BiUserCheck } from "react-icons/bi";
+import { BiUserX } from "react-icons/bi";
+import { GrDocumentPdf } from "react-icons/gr";
+import VerificationTab from './VerificationTab';
+
 
 const ShelterManagement = () => {
   const [activeTab, setActiveTab] = useState("verification");
@@ -63,36 +68,7 @@ const ShelterManagement = () => {
         >
           {/* 1. VERIFICATION TAB */}
           {activeTab === "verification" && (
-            <div className="bg-base-100 rounded-4xl shadow-xl p-6 border border-base-300">
-              <h2 className="text-xl font-black mb-6 px-2">Pending Requests</h2>
-              <div className="overflow-x-auto">
-                <table className="table w-full">
-                  <thead className="bg-base-200/50">
-                    <tr className="border-none font-black text-slate-500">
-                      <th>Shelter Name</th>
-                      <th>Owner</th>
-                      <th>Documents</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="hover:bg-base-200/20 transition-colors">
-                      <td className="font-bold text-slate-700 underline underline-offset-4 decoration-primary/30">IDEAL Shelter</td>
-                      <td className="text-slate-600 font-medium">Tanvir Hossain</td>
-                      <td>
-                        <button className="btn btn-xs btn-ghost text-primary font-black underline">View NID/Licence</button>
-                      </td>
-                      <td><span className="badge badge-warning font-bold p-3">Pending</span></td>
-                      <td className="flex gap-2">
-                        <button className="btn btn-success btn-sm text-white rounded-lg">Approve</button>
-                        <button className="btn btn-error btn-outline btn-sm rounded-lg">Reject</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <VerificationTab></VerificationTab>
           )}
 
           {/* 2. INVENTORY & MONITORING TAB */}
