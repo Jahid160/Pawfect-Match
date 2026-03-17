@@ -54,12 +54,34 @@ export const createAdoptionUser = async (data) => {
     const result = await adoptionCollection.insertOne({
       ...data,
       adoptionCode: adoptionId,
+      status: "pending"
     });
 
     return {
       success: true,
       id: result.insertedId.toString(),
       adoptionCode: adoptionId,
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const getAdoptionUserByCode = async (adoptionCode) => {
+  try {
+    const adoptionCollection = await adoptionCollectionPromise;
+
+    const userData = await adoptionCollection.findOne({
+      adoptionCode: adoptionCode,
+    });
+
+    if (!userData) {
+      return { success: false, message: "Adoption user not found" };
+    }
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(userData)),
     };
   } catch (error) {
     return { success: false, error: error.message };

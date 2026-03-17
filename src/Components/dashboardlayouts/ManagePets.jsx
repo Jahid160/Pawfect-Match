@@ -24,6 +24,8 @@ import {
 import Image from "next/image";
 import Swal from "sweetalert2";
 import PetDetailsModal from "./PetDetailsModal";
+import PetProfileModal from "./AdminDashboard/PetMangeMent/PetProfileModal"
+import { getAdoptionUserByCode } from "@/action/server/Adoptionuser";
 
 const ManagePets = ({ initialPets }) => {
   const [pets, setPets] = useState(initialPets);
@@ -33,6 +35,8 @@ const ManagePets = ({ initialPets }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedProfilePet, setSelectedProfilePet] = useState(null);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -138,8 +142,16 @@ const ManagePets = ({ initialPets }) => {
     }
   };
   const handleApproveEye = async (pet) => {
-    setSelectedPet(pet);
+    // console.log(pet.adoptionCode);
+    const userData = await getAdoptionUserByCode(pet.adoptionCode);
+    console.log(userData.data);
+    setSelectedPet(userData.data);
     setIsModalOpen(true);
+  };
+  const handleAvailableEye = (pet) => {
+    console.log(pet);
+    setSelectedProfilePet(pet);
+    setIsProfileModalOpen(true);
   };
   // pihyl@mailinator.com
   return (
@@ -304,7 +316,10 @@ const ManagePets = ({ initialPets }) => {
                             >
                               <X size={16} />
                             </button>
-                            <button className="p-2 ">
+                            <button
+                              onClick={() => handleApproveEye(pet)}
+                              className="p-2 "
+                            >
                               <Eye size={16} />
                             </button>
                           </>
@@ -330,7 +345,10 @@ const ManagePets = ({ initialPets }) => {
                               <Trash2 size={16} />
                             </button>
                             <button className="p-2 ">
-                              <Eye size={16} />
+                              <Eye
+                                onClick={() => handleAvailableEye(pet)}
+                                size={16}
+                              />
                             </button>
                           </>
                         )}
@@ -396,6 +414,11 @@ const ManagePets = ({ initialPets }) => {
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               petData={selectedPet}
+            />
+            <PetProfileModal
+              isOpen={isProfileModalOpen}
+              onClose={() => setIsProfileModalOpen(false)}
+              pet={selectedProfilePet}
             />
           </div>
         </div>
