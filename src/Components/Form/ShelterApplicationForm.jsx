@@ -37,7 +37,7 @@ export default function ShelterApplicationForm() {
     rescueDetails: "",
     hasVetContact: "",
     motivation: "",
-    nidPhoto: null,
+    nidPdf: null,
     shelterPhoto: null,
     registrationCert: null,
     agreeTerms: false,
@@ -96,7 +96,7 @@ export default function ShelterApplicationForm() {
         e.motivation = "Please share your motivation";
     }
     if (step === 4) {
-      if (!formData.nidPhoto) e.nidPhoto = "NID photo is required";
+      if (!formData.nidPhoto) e.nidPhoto = "NID PDF is required";
       if (!formData.shelterPhoto) e.shelterPhoto = "Shelter photo is required";
       if (formData.shelterType === "ngo" && !formData.registrationCert)
         e.registrationCert = "Registration certificate is required for NGOs";
@@ -645,7 +645,7 @@ export default function ShelterApplicationForm() {
                   </div>
 
                   <UploadField
-                    label="National ID Card Photo (NID) *"
+                    label="National ID Card PDF (NID) *"
                     hint="Both front and back sides together"
                     error={errors.nidPhoto}
                     onChange={(e) => {
