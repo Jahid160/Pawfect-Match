@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardCheck,
@@ -11,16 +11,32 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import VerificationTab from './VerificationTab';
+import { getShelterRequests } from '@/action/server/Shelteruser';
 
 
 const ShelterManagement = () => {
   const [activeTab, setActiveTab] = useState("verification");
+  const [requests, setRequests] = useState([]);
+
+  useEffect(() => {
+    const SelterRequests = async () => {
+      const result = await getShelterRequests();
+      if (result.success) {
+        setRequests(result.data)
+      } else {
+        console.error("Some error occurred:", result.error);
+      }
+
+    }
+    SelterRequests()
+  }, []);
 
   const tabs = [
     { id: "verification", label: "Verification", icon: <ClipboardCheck size={18} /> },
     { id: "inventory", label: "Inventory", icon: <LayoutGrid size={18} /> },
     { id: "analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
   ];
+
 
   return (
     <div className="bg-base-200 min-h-screen p-6 lg:p-10 font-sans">
@@ -65,7 +81,7 @@ const ShelterManagement = () => {
         >
           {/* 1. VERIFICATION TAB */}
           {activeTab === "verification" && (
-            <VerificationTab></VerificationTab>
+            <VerificationTab requests={requests} setRequests={setRequests} ></VerificationTab>
           )}
 
           {/* 2. INVENTORY & MONITORING TAB */}

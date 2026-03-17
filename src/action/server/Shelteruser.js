@@ -43,8 +43,13 @@ export const getShelterRequests = async () => {
 
 
           const requests = await shelterRequestsCollection.find({}).sort({ submittedAt: -1 }).toArray();
+          const plainRequests = requests.map(doc => ({
+               ...doc,
+               _id: doc._id.toString(),
 
-          return { success: true, data: requests };
+          }))
+
+          return { success: true, data: plainRequests };
      } catch (error) {
           console.error("Database Error:", error);
           return { success: false, error: error.message };

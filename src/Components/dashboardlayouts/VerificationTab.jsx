@@ -8,19 +8,10 @@ import { MdAccessTime, MdCheckCircle, MdCancel, MdBlock } from "react-icons/md";
 import { LuUserRoundCheck } from "react-icons/lu";
 import { FaUserSlash } from "react-icons/fa";
 
-const VerificationTab = () => {
+const VerificationTab = ({ requests, setRequests }) => {
      const [searchTerm, setSearchTerm] = useState("");
      const [statusFilter, setStatusFilter] = useState("All");
      const [isOpen, setIsOpen] = useState(false);
-
-     // Sample data logic
-     const requests = [
-          { _id: "1", shelterName: "IDEAL Shelter", fullName: "Tanvir Hossain", status: "Pending", submittedAt: "2026-03-16" },
-          { _id: "2", shelterName: "Paws Care", fullName: "Al Amin", status: "Approved", submittedAt: "2026-03-15" },
-          { _id: "3", shelterName: "Darwins Care", fullName: "Al Amin", status: "Rejected", submittedAt: "2026-03-17" },
-          { _id: "4", shelterName: "Xarwins Care", fullName: "Al Amin", status: "Suspended", submittedAt: "2026-03-17" },
-          // aro data thakbe...
-     ];
 
      const options = [
           { value: "All", label: "All Status", color: "bg-amber-500" },
@@ -29,6 +20,33 @@ const VerificationTab = () => {
           { value: "Rejected", label: "Rejected Applications", color: "bg-rose-500" },
           { value: "Suspended", label: "Suspended Shelters", color: "bg-slate-400" },
      ];
+
+     const handleStatusUpdate = async (id, newStatus) => {
+          // ১. ইউজারের কাছ থেকে কনফার্মেশন নেওয়া
+          const confirmBox = window.confirm(`Are you sure you want to change status to ${newStatus}?`);
+          if (!confirmBox) return;
+
+          try {
+               // ২. আপনার API বা Server Function কল করা (ধরে নিচ্ছি updateShelterStatus একটি ফাংশন)
+               // const result = await updateShelterStatus(id, newStatus); 
+
+               // এখানে আপনার ডাটাবেস আপডেট লজিক বসবে। 
+               // যদি আপডেট সফল হয় (success: true), তবে নিচের কাজগুলো হবে:
+
+               // ৩. ফ্রন্টএন্ড স্টেট আপডেট করা (যাতে সাথে সাথে UI পরিবর্তন হয়)
+               setRequests((prevRequests) =>
+                    prevRequests.map((req) =>
+                         req._id === id ? { ...req, status: newStatus } : req
+                    )
+               );
+
+               alert(`Successfully updated to ${newStatus}`);
+
+          } catch (error) {
+               console.error("Update failed:", error);
+               alert("Status update korte somossa hoyeche!");
+          }
+     };
 
      return (
           <div className="space-y-6">
@@ -167,7 +185,7 @@ const VerificationTab = () => {
                                                                  {request.shelterName}
                                                             </p>
                                                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                                                                 Submitted: {request.submittedAt}
+                                                                 Submitted: {new Date(request.submittedAt).toLocaleDateString()}
                                                             </p>
                                                        </td>
 
