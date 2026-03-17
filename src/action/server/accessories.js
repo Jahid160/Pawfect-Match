@@ -1,9 +1,9 @@
 "use server";
 
 import { collections, dbConnect } from "@/lib/db";
-import { ObjectId } from "mongodb"; // ObjectId ইম্পোর্ট করা জরুরি
+import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
-// ১. নতুন অ্যাক্সেসরিজ তৈরি করার ফাংশন
 export const createAccessory = async (data) => {
      try {
           const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
@@ -29,6 +29,8 @@ export const createAccessory = async (data) => {
 
           const result = await accessoriesCollection.insertOne(newAccessory);
 
+          revalidatePath("/pet-accessories");
+
           return {
                success: true,
                id: result.insertedId.toString(),
@@ -40,16 +42,20 @@ export const createAccessory = async (data) => {
      }
 };
 
-// ২. সব অ্যাক্সেসরিজ পাওয়ার ফাংশন
 export const getPetAccessories = async () => {
      try {
           const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
-          const items = await accessoriesCollection.find().toArray();
+          
+          const items = await accessoriesCollection.find({}).toArray();
+
+          if (!items) return [];
 
           return items.map((item) => ({
                ...item,
                _id: item._id.toString(),
-               createdAt: item.createdAt?.toISOString?.() || item.createdAt || null,
+               createdAt: item.createdAt instanceof Date 
+                    ? item.createdAt.toISOString() 
+                    : item.createdAt || null,
           }));
      } catch (error) {
           console.error("getPetAccessories error:", error);
@@ -57,26 +63,23 @@ export const getPetAccessories = async () => {
      }
 };
 
-// ৩. একটি নির্দিষ্ট অ্যাক্সেসরিজ পাওয়ার ফাংশন
 export const getSingleAccessory = async (id) => {
      try {
-          // ID ভ্যালিডেশন
           if (!id || !ObjectId.isValid(id)) {
                return null;
           }
 
           const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
-
-          const item = await accessoriesCollection.findOne({
-               _id: new ObjectId(id),
-          });
+          const item = await accessoriesCollection.findOne({ _id: new ObjectId(id) });
 
           if (!item) return null;
 
           return {
                ...item,
                _id: item._id.toString(),
-               createdAt: item.createdAt?.toISOString?.() || item.createdAt || null,
+               createdAt: item.createdAt instanceof Date 
+                    ? item.createdAt.toISOString() 
+                    : item.createdAt || null,
           };
      } catch (error) {
           console.error("getSingleAccessory error:", error);
