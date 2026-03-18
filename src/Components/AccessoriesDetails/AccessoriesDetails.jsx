@@ -21,12 +21,15 @@ import { addToCart } from "@/action/server/cart";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 import toast from "react-hot-toast";
-
+import { useCartStore } from "@/lib/useCartStore";
 const AccessoriesDetails = ({ item }) => {
   const router = useRouter();
   const { data: session } = useSession();
   const { openLoginModal } = useAuthModal();
   const [isPending, startTransition] = useTransition();
+  
+  // Zustand 
+  const incrementCart = useCartStore((state) => state.incrementCart);
 
   if (!item?._id) {
     return (
@@ -70,6 +73,10 @@ const AccessoriesDetails = ({ item }) => {
 
       if (result?.success || result?.acknowledged) {
         toast.success(`${item.title} added to cart! 🛒`);
+        
+        // Zustand 
+        incrementCart(1); 
+        
       } else {
         toast.error(result?.message || "Failed to add to cart");
       }
@@ -83,7 +90,18 @@ const AccessoriesDetails = ({ item }) => {
     }
 
     startTransition(async () => {
-      const result = await createStripeCheckoutFromCart(item, session.user.email);
+      
+      const result = await createStripeCheckoutFromCart({
+        userEmail: session.user.email,
+        cartItems: [{
+          ...item,
+          productName: item.title,
+          image: safeImageSrc,
+          price: finalPrice,
+          quantity: 1
+        }]
+      });
+
       if (result?.url) {
         window.location.href = result.url;
       } else {
@@ -200,7 +218,7 @@ const AccessoriesDetails = ({ item }) => {
               </div>
 
               {/* Trust Badges */}
-              <div className="gap-6 grid grid-cols-2">
+              <div className="gap-6 grid grid-cols-2 pt-8 border-t">
                 <div className="flex items-center gap-3 text-[10px] text-gray-500">
                   <div className="bg-gray-100 p-2 rounded-lg text-orange-500"><FaTruck /></div>
                   <span className="font-bold uppercase leading-tight">Fast & Safe<br/>Delivery</span>
