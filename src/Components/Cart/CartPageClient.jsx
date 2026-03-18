@@ -18,6 +18,7 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import AuthButtons from "../button/AuthButtons";
+import toast from "react-hot-toast";
 
 const CartPageClient = () => {
   const { data: session, status } = useSession();
@@ -31,7 +32,6 @@ const CartPageClient = () => {
       setLoading(false);
       return;
     }
-
     try {
       const items = await getCartItems(session.user.email);
       setCartItems(items || []);
@@ -58,25 +58,35 @@ const CartPageClient = () => {
     return cartItems.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
   }, [cartItems]);
 
-  const handleQuantityChange = (cartId, quantity) => {
+  const handleQuantityChange = (cartId, quantity, stock) => {
     if (quantity < 1) return;
+    if (quantity > stock) {
+      toast.error("Sorry, not enough stock available!");
+      return;
+    }
+    
     startTransition(async () => {
-      await updateCartQuantity({
+      const result = await updateCartQuantity({
         cartId,
         userEmail: session.user.email,
         quantity,
       });
-      await loadCart();
+      if (result?.success) {
+        await loadCart();
+      }
     });
   };
 
   const handleRemove = (cartId) => {
     startTransition(async () => {
-      await removeCartItem({
+      const result = await removeCartItem({
         cartId,
         userEmail: session.user.email,
       });
-      await loadCart();
+      if (result?.success) {
+        toast.success("Item removed from cart");
+        await loadCart();
+      }
     });
   };
 
@@ -84,27 +94,29 @@ const CartPageClient = () => {
     if (window.confirm("Are you sure you want to clear your cart?")) {
       startTransition(async () => {
         await clearCart(session.user.email);
+        toast.success("Cart cleared!");
         await loadCart();
       });
     }
   };
 
+  // Loading & Empty States (No changes needed, they look good)
   if (status === "loading" || loading) {
     return (
-       <div className="flex justify-center items-center min-h-screen bg-base-200">
-        <span className="loading loading-dots loading-lg text-primary"></span>
+       <div className="flex justify-center items-center bg-base-200 min-h-screen">
+        <span className="text-primary loading loading-dots loading-lg"></span>
       </div>
     );
   }
 
   if (!session?.user) {
     return (
-      <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center bg-base-200">
-        <div className="bg-base-100 mb-6 p-10 rounded-full shadow-lg">
+      <div className="flex flex-col justify-center items-center bg-base-200 px-4 min-h-screen text-center">
+        <div className="bg-base-100 shadow-lg mb-6 p-10 rounded-full">
           <FaShoppingCart className="text-primary text-6xl" />
         </div>
-        <h2 className="font-black text-3xl text-neutral">Login Required</h2>
-        <p className="mt-3 text-neutral/60 max-w-sm">
+        <h2 className="font-black text-neutral text-3xl">Login Required</h2>
+        <p className="mt-3 max-w-sm text-neutral/60">
           You need to be logged in to manage your shopping cart.
         </p>
         <div className="mt-8">
@@ -116,27 +128,28 @@ const CartPageClient = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center bg-base-200">
-        <div className="bg-base-100 mb-6 p-10 rounded-full shadow-lg">
+      <div className="flex flex-col justify-center items-center bg-base-200 px-4 min-h-screen text-center">
+        <div className="bg-base-100 shadow-lg mb-6 p-10 rounded-full">
           <FaShoppingCart className="text-primary/20 text-6xl" />
         </div>
-        <h2 className="font-black text-3xl text-neutral">Your cart is empty</h2>
+        <h2 className="font-black text-neutral text-3xl">Your cart is empty</h2>
         <p className="mt-3 text-neutral/60">
-          Looks like you haven&apos;t added any treats for your furry friends yet!
+          Looks like you haven&apos;t added anything for your pets yet!
         </p>
-        <Link
-          href="/pet-food"
-          className="inline-flex items-center gap-2 bg-primary mt-8 px-8 py-4 rounded-2xl font-black text-white shadow-xl hover:scale-105 transition-transform"
-        >
-          <FaArrowLeft />
-          Start Shopping
-        </Link>
+        <div className="flex gap-4 mt-8">
+            <Link href="/pet-food" className="shadow-xl px-8 py-4 rounded-2xl h-auto font-black text-white hover:scale-105 transition-all btn btn-primary">
+               Browse Food
+            </Link>
+            <Link href="/pet-accessories" className="px-8 py-4 border-2 rounded-2xl btn-outline h-auto font-black hover:scale-105 transition-all btn">
+               Browse Gear
+            </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-base-200 min-h-screen px-4 md:px-8 py-10">
+    <div className="bg-base-200 px-4 md:px-8 py-10 min-h-screen">
       <div className="mx-auto max-w-7xl">
         <Link
           href="/pet-food"
@@ -147,13 +160,13 @@ const CartPageClient = () => {
         </Link>
 
         <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
-          <div className="lg:col-span-2 bg-base-100 shadow-xl p-8 rounded-[2.5rem] border border-base-300">
+          <div className="lg:col-span-2 bg-base-100 shadow-xl p-8 border border-base-300 rounded-[2.5rem]">
             <div className="flex justify-between items-center mb-8">
-              <h1 className="font-black text-3xl text-neutral">Cart Details</h1>
+              <h1 className="font-black text-neutral text-3xl">Cart Details ({totalItems})</h1>
               <button
                 onClick={handleClearCart}
                 disabled={isPending}
-                className="btn btn-error btn-sm rounded-xl font-bold text-white capitalize"
+                className="rounded-xl font-bold text-white capitalize btn btn-error btn-sm"
               >
                 Clear Cart
               </button>
@@ -163,44 +176,53 @@ const CartPageClient = () => {
               {cartItems.map((item) => (
                 <div
                   key={item._id}
-                  className="flex md:flex-row flex-col gap-6 bg-base-200 p-5 rounded-3xl border border-transparent hover:border-primary/10 transition-all group"
+                  className="group flex md:flex-row flex-col gap-6 bg-base-200 p-5 border border-transparent hover:border-primary/10 rounded-3xl transition-all"
                 >
-                  {/* Image Container */}
-                  <div className="relative bg-white rounded-2xl w-full md:w-32 h-32 overflow-hidden shadow-inner shrink-0">
+                  <div className="relative bg-white shadow-inner rounded-2xl w-full md:w-32 h-32 overflow-hidden shrink-0">
                     <Image
                       src={item.image || "https://placehold.co/300x300"}
-                      alt={item.productName}
+                      alt={item.productName || "Product"}
                       fill
-                      className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                      className="p-4 object-contain group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 flex flex-col justify-between py-1">
+                  <div className="flex flex-col flex-1 justify-between py-1">
                     <div>
-                        <h3 className="font-black text-xl text-neutral leading-tight">{item.productName}</h3>
-                        <div className="flex gap-3 mt-1 text-xs font-bold text-neutral/40 uppercase">
+                        <h3 className="font-black text-neutral text-xl leading-tight">{item.productName}</h3>
+                        <div className="flex gap-3 mt-1 font-bold text-neutral/40 text-xs uppercase">
                            <span>{item.brand}</span>
-                           <span>•</span>
-                           <span>{item.weight} {item.weightUnit}</span>
+                           {item.weight && (
+                               <>
+                                <span>•</span>
+                                <span>{item.weight} {item.weightUnit}</span>
+                               </>
+                           )}
+                           {item.category && (
+                               <>
+                                <span>•</span>
+                                <span className="text-primary">{item.category}</span>
+                               </>
+                           )}
                         </div>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-3 mt-4">
-                      <div className="flex items-center bg-white rounded-xl p-1 shadow-sm border border-base-300">
+                      <div className="flex items-center bg-white shadow-sm p-1 border border-base-300 rounded-xl">
                         <button
-                          onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
-                          className="flex justify-center items-center w-8 h-8 hover:text-primary transition-colors"
+                          onClick={() => handleQuantityChange(item._id, item.quantity - 1, item.stock)}
+                          disabled={isPending}
+                          className="flex justify-center items-center disabled:opacity-30 w-8 h-8 hover:text-primary transition-colors"
                         >
                           <FaMinus size={12} />
                         </button>
-                        <span className="min-w-[40px] font-black text-center text-lg">
+                        <span className="min-w-[40px] font-black text-lg text-center">
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
-                          disabled={item.quantity >= item.stock}
-                          className="flex justify-center items-center w-8 h-8 hover:text-primary disabled:opacity-30 transition-colors"
+                          onClick={() => handleQuantityChange(item._id, item.quantity + 1, item.stock)}
+                          disabled={item.quantity >= item.stock || isPending}
+                          className="flex justify-center items-center disabled:opacity-30 w-8 h-8 hover:text-primary transition-colors"
                         >
                           <FaPlus size={12} />
                         </button>
@@ -208,7 +230,8 @@ const CartPageClient = () => {
 
                       <button
                         onClick={() => handleRemove(item._id)}
-                        className="btn btn-ghost btn-sm text-error/60 hover:text-error hover:bg-error/10 rounded-xl"
+                        disabled={isPending}
+                        className="hover:bg-error/10 rounded-xl text-error/60 hover:text-error btn btn-ghost btn-sm"
                       >
                         <FaTrash />
                         <span className="font-bold">Remove</span>
@@ -217,8 +240,8 @@ const CartPageClient = () => {
                   </div>
 
                   <div className="flex md:flex-col justify-between items-end md:text-right">
-                    <p className="text-sm font-bold text-neutral/30">Price</p>
-                    <p className="font-black text-2xl text-primary">
+                    <p className="font-bold text-neutral/30 text-sm">Total Price</p>
+                    <p className="font-black text-primary text-2xl">
                       ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
                     </p>
                   </div>
@@ -227,9 +250,8 @@ const CartPageClient = () => {
             </div>
           </div>
 
-          {/* Summary Sidebar */}
-          <div className="bg-base-100 shadow-xl p-8 rounded-[2.5rem] border border-base-300 h-fit sticky top-24">
-            <h2 className="mb-8 font-black text-2xl text-neutral border-b border-base-200 pb-4">Order Summary</h2>
+          <div className="top-24 sticky bg-base-100 shadow-xl p-8 border border-base-300 rounded-[2.5rem] h-fit">
+            <h2 className="mb-8 pb-4 border-base-200 border-b font-black text-neutral text-2xl">Order Summary</h2>
 
             <div className="space-y-4 font-bold text-neutral/70">
               <div className="flex justify-between">
@@ -242,24 +264,24 @@ const CartPageClient = () => {
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span className="text-success">FREE</span>
+                <span className="text-success text-sm uppercase tracking-widest">Free</span>
               </div>
 
-              <div className="pt-6 mt-6 border-t-2 border-dashed border-base-200">
-                <div className="flex justify-between font-black text-2xl text-neutral">
-                  <span>Total</span>
+              <div className="mt-6 pt-6 border-base-200 border-t-2 border-dashed">
+                <div className="flex justify-between font-black text-neutral text-2xl">
+                  <span>Grand Total</span>
                   <span className="text-primary">${subtotal.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
             <Link href='/checkout' className="block mt-10">
-              <button className="bg-primary hover:bg-primary/90 py-5 rounded-2xl w-full font-black text-white text-lg shadow-xl shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95">
+              <button className="bg-primary hover:bg-primary/90 shadow-primary/20 shadow-xl py-5 rounded-2xl w-full font-black text-white text-lg active:scale-95 transition-all hover:-translate-y-1">
                 Proceed to Checkout
               </button>
             </Link>
             
-            <p className="mt-4 text-[10px] text-center font-bold text-neutral/30 uppercase tracking-widest">
+            <p className="mt-4 font-bold text-[10px] text-neutral/30 text-center uppercase tracking-widest">
               Secure Checkout • Powered by Pawfect Match
             </p>
           </div>
