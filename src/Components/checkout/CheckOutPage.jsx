@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getCartItems } from "@/action/server/cart";
 import { createOrderFromCart } from "@/action/server/order";
 import { FaArrowLeft, FaShoppingBag, FaTruck, FaCreditCard, FaCheckCircle } from "react-icons/fa";
@@ -12,18 +12,36 @@ import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
 import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 import { useCartStore } from "@/lib/useCartStore";
+import {
+  createOrderFromCart,
+  createSingleFoodOrder,
+} from "@/action/server/order";
+import { getSingleFood } from "@/action/server/foods";
+import { FaArrowLeft, FaShoppingBag } from "react-icons/fa";
+import Swal from "sweetalert2";
+import AuthButtons from "../button/AuthButtons";
+import {
+  createStripeCheckoutFromCart,
+  createStripeCheckoutForSingleFood,
+} from "@/action/server/stripe";
 
 const CheckoutPageClient = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const setCartCount = useCartStore((state) => state.setCartCount);
+  const searchParams = useSearchParams();
+
+  const mode = searchParams.get("mode");
+  const foodId = searchParams.get("foodId");
+  const isBuyNow = mode === "buy-now" && !!foodId;
 
   const [cartItems, setCartItems] = useState([]);
+  const [buyNowItem, setBuyNowItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
 
   const [formData, setFormData] = useState({
-    customerName: session?.user?.name || "",
+    customerName: "",
     phone: "",
     address: "",
     city: "",
@@ -32,24 +50,38 @@ const CheckoutPageClient = () => {
     note: "",
   });
 
-  const loadCart = async () => {
+  const loadCheckoutData = async () => {
     if (!session?.user?.email) {
       setCartItems([]);
+      setBuyNowItem(null);
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    const items = await getCartItems(session.user.email);
-    setCartItems(items || []);
-    setLoading(false);
+
+    try {
+      if (isBuyNow) {
+        const item = await getSingleFood(foodId);
+        setBuyNowItem(item?._id ? item : null);
+        setCartItems([]);
+      } else {
+        const items = await getCartItems(session.user.email);
+        setCartItems(items || []);
+        setBuyNowItem(null);
+      }
+    } catch (error) {
+      console.error("Checkout load error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (status !== "loading") {
-      loadCart();
+      loadCheckoutData();
     }
-  }, [status, session?.user?.email]);
+  }, [status, session?.user?.email, isBuyNow, foodId]);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -58,15 +90,46 @@ const CheckoutPageClient = () => {
     }));
   }, [session?.user?.name]);
 
+  const finalBuyNowPrice = useMemo(() => {
+    if (!buyNowItem) return 0;
+    const hasDiscount =
+      buyNowItem.discountPrice &&
+      Number(buyNowItem.discountPrice) < Number(buyNowItem.price);
+    return Number(hasDiscount ? buyNowItem.discountPrice : buyNowItem.price);
+  }, [buyNowItem]);
+
+  const checkoutItems = useMemo(() => {
+    if (isBuyNow && buyNowItem) {
+      return [
+        {
+          _id: buyNowItem._id,
+          productId: buyNowItem._id,
+          productName: buyNowItem.productName,
+          image: buyNowItem.image,
+          price: finalBuyNowPrice,
+          quantity: 1,
+          brand: buyNowItem.brand,
+          weight: buyNowItem.weight,
+          weightUnit: buyNowItem.weightUnit,
+          stock: buyNowItem.stock,
+        },
+      ];
+    }
+
+    return cartItems;
+  }, [isBuyNow, buyNowItem, cartItems, finalBuyNowPrice]);
+
   const subtotal = useMemo(() => {
-    return cartItems.reduce((sum, item) => {
+    return checkoutItems.reduce((sum, item) => {
       return sum + Number(item.price || 0) * Number(item.quantity || 1);
     }, 0);
-  }, [cartItems]);
+  }, [checkoutItems]);
 
   const totalItems = useMemo(() => {
-    return cartItems.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
-  }, [cartItems]);
+    return checkoutItems.reduce((sum, item) => {
+      return sum + Number(item.quantity || 1);
+    }, 0);
+  }, [checkoutItems]);
 
   const shipping = 0;
   const total = subtotal + shipping;
@@ -87,22 +150,27 @@ const CheckoutPageClient = () => {
       return;
     }
 
-    if (!cartItems.length) {
-      Swal.fire("Cart Empty", "Please add products before checkout.", "warning");
+    if (!checkoutItems.length) {
+      Swal.fire("No Product", "No product found for checkout.", "warning");
       return;
     }
 
     startTransition(async () => {
-      // --- Online Payment Logic ---
       if (formData.paymentMethod === "Online Payment") {
-        const result = await createStripeCheckoutFromCart({
-          userEmail: session.user.email,
-          cartItems: cartItems,
-          ...formData,
-        });
+        const result = isBuyNow
+          ? await createStripeCheckoutForSingleFood({
+              userEmail: session.user.email,
+              ...formData,
+              foodId,
+              quantity: 1,
+            })
+          : await createStripeCheckoutFromCart({
+              userEmail: session.user.email,
+              ...formData,
+            });
 
         if (!result?.success) {
-          Swal.fire("Error", "Payment session failed", "error");
+          Swal.fire("Error", result?.message || "Payment session failed", "error");
           return;
         }
 
@@ -110,13 +178,17 @@ const CheckoutPageClient = () => {
         return;
       }
 
-      // --- Cash on Delivery Logic ---
-      const result = await createOrderFromCart({
-        userEmail: session.user.email,
-        ...formData,
-        cartItems: cartItems,
-        totalAmount: total,
-      });
+      const result = isBuyNow
+        ? await createSingleFoodOrder({
+            userEmail: session.user.email,
+            ...formData,
+            foodId,
+            quantity: 1,
+          })
+        : await createOrderFromCart({
+            userEmail: session.user.email,
+            ...formData,
+          });
 
       if (!result?.success) {
         Swal.fire("Error", result?.message || "Order failed.", "error");
@@ -161,16 +233,26 @@ const CheckoutPageClient = () => {
     );
   }
 
-  if (!cartItems.length) {
+  if (!checkoutItems.length) {
     return (
       <div className="flex flex-col justify-center items-center bg-gray-50 px-4 min-h-screen text-center">
         <div className="bg-white shadow-xl mb-6 p-10 rounded-full">
           <FaShoppingBag className="text-gray-200 text-6xl" />
         </div>
-        <h2 className="font-black text-gray-900 text-3xl">Your cart is empty</h2>
-        <p className="mt-3 text-gray-500">Add some treats or gear before checking out!</p>
-        <Link href="/pet-food" className="bg-primary hover:bg-primary/90 shadow-xl mt-8 px-10 py-4 rounded-2xl font-black text-white active:scale-95 transition-all">
-          Start Shopping
+        <h2 className="font-black text-3xl">
+          {isBuyNow ? "Product not found" : "Your cart is empty"}
+        </h2>
+        <p className="mt-3 text-gray-500">
+          {isBuyNow
+            ? "This product is unavailable for checkout."
+            : "Add some products before going to checkout."}
+        </p>
+        <Link
+          href="/pet-food"
+          className="inline-flex items-center gap-2 bg-primary mt-6 px-6 py-3 rounded-xl font-bold text-white"
+        >
+          <FaArrowLeft />
+          Continue Shopping
         </Link>
       </div>
     );
@@ -179,14 +261,27 @@ const CheckoutPageClient = () => {
   return (
     <div className="bg-gray-50/50 px-4 md:px-8 py-10 min-h-screen">
       <div className="mx-auto max-w-7xl">
-        <Link href="/cart" className="group inline-flex items-center gap-2 mb-8 font-bold text-gray-500 hover:text-primary transition-all">
-          <FaArrowLeft className="transition-transform group-hover:-translate-x-1" /> Back to Cart
+        <Link
+          href={isBuyNow ? `/petfoods/${foodId}` : "/cart"}
+          className="inline-flex items-center gap-2 mb-8 font-bold text-primary"
+        >
+          <FaArrowLeft />
+          {isBuyNow ? "Back to Product" : "Back to Cart"}
         </Link>
 
-        <div className="gap-10 grid grid-cols-1 lg:grid-cols-3">
-          {/* LEFT: Checkout Form */}
-          <form onSubmit={handlePlaceOrder} className="lg:col-span-2 bg-white shadow-2xl shadow-gray-200/50 p-8 md:p-10 border border-gray-100 rounded-[2.5rem]">
-            <h1 className="mb-10 font-black text-gray-900 text-4xl tracking-tight">Checkout Details</h1>
+        <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
+          <form
+            onSubmit={handlePlaceOrder}
+            className="lg:col-span-2 bg-base-100 shadow p-6 rounded-3xl"
+          >
+            <h1 className="mb-2 font-black text-3xl">
+              {isBuyNow ? "Buy Now Checkout" : "Checkout"}
+            </h1>
+            <p className="mb-6 text-gray-500">
+              {isBuyNow
+                ? "Complete your order for this item."
+                : "Complete your order details below."}
+            </p>
 
             <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-2">

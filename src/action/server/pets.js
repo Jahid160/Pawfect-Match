@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 const petCollectionPromise = dbConnect(collections.PETS);
+const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
 
 export const getPets = async () => {
   try {
@@ -42,7 +43,7 @@ export async function getAllPetsAction() {
         type: pet.species,
         image: pet.images[0],
         status: pet.status || "Available",
-        adoptionCode: pet.adoptionCode
+        adoptionCode: pet.adoptionCode,
       };
     });
 
@@ -116,24 +117,52 @@ export const DeletePets = async (id) => {
   }
 };
 
-export const UpdatePets = async (id, petdata = {}) => {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return { success: false, message: "Unauthorized" };
-
-  if (id?.length !== 24) return { success: false, message: "Invalid ID" };
+export const updatePet = async (id, updatedData) => {
+  try {
+    await verifyAdmin();
+  } catch (error) {
+    return { success: false, message: "Unauthorized access! Admin only." };
+  }
+  if (!id || id.length !== 24) {
+    return { success: false, message: "Invalid Pet ID format." };
+  }
 
   try {
     const Petcollection = await petCollectionPromise;
-    const query = { _id: new ObjectId(id), email: session.user.email };
 
-    const updatedData = {
-      $set: petdata,
-    };
+    const { _id, createdAt, ...dataToUpdate } = updatedData;
 
-    const result = await Petcollection.updateOne(query, updatedData);
-    return { success: Boolean(result.modifiedCount) };
+    const result = await Petcollection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...dataToUpdate,
+          updatedAt: new Date(),
+        },
+      },
+    );
+
+    if (result.matchedCount === 0) {
+      return { success: false, message: "No pet found with this ID." };
+    }
+
+    if (result.modifiedCount > 0 || result.matchedCount > 0) {
+      revalidatePath("/dashboard/manage-pets");
+      revalidatePath(`/dashboard/manage-pets/petEdit/${id}`);
+
+      return {
+        success: true,
+        message: "Pet information updated successfully!",
+      };
+    }
+
+    return { success: true, message: "No changes were made." };
   } catch (error) {
-    return { success: false, error: error.message };
+    console.error("Error updating pet:", error);
+    return {
+      success: false,
+      message: "Internal Server Error. Please try again.",
+    };
   }
 };
 
@@ -176,28 +205,46 @@ export const UpdatePetStatus = async (id) => {
   }
 };
 
-export const UpdatePetStatusReject = async (id) => {
-  verifyAdmin();
+export const UpdatePetStatusReject = async (id, adoptionCode) => {
+  let admin;
+  try {
+    admin = await verifyAdmin();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+
+  const adminEmail = admin.email;
+  console.log("Action performed by:", adminEmail);
 
   if (id?.length !== 24) return { success: false, message: "Invalid ID" };
 
   try {
     const PetCollection = await petCollectionPromise;
+    const adoptionCollection = await adoptionCollectionPromise;
     const query = { _id: new ObjectId(id) };
+
     const updateStatus = {
       $set: {
         status: "available",
       },
+      $unset: {
+        adoptedUserEmail: "",
+        adoptionCode: "",
+        updatedBy: "",
+        adoptedUserTime: ""
+      },
     };
+
     const result = await PetCollection.updateOne(query, updateStatus);
+    await adoptionCollection.deleteOne({ adoptionCode });
     revalidatePath("/dashboard/manage-pets");
 
     return {
       success: result.modifiedCount > 0,
       message:
         result.modifiedCount > 0
-          ? "Pet adopted successfully"
-          : "Pet status was not pending",
+          ? "Pet rejection successful, status reset"
+          : "Pet not found or already updated",
     };
   } catch (error) {
     return { success: false, error: error.message };

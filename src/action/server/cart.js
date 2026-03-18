@@ -16,24 +16,58 @@ export const addToCart = async (payload) => {
     }
 
     const cartCollection = await cartCollectionPromise;
-    const existingItem = await cartCollection.findOne({ userEmail, foodId });
+
+    const existingItem = await cartCollection.findOne({
+      userEmail,
+      productId: foodId,
+    });
 
     if (existingItem) {
-      const newQuantity = Math.min((existingItem.quantity || 1) + 1, stock || 999);
+      const newQuantity = Math.min(
+        Number(existingItem.quantity || 1) + 1,
+        Number(stock || 999)
+      );
+
       await cartCollection.updateOne(
         { _id: existingItem._id },
-        { $set: { quantity: newQuantity, updatedAt: new Date() } }
+        {
+          $set: {
+            quantity: newQuantity,
+            stock: Number(stock) || 0,
+            inStock,
+            updatedAt: new Date(),
+          },
+        }
       );
     } else {
       const doc = { ...payload, quantity: 1, createdAt: new Date(), updatedAt: new Date() };
       await cartCollection.insertOne(doc);
     }
 
-    // নেভবার এবং কার্ট পেজকে ফ্রেশ ডেটা দেখাতে বাধ্য করবে
-    revalidatePath("/", "layout"); 
-    revalidatePath("/cart");
+    const doc = {
+      userEmail,
+      productId: foodId,
+      foodId,
+      productName,
+      image,
+      price: Number(price) || 0,
+      stock: Number(stock) || 0,
+      brand,
+      weight,
+      weightUnit,
+      inStock,
+      quantity: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    return { success: true, message: existingItem ? "Cart updated" : "Added to cart" };
+    const result = await cartCollection.insertOne(doc);
+
+    return {
+      success: true,
+      insertedId: result.insertedId.toString(),
+      message: "Added to cart",
+    };
   } catch (error) {
     console.error("addToCart error:", error);
     return { success: false, message: error.message };
@@ -79,9 +113,22 @@ export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
       );
     }
 
-    revalidatePath("/", "layout");
-    revalidatePath("/cart");
-    return { success: true, message: "Cart updated" };
+    const safeQuantity = Math.min(Number(quantity), Number(item.stock || 999));
+
+    await cartCollection.updateOne(
+      {
+        _id: new ObjectId(cartId),
+        userEmail,
+      },
+      {
+        $set: {
+          quantity: safeQuantity,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    return { success: true, message: "Quantity updated" };
   } catch (error) {
     console.error("updateCartQuantity error:", error);
     return { success: false, message: error.message };
