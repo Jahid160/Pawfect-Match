@@ -4,24 +4,37 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getCartItems } from "@/action/server/cart";
-import { createOrderFromCart } from "@/action/server/order";
+import {
+  createOrderFromCart,
+  createSingleFoodOrder,
+} from "@/action/server/order";
+import { getSingleFood } from "@/action/server/foods";
 import { FaArrowLeft, FaShoppingBag } from "react-icons/fa";
 import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
-import { createStripeCheckoutFromCart } from "@/action/server/stripe";
+import {
+  createStripeCheckoutFromCart,
+  createStripeCheckoutForSingleFood,
+} from "@/action/server/stripe";
 
 const CheckoutPageClient = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const mode = searchParams.get("mode");
+  const foodId = searchParams.get("foodId");
+  const isBuyNow = mode === "buy-now" && !!foodId;
 
   const [cartItems, setCartItems] = useState([]);
+  const [buyNowItem, setBuyNowItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
 
   const [formData, setFormData] = useState({
-    customerName: session?.user?.name || "",
+    customerName: "",
     phone: "",
     address: "",
     city: "",
@@ -30,24 +43,38 @@ const CheckoutPageClient = () => {
     note: "",
   });
 
-  const loadCart = async () => {
+  const loadCheckoutData = async () => {
     if (!session?.user?.email) {
       setCartItems([]);
+      setBuyNowItem(null);
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    const items = await getCartItems(session.user.email);
-    setCartItems(items || []);
-    setLoading(false);
+
+    try {
+      if (isBuyNow) {
+        const item = await getSingleFood(foodId);
+        setBuyNowItem(item?._id ? item : null);
+        setCartItems([]);
+      } else {
+        const items = await getCartItems(session.user.email);
+        setCartItems(items || []);
+        setBuyNowItem(null);
+      }
+    } catch (error) {
+      console.error("Checkout load error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (status !== "loading") {
-      loadCart();
+      loadCheckoutData();
     }
-  }, [status, session?.user?.email]);
+  }, [status, session?.user?.email, isBuyNow, foodId]);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -56,17 +83,46 @@ const CheckoutPageClient = () => {
     }));
   }, [session?.user?.name]);
 
+  const finalBuyNowPrice = useMemo(() => {
+    if (!buyNowItem) return 0;
+    const hasDiscount =
+      buyNowItem.discountPrice &&
+      Number(buyNowItem.discountPrice) < Number(buyNowItem.price);
+    return Number(hasDiscount ? buyNowItem.discountPrice : buyNowItem.price);
+  }, [buyNowItem]);
+
+  const checkoutItems = useMemo(() => {
+    if (isBuyNow && buyNowItem) {
+      return [
+        {
+          _id: buyNowItem._id,
+          productId: buyNowItem._id,
+          productName: buyNowItem.productName,
+          image: buyNowItem.image,
+          price: finalBuyNowPrice,
+          quantity: 1,
+          brand: buyNowItem.brand,
+          weight: buyNowItem.weight,
+          weightUnit: buyNowItem.weightUnit,
+          stock: buyNowItem.stock,
+        },
+      ];
+    }
+
+    return cartItems;
+  }, [isBuyNow, buyNowItem, cartItems, finalBuyNowPrice]);
+
   const subtotal = useMemo(() => {
-    return cartItems.reduce((sum, item) => {
+    return checkoutItems.reduce((sum, item) => {
       return sum + Number(item.price || 0) * Number(item.quantity || 1);
     }, 0);
-  }, [cartItems]);
+  }, [checkoutItems]);
 
   const totalItems = useMemo(() => {
-    return cartItems.reduce((sum, item) => {
+    return checkoutItems.reduce((sum, item) => {
       return sum + Number(item.quantity || 1);
     }, 0);
-  }, [cartItems]);
+  }, [checkoutItems]);
 
   const shipping = 0;
   const total = subtotal + shipping;
@@ -80,54 +136,64 @@ const CheckoutPageClient = () => {
   };
 
   const handlePlaceOrder = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!session?.user?.email) {
-    Swal.fire("Login Required", "Please login first.", "warning");
-    return;
-  }
-
-  if (!cartItems.length) {
-    Swal.fire("Cart Empty", "Please add products before checkout.", "warning");
-    return;
-  }
-
-  startTransition(async () => {
-
-    if (formData.paymentMethod === "Online Payment") {
-
-  const result = await createStripeCheckoutFromCart({
-  userEmail: session.user.email,
-  ...formData,
-});
-
-  if (!result?.success) {
-    Swal.fire("Error", "Payment session failed", "error");
-    return;
-  }
-
-  window.location.href = result.url;
-  return;
-}
-
-    // Cash on Delivery
-    const result = await createOrderFromCart({
-      userEmail: session.user.email,
-      ...formData,
-    });
-
-    if (!result?.success) {
-      Swal.fire("Error", result?.message || "Order failed.", "error");
+    if (!session?.user?.email) {
+      Swal.fire("Login Required", "Please login first.", "warning");
       return;
     }
 
-    Swal.fire("Success", "Your order has been placed successfully.", "success");
+    if (!checkoutItems.length) {
+      Swal.fire("No Product", "No product found for checkout.", "warning");
+      return;
+    }
 
-    router.push(`/checkout/success?orderId=${result.insertedId}`);
-    router.refresh();
-  });
-};
+    startTransition(async () => {
+      if (formData.paymentMethod === "Online Payment") {
+        const result = isBuyNow
+          ? await createStripeCheckoutForSingleFood({
+              userEmail: session.user.email,
+              ...formData,
+              foodId,
+              quantity: 1,
+            })
+          : await createStripeCheckoutFromCart({
+              userEmail: session.user.email,
+              ...formData,
+            });
 
+        if (!result?.success) {
+          Swal.fire("Error", result?.message || "Payment session failed", "error");
+          return;
+        }
+
+        window.location.href = result.url;
+        return;
+      }
+
+      const result = isBuyNow
+        ? await createSingleFoodOrder({
+            userEmail: session.user.email,
+            ...formData,
+            foodId,
+            quantity: 1,
+          })
+        : await createOrderFromCart({
+            userEmail: session.user.email,
+            ...formData,
+          });
+
+      if (!result?.success) {
+        Swal.fire("Error", result?.message || "Order failed.", "error");
+        return;
+      }
+
+      Swal.fire("Success", "Your order has been placed successfully.", "success");
+
+      router.push(`/checkout/success?orderId=${result.insertedId}`);
+      router.refresh();
+    });
+  };
 
   if (status === "loading" || loading) {
     return (
@@ -152,15 +218,19 @@ const CheckoutPageClient = () => {
     );
   }
 
-  if (!cartItems.length) {
+  if (!checkoutItems.length) {
     return (
       <div className="flex flex-col justify-center items-center px-4 min-h-screen text-center">
         <div className="bg-base-200 mb-6 p-8 rounded-full">
           <FaShoppingBag className="text-primary text-5xl" />
         </div>
-        <h2 className="font-black text-3xl">Your cart is empty</h2>
+        <h2 className="font-black text-3xl">
+          {isBuyNow ? "Product not found" : "Your cart is empty"}
+        </h2>
         <p className="mt-3 text-gray-500">
-          Add some products before going to checkout.
+          {isBuyNow
+            ? "This product is unavailable for checkout."
+            : "Add some products before going to checkout."}
         </p>
         <Link
           href="/pet-food"
@@ -177,11 +247,11 @@ const CheckoutPageClient = () => {
     <div className="bg-base-200 min-h-screen px-4 md:px-8 py-10">
       <div className="mx-auto max-w-7xl">
         <Link
-          href="/cart"
+          href={isBuyNow ? `/petfoods/${foodId}` : "/cart"}
           className="inline-flex items-center gap-2 mb-8 font-bold text-primary"
         >
           <FaArrowLeft />
-          Back to Cart
+          {isBuyNow ? "Back to Product" : "Back to Cart"}
         </Link>
 
         <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
@@ -189,7 +259,14 @@ const CheckoutPageClient = () => {
             onSubmit={handlePlaceOrder}
             className="lg:col-span-2 bg-base-100 shadow p-6 rounded-3xl"
           >
-            <h1 className="mb-6 font-black text-3xl">Checkout</h1>
+            <h1 className="mb-2 font-black text-3xl">
+              {isBuyNow ? "Buy Now Checkout" : "Checkout"}
+            </h1>
+            <p className="mb-6 text-gray-500">
+              {isBuyNow
+                ? "Complete your order for this item."
+                : "Complete your order details below."}
+            </p>
 
             <div className="gap-5 grid grid-cols-1 md:grid-cols-2">
               <div>
@@ -288,7 +365,11 @@ const CheckoutPageClient = () => {
               disabled={isPending}
               className="bg-primary hover:bg-primary/90 mt-8 py-4 rounded-xl w-full font-black text-white disabled:opacity-70"
             >
-              {isPending ? "Placing Order..." : "Place Order"}
+              {isPending
+                ? "Processing..."
+                : formData.paymentMethod === "Online Payment"
+                ? "Proceed to Payment"
+                : "Place Order"}
             </button>
           </form>
 
@@ -296,9 +377,9 @@ const CheckoutPageClient = () => {
             <h2 className="mb-6 font-black text-2xl">Order Summary</h2>
 
             <div className="space-y-4 mb-6 max-h-[350px] overflow-y-auto">
-              {cartItems.map((item) => (
+              {checkoutItems.map((item) => (
                 <div
-                  key={item._id}
+                  key={item._id || item.productId}
                   className="flex gap-3 bg-base-200 p-3 rounded-2xl"
                 >
                   <div className="relative bg-white rounded-xl w-20 h-20 overflow-hidden">
