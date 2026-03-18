@@ -138,7 +138,6 @@ const AccessoriesManagement = () => {
                <div className="bg-warning/5 mb-6 border-warning/20 rounded-2xl alert alert-warning">
                  <p className="font-bold text-sm">Below items are running low. Please restock soon.</p>
                </div>
-               {/* এখানে শুধু Low stock আইটেমের টেবিল আসবে */}
                <div className="opacity-50 py-10 font-black text-center italic">No Critical Stock Alerts Found.</div>
              </div>
           )}
