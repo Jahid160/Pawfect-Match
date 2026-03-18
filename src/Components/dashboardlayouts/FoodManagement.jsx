@@ -245,9 +245,30 @@ const FoodManagement = () => {
                               </p>
                             </td>
                             <td>
-                              <p className="font-black text-neutral">
-                                ${item.price}
-                              </p>
+                              <div className="flex flex-col">
+                                {/* Discounted Price (The Active Price) */}
+                                <p className="font-black text-neutral text-lg">
+                                  ${item.discountPrice || item.price}
+                                </p>
+
+                                {/* Original Price (Shown only if a discount exists) */}
+                                {item.discountPrice &&
+                                  item.discountPrice < item.price && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-bold text-slate-400 line-through">
+                                        ${item.price}
+                                      </span>
+                                      <span className="text-[10px] font-black text-success uppercase tracking-tighter">
+                                        {Math.round(
+                                          ((item.price - item.discountPrice) /
+                                            item.price) *
+                                            100,
+                                        )}
+                                        % OFF
+                                      </span>
+                                    </div>
+                                  )}
+                              </div>
                             </td>
                             <td className="text-center">
                               <button
