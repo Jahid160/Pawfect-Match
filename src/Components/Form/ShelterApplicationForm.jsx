@@ -96,7 +96,7 @@ export default function ShelterApplicationForm() {
         e.motivation = "Please share your motivation";
     }
     if (step === 4) {
-      if (!formData.nidPhoto) e.nidPhoto = "NID PDF is required";
+      if (!formData.nidPdf) e.nidPdf = "NID PDF is required";
       if (!formData.shelterPhoto) e.shelterPhoto = "Shelter photo is required";
       if (formData.shelterType === "ngo" && !formData.registrationCert)
         e.registrationCert = "Registration certificate is required for NGOs";
@@ -145,15 +145,16 @@ export default function ShelterApplicationForm() {
         return fileData.secure_url;
       };
 
-      const nidUrl = await uploadToCloudinary(formData.nidPhoto);
+      const nidUrl = await uploadToCloudinary(formData.nidPdf);
       const shelterUrl = await uploadToCloudinary(formData.shelterPhoto);
+      console.log("Uploaded files:", { nidUrl, shelterUrl });
       const certUrl = formData.registrationCert
         ? await uploadToCloudinary(formData.registrationCert)
         : null;
 
       const finalData = {
         ...formData,
-        nidPhoto: nidUrl,
+        nidPdf: nidUrl,
         shelterPhoto: shelterUrl,
         registrationCert: certUrl,
         submittedAt: new Date().toISOString(),
@@ -203,7 +204,7 @@ export default function ShelterApplicationForm() {
       rescueDetails: "",
       hasVetContact: "",
       motivation: "",
-      nidPhoto: null,
+      nidPdf: null,
       shelterPhoto: null,
       registrationCert: null,
       agreeTerms: false,
@@ -647,11 +648,11 @@ export default function ShelterApplicationForm() {
                   <UploadField
                     label="National ID Card PDF (NID) *"
                     hint="Both front and back sides together"
-                    error={errors.nidPhoto}
+                    error={errors.nidPdf}
                     onChange={(e) => {
-                      update("nidPhoto", e.target.files[0]);
-                      if (errors.nidPhoto)
-                        setErrors((p) => ({ ...p, nidPhoto: "" }));
+                      update("nidPdf", e.target.files[0]);
+                      if (errors.nidPdf)
+                        setErrors((p) => ({ ...p, nidPdf: "" }));
                     }}
                   />
                   <UploadField
