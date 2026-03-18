@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import Link from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import NextLink from "next/link";
 
 import {
   User,
@@ -18,7 +19,9 @@ import {
   Menu,
   X,
   Bone,
-  ShoppingBag
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 import { FaUserGroup } from "react-icons/fa6";
@@ -26,15 +29,14 @@ import { BsHouseAddFill } from "react-icons/bs";
 
 import Logo from "../Header/Logo";
 
-const DashboardSidebar = () => {
+const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const pathname = usePathname();
   const { data: session } = useSession();
   const role = session?.user?.role;
 
   const [isOpen, setIsOpen] = useState(false);
 
-  /* ---------------- ADMIN NAV ---------------- */
-
+  /* ---------------- NAV ITEMS ---------------- */
   const adminNavItem = [
     { name: "User Management", href: "/dashboard/users", icon: FaUserGroup },
     { name: "Shelter Management", href: "/dashboard/shelters", icon: BsHouseAddFill },
@@ -45,45 +47,11 @@ const DashboardSidebar = () => {
     { name: "Manage Pets", href: "/dashboard/manage-pets", icon: PawPrint },
   ];
 
-  /* ---------------- USER NAV ---------------- */
+  const userNavItem = [{ name: "Adoption Requests", href: "/dashboard/adoption-requests", icon: PawPrint }, { name: "Favorite Pets", href: "/dashboard/favorites", icon: PawPrint }, { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint }];
+  const doctorNavItem = [{ name: "Appointments", href: "/dashboard/appointments", icon: ClipboardCheck }, { name: "Vaccinations", href: "/dashboard/vaccinations", icon: Syringe }, { name: "Pet Medical Records", href: "/dashboard/pet-records", icon: FileText }];
+  const shelterNavItem = [{ name: "Manage Pets", href: "/dashboard/manage-pets", icon: PawPrint }, { name: "Adoption Requests", href: "/dashboard/requests", icon: ClipboardCheck }, { name: "Shelter Reports", href: "/dashboard/reports", icon: BarChart3 }];
 
-  const userNavItem = [
-    { name: "Adoption Requests", href: "/dashboard/adoption-requests", icon: PawPrint },
-    { name: "Favorite Pets", href: "/dashboard/favorites", icon: PawPrint },
-    { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint },
-  ];
-
-  /* ---------------- DOCTOR NAV ---------------- */
-
-  const doctorNavItem = [
-    { name: "Appointments", href: "/dashboard/appointments", icon: ClipboardCheck },
-    { name: "Vaccinations", href: "/dashboard/vaccinations", icon: Syringe },
-    { name: "Pet Medical Records", href: "/dashboard/pet-records", icon: FileText },
-  ];
-
-  /* ---------------- SHELTER NAV ---------------- */
-
-  const shelterNavItem = [
-    { name: "Manage Pets", href: "/dashboard/manage-pets", icon: PawPrint },
-    { name: "Adoption Requests", href: "/dashboard/requests", icon: ClipboardCheck },
-    { name: "Shelter Reports", href: "/dashboard/reports", icon: BarChart3 },
-  ];
-
-  /* ---------------- ROLE BASED NAV ---------------- */
-
-  let navItems = [];
-
-  if (role === "admin") {
-    navItems = adminNavItem;
-  } else if (role === "doctor") {
-    navItems = doctorNavItem;
-  } else if (role === "shelter") {
-    navItems = shelterNavItem;
-  } else {
-    navItems = userNavItem;
-  }
-
-  /* ---------------- BOTTOM NAV ---------------- */
+  let navItems = role === "admin" ? adminNavItem : role === "doctor" ? doctorNavItem : role === "shelter" ? shelterNavItem : userNavItem;
 
   const bottomNavItems = [
     { name: "Profile", href: "/dashboard/profile", icon: User },
@@ -91,105 +59,89 @@ const DashboardSidebar = () => {
   ];
 
   /* ---------------- STYLE HELPERS ---------------- */
-
   const getLinkStyle = (path) => {
     const isActive = pathname === path;
-
-    return `flex items-center gap-3 px-3 py-2 rounded-lg transition-all font-medium group ${
-      isActive
-        ? "bg-orange-50 text-orange-600 shadow-sm"
-        : "hover:bg-orange-50 hover:text-orange-600 text-gray-700"
-    }`;
-  };
-
-  const getIconStyle = (path) => {
-    const isActive = pathname === path;
-
-    return `w-5 h-5 ${
-      isActive
-        ? "text-orange-600"
-        : "text-gray-600 group-hover:text-orange-600"
-    }`;
+    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${
+      isActive ? "bg-orange-500 text-white shadow-md shadow-orange-200" : "hover:bg-orange-100 text-slate-600"
+    } ${isCollapsed ? "justify-center px-2" : ""}`;
   };
 
   return (
     <>
-      {/* MOBILE HAMBURGER BUTTON */}
-
+      {/* MOBILE HAMBURGER */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden top-4 left-4 z-[100] fixed bg-orange-400 shadow-lg p-2 rounded-md text-white"
+        className="lg:hidden top-4 left-4 z-[100] fixed bg-orange-500 shadow-lg p-2 rounded-lg text-white"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* MOBILE OVERLAY */}
-
       {isOpen && (
-        <div
-          className="lg:hidden z-[80] fixed inset-0 bg-black/50"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="lg:hidden z-[80] fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
       )}
 
       {/* SIDEBAR */}
-
       <aside
         className={`
-        fixed top-0 left-0 h-screen bg-orange-200 border-r border-gray-100 text-black 
-        pb-6 px-4 z-[90] flex flex-col transition-transform duration-300 ease-in-out
-        w-[240px]
-        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      `}
+          fixed left-0 top-0 z-[90] flex h-screen flex-col border-r border-orange-100 bg-orange-50 pb-6 text-black transition-all duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          ${isCollapsed ? "lg:w-[80px]" : "lg:w-[240px]"}
+          w-[260px]
+        `}
       >
-        {/* LOGO */}
+        {/* COLLAPSE TOGGLE BUTTON */}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden top-10 -right-3 z-[100] absolute lg:flex bg-white hover:bg-orange-500 shadow-sm p-1 border border-orange-200 rounded-full text-orange-600 hover:text-white transition-all"
+        >
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
 
-        <div className="mb-2 py-6 border-orange-300/50 border-b">
-          <Logo />
+        {/* LOGO AREA */}
+        <div className={`mb-4 flex items-center border-b border-orange-200 py-8 ${isCollapsed ? "justify-center" : "px-4"}`}>
+          {isCollapsed ? <PawPrint className="text-orange-500" size={32} /> : <Logo />}
         </div>
 
-        {/* TOP NAV */}
+        {/* NAV CONTENT */}
+        <div className="flex flex-col flex-grow gap-1 pt-4 overflow-y-auto no-scrollbar scrollbar-hide">
+          
+          <NextLink href="/dashboard" className={getLinkStyle("/dashboard")}>
+            <LayoutDashboard size={20} className={pathname === "/dashboard" ? "text-white" : "text-orange-500"} />
+            {!isCollapsed && <span className="text-sm uppercase tracking-wider">Dashboard</span>}
+          </NextLink>
 
-        <div className="flex flex-col flex-grow gap-1 pt-4 overflow-y-auto scrollbar-hide">
-          <Link
-            href="/dashboard"
-            onClick={() => setIsOpen(false)}
-            className={`${getLinkStyle("/dashboard")} mb-4`}
-          >
-            <LayoutDashboard className={getIconStyle("/dashboard")} />
-            <span className="font-bold text-sm uppercase tracking-wider">
-              Dashboard
-            </span>
-          </Link>
-
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={getLinkStyle(item.href)}
-              >
-                <item.icon className={getIconStyle(item.href)} />
-                <span className="text-sm">{item.name}</span>
-              </Link>
-            ))}
-          </nav>
+          <div className="my-4 px-2">
+             {!isCollapsed && <p className="mb-4 px-2 font-black text-[10px] text-slate-400 uppercase tracking-[0.2em]">Main Menu</p>}
+             <nav className="flex flex-col">
+                {navItems.map((item) => (
+                  <NextLink 
+                    key={item.href} 
+                    href={item.href} 
+                    onClick={() => setIsOpen(false)} 
+                    className={getLinkStyle(item.href)} 
+                    title={isCollapsed ? item.name : ""}
+                  >
+                    <item.icon size={20} className={pathname === item.href ? "text-white" : "text-orange-500"} />
+                    {!isCollapsed && <span className="text-sm">{item.name}</span>}
+                  </NextLink>
+                ))}
+             </nav>
+          </div>
         </div>
 
         {/* BOTTOM NAV */}
-
-        <div className="flex flex-col gap-1 mt-4 pt-4 border-orange-300 border-t">
+        <div className="flex flex-col gap-1 mt-auto pt-4 border-orange-200 border-t">
           {bottomNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              className={getLinkStyle(item.href)}
+            <NextLink 
+               key={item.href} 
+               href={item.href} 
+               className={getLinkStyle(item.href)} 
+               title={isCollapsed ? item.name : ""}
             >
-              <item.icon className={getIconStyle(item.href)} />
-              <span className="text-sm">{item.name}</span>
-            </Link>
+              <item.icon size={20} className={pathname === item.href ? "text-white" : "text-orange-500"} />
+              {!isCollapsed && <span className="text-sm">{item.name}</span>}
+            </NextLink>
           ))}
         </div>
       </aside>
