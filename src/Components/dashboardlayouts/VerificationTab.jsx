@@ -8,9 +8,12 @@ import { MdAccessTime, MdCheckCircle, MdCancel, MdBlock } from "react-icons/md";
 import { LuUserRoundCheck } from "react-icons/lu";
 import { FaUserSlash } from "react-icons/fa";
 import { updateShelterStatus } from '@/action/server/Shelteruser';
+import Swal from 'sweetalert2';
+import ShelterDetailsModal from './ShelterDetailsModal';
 
 const VerificationTab = ({ requests, setRequests }) => {
      const [searchTerm, setSearchTerm] = useState("");
+     const [selectedRequest, setSelectedRequest] = useState(null);
      const [statusFilter, setStatusFilter] = useState("All");
      const [isOpen, setIsOpen] = useState(false);
 
@@ -23,42 +26,62 @@ const VerificationTab = ({ requests, setRequests }) => {
      ];
 
      const handleStatusUpdate = async (id, newStatus) => {
+          Swal.fire({
+               title: "Are you sure?",
+               text: `You are about to change the status to ${newStatus}.`,
+               icon: "warning",
+               showCancelButton: true,
+               confirmButtonColor: "#fa6e1d",
+               cancelButtonColor: "#f94144",
+               confirmButtonText: "Yes, confirm!",
+               cancelButtonText: "Cancel",
+               background: "#ffffff",
+               color: "#404040",
+          }).then(async (result) => {
 
-          const confirmBox = window.confirm(`Are you sure you want to change status to ${newStatus}?`);
-          if (!confirmBox) return;
+               if (result.isConfirmed) {
+                    try {
+                         const response = await updateShelterStatus(id, newStatus);
 
-          try {
-               // ২. আপনার API বা Server Function কল করা (ধরে নিচ্ছি updateShelterStatus একটি ফাংশন)
-               const result = await updateShelterStatus(id, newStatus);
+                         if (response.success) {
+                              setRequests((prev) =>
+                                   prev.map((req) => (req._id === id ? { ...req, status: newStatus } : req))
+                              );
 
-               if (result.success) {
-                    setRequests((prevRequests) =>
-                         prevRequests.map((req) =>
-                              req._id === id ? { ...req, status: newStatus } : req
-                         )
-                    );
-                    alert("Status successfully updated!");
-               } else {
-                    alert("Status update korte somossa hoyeche!");
-                    return;
+
+                              Swal.fire({
+                                   title: "Success!",
+                                   text: "Status updated successfully.",
+                                   icon: "success",
+                                   confirmButtonColor: "#fa6e1d",
+                                   timer: 1500,
+                                   showConfirmButton: false
+                              });
+                         } else {
+                              Swal.fire({
+                                   title: "Failed!",
+                                   text: response.message,
+                                   icon: "error",
+                                   confirmButtonColor: "#fa6e1d"
+                              });
+                         }
+                    } catch (error) {
+                         Swal.fire("Error!", "Something went wrong.", "error");
+                    }
                }
-
-               setRequests((prevRequests) =>
-                    prevRequests.map((req) =>
-                         req._id === id ? { ...req, status: newStatus } : req
-                    )
-               );
-
-               alert(`Successfully updated to ${newStatus}`);
-
-          } catch (error) {
-               console.error("Update failed:", error);
-               alert("Status update korte somossa hoyeche!");
-          }
+          });
      };
 
      return (
+
           <div className="space-y-6">
+               {/* Modal Component */}
+               {selectedRequest && (
+                    <ShelterDetailsModal
+                         data={selectedRequest}
+                         onClose={() => setSelectedRequest(null)}
+                    />
+               )}
                {/* --- Search & Filter Bar --- */}
                <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-3xl border border-base-300 shadow-sm">
                     <div className="relative w-full md:w-96">
@@ -204,10 +227,17 @@ const VerificationTab = ({ requests, setRequests }) => {
                                                        </td>
 
                                                        {/* Documents */}
+
                                                        <td className="text-center">
-                                                            <button className="btn btn-circle btn-ghost btn-sm text-primary hover:bg-white hover:shadow-md transition-all">
+                                                            <a
+                                                                 href={request.nidPdf}
+                                                                 target="_blank"
+                                                                 rel="noopener noreferrer"
+                                                                 className="btn btn-circle btn-ghost btn-sm text-primary hover:bg-white hover:shadow-md transition-all inline-flex items-center justify-center"
+                                                                 title="View Document"
+                                                            >
                                                                  <GrDocumentPdf size={20} />
-                                                            </button>
+                                                            </a>
                                                        </td>
 
                                                        {/* Dynamic Status Badge */}
@@ -285,7 +315,9 @@ const VerificationTab = ({ requests, setRequests }) => {
 
                                                        {/* Details Eye Icon */}
                                                        <td className="rounded-r-2xl text-center pr-6">
-                                                            <button className="btn btn-ghost btn-sm btn-circle text-slate-500 hover:text-primary hover:bg-white hover:shadow-md transition-all">
+                                                            <button
+                                                                 onClick={() => setSelectedRequest(request)}
+                                                                 className="btn btn-ghost btn-sm btn-circle text-slate-500 hover:text-primary hover:bg-white hover:shadow-md transition-all">
                                                                  <Eye size={22} />
                                                             </button>
                                                        </td>
