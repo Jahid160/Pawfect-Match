@@ -2,23 +2,14 @@
 
 import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 const cartCollectionPromise = dbConnect(collections.CART);
 
+// ১. কার্টে প্রোডাক্ট যোগ করা
 export const addToCart = async (payload) => {
   try {
-    const {
-      userEmail,
-      foodId,
-      productName,
-      image,
-      price,
-      stock = 0,
-      brand,
-      weight,
-      weightUnit,
-      inStock = true,
-    } = payload;
+    const { userEmail, foodId, stock = 0 } = payload;
 
     if (!userEmail || !foodId) {
       return { success: false, message: "Please login first" };
@@ -48,8 +39,9 @@ export const addToCart = async (payload) => {
           },
         }
       );
-
-      return { success: true, message: "Cart updated" };
+    } else {
+      const doc = { ...payload, quantity: 1, createdAt: new Date(), updatedAt: new Date() };
+      await cartCollection.insertOne(doc);
     }
 
     const doc = {
@@ -82,12 +74,12 @@ export const addToCart = async (payload) => {
   }
 };
 
+// ২. কার্টের সব আইটেম নিয়ে আসা
 export const getCartItems = async (userEmail) => {
   try {
     if (!userEmail) return [];
 
     const cartCollection = await cartCollectionPromise;
-
     const items = await cartCollection
       .find({ userEmail })
       .sort({ createdAt: -1 })
@@ -105,30 +97,20 @@ export const getCartItems = async (userEmail) => {
   }
 };
 
+// ৩. পরিমাণ আপডেট করা (প্লাস/মাইনাস বাটন)
 export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
   try {
-    if (!cartId || !userEmail) {
-      return { success: false, message: "Please login first" };
-    }
+    if (!cartId || !userEmail) return { success: false, message: "Authentication failed" };
 
     const cartCollection = await cartCollectionPromise;
 
-    const item = await cartCollection.findOne({
-      _id: new ObjectId(cartId),
-      userEmail,
-    });
-
-    if (!item) {
-      return { success: false, message: "Cart item not found" };
-    }
-
     if (quantity <= 0) {
-      await cartCollection.deleteOne({
-        _id: new ObjectId(cartId),
-        userEmail,
-      });
-
-      return { success: true, message: "Item removed" };
+      await cartCollection.deleteOne({ _id: new ObjectId(cartId), userEmail });
+    } else {
+      await cartCollection.updateOne(
+        { _id: new ObjectId(cartId), userEmail },
+        { $set: { quantity, updatedAt: new Date() } }
+      );
     }
 
     const safeQuantity = Math.min(Number(quantity), Number(item.stock || 999));
@@ -153,19 +135,16 @@ export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
   }
 };
 
+// ৪. নির্দিষ্ট আইটেম মুছে ফেলা
 export const removeCartItem = async ({ cartId, userEmail }) => {
   try {
-    if (!cartId || !userEmail) {
-      return { success: false, message: "Please login first" };
-    }
+    if (!cartId || !userEmail) return { success: false, message: "Authentication failed" };
 
     const cartCollection = await cartCollectionPromise;
+    await cartCollection.deleteOne({ _id: new ObjectId(cartId), userEmail });
 
-    await cartCollection.deleteOne({
-      _id: new ObjectId(cartId),
-      userEmail,
-    });
-
+    revalidatePath("/", "layout");
+    revalidatePath("/cart");
     return { success: true, message: "Item removed" };
   } catch (error) {
     console.error("removeCartItem error:", error);
@@ -173,16 +152,16 @@ export const removeCartItem = async ({ cartId, userEmail }) => {
   }
 };
 
+// ৫. পুরো কার্ট খালি করা (অর্ডার সাকসেস হলে বা ম্যানুয়ালি)
 export const clearCart = async (userEmail) => {
   try {
-    if (!userEmail) {
-      return { success: false, message: "Please login first" };
-    }
+    if (!userEmail) return { success: false, message: "Authentication failed" };
 
     const cartCollection = await cartCollectionPromise;
-
     await cartCollection.deleteMany({ userEmail });
 
+    revalidatePath("/", "layout");
+    revalidatePath("/cart");
     return { success: true, message: "Cart cleared" };
   } catch (error) {
     console.error("clearCart error:", error);
