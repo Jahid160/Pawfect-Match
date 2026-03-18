@@ -11,11 +11,12 @@ import { updateShelterStatus } from '@/action/server/Shelteruser';
 import Swal from 'sweetalert2';
 import ShelterDetailsModal from './ShelterDetailsModal';
 
-const VerificationTab = ({ requests = [], setRequests }) => {
+const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages }) => {
      const [searchTerm, setSearchTerm] = useState("");
      const [selectedRequest, setSelectedRequest] = useState(null);
      const [statusFilter, setStatusFilter] = useState("All");
      const [isOpen, setIsOpen] = useState(false);
+
 
      const options = [
           { value: "All", label: "All Status", color: "bg-amber-500" },
@@ -260,20 +261,52 @@ const VerificationTab = ({ requests = [], setRequests }) => {
                     </div>
 
                     {/* --- Pagination Footer --- */}
-                    {filteredRequests.length > 0 && (
-                         <div className="flex flex-col md:flex-row justify-between items-center px-4 md:px-8 py-6 bg-slate-50/50 border-t border-base-200 gap-4">
-                              <p className="text-xs md:text-sm font-bold text-slate-400">
-                                   Showing <span className="text-slate-800 font-black">1-{filteredRequests.length}</span> of <span className="text-slate-800 font-black">{filteredRequests.length}</span> requests
-                              </p>
-                              <div className="flex items-center gap-2">
-                                   <button className="btn btn-xs md:btn-sm btn-circle btn-ghost hover:bg-white border border-base-300">
-                                        <ChevronLeft size={16} />
+                    {totalItems > 0 && (
+                         <div className="flex flex-col md:flex-row justify-between items-center px-6 py-6 bg-white/50 backdrop-blur-sm border-t border-base-200 gap-4 rounded-b-3xl">
+                              {/* Info Text */}
+                              <div className="flex flex-col items-center md:items-start">
+                                   <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                        Showing <span className="text-primary font-black">{startIndex}-{endIndex}</span> of <span className="text-slate-800 font-black">{totalItems}</span> requests
+                                   </p>
+                              </div>
+
+                              {/* Controls */}
+                              <div className="flex items-center gap-3">
+                                   {/* Previous Button */}
+                                   <button
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className="btn btn-sm btn-circle bg-white border-base-300 hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-40 shadow-sm"
+                                   >
+                                        <ChevronLeft size={18} />
                                    </button>
-                                   <div className="join bg-white shadow-sm border border-base-300 rounded-xl overflow-hidden">
-                                        <button className="join-item btn btn-xs md:btn-sm btn-ghost font-black px-3 md:px-4 bg-primary text-white">1</button>
+
+                                   {/* Page Numbers */}
+                                   <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-base-200">
+                                        {[...Array(totalPages)].map((_, index) => {
+                                             const pageNum = index + 1;
+                                             return (
+                                                  <button
+                                                       key={pageNum}
+                                                       onClick={() => setCurrentPage(pageNum)}
+                                                       className={`btn btn-sm min-w-10 border-none rounded-xl transition-all duration-300 ${currentPage === pageNum
+                                                            ? 'bg-primary text-white shadow-md shadow-primary/30'
+                                                            : 'bg-transparent text-slate-500 hover:bg-white'
+                                                            }`}
+                                                  >
+                                                       {pageNum}
+                                                  </button>
+                                             );
+                                        })}
                                    </div>
-                                   <button className="btn btn-xs md:btn-sm btn-circle btn-ghost hover:bg-white border border-base-300">
-                                        <ChevronRight size={16} />
+
+                                   {/* Next Button */}
+                                   <button
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className="btn btn-sm btn-circle bg-white border-base-300 hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-40 shadow-sm"
+                                   >
+                                        <ChevronRight size={18} />
                                    </button>
                               </div>
                          </div>

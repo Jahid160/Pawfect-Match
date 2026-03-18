@@ -37,20 +37,32 @@ export const createShelterUser = async (data) => {
 }
 
 
-export const getShelterRequests = async () => {
+export const getShelterRequests = async (page = 1, limit = 10) => {
      try {
-
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const skip = (page - 1) * limit;
 
 
-          const requests = await shelterRequestsCollection.find({}).sort({ submittedAt: -1 }).toArray();
+          const totalItems = await shelterRequestsCollection.countDocuments({});
+
+          const requests = await shelterRequestsCollection
+               .find({})
+               .sort({ submittedAt: -1 })
+               .skip(skip)
+               .limit(limit)
+               .toArray();
+
           const plainRequests = requests.map(doc => ({
                ...doc,
                _id: doc._id.toString(),
+          }));
 
-          }))
-
-          return { success: true, data: plainRequests };
+          return {
+               success: true,
+               data: plainRequests,
+               totalItems,
+               totalPages: Math.ceil(totalItems / limit)
+          };
      } catch (error) {
           console.error("Database Error:", error);
           return { success: false, error: error.message };
