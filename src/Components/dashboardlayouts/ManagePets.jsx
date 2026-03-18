@@ -24,8 +24,9 @@ import {
 import Image from "next/image";
 import Swal from "sweetalert2";
 import PetDetailsModal from "./PetDetailsModal";
-import PetProfileModal from "./AdminDashboard/PetMangeMent/PetProfileModal"
+import PetProfileModal from "./AdminDashboard/PetMangeMent/PetProfileModal";
 import { getAdoptionUserByCode } from "@/action/server/Adoptionuser";
+import { useRouter } from "next/navigation";
 
 const ManagePets = ({ initialPets }) => {
   const [pets, setPets] = useState(initialPets);
@@ -65,12 +66,12 @@ const ManagePets = ({ initialPets }) => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredPets.slice(indexOfFirstItem, indexOfLastItem);
-  console.log(currentItems);
+  // console.log(currentItems);
   const handleFilterChange = (setter, value) => {
     setter(value);
     setCurrentPage(1);
   };
-
+  const router = useRouter();
   const handleApprove = async (id) => {
     // 1️⃣ Update UI immediately
     setPets((prev) =>
@@ -90,9 +91,9 @@ const ManagePets = ({ initialPets }) => {
       alert("Failed to update status");
     }
   };
-  const handleReject = async (id) => {
-    const result = await UpdatePetStatusReject(id);
-
+  const handleReject = async (pet) => {
+    const result = await UpdatePetStatusReject(pet._id,pet.adoptionCode);
+    console.log(pet._id,pet.adoptionCode);
     if (result.success) {
       alert("Pet adopted successfully");
     } else {
@@ -100,7 +101,7 @@ const ManagePets = ({ initialPets }) => {
     }
   };
   const handleEdit = (id) => {
-    alert("handleEdit id", id);
+    router.push(`/dashboard/manage-pets/petEdit/${id}`);
   };
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
@@ -149,7 +150,7 @@ const ManagePets = ({ initialPets }) => {
     setIsModalOpen(true);
   };
   const handleAvailableEye = (pet) => {
-    console.log(pet);
+    // console.log(pet);
     setSelectedProfilePet(pet);
     setIsProfileModalOpen(true);
   };
@@ -310,7 +311,7 @@ const ManagePets = ({ initialPets }) => {
 
                             {/* Reject (Pending -> Available) */}
                             <button
-                              onClick={() => handleReject(pet._id)}
+                              onClick={() => handleReject(pet)}
                               title="Reject"
                               className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                             >
