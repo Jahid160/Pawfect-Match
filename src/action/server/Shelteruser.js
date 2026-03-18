@@ -2,6 +2,7 @@
 
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
+import { ObjectId } from "mongodb";
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -36,17 +37,62 @@ export const createShelterUser = async (data) => {
 }
 
 
-export const getShelterRequests = async () => {
+export const getShelterRequests = async (page = 1, limit = 10) => {
      try {
-
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const skip = (page - 1) * limit;
 
 
-          const requests = await shelterRequestsCollection.find({}).sort({ submittedAt: -1 }).toArray();
+          const totalItems = await shelterRequestsCollection.countDocuments({});
 
-          return { success: true, data: requests };
+          const requests = await shelterRequestsCollection
+               .find({})
+               .sort({ submittedAt: -1 })
+               .skip(skip)
+               .limit(limit)
+               .toArray();
+
+          const plainRequests = requests.map(doc => ({
+               ...doc,
+               _id: doc._id.toString(),
+          }));
+
+          return {
+               success: true,
+               data: plainRequests,
+               totalItems,
+               totalPages: Math.ceil(totalItems / limit)
+          };
      } catch (error) {
           console.error("Database Error:", error);
           return { success: false, error: error.message };
      }
 }
+
+
+
+export const updateShelterStatus = async (id, newStatus) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+
+
+          const result = await shelterRequestsCollection.updateOne(
+               { _id: new ObjectId(id) },
+               {
+                    $set: {
+                         status: newStatus,
+                         updatedAt: new Date()
+                    }
+               }
+          );
+
+          if (result.matchedCount === 0) {
+               return { success: false, message: "Request not found." };
+          }
+
+          return { success: true, message: "Status updated successfully." };
+     } catch (error) {
+          console.error("Database Error:", error);
+          return { success: false, message: "Something went wrong while updating status." };
+     }
+};
