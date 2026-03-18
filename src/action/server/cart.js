@@ -28,13 +28,13 @@ export const addToCart = async (payload) => {
 
     const existingItem = await cartCollection.findOne({
       userEmail,
-      foodId,
+      productId: foodId,
     });
 
     if (existingItem) {
       const newQuantity = Math.min(
-        (existingItem.quantity || 1) + 1,
-        stock || 999
+        Number(existingItem.quantity || 1) + 1,
+        Number(stock || 999)
       );
 
       await cartCollection.updateOne(
@@ -42,6 +42,8 @@ export const addToCart = async (payload) => {
         {
           $set: {
             quantity: newQuantity,
+            stock: Number(stock) || 0,
+            inStock,
             updatedAt: new Date(),
           },
         }
@@ -52,11 +54,12 @@ export const addToCart = async (payload) => {
 
     const doc = {
       userEmail,
+      productId: foodId,
       foodId,
       productName,
       image,
-      price,
-      stock,
+      price: Number(price) || 0,
+      stock: Number(stock) || 0,
       brand,
       weight,
       weightUnit,
@@ -128,7 +131,7 @@ export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
       return { success: true, message: "Item removed" };
     }
 
-    const safeQuantity = Math.min(quantity, item.stock || 999);
+    const safeQuantity = Math.min(Number(quantity), Number(item.stock || 999));
 
     await cartCollection.updateOne(
       {
