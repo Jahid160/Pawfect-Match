@@ -43,9 +43,8 @@ const AccessoriesManagement = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all z-10 ${
-              activeTab === tab.id ? "text-white" : "text-slate-500 hover:bg-base-200"
-            }`}
+            className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all z-10 ${activeTab === tab.id ? "text-white" : "text-slate-500 hover:bg-base-200"
+              }`}
           >
             {tab.icon}
             {tab.label}
@@ -76,9 +75,9 @@ const AccessoriesManagement = () => {
                 <h2 className="font-black text-xl italic">Inventory <span className="text-primary">List</span></h2>
                 <div className="relative">
                   <Search className="top-1/2 left-3 absolute text-slate-400 -translate-y-1/2" size={16} />
-                  <input 
-                    type="text" 
-                    placeholder="Search product..." 
+                  <input
+                    type="text"
+                    placeholder="Search product..."
                     className="bg-base-200/50 pl-10 border-none rounded-xl w-full md:w-72 font-medium input input-bordered"
                   />
                 </div>
@@ -130,16 +129,16 @@ const AccessoriesManagement = () => {
 
           {/* 2. LOW STOCK TAB */}
           {activeTab === "low-stock" && (
-             <div className="bg-base-100 shadow-xl p-8 border border-warning/20 rounded-4xl">
-               <div className="flex items-center gap-3 mb-6">
-                 <div className="bg-warning/10 p-3 rounded-2xl text-warning"><AlertOctagon /></div>
-                 <h2 className="font-black text-xl italic">Stock Alerts</h2>
-               </div>
-               <div className="bg-warning/5 mb-6 border-warning/20 rounded-2xl alert alert-warning">
-                 <p className="font-bold text-sm">Below items are running low. Please restock soon.</p>
-               </div>
-               <div className="opacity-50 py-10 font-black text-center italic">No Critical Stock Alerts Found.</div>
-             </div>
+            <div className="bg-base-100 shadow-xl p-8 border border-warning/20 rounded-4xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-warning/10 p-3 rounded-2xl text-warning"><AlertOctagon /></div>
+                <h2 className="font-black text-xl italic">Stock Alerts</h2>
+              </div>
+              <div className="bg-warning/5 mb-6 border-warning/20 rounded-2xl alert alert-warning">
+                <p className="font-bold text-sm">Below items are running low. Please restock soon.</p>
+              </div>
+              <div className="opacity-50 py-10 font-black text-center italic">No Critical Stock Alerts Found.</div>
+            </div>
           )}
 
           {/* 3. SALES & ANALYTICS TAB */}
@@ -148,14 +147,14 @@ const AccessoriesManagement = () => {
               <div className="lg:col-span-2 bg-base-100 shadow-xl p-8 border border-base-300 rounded-4xl">
                 <h2 className="mb-6 font-black text-xl italic">Sales Performance</h2>
                 <div className="flex justify-between items-center bg-primary mb-4 p-6 rounded-3xl text-white">
-                   <div>
-                     <p className="opacity-80 font-black text-xs uppercase">Total Revenue</p>
-                     <h3 className="font-black text-4xl">$4,520.00</h3>
-                   </div>
-                   <div className="text-right">
-                     <p className="opacity-80 font-black text-xs uppercase">Items Sold</p>
-                     <h3 className="font-black text-2xl">184 Units</h3>
-                   </div>
+                  <div>
+                    <p className="opacity-80 font-black text-xs uppercase">Total Revenue</p>
+                    <h3 className="font-black text-4xl">$4,520.00</h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="opacity-80 font-black text-xs uppercase">Items Sold</p>
+                    <h3 className="font-black text-2xl">184 Units</h3>
+                  </div>
                 </div>
               </div>
 
@@ -165,8 +164,8 @@ const AccessoriesManagement = () => {
                   <div className="bg-white/5 p-4 border border-white/10 rounded-2xl">
                     <p className="font-black text-sm">Organic Dog Food</p>
                     <div className="flex justify-between mt-2">
-                       <span className="opacity-60 font-bold text-xs">Revenue</span>
-                       <span className="font-black text-primary text-xs">$1,200</span>
+                      <span className="opacity-60 font-bold text-xs">Revenue</span>
+                      <span className="font-black text-primary text-xs">$1,200</span>
                     </div>
                   </div>
                 </div>
@@ -179,4 +178,4 @@ const AccessoriesManagement = () => {
   );
 };
 
-export default AccessoriesManagement;J
+export default AccessoriesManagement;

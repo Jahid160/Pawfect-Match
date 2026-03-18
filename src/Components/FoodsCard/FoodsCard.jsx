@@ -5,6 +5,7 @@ import React, { useState, useMemo, useTransition } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion"; // Added
 import {
   FaLeaf,
   FaShoppingCart,
@@ -19,57 +20,66 @@ import { addToCart } from "@/action/server/cart";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import toast from "react-hot-toast";
 
+// --- Animation Variants ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+};
+
 // --- FoodCard Component ---
 export const FoodCard = ({ food }) => {
   const foodId = food._id?.toString() || food.id;
   const { data: session } = useSession();
-  const router = useRouter();
   const { openLoginModal } = useAuthModal();
-
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
 
-  const hasDiscount =
-    food.discountPrice && Number(food.discountPrice) < Number(food.price);
-
+  const hasDiscount = food.discountPrice && Number(food.discountPrice) < Number(food.price);
   const isOutOfStock = food.inStock === false || food.stock <= 0;
-
   const displayPrice = hasDiscount ? food.discountPrice : food.price;
-
-  const discountPercent = hasDiscount
-    ? Math.round(((food.price - food.discountPrice) / food.price) * 100)
-    : 0;
+  const discountPercent = hasDiscount ? Math.round(((food.price - food.discountPrice) / food.price) * 100) : 0;
 
   const handleAddToCart = () => {
-  if (!session?.user?.email) {
-    openLoginModal();
-    return;
-  }
-
-  startTransition(async () => {
-    const result = await addToCart({
-      userEmail: session.user.email,
-      foodId: food._id?.toString() || food.id,
-      productName: food.productName,
-      image: food.image,
-      price: displayPrice,
-      stock: food.stock,
-      brand: food.brand,
-      weight: food.weight,
-      weightUnit: food.weightUnit,
-      inStock: food.inStock,
-    });
-
-    if (result?.acknowledged || result?.insertedId || result?.success) {
-      toast.success("Added to cart successfully 🛒");
-    } else {
-      toast.error(result?.message || "Failed to add to cart");
+    if (!session?.user?.email) {
+      openLoginModal();
+      return;
     }
-  });
-};
+    startTransition(async () => {
+      const result = await addToCart({
+        userEmail: session.user.email,
+        foodId: food._id?.toString() || food.id,
+        productName: food.productName,
+        image: food.image,
+        price: displayPrice,
+        stock: food.stock,
+        brand: food.brand,
+        weight: food.weight,
+        weightUnit: food.weightUnit,
+        inStock: food.inStock,
+      });
+      if (result?.acknowledged || result?.insertedId || result?.success) {
+        toast.success("Added to cart successfully 🛒");
+      } else {
+        toast.error(result?.message || "Failed to add to cart");
+      }
+    });
+  };
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+    <motion.div
+      variants={cardVariants}
+      layout // Ensures smooth movement when other cards disappear
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+    >
       {/* Image Section */}
       <div className="relative h-64 w-full overflow-hidden bg-gradient-to-br from-orange-50 via-white to-yellow-50">
         <Image
@@ -82,7 +92,6 @@ export const FoodCard = ({ food }) => {
           }`}
         />
 
-        {/* Top badges */}
         <div className="absolute left-4 top-4 flex flex-col gap-2">
           {hasDiscount && (
             <span className="rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow">
@@ -96,14 +105,12 @@ export const FoodCard = ({ food }) => {
           )}
         </div>
 
-        {/* Category badge */}
         <div className="absolute right-4 top-4">
           <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
             {food.foodType || "Food"}
           </span>
         </div>
 
-        {/* Out of stock overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/15 backdrop-blur-[2px]">
             <span className="flex items-center gap-2 rounded-xl bg-black/80 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white">
@@ -113,39 +120,35 @@ export const FoodCard = ({ food }) => {
           </div>
         )}
 
-        {/* Quick cart button */}
         {!isOutOfStock && (
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={handleAddToCart}
             disabled={isPending}
             className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-3 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-110 disabled:cursor-not-allowed disabled:opacity-70"
             aria-label="Add to cart"
           >
             <FaShoppingCart size={18} />
-          </button>
+          </motion.button>
         )}
       </div>
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-5">
-        {/* Brand and rating */}
         <div className="mb-2 flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-orange-500">
             {food.brand || "Brand"}
           </span>
-
           <div className="flex items-center gap-1 text-sm text-amber-500">
             <FaStar />
             <span className="font-semibold text-gray-700">4.8</span>
           </div>
         </div>
 
-        {/* Title */}
         <h3 className="mb-2 line-clamp-2 min-h-[56px] text-lg font-extrabold leading-snug text-gray-900">
           {food.productName}
         </h3>
 
-        {/* Info row */}
         <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-500">
           <div className="flex items-center gap-1.5">
             <FaWeightHanging className="text-orange-400" />
@@ -154,16 +157,13 @@ export const FoodCard = ({ food }) => {
               {food.weightUnit}
             </span>
           </div>
-
           <span className="h-1 w-1 rounded-full bg-gray-300"></span>
-
           <div className="flex items-center gap-1.5">
             <FaLeaf className="text-green-500" />
             <span className="font-medium">{food.category || "Pet Food"}</span>
           </div>
         </div>
 
-        {/* Price + CTA */}
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
           <div className="flex flex-col">
             {hasDiscount ? (
@@ -182,19 +182,21 @@ export const FoodCard = ({ food }) => {
             )}
           </div>
 
-          <Link
-            href={`/pet-food/${foodId}`}
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-500"
-          >
-            View Details <FaChevronRight size={10} />
-          </Link>
+          <motion.div whileHover={{ x: 3 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href={`/pet-food/${foodId}`}
+              className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-500"
+            >
+              View Details <FaChevronRight size={10} />
+            </Link>
+          </motion.div>
         </div>
 
         {message && (
           <p className="mt-3 text-xs font-medium text-green-600">{message}</p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -217,19 +219,14 @@ const PetFoods = ({ foods = [] }) => {
 
     if (selectedCategory !== "All") {
       result = result.filter(
-        (item) =>
-          item.foodType?.toLowerCase() === selectedCategory.toLowerCase()
+        (item) => item.foodType?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
     if (sortBy === "Price: Low to High") {
-      result.sort(
-        (a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price)
-      );
+      result.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
     } else if (sortBy === "Price: High to Low") {
-      result.sort(
-        (a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price)
-      );
+      result.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
     } else if (sortBy === "Newest") {
       result.reverse();
     }
@@ -241,8 +238,12 @@ const PetFoods = ({ foods = [] }) => {
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-white px-4 py-14 sm:px-8">
-      {/* Header */}
-      <div className="mx-auto mb-12 max-w-7xl">
+      {/* Header Animations */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mx-auto mb-12 max-w-7xl"
+      >
         <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-orange-600">
           <FaLeaf />
           Premium Pet Nutrition
@@ -261,19 +262,18 @@ const PetFoods = ({ foods = [] }) => {
           </div>
 
           <div className="text-sm text-gray-500">
-            Showing{" "}
-            <span className="font-bold text-gray-900">
-              {filteredFoods.length}
-            </span>{" "}
-            products
+            Showing <span className="font-bold text-gray-900">{filteredFoods.length}</span> products
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Filters */}
-      <div className="mx-auto mb-12 max-w-7xl rounded-3xl border border-orange-100 bg-white p-5 shadow-lg shadow-orange-100/40">
+      {/* Filters Animation */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="mx-auto mb-12 max-w-7xl rounded-3xl border border-orange-100 bg-white p-5 shadow-lg shadow-orange-100/40"
+      >
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          {/* Search */}
           <div className="relative w-full xl:max-w-md">
             <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
@@ -285,10 +285,11 @@ const PetFoods = ({ foods = [] }) => {
             />
           </div>
 
-          {/* Categories */}
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`rounded-full px-5 py-3 text-xs font-bold uppercase tracking-wider transition ${
@@ -298,17 +299,15 @@ const PetFoods = ({ foods = [] }) => {
                 }`}
               >
                 {cat}
-              </button>
+              </motion.button>
             ))}
           </div>
 
-          {/* Sort */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
               <FaFilter className="text-orange-500" />
               Sort by
             </div>
-
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -321,28 +320,41 @@ const PetFoods = ({ foods = [] }) => {
             </select>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Product grid */}
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredFoods.length > 0 ? (
-          filteredFoods.map((food, index) => (
-            <FoodCard
-              key={food._id?.toString() || food.id || `food-${index}`}
-              food={food}
-            />
-          ))
-        ) : (
-          <div className="col-span-full rounded-3xl border border-dashed border-gray-300 bg-white py-20 text-center">
-            <h3 className="text-xl font-bold text-gray-800">
-              No products found
-            </h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Try changing your search or category filter.
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Product Grid Animation */}
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <AnimatePresence mode="popLayout">
+          {filteredFoods.length > 0 ? (
+            filteredFoods.map((food, index) => (
+              <FoodCard
+                key={food._id?.toString() || food.id || `food-${index}`}
+                food={food}
+              />
+            ))
+          ) : (
+            <motion.div 
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="col-span-full rounded-3xl border border-dashed border-gray-300 bg-white py-20 text-center"
+            >
+              <h3 className="text-xl font-bold text-gray-800">
+                No products found
+              </h3>
+              <p className="mt-2 text-sm text-gray-500">
+                Try changing your search or category filter.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </section>
   );
 };
