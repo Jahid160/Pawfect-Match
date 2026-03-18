@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useTransition } from "react";
+import { motion } from "framer-motion"; // Added
 import {
   FaArrowLeft,
   FaWeightHanging,
@@ -18,6 +19,17 @@ import { addToCart } from "@/action/server/cart";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 
+// Animation Variants
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const slideIn = {
+  hidden: { opacity: 0, x: -30 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
 const FoodDetails = ({ food }) => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -27,7 +39,11 @@ const FoodDetails = ({ food }) => {
 
   if (!food?._id) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col justify-center items-center min-h-screen"
+      >
         <FaTimesCircle className="mb-4 text-red-500 text-4xl" />
         <h2 className="font-bold text-2xl">Food not found</h2>
 
@@ -37,15 +53,13 @@ const FoodDetails = ({ food }) => {
         >
           Back to Foods
         </Link>
-      </div>
+      </motion.div>
     );
   }
 
   const hasDiscount =
     food.discountPrice && Number(food.discountPrice) < Number(food.price);
-
   const isOutOfStock = food.inStock === false || food.stock <= 0;
-
   const finalPrice = hasDiscount ? food.discountPrice : food.price;
 
   const handleAddToCart = () => {
@@ -53,9 +67,7 @@ const FoodDetails = ({ food }) => {
       openLoginModal();
       return;
     }
-
     setMessage("");
-
     startTransition(async () => {
       const result = await addToCart({
         userEmail: session.user.email,
@@ -69,60 +81,70 @@ const FoodDetails = ({ food }) => {
         weightUnit: food.weightUnit,
         inStock: food.inStock,
       });
-
       setMessage(result?.message || "Something went wrong");
     });
   };
 
   const handleBuyNow = () => {
-  if (!session?.user?.email) {
-    openLoginModal();
-    return;
-  }
-
-  startTransition(async () => {
-    const result = await createStripeCheckoutFromCart(food, session.user.email);
-
-    if (result?.url) {
-      window.location.href = result.url;
+    if (!session?.user?.email) {
+      openLoginModal();
+      return;
     }
-  });
-};
 
+    router.push(`/checkout?mode=buy-now&foodId=${food._id}`);
+  };
 
   return (
-    <div className="bg-base-200 min-h-screen px-6 py-10">
+    <div className="bg-base-200 min-h-screen px-6 py-10 overflow-hidden">
       <div className="mx-auto max-w-7xl">
-        <Link
-          href="/petfoods"
-          className="flex items-center gap-2 mb-8 font-bold text-primary"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
         >
-          <FaArrowLeft /> Back to foods
-        </Link>
+          <Link
+            href="/petfoods"
+            className="flex items-center gap-2 mb-8 font-bold text-primary hover:gap-3 transition-all"
+          >
+            <FaArrowLeft /> Back to foods
+          </Link>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-10 bg-base-100 shadow p-8 rounded-3xl">
-          <div className="relative flex justify-center items-center bg-base-200 rounded-2xl min-h-[450px]">
+          {/* Left: Image Section */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={slideIn}
+            className="relative flex justify-center items-center bg-base-200 rounded-2xl min-h-[450px]"
+          >
             {hasDiscount && (
-              <span className="top-5 left-5 absolute bg-red-500 px-4 py-1 rounded-full font-bold text-xs text-white">
+              <span className="top-5 left-5 absolute z-10 bg-red-500 px-4 py-1 rounded-full font-bold text-xs text-white">
                 SALE
               </span>
             )}
 
-            <Image
-              src={food.image || "https://placehold.co/700x700"}
-              alt={food.productName || "Pet Food"}
-              width={600}
-              height={600}
-              className="object-contain max-h-[420px]"
-            />
-          </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="w-full h-full flex items-center justify-center p-4"
+            >
+              <Image
+                src={food.image || "https://placehold.co/700x700"}
+                alt={food.productName || "Pet Food"}
+                width={600}
+                height={600}
+                className="object-contain max-h-[420px]"
+                priority
+              />
+            </motion.div>
+          </motion.div>
 
-          <div>
+          {/* Right: Content Section */}
+          <motion.div initial="hidden" animate="visible" variants={fadeIn}>
             <div className="flex gap-3 mb-3">
               <span className="bg-primary/10 px-4 py-1 rounded-full font-bold text-primary text-xs">
                 {food.brand}
               </span>
-
               <span className="bg-base-200 px-4 py-1 rounded-full font-bold text-xs">
                 {food.foodType}
               </span>
@@ -136,7 +158,6 @@ const FoodDetails = ({ food }) => {
                   <span className="font-black text-4xl text-error">
                     ${food.discountPrice}
                   </span>
-
                   <span className="text-gray-400 text-lg line-through">
                     ${food.price}
                   </span>
@@ -148,24 +169,20 @@ const FoodDetails = ({ food }) => {
 
             <div className="space-y-3 text-sm mb-6">
               <p className="flex items-center gap-2">
-                <FaWeightHanging /> {food.weight}
+                <FaWeightHanging className="text-primary" /> {food.weight}{" "}
                 {food.weightUnit}
               </p>
-
               <p className="flex items-center gap-2">
-                <FaBoxOpen /> Stock: {food.stock}
+                <FaBoxOpen className="text-primary" /> Stock: {food.stock}
               </p>
-
               <p className="flex items-center gap-2">
                 {isOutOfStock ? (
                   <>
-                    <FaTimesCircle className="text-red-500" />
-                    Out of stock
+                    <FaTimesCircle className="text-red-500" /> Out of stock
                   </>
                 ) : (
                   <>
-                    <FaCheckCircle className="text-green-500" />
-                    Available
+                    <FaCheckCircle className="text-green-500" /> Available
                   </>
                 )}
               </p>
@@ -173,15 +190,23 @@ const FoodDetails = ({ food }) => {
 
             {food.description && (
               <div className="mb-6">
-                <h3 className="font-bold text-lg mb-2">Description</h3>
-                <p className="text-gray-500">{food.description}</p>
+                <h3 className="font-bold text-lg mb-2 border-b border-base-200 pb-1">
+                  Description
+                </h3>
+                <p className="text-gray-500 leading-relaxed">
+                  {food.description}
+                </p>
               </div>
             )}
 
             {food.ingredients && (
               <div className="mb-6">
-                <h3 className="font-bold text-lg mb-2">Ingredients</h3>
-                <p className="text-gray-500">{food.ingredients}</p>
+                <h3 className="font-bold text-lg mb-2 border-b border-base-200 pb-1">
+                  Ingredients
+                </h3>
+                <p className="text-gray-500 leading-relaxed">
+                  {food.ingredients}
+                </p>
               </div>
             )}
 
@@ -190,49 +215,63 @@ const FoodDetails = ({ food }) => {
                 {food.tags.map((tag, i) => (
                   <span
                     key={i}
-                    className="flex items-center gap-2 bg-base-200 px-3 py-1 rounded-full text-sm"
+                    className="flex items-center gap-2 bg-base-200 px-3 py-1 rounded-full text-sm hover:bg-base-300 transition-colors"
                   >
-                    <FaTag /> {tag}
+                    <FaTag className="text-xs" /> {tag}
                   </span>
                 ))}
               </div>
             )}
 
             <div className="flex flex-wrap gap-4 mt-10">
-              <button
+              <motion.button
+                whileHover={!isOutOfStock && !isPending ? { scale: 1.02 } : {}}
+                whileTap={!isOutOfStock && !isPending ? { scale: 0.98 } : {}}
                 onClick={handleAddToCart}
                 disabled={isOutOfStock || isPending}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition ${isOutOfStock || isPending
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-primary hover:bg-primary/90 text-white"
-                  }`}
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition shadow-lg shadow-primary/20 ${
+                  isOutOfStock || isPending
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-primary hover:bg-primary/90 text-white"
+                }`}
               >
                 <FaShoppingCart />
                 {isPending ? "Adding..." : "Add to Cart"}
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={!isOutOfStock ? { scale: 1.02 } : {}}
+                whileTap={!isOutOfStock ? { scale: 0.98 } : {}}
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
-                className={`px-8 py-4 rounded-xl font-bold transition ${isOutOfStock
-                  ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                  : "bg-gray-900 hover:bg-black text-white"
-                  }`}
+                className={`px-8 py-4 rounded-xl font-bold transition shadow-lg ${
+                  isOutOfStock
+                    ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                    : "bg-gray-900 hover:bg-black text-white"
+                }`}
               >
                 Buy Now
-              </button>
+              </motion.button>
             </div>
 
             {message && (
-              <p className="mt-4 font-medium text-sm text-primary">{message}</p>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 font-medium text-sm text-primary"
+              >
+                {message}
+              </motion.p>
             )}
 
             <div className="flex gap-6 mt-8 text-gray-500 text-sm">
-              <span>✔ Secure Payment</span>
-              <span>✔ Fast Delivery</span>
-              <span>✔ Quality Guarantee</span>
+              <span className="flex items-center gap-1">✔ Secure Payment</span>
+              <span className="flex items-center gap-1">✔ Fast Delivery</span>
+              <span className="flex items-center gap-1">
+                ✔ Quality Guarantee
+              </span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

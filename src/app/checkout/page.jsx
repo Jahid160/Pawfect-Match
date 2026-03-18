@@ -1,5 +1,5 @@
+import CheckoutPageClient from "@/components/checkout/CheckOutPage";
 
-import CheckoutPageClient from "@/Components/checkout/CheckOutPage";
 
 const CheckoutPage = () => {
   return <CheckoutPageClient />;
