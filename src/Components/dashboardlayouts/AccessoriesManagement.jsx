@@ -1,173 +1,183 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { 
-  FaPlus, 
-  FaSearch, 
-  FaTrashAlt, 
-  FaEdit, 
-  FaBoxOpen, 
-  FaShoppingCart, 
-  FaCheckCircle, 
-  FaExclamationTriangle 
-} from "react-icons/fa";
+import {
+  Package,
+  AlertOctagon,
+  BadgeDollarSign,
+  Eye,
+  Trash2,
+  Edit3,
+  Search,
+  Plus
+} from 'lucide-react';
 
 const AccessoriesManagement = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("inventory");
 
-  // স্ট্যাটাস কার্ড ডাটা (এগুলো পরে ডাইনামিক করবেন)
-  const stats = [
-    { label: "Total Items", value: "48", icon: <FaBoxOpen />, color: "bg-blue-500" },
-    { label: "In Stock", value: "42", icon: <FaCheckCircle />, color: "bg-green-500" },
-    { label: "Low Stock", value: "6", icon: <FaExclamationTriangle />, color: "bg-orange-500" },
-    { label: "Total Sales", value: "$1,240", icon: <FaShoppingCart />, color: "bg-purple-500" },
+  const tabs = [
+    { id: "inventory", label: "Total Items", icon: <Package size={18} /> },
+    { id: "low-stock", label: "Low Stock", icon: <AlertOctagon size={18} /> },
+    { id: "sales", label: "Total Sales", icon: <BadgeDollarSign size={18} /> },
   ];
 
   return (
-    <div className="p-6 min-h-screen">
-      {/* Header Section */}
-      <div className="flex md:flex-row flex-col md:justify-between md:items-center gap-4 mb-8">
+    <div className="bg-base-200 p-6 lg:p-10 min-h-screen font-sans">
+      {/* --- HEADER --- */}
+      <div className="flex md:flex-row flex-col justify-between md:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-black text-gray-800 text-3xl tracking-tight">Accessories Management</h1>
-          <p className="text-gray-500">Manage your pet gear, inventory, and pricing.</p>
+          <h1 className="font-black text-neutral text-3xl tracking-tight">
+            Accessories <span className="text-primary">Management</span>
+          </h1>
+          <p className="font-medium text-slate-500">Control your inventory, track sales, and manage pet gear levels.</p>
         </div>
-        <button className="flex justify-center items-center gap-2 bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-200 px-6 py-3 rounded-2xl font-bold text-white active:scale-95 transition-all">
-          <FaPlus /> Add New Accessory
+        <button className="shadow-lg shadow-primary/20 px-6 rounded-2xl font-black btn btn-primary">
+          <Plus size={20} /> Add Product
         </button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        {stats.map((stat, index) => (
-          <div key={index} className="flex items-center gap-4 bg-white shadow-sm p-6 border border-gray-100 rounded-3xl">
-            <div className={`${stat.color} p-4 rounded-2xl text-white text-xl shadow-lg`}>
-              {stat.icon}
-            </div>
-            <div>
-              <p className="font-bold text-gray-400 text-sm uppercase tracking-wider">{stat.label}</p>
-              <h3 className="font-black text-gray-800 text-2xl">{stat.value}</h3>
-            </div>
-          </div>
+      {/* --- TABBING SYSTEM (DaisyUI + Framer Motion) --- */}
+      <div className="flex bg-white shadow-sm mb-8 p-1.5 border border-base-300 rounded-2xl w-fit">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all z-10 ${
+              activeTab === tab.id ? "text-white" : "text-slate-500 hover:bg-base-200"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="activeTabAcc"
+                className="-z-10 absolute inset-0 bg-primary rounded-xl"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+          </button>
         ))}
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="bg-white shadow-sm mb-6 p-4 border border-gray-100 rounded-2xl">
-        <div className="relative w-full max-w-md">
-          <input
-            type="text"
-            placeholder="Search by name or category..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-gray-50 py-3 pr-4 pl-12 border border-transparent focus:border-orange-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-500/5 w-full text-sm transition-all"
-          />
-          <FaSearch className="top-1/2 left-4 absolute text-gray-400 -translate-y-1/2" />
-        </div>
-      </div>
+      {/* --- TAB CONTENT --- */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* 1. TOTAL ITEMS / INVENTORY TAB */}
+          {activeTab === "inventory" && (
+            <div className="bg-base-100 shadow-xl border border-base-300 rounded-4xl overflow-hidden">
+              <div className="flex md:flex-row flex-col justify-between md:items-center gap-4 p-8 border-base-200 border-b">
+                <h2 className="font-black text-xl italic">Inventory <span className="text-primary">List</span></h2>
+                <div className="relative">
+                  <Search className="top-1/2 left-3 absolute text-slate-400 -translate-y-1/2" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder="Search product..." 
+                    className="bg-base-200/50 pl-10 border-none rounded-xl w-full md:w-72 font-medium input input-bordered"
+                  />
+                </div>
+              </div>
 
-      {/* Accessories Table */}
-      <div className="bg-white shadow-sm border border-gray-100 rounded-3xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50/50 border-gray-100 border-b">
-                <th className="px-6 py-5 font-bold text-gray-400 text-xs uppercase tracking-widest">Product</th>
-                <th className="px-6 py-5 font-bold text-gray-400 text-xs uppercase tracking-widest">Category</th>
-                <th className="px-6 py-5 font-bold text-gray-400 text-xs uppercase tracking-widest">Price</th>
-                <th className="px-6 py-5 font-bold text-gray-400 text-xs uppercase tracking-widest">Stock</th>
-                <th className="px-6 py-5 font-bold text-gray-400 text-xs text-center uppercase tracking-widest">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {/* Sample Row 1 */}
-              <tr className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative bg-gray-100 rounded-xl w-12 h-12 overflow-hidden">
-                      <Image 
-                        src="https://placehold.co/100x100?text=Gear" 
-                        alt="Product" 
-                        fill 
-                        className="object-cover" 
-                      />
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800">Premium Leather Leash</p>
-                      <p className="text-gray-400 text-xs italic">Brand: PawCare</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 font-semibold text-gray-600 text-sm italic">Walking Gear</td>
-                <td className="px-6 py-4 font-black text-gray-800">$24.99</td>
-                <td className="px-6 py-4">
-                  <span className="bg-green-100 px-3 py-1 rounded-full font-bold text-[10px] text-green-600 uppercase">
-                    12 Units
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-center items-center gap-2">
-                    <button className="bg-blue-50 hover:bg-blue-500 p-2.5 rounded-xl text-blue-500 hover:text-white transition-all">
-                      <FaEdit size={14} />
-                    </button>
-                    <button className="bg-red-50 hover:bg-red-500 p-2.5 rounded-xl text-red-500 hover:text-white transition-all">
-                      <FaTrashAlt size={14} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
+              <div className="overflow-x-auto">
+                <table className="table w-full border-collapse">
+                  <thead className="bg-base-200/50">
+                    <tr className="border-none text-[11px] text-slate-400 uppercase tracking-widest">
+                      <th className="px-8 py-5">Product Details</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Stock Status</th>
+                      <th className="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="hover:bg-base-200/20 border-base-200 border-b transition-colors">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="avatar">
+                            <div className="w-12 h-12 mask mask-squircle">
+                              <Image src="https://i.ibb.co/placeholder-accessory.png" alt="Product" width={48} height={48} />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="font-black text-slate-800 italic">Premium Leather Collar</p>
+                            <p className="font-bold text-slate-400 text-xs">ID: #ACC-9021</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="font-bold text-slate-500 text-sm italic">Walking Gear</td>
+                      <td className="font-black text-neutral">$24.99</td>
+                      <td>
+                        <div className="px-3 py-3 badge-outline font-black text-[10px] badge badge-success">In Stock (12)</div>
+                      </td>
+                      <td>
+                        <div className="flex justify-center gap-2">
+                          <button className="text-info btn btn-square btn-ghost btn-sm"><Edit3 size={18} /></button>
+                          <button className="text-error btn btn-square btn-ghost btn-sm"><Trash2 size={18} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
-              {/* Sample Row 2 (Low Stock) */}
-              <tr className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative bg-gray-100 rounded-xl w-12 h-12 overflow-hidden">
-                      <Image 
-                        src="https://placehold.co/100x100?text=Toy" 
-                        alt="Product" 
-                        fill 
-                        className="object-cover" 
-                      />
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800">Squeaky Chew Toy</p>
-                      <p className="text-gray-400 text-xs italic">Brand: FunPet</p>
+          {/* 2. LOW STOCK TAB */}
+          {activeTab === "low-stock" && (
+             <div className="bg-base-100 shadow-xl p-8 border border-warning/20 rounded-4xl">
+               <div className="flex items-center gap-3 mb-6">
+                 <div className="bg-warning/10 p-3 rounded-2xl text-warning"><AlertOctagon /></div>
+                 <h2 className="font-black text-xl italic">Stock Alerts</h2>
+               </div>
+               <div className="bg-warning/5 mb-6 border-warning/20 rounded-2xl alert alert-warning">
+                 <p className="font-bold text-sm">Below items are running low. Please restock soon.</p>
+               </div>
+               {/* এখানে শুধু Low stock আইটেমের টেবিল আসবে */}
+               <div className="opacity-50 py-10 font-black text-center italic">No Critical Stock Alerts Found.</div>
+             </div>
+          )}
+
+          {/* 3. SALES & ANALYTICS TAB */}
+          {activeTab === "sales" && (
+            <div className="gap-6 grid grid-cols-1 lg:grid-cols-3">
+              <div className="lg:col-span-2 bg-base-100 shadow-xl p-8 border border-base-300 rounded-4xl">
+                <h2 className="mb-6 font-black text-xl italic">Sales Performance</h2>
+                <div className="flex justify-between items-center bg-primary mb-4 p-6 rounded-3xl text-white">
+                   <div>
+                     <p className="opacity-80 font-black text-xs uppercase">Total Revenue</p>
+                     <h3 className="font-black text-4xl">$4,520.00</h3>
+                   </div>
+                   <div className="text-right">
+                     <p className="opacity-80 font-black text-xs uppercase">Items Sold</p>
+                     <h3 className="font-black text-2xl">184 Units</h3>
+                   </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral shadow-xl p-8 rounded-4xl text-white">
+                <h3 className="mb-4 font-black text-primary text-xl italic">Top Seller</h3>
+                <div className="space-y-4">
+                  <div className="bg-white/5 p-4 border border-white/10 rounded-2xl">
+                    <p className="font-black text-sm">Organic Dog Food</p>
+                    <div className="flex justify-between mt-2">
+                       <span className="opacity-60 font-bold text-xs">Revenue</span>
+                       <span className="font-black text-primary text-xs">$1,200</span>
                     </div>
                   </div>
-                </td>
-                <td className="px-6 py-4 font-semibold text-gray-600 text-sm italic">Toys</td>
-                <td className="px-6 py-4 font-black text-gray-800">$9.50</td>
-                <td className="px-6 py-4">
-                  <span className="bg-orange-100 px-3 py-1 rounded-full font-bold text-[10px] text-orange-600 uppercase">
-                    2 Units (Low)
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-center items-center gap-2">
-                    <button className="bg-blue-50 hover:bg-blue-500 p-2.5 rounded-xl text-blue-500 hover:text-white transition-all">
-                      <FaEdit size={14} />
-                    </button>
-                    <button className="bg-red-50 hover:bg-red-500 p-2.5 rounded-xl text-red-500 hover:text-white transition-all">
-                      <FaTrashAlt size={14} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination Placeholder */}
-        <div className="flex justify-between items-center bg-gray-50/50 px-6 py-4 border-gray-100 border-t">
-          <p className="text-gray-400 text-sm italic">Showing 2 of 48 accessories</p>
-          <div className="flex gap-2">
-            <button className="bg-white hover:bg-gray-100 px-4 py-2 border border-gray-200 rounded-xl font-bold text-gray-500 text-xs transition-all">Previous</button>
-            <button className="bg-white hover:bg-gray-100 px-4 py-2 border border-gray-200 rounded-xl font-bold text-gray-500 text-xs transition-all">Next</button>
-          </div>
-        </div>
-      </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
 
-export default AccessoriesManagement;
+export default AccessoriesManagement;J
