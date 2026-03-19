@@ -22,6 +22,7 @@ const ShelterManagement = () => {
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [topShelter, setTopShelter] = useState(null);
 
   const [query] = useDebounce(searchTerm, 500);
 
@@ -30,6 +31,7 @@ const ShelterManagement = () => {
       const result = await getShelterRequests(currentPage, itemsPerPage, query, statusFilter);
       if (result.success) {
         setRequests(result.data);
+        setTopShelter(result.topShelter)
         setTotalItems(result.totalItems);
       } else {
         console.error("Some error occurred:", result.error);
@@ -109,7 +111,7 @@ const ShelterManagement = () => {
 
           {/* 3. PERFORMANCE & ANALYTICS TAB */}
           {activeTab === "analytics" && (
-            <ShelterInsight currentPage={currentPage} setCurrentPage={setCurrentPage} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} totalPages={totalPages} requests={requests} setRequests={setRequests} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <ShelterInsight currentPage={currentPage} setCurrentPage={setCurrentPage} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} totalPages={totalPages} requests={requests} setRequests={setRequests} searchTerm={searchTerm} setSearchTerm={setSearchTerm} topShelter={topShelter} />
           )}
 
         </motion.div>

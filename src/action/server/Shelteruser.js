@@ -59,6 +59,29 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "", stat
 
           const totalItems = await shelterRequestsCollection.countDocuments(query);
 
+          const mvpResult = await shelterRequestsCollection.aggregate([
+               {
+                    $lookup: {
+                         from: "pets",
+                         localField: "email",
+                         foreignField: "email",
+                         as: "ownedPets"
+                    }
+               },
+               {
+                    $addFields: {
+                         petCount: { $size: "$ownedPets" }
+                    }
+               },
+               { $sort: { petCount: -1, submittedAt: -1 } },
+               { $limit: 1 }
+          ]).toArray();
+
+          const topShelterData = mvpResult.length > 0 ? {
+               ...mvpResult[0],
+               _id: mvpResult[0]._id.toString()
+          } : null;
+
 
           const requests = await shelterRequestsCollection.aggregate([
                { $match: query },
@@ -90,6 +113,7 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "", stat
                success: true,
                data: plainRequests,
                totalItems,
+               topShelter: topShelterData,
                totalPages: Math.ceil(totalItems / limitNum)
           };
      } catch (error) {
