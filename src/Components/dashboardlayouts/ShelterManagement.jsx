@@ -3,12 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardCheck,
-  LayoutGrid,
   BarChart3,
-  Eye,
-  Trash2,
-  MapPin,
-  TrendingUp,
 } from 'lucide-react';
 import VerificationTab from './VerificationTab';
 import { getShelterRequests } from '@/action/server/Shelteruser';
