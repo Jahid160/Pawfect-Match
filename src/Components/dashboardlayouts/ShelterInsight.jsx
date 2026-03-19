@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { Edit3, Trash2, Trophy, ShieldAlert, Zap, Search, ChevronLeft, ChevronRight, ArrowUpDown, Inbox, SearchX } from 'lucide-react';
+import { Edit3, Trash2, Trophy, Zap, Search, ChevronLeft, ChevronRight, ArrowUpDown, Inbox, SearchX } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 // --- 1. Move EmptyState OUTSIDE the main component ---
@@ -19,29 +19,19 @@ const EmptyState = ({ icon: Icon, title, description }) => (
      </motion.div>
 );
 
-const ShelterInsight = ({ requests, setRequests }) => {
-     const [searchTerm, setSearchTerm] = useState("");
-     const [currentPage, setCurrentPage] = useState(1);
+const ShelterInsight = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages, searchTerm, setSearchTerm }) => {
      const [sortOrder, setSortOrder] = useState('desc');
-     const itemsPerPage = 5;
 
      // ... (All your existing logic: filteredAndSortedData, topShelter, handleDelete, handleEdit)
-     const filteredAndSortedData = useMemo(() => {
-          let result = requests.filter(item =>
-               item.shelterName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               item.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-
-          return result.sort((a, b) => {
+     const sortedData = useMemo(() => {
+          return [...requests].sort((a, b) => {
                return sortOrder === 'desc'
                     ? (b.petCount || 0) - (a.petCount || 0)
                     : (a.petCount || 0) - (b.petCount || 0);
           });
-     }, [requests, searchTerm, sortOrder]);
+     }, [requests, sortOrder]);
 
-     const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
-     const startIndex = (currentPage - 1) * itemsPerPage;
-     const currentItems = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
+
 
      const topShelter = requests.length > 0
           ? [...requests].sort((a, b) => (b.petCount || 0) - (a.petCount || 0))[0]
@@ -140,7 +130,7 @@ const ShelterInsight = ({ requests, setRequests }) => {
                          title="No Data Found"
                          description="No shelter requests have been submitted yet."
                     />
-               ) : filteredAndSortedData.length === 0 ? (
+               ) : sortedData.length === 0 ? (
                     <EmptyState
                          icon={SearchX}
                          title="No Match Found"
@@ -159,7 +149,7 @@ const ShelterInsight = ({ requests, setRequests }) => {
                                    </thead>
                                    <tbody className="divide-y divide-slate-50">
                                         <AnimatePresence mode='popLayout'>
-                                             {currentItems.map((item) => (
+                                             {sortedData.map((item) => (
                                                   <motion.tr
                                                        key={item._id}
                                                        layout
@@ -200,25 +190,52 @@ const ShelterInsight = ({ requests, setRequests }) => {
                          </div>
 
                          {/* Pagination */}
-                         {totalPages > 1 && (
-                              <div className="p-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/30">
-                                   <p className="text-sm font-bold text-slate-400">
-                                        Showing <span className="text-slate-900">{startIndex + 1}</span> to <span className="text-slate-900">{Math.min(startIndex + itemsPerPage, filteredAndSortedData.length)}</span> of {filteredAndSortedData.length}
-                                   </p>
-                                   <div className="flex gap-2">
+                         {totalItems > 1 && (
+                              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-6 bg-white/50 backdrop-blur-sm border-t border-base-200 gap-4 rounded-b-3xl">
+                                   {/* Info Text */}
+                                   <div className="flex flex-col items-center md:items-start">
+                                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                                             Showing <span className="text-primary font-black">{startIndex}-{endIndex}</span> of <span className="text-slate-800 font-black">{totalItems}</span> requests
+                                        </p>
+                                   </div>
+
+                                   {/* Controls */}
+                                   <div className="flex items-center gap-3">
+                                        {/* Previous Button */}
                                         <button
+                                             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                              disabled={currentPage === 1}
-                                             onClick={() => setCurrentPage(prev => prev - 1)}
-                                             className="p-2 rounded-xl border border-slate-200 bg-white disabled:opacity-30 hover:bg-slate-50 transition-all"
+                                             className="btn btn-sm btn-circle bg-white border-base-300 hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-40 shadow-sm"
                                         >
-                                             <ChevronLeft size={20} />
+                                             <ChevronLeft size={18} />
                                         </button>
+
+                                        {/* Page Numbers */}
+                                        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-base-200">
+                                             {[...Array(totalPages)].map((_, index) => {
+                                                  const pageNum = index + 1;
+                                                  return (
+                                                       <button
+                                                            key={pageNum}
+                                                            onClick={() => setCurrentPage(pageNum)}
+                                                            className={`btn btn-sm min-w-10 border-none rounded-xl transition-all duration-300 ${currentPage === pageNum
+                                                                 ? 'bg-primary text-white shadow-md shadow-primary/30'
+                                                                 : 'bg-transparent text-slate-500 hover:bg-white'
+                                                                 }`}
+                                                       >
+                                                            {pageNum}
+                                                       </button>
+                                                  );
+                                             })}
+                                        </div>
+
+                                        {/* Next Button */}
                                         <button
+                                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                              disabled={currentPage === totalPages}
-                                             onClick={() => setCurrentPage(prev => prev + 1)}
-                                             className="p-2 rounded-xl border border-slate-200 bg-white disabled:opacity-30 hover:bg-slate-50 transition-all"
+                                             className="btn btn-sm btn-circle bg-white border-base-300 hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-40 shadow-sm"
                                         >
-                                             <ChevronRight size={20} />
+                                             <ChevronRight size={18} />
                                         </button>
                                    </div>
                               </div>

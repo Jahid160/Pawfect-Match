@@ -95,7 +95,7 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                               </div>
                               <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-2">No Requests Found</h3>
                               <p className="text-slate-500 max-w-sm font-medium text-sm md:text-base">
-                                   We could not find any shelter verification requests from the server. Please try again later.
+                                   We could not find any shelter verification requests matching your current filters or search.
                               </p>
                          </motion.div>
                     ) : (
@@ -183,9 +183,8 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                             <th className="bg-transparent text-center">Details</th>
                                                        </tr>
                                                   </thead>
-                                                  <tbody className="before:block before:h-2 cursor-pointer">
-                                                       {/* Layout mode 'popLayout' filter korar somoi smoothness baray */}
-                                                       <AnimatePresence mode='popLayout' initial={false}>
+                                                  <tbody className="before:block before:h-2 cursor-pointer ">
+                                                       <AnimatePresence mode='popLayout'>
                                                             {filteredRequests.map((request) => {
                                                                  const statusConfigs = {
                                                                       Pending: { row: "border-l-orange-500 bg-orange-50/40 hover:bg-orange-100/60", badge: "bg-orange-200 text-orange-800", icon: <MdAccessTime size={14} className="animate-pulse" /> },
@@ -198,16 +197,9 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                                  return (
                                                                       <motion.tr
                                                                            key={request._id}
-                                                                           layout // Jeno filter houar somoi list smoothly rearrange hoy
-                                                                           initial={{ opacity: 0, scale: 0.9 }}
-                                                                           animate={{ opacity: 1, scale: 1 }}
-                                                                           exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                                                                           transition={{
-                                                                                type: "spring",
-                                                                                stiffness: 500,
-                                                                                damping: 50,
-                                                                                mass: 1
-                                                                           }}
+                                                                           initial={{ opacity: 0, x: -10 }}
+                                                                           animate={{ opacity: 1, x: 0 }}
+                                                                           exit={{ opacity: 0, scale: 0.95 }}
                                                                            className={`group transition-all duration-300 border-l-4 md:border-l-8 rounded-2xl mb-4 ${config.row}`}
                                                                       >
                                                                            <td className="rounded-l-none pl-4 md:pl-6 py-4">
@@ -215,6 +207,7 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                                                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">
                                                                                      {new Date(request.submittedAt).toLocaleDateString()}
                                                                                 </p>
+                                                                                {/* Mobile Only Owner Name */}
                                                                                 <p className="sm:hidden text-xs text-slate-600 mt-1 font-semibold">{request.fullName}</p>
                                                                            </td>
                                                                            <td className="font-bold text-slate-700 normal-case hidden sm:table-cell">{request.fullName}</td>
@@ -231,7 +224,24 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                                            </td>
                                                                            <td className="">
                                                                                 <div className="flex justify-center items-center gap-1 md:gap-3">
-                                                                                     {/* ... Action buttons (no changes needed here) */}
+                                                                                     {request.status === 'Suspended' ? (
+                                                                                          <button className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, 'Approved')}>
+                                                                                               <LuUserRoundCheck size={18} />
+                                                                                          </button>
+                                                                                     ) : (
+                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Approved'} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, 'Approved')}>
+                                                                                               <BiUserCheck size={18} />
+                                                                                          </button>
+                                                                                     )}
+                                                                                     {request.status === 'Approved' ? (
+                                                                                          <button className="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, 'Suspended')}>
+                                                                                               <FaUserSlash size={16} />
+                                                                                          </button>
+                                                                                     ) : (
+                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Suspended'} className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, 'Rejected')}>
+                                                                                               {request.status === 'Suspended' ? <FaUserSlash size={16} /> : <BiUserX size={18} />}
+                                                                                          </button>
+                                                                                     )}
                                                                                 </div>
                                                                            </td>
                                                                            <td className="rounded-r-2xl text-center pr-4">

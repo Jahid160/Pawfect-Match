@@ -19,10 +19,12 @@ const ShelterManagement = () => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   useEffect(() => {
     const SelterRequests = async () => {
-      const result = await getShelterRequests(currentPage, itemsPerPage);
+      const result = await getShelterRequests(currentPage, itemsPerPage, searchTerm);
       if (result.success) {
         setRequests(result.data);
         setTotalItems(result.totalItems);
@@ -31,7 +33,7 @@ const ShelterManagement = () => {
       }
     };
     SelterRequests();
-  }, [currentPage]);
+  }, [currentPage, searchTerm]);
 
   const tabs = [
     { id: "verification", label: "Verification", icon: <ClipboardCheck size={18} /> },
@@ -104,7 +106,7 @@ const ShelterManagement = () => {
 
           {/* 3. PERFORMANCE & ANALYTICS TAB */}
           {activeTab === "analytics" && (
-            <ShelterInsight requests={requests} setRequests={setRequests} />
+            <ShelterInsight currentPage={currentPage} setCurrentPage={setCurrentPage} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} totalPages={totalPages} requests={requests} setRequests={setRequests} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           )}
 
         </motion.div>

@@ -37,20 +37,46 @@ export const createShelterUser = async (data) => {
 }
 
 
-export const getShelterRequests = async (page = 1, limit = 10) => {
+export const getShelterRequests = async (page = 1, limit = 10, search = "") => {
      try {
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
-          const skip = (page - 1) * limit;
 
-
+          const pageNum = parseInt(page);
+          const limitNum = parseInt(limit);
+          const skipAmount = (pageNum - 1) * limitNum;
           const totalItems = await shelterRequestsCollection.countDocuments({});
 
-          const requests = await shelterRequestsCollection
-               .find({})
-               .sort({ submittedAt: -1 })
-               .skip(skip)
-               .limit(limit)
-               .toArray();
+          const query = search
+               ? {
+                    $or: [
+                         { shelterName: { $regex: search, $options: "i" } },
+                         { fullName: { $regex: search, $options: "i" } }
+                    ]
+               }
+               : {};
+
+          // Aggregation Pipeline
+          const requests = await shelterRequestsCollection.aggregate([
+               { $match: query },
+               { $sort: { submittedAt: -1 } },
+               { $skip: skipAmount },
+               { $limit: limitNum },
+               {
+                    $lookup: {
+                         from: "pets",
+                         localField: "email",
+                         foreignField: "email",
+                         as: "ownedPets"
+                    }
+               },
+               {
+                    $addFields: {
+                         petCount: { $size: "$ownedPets" }
+                    }
+               },
+               { $project: { ownedPets: 0 } }
+          ]).toArray();
+
 
           const plainRequests = requests.map(doc => ({
                ...doc,
@@ -61,7 +87,7 @@ export const getShelterRequests = async (page = 1, limit = 10) => {
                success: true,
                data: plainRequests,
                totalItems,
-               totalPages: Math.ceil(totalItems / limit)
+               totalPages: Math.ceil(totalItems / limitNum)
           };
      } catch (error) {
           console.error("Database Error:", error);
