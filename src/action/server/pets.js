@@ -81,11 +81,17 @@ export const getSinglePets = async (id) => {
 };
 
 export const AddPets = async (petdata) => {
+  const session = await getServerSession(authOptions)
+  if (!session || !session.user) {
+    return { success: false, message: "Unauthorized" };
+  }
+
   try {
     const Petcollection = await petCollectionPromise;
     const result = await Petcollection.insertOne({
       ...petdata,
       status: "available",
+      email: session.user.email,
     });
     return { success: Boolean(result.insertedId) };
   } catch (error) {
