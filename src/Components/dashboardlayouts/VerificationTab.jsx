@@ -11,10 +11,8 @@ import { updateShelterStatus } from '@/action/server/Shelteruser';
 import Swal from 'sweetalert2';
 import ShelterDetailsModal from './ShelterDetailsModal';
 
-const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages }) => {
-     const [searchTerm, setSearchTerm] = useState("");
+const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages, statusFilter, setStatusFilter, setSearchTerm }) => {
      const [selectedRequest, setSelectedRequest] = useState(null);
-     const [statusFilter, setStatusFilter] = useState("All");
      const [isOpen, setIsOpen] = useState(false);
 
 
@@ -71,10 +69,8 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
 
      // Responsive Filter logic (optional based on your requirement)
      const filteredRequests = requests.filter(req => {
-          const matchesSearch = req.shelterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               req.fullName.toLowerCase().includes(searchTerm.toLowerCase());
           const matchesStatus = statusFilter === "All" || req.status === statusFilter;
-          return matchesSearch && matchesStatus;
+          return matchesStatus;
      });
 
      return (
@@ -116,7 +112,7 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                              type="text"
                                              placeholder="Search by shelter or owner..."
                                              className="input input-bordered w-full pl-12 rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 transition-all text-sm md:text-base"
-                                             onChange={(e) => setSearchTerm(e.target.value)}
+                                             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                                         />
                                    </div>
 
@@ -150,7 +146,11 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                                  {options.map((option) => (
                                                                       <button
                                                                            key={option.value}
-                                                                           onClick={() => { setStatusFilter(option.value); setIsOpen(false); }}
+                                                                           onClick={() => {
+                                                                                setStatusFilter(option.value);
+                                                                                setCurrentPage(1)
+                                                                                setIsOpen(false);
+                                                                           }}
                                                                            className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${statusFilter === option.value ? "bg-primary/5 text-primary" : "hover:bg-slate-50 text-slate-600"}`}
                                                                       >
                                                                            <div className="flex items-center gap-3">
