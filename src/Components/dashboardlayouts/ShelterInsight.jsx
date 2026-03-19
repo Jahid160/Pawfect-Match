@@ -139,54 +139,67 @@ const ShelterInsight = ({ totalItems, requests = [], setRequests, currentPage, s
                ) : (
                     <div className="bg-white rounded-4xl border border-slate-200 shadow-sm overflow-hidden">
                          <div className="overflow-x-auto">
-                              <table className="w-full text-left border-collapse">
-                                   <thead>
-                                        <tr className="bg-slate-50/50 border-b border-slate-100">
-                                             <th className="p-6 text-[11px] font-black uppercase text-slate-400 tracking-wider">Shelter Information</th>
-                                             <th className="p-6 text-[11px] font-black uppercase text-center text-slate-400 tracking-wider">Stats</th>
-                                             <th className="p-6 text-[11px] font-black uppercase text-right text-slate-400 tracking-wider">Actions</th>
-                                        </tr>
-                                   </thead>
-                                   <tbody className="divide-y divide-slate-50">
-                                        <AnimatePresence mode='popLayout'>
-                                             {sortedData.map((item) => (
-                                                  <motion.tr
-                                                       key={item._id}
-                                                       layout
-                                                       initial={{ opacity: 0 }}
-                                                       animate={{ opacity: 1 }}
-                                                       exit={{ opacity: 0, x: 20 }}
-                                                       className="group hover:bg-slate-50/50 transition-colors"
-                                                  >
-                                                       <td className="p-6">
-                                                            <div className="flex flex-col">
-                                                                 <span className="font-bold text-slate-800">{item.shelterName}</span>
-                                                                 <span className="text-xs text-slate-400">{item.fullName}</span>
-                                                            </div>
-                                                       </td>
-                                                       <td className="p-6 text-center">
-                                                            <span className="px-4 py-1 bg-slate-100 rounded-lg font-black text-sm text-slate-600">
-                                                                 {item.petCount || 0} Pets
-                                                            </span>
-                                                       </td>
-                                                       <td className="p-6 text-right">
-                                                            <div className="flex justify-end gap-2">
-                                                                 <button onClick={() => handleEdit(item)} className="p-2.5 text-slate-400 hover:text-blue-600 rounded-xl transition-all border border-slate-100 hover:border-blue-100">
-                                                                      <Edit3 size={18} />
-                                                                 </button>
-                                                                 <button
-                                                                      onClick={() => handleDelete(item._id, item.shelterName)}
-                                                                      className="p-2.5 text-slate-400 hover:text-red-600 rounded-xl transition-all border border-slate-100 hover:border-red-100"
-                                                                 >
-                                                                      <Trash2 size={18} />
-                                                                 </button>
-                                                            </div>
-                                                       </td>
-                                                  </motion.tr>
-                                             ))}
-                                        </AnimatePresence>
-                                   </tbody>
-                              </table>
+                                        <table className="w-full text-left border-collapse cursor-pointer">
+                                             <thead>
+                                                  <tr className="bg-slate-50/50 border-b border-slate-100">
+                                                       <th className="p-6 text-[11px] font-black uppercase text-slate-400 tracking-wider">Shelter Information</th>
+                                                       <th className="p-6 text-[11px] font-black uppercase text-center text-slate-400 tracking-wider">Stats</th>
+                                                       <th className="p-6 text-[11px] font-black uppercase text-right text-slate-400 tracking-wider">Actions</th>
+                                                  </tr>
+                                             </thead>
+                                             <tbody className="divide-y divide-slate-50">
+                                                  <AnimatePresence mode='popLayout'>
+                                                       {sortedData.map((item) => (
+                                                            <motion.tr
+                                                                 key={item._id}
+                                                                 layout
+                                                                 initial={{ opacity: 0, y: 10 }}
+                                                                 animate={{ opacity: 1, y: 0 }}
+                                                                 exit={{ opacity: 0, x: 20 }}
+                                                                 // --- SMOOTH HOVER WITHOUT SCALE ---
+                                                                 whileHover={{
+                                                                      backgroundColor: "white", // Solid color jitter komay
+                                                                      boxShadow: "0px 10px 20px -5px rgba(0, 0, 0, 0.05)",
+                                                                      zIndex: 10,
+                                                                      transition: { duration: 0.2, ease: "easeInOut" }
+                                                                 }}
+                                                                 className="group relative transition-all duration-300 border-l-4 border-transparent hover:border-orange-500 hover:bg-white"
+                                                            >
+                                                                 <td className="p-6">
+                                                                      <div className="flex flex-col">
+                                                                           <span className="font-bold text-slate-800 group-hover:text-orange-600 transition-colors duration-300">
+                                                                                {item.shelterName}
+                                                                           </span>
+                                                                           <span className="text-xs text-slate-400">{item.fullName}</span>
+                                                                      </div>
+                                                                 </td>
+                                                                 <td className="p-6 text-center">
+                                                                      <span className="inline-block px-4 py-1 bg-slate-100 group-hover:bg-orange-50 group-hover:text-orange-700 rounded-lg font-black text-sm text-slate-600 transition-all duration-300">
+                                                                           {item.petCount || 0} Pets
+                                                                      </span>
+                                                                 </td>
+                                                                 <td className="p-6 text-right">
+                                                                      {/* Smooth Action Buttons */}
+                                                                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                                                                           <button
+                                                                                onClick={() => handleEdit(item)}
+                                                                                className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent cursor-pointer"
+                                                                           >
+                                                                                <Edit3 size={18} />
+                                                                           </button>
+                                                                           <button
+                                                                                onClick={() => handleDelete(item._id, item.shelterName)}
+                                                                                className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent cursor-pointer"
+                                                                           >
+                                                                                <Trash2 size={18} />
+                                                                           </button>
+                                                                      </div>
+                                                                 </td>
+                                                            </motion.tr>
+                                                       ))}
+                                                  </AnimatePresence>
+                                             </tbody>
+                                        </table>
                          </div>
 
                          {/* Pagination */}
