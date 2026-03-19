@@ -1,17 +1,19 @@
 "use server";
 
-import { auth } from "@/auth";
+
+import { authOptions } from "@/lib/authOptions";
 import { dbConnect,collections } from "@/lib/db";
+import { getServerSession } from "next-auth";
 const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
 
 export const getUserAdoptions = async () => {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.email) return { success: false, data: [] };
-
+// console.log(session);
   try {
     const collection = await adoptionCollectionPromise;
     const requests = await collection
-      .find({ requesterEmail: session.user.email })
+      .find({ email: session.user.email })
       .sort({ createdAt: -1 })
       .toArray();
 
