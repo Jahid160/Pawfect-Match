@@ -13,7 +13,7 @@ const steps = [
 ];
 
 export default function ShelterApplicationForm() {
-  const { data: session, } = useSession()
+  const { data: session } = useSession()
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -384,7 +384,6 @@ export default function ShelterApplicationForm() {
                     <input
                       type="email"
                       className={`input input-bordered w-full bg-slate-100 cursor-not-allowed ${inputCls(errors.email)}`}
-                      placeholder="example@email.com"
                       value={formData.email}
                       readOnly
                       required

@@ -25,6 +25,7 @@
     "stripe": "^20.4.1",
     "sweetalert2": "^11.26.21",
     "swiper": "^12.1.2",
+    "use-debounce": "^10.1.0",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
