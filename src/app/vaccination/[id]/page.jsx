@@ -5,7 +5,6 @@ import {
   FaWarehouse, FaCalendarAlt, FaHistory, FaClinicMedical
 } from "react-icons/fa";
 import Link from "next/link";
-import { getVaccineById } from "@/action/server/vaccines";
 import { notFound } from "next/navigation";
 import OrderButton from "./OrderButton";
 
