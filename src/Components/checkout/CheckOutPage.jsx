@@ -6,19 +6,20 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getCartItems } from "@/action/server/cart";
-import { createOrderFromCart } from "@/action/server/order";
-import { FaArrowLeft, FaShoppingBag, FaTruck, FaCreditCard, FaCheckCircle } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaShoppingBag,
+  FaTruck,
+  FaCreditCard,
+  FaCheckCircle,
+} from "react-icons/fa";
 import Swal from "sweetalert2";
-import AuthButtons from "../button/AuthButtons";
-import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 import { useCartStore } from "@/lib/useCartStore";
 import {
   createOrderFromCart,
   createSingleFoodOrder,
 } from "@/action/server/order";
 import { getSingleFood } from "@/action/server/foods";
-import { FaArrowLeft, FaShoppingBag } from "react-icons/fa";
-import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
 import {
   createStripeCheckoutFromCart,
@@ -170,7 +171,11 @@ const CheckoutPageClient = () => {
             });
 
         if (!result?.success) {
-          Swal.fire("Error", result?.message || "Payment session failed", "error");
+          Swal.fire(
+            "Error",
+            result?.message || "Payment session failed",
+            "error",
+          );
           return;
         }
 
@@ -195,7 +200,6 @@ const CheckoutPageClient = () => {
         return;
       }
 
-      
       setCartCount(0);
 
       Swal.fire({
@@ -215,7 +219,9 @@ const CheckoutPageClient = () => {
     return (
       <div className="flex flex-col justify-center items-center bg-gray-50 min-h-screen">
         <span className="text-primary loading loading-dots loading-lg"></span>
-        <p className="mt-4 font-bold text-gray-500 text-xs uppercase tracking-widest animate-pulse">Preparing Checkout...</p>
+        <p className="mt-4 font-bold text-gray-500 text-xs uppercase tracking-widest animate-pulse">
+          Preparing Checkout...
+        </p>
       </div>
     );
   }
@@ -226,9 +232,15 @@ const CheckoutPageClient = () => {
         <div className="bg-white shadow-xl mb-6 p-10 rounded-full">
           <FaShoppingBag className="text-primary text-6xl" />
         </div>
-        <h2 className="font-black text-gray-900 text-3xl">Please login first</h2>
-        <p className="mt-3 max-w-sm text-gray-500">You need to be logged in to complete your purchase and track orders.</p>
-        <div className="mt-8"><AuthButtons /></div>
+        <h2 className="font-black text-gray-900 text-3xl">
+          Please login first
+        </h2>
+        <p className="mt-3 max-w-sm text-gray-500">
+          You need to be logged in to complete your purchase and track orders.
+        </p>
+        <div className="mt-8">
+          <AuthButtons />
+        </div>
       </div>
     );
   }
@@ -285,83 +297,195 @@ const CheckoutPageClient = () => {
 
             <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-2">
-                 <h3 className="mb-4 font-bold text-gray-400 text-xs uppercase tracking-widest">Shipping Information</h3>
-              </div>
-              
-              <div className="md:col-span-1">
-                <label className="block mb-2 font-bold text-gray-700 text-sm">Full Name</label>
-                <input type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="Enter your full name" required />
+                <h3 className="mb-4 font-bold text-gray-400 text-xs uppercase tracking-widest">
+                  Shipping Information
+                </h3>
               </div>
 
               <div className="md:col-span-1">
-                <label className="block mb-2 font-bold text-gray-700 text-sm">Phone Number</label>
-                <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="01XXXXXXXXX" required />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="customerName"
+                  value={formData.customerName}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="01XXXXXXXXX"
+                  required
+                />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block mb-2 font-bold text-gray-700 text-sm">Delivery Address</label>
-                <input type="text" name="address" value={formData.address} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="House no, Flat, Street details" required />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Delivery Address
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="House no, Flat, Street details"
+                  required
+                />
               </div>
 
               <div>
-                <label className="block mb-2 font-bold text-gray-700 text-sm">City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="Dhaka" required />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  City
+                </label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="Dhaka"
+                  required
+                />
               </div>
 
               <div>
-                <label className="block mb-2 font-bold text-gray-700 text-sm">Area / Zone</label>
-                <input type="text" name="area" value={formData.area} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="Uttara" required />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Area / Zone
+                </label>
+                <input
+                  type="text"
+                  name="area"
+                  value={formData.area}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="Uttara"
+                  required
+                />
               </div>
 
               <div className="md:col-span-2 mt-4">
-                 <h3 className="mb-4 font-bold text-gray-400 text-xs uppercase tracking-widest">Payment Strategy</h3>
-                 <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
-                    <label className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.paymentMethod === 'Cash on Delivery' ? 'border-primary bg-orange-50/50' : 'border-gray-100 bg-gray-50'}`}>
-                        <input type="radio" name="paymentMethod" value="Cash on Delivery" checked={formData.paymentMethod === 'Cash on Delivery'} onChange={handleChange} className="radio radio-primary" />
-                        <div>
-                            <p className="font-black text-gray-900">Cash on Delivery</p>
-                            <p className="text-[10px] text-gray-500">Pay when you receive</p>
-                        </div>
-                        <FaTruck className={`ml-auto text-xl ${formData.paymentMethod === 'Cash on Delivery' ? 'text-primary' : 'text-gray-300'}`} />
-                    </label>
+                <h3 className="mb-4 font-bold text-gray-400 text-xs uppercase tracking-widest">
+                  Payment Strategy
+                </h3>
+                <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
+                  <label
+                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.paymentMethod === "Cash on Delivery" ? "border-primary bg-orange-50/50" : "border-gray-100 bg-gray-50"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="Cash on Delivery"
+                      checked={formData.paymentMethod === "Cash on Delivery"}
+                      onChange={handleChange}
+                      className="radio radio-primary"
+                    />
+                    <div>
+                      <p className="font-black text-gray-900">
+                        Cash on Delivery
+                      </p>
+                      <p className="text-[10px] text-gray-500">
+                        Pay when you receive
+                      </p>
+                    </div>
+                    <FaTruck
+                      className={`ml-auto text-xl ${formData.paymentMethod === "Cash on Delivery" ? "text-primary" : "text-gray-300"}`}
+                    />
+                  </label>
 
-                    <label className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.paymentMethod === 'Online Payment' ? 'border-primary bg-orange-50/50' : 'border-gray-100 bg-gray-50'}`}>
-                        <input type="radio" name="paymentMethod" value="Online Payment" checked={formData.paymentMethod === 'Online Payment'} onChange={handleChange} className="radio radio-primary" />
-                        <div>
-                            <p className="font-black text-gray-900">Online Payment</p>
-                            <p className="text-[10px] text-gray-500">Visa, Mastercard, BKash</p>
-                        </div>
-                        <FaCreditCard className={`ml-auto text-xl ${formData.paymentMethod === 'Online Payment' ? 'text-primary' : 'text-gray-300'}`} />
-                    </label>
-                 </div>
+                  <label
+                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.paymentMethod === "Online Payment" ? "border-primary bg-orange-50/50" : "border-gray-100 bg-gray-50"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="Online Payment"
+                      checked={formData.paymentMethod === "Online Payment"}
+                      onChange={handleChange}
+                      className="radio radio-primary"
+                    />
+                    <div>
+                      <p className="font-black text-gray-900">Online Payment</p>
+                      <p className="text-[10px] text-gray-500">
+                        Visa, Mastercard, BKash
+                      </p>
+                    </div>
+                    <FaCreditCard
+                      className={`ml-auto text-xl ${formData.paymentMethod === "Online Payment" ? "text-primary" : "text-gray-300"}`}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div className="md:col-span-2">
-                <label className="block mb-2 font-bold text-gray-700 text-sm">Special Instructions (Optional)</label>
-                <textarea name="note" value={formData.note} onChange={handleChange} rows={3} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="Any specific note for the delivery person..." />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Special Instructions (Optional)
+                </label>
+                <textarea
+                  name="note"
+                  value={formData.note}
+                  onChange={handleChange}
+                  rows={3}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="Any specific note for the delivery person..."
+                />
               </div>
             </div>
 
-            <button type="submit" disabled={isPending} className="bg-gray-900 hover:bg-primary disabled:opacity-50 shadow-xl mt-10 py-5 rounded-[1.5rem] w-full font-black text-white text-lg active:scale-95 transition-all">
-              {isPending ? "Processing..." : formData.paymentMethod === "Online Payment" ? "Proceed to Payment" : "Confirm Order"}
+            <button
+              type="submit"
+              disabled={isPending}
+              className="bg-gray-900 hover:bg-primary disabled:opacity-50 shadow-xl mt-10 py-5 rounded-[1.5rem] w-full font-black text-white text-lg active:scale-95 transition-all"
+            >
+              {isPending
+                ? "Processing..."
+                : formData.paymentMethod === "Online Payment"
+                  ? "Proceed to Payment"
+                  : "Confirm Order"}
             </button>
           </form>
 
           {/* RIGHT: Order Summary */}
           <div className="top-24 sticky bg-white shadow-2xl shadow-gray-200/50 p-8 border border-gray-100 rounded-[2.5rem] h-fit">
-            <h2 className="mb-8 pb-4 border-gray-50 border-b font-black text-gray-900 text-2xl">Summary</h2>
+            <h2 className="mb-8 pb-4 border-gray-50 border-b font-black text-gray-900 text-2xl">
+              Summary
+            </h2>
 
             <div className="space-y-4 mb-8 pr-2 max-h-[400px] overflow-y-auto custom-scrollbar">
               {cartItems.map((item) => (
                 <div key={item._id} className="flex items-center gap-4">
                   <div className="relative bg-gray-50 border border-gray-100 rounded-xl w-16 h-16 overflow-hidden shrink-0">
-                    <Image src={item.image || "https://placehold.co/200x200"} alt={item.productName} fill className="p-2 object-contain" />
+                    <Image
+                      src={item.image || "https://placehold.co/200x200"}
+                      alt={item.productName}
+                      fill
+                      className="p-2 object-contain"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-sm truncate">{item.productName}</h3>
-                    <p className="font-bold text-[10px] text-gray-400 uppercase tracking-tighter">Qty: {item.quantity} × ${item.price}</p>
+                    <h3 className="font-bold text-gray-900 text-sm truncate">
+                      {item.productName}
+                    </h3>
+                    <p className="font-bold text-[10px] text-gray-400 uppercase tracking-tighter">
+                      Qty: {item.quantity} × ${item.price}
+                    </p>
                   </div>
-                  <p className="font-black text-gray-900 text-sm">${(Number(item.price) * Number(item.quantity)).toFixed(2)}</p>
+                  <p className="font-black text-gray-900 text-sm">
+                    ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                  </p>
                 </div>
               ))}
             </div>
@@ -373,17 +497,22 @@ const CheckoutPageClient = () => {
               </div>
               <div className="flex justify-between font-bold text-gray-500 text-sm">
                 <span>Shipping Fee</span>
-                <span className="text-[10px] text-green-500 uppercase tracking-widest">{shipping === 0 ? "Free Delivery" : `$${shipping.toFixed(2)}`}</span>
+                <span className="text-[10px] text-green-500 uppercase tracking-widest">
+                  {shipping === 0 ? "Free Delivery" : `$${shipping.toFixed(2)}`}
+                </span>
               </div>
               <div className="flex justify-between pt-2 font-black text-gray-900 text-2xl">
                 <span>Total</span>
                 <span className="text-primary">${total.toFixed(2)}</span>
               </div>
             </div>
-            
+
             <div className="flex items-start gap-3 bg-gray-50 mt-8 p-4 border border-gray-100 rounded-2xl">
-               <FaCheckCircle className="mt-1 text-green-500" />
-               <p className="font-bold text-[10px] text-gray-400 uppercase leading-relaxed">Secure transaction guaranteed with Pawfect Match protection policy.</p>
+              <FaCheckCircle className="mt-1 text-green-500" />
+              <p className="font-bold text-[10px] text-gray-400 uppercase leading-relaxed">
+                Secure transaction guaranteed with Pawfect Match protection
+                policy.
+              </p>
             </div>
           </div>
         </div>

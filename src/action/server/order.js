@@ -118,7 +118,7 @@ export const createOrderFromCart = async (payload) => {
 
     revalidatePath("/cart");
     revalidatePath("/checkout");
-    revalidatePath("/dashboard/orders");
+    revalidatePath("/dashboard/pet-food&accessories");
     revalidatePath("/pet-food");
 
     return {
@@ -268,7 +268,7 @@ export const createSingleFoodOrder = async (payload) => {
 
     revalidatePath("/pet-food");
     revalidatePath("/checkout");
-    revalidatePath("/dashboard/orders");
+    revalidatePath("/dashboard/pet-food&accessories");
 
     return {
       success: true,
