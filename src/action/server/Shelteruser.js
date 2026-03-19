@@ -37,25 +37,29 @@ export const createShelterUser = async (data) => {
 }
 
 
-export const getShelterRequests = async (page = 1, limit = 10, search = "") => {
+export const getShelterRequests = async (page = 1, limit = 10, search = "", status = "All") => {
      try {
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
           const pageNum = parseInt(page);
           const limitNum = parseInt(limit);
           const skipAmount = (pageNum - 1) * limitNum;
-          const totalItems = await shelterRequestsCollection.countDocuments({});
 
-          const query = search
-               ? {
-                    $or: [
-                         { shelterName: { $regex: search, $options: "i" } },
-                         { fullName: { $regex: search, $options: "i" } }
-                    ]
-               }
-               : {};
 
-          // Aggregation Pipeline
+          let query = {};
+          if (status !== "All") {
+               query.status = status;
+          }
+          if (search) {
+               query.$or = [
+                    { shelterName: { $regex: search, $options: "i" } },
+                    { fullName: { $regex: search, $options: "i" } }
+               ];
+          }
+
+          const totalItems = await shelterRequestsCollection.countDocuments(query);
+
+
           const requests = await shelterRequestsCollection.aggregate([
                { $match: query },
                { $sort: { submittedAt: -1 } },
@@ -76,7 +80,6 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "") => {
                },
                { $project: { ownedPets: 0 } }
           ]).toArray();
-
 
           const plainRequests = requests.map(doc => ({
                ...doc,

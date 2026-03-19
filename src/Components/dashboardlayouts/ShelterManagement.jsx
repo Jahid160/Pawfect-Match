@@ -8,6 +8,7 @@ import {
 import VerificationTab from './VerificationTab';
 import { getShelterRequests } from '@/action/server/Shelteruser';
 import ShelterInsight from './ShelterInsight';
+import { useDebounce } from 'use-debounce';
 
 
 const ShelterManagement = () => {
@@ -20,11 +21,13 @@ const ShelterManagement = () => {
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
+  const [query] = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     const SelterRequests = async () => {
-      const result = await getShelterRequests(currentPage, itemsPerPage, searchTerm);
+      const result = await getShelterRequests(currentPage, itemsPerPage, query, statusFilter);
       if (result.success) {
         setRequests(result.data);
         setTotalItems(result.totalItems);
@@ -33,7 +36,7 @@ const ShelterManagement = () => {
       }
     };
     SelterRequests();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, query, statusFilter]);
 
   const tabs = [
     { id: "verification", label: "Verification", icon: <ClipboardCheck size={18} /> },
@@ -101,7 +104,7 @@ const ShelterManagement = () => {
 
           {/* 1. VERIFICATION TAB */}
           {activeTab === "verification" && (
-            <VerificationTab currentPage={currentPage} setCurrentPage={setCurrentPage} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} totalPages={totalPages} requests={requests} setRequests={setRequests} />
+            <VerificationTab currentPage={currentPage} setCurrentPage={setCurrentPage} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} totalPages={totalPages} requests={requests} setRequests={setRequests} searchTerm={searchTerm} setSearchTerm={setSearchTerm} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
           )}
 
           {/* 3. PERFORMANCE & ANALYTICS TAB */}
