@@ -59,6 +59,7 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "", stat
 
           const totalItems = await shelterRequestsCollection.countDocuments(query);
 
+
           const mvpResult = await shelterRequestsCollection.aggregate([
                {
                     $lookup: {
@@ -76,11 +77,11 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "", stat
                { $sort: { petCount: -1, submittedAt: -1 } },
                { $limit: 1 }
           ]).toArray();
+          let topShelterData = null;
+          if (mvpResult.length > 0) {
 
-          const topShelterData = mvpResult.length > 0 ? {
-               ...mvpResult[0],
-               _id: mvpResult[0]._id.toString()
-          } : null;
+               topShelterData = JSON.parse(JSON.stringify(mvpResult[0]));
+          }
 
 
           const requests = await shelterRequestsCollection.aggregate([
@@ -104,10 +105,7 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "", stat
                { $project: { ownedPets: 0 } }
           ]).toArray();
 
-          const plainRequests = requests.map(doc => ({
-               ...doc,
-               _id: doc._id.toString(),
-          }));
+          const plainRequests = JSON.parse(JSON.stringify(requests));
 
           return {
                success: true,
