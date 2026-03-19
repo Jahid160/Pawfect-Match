@@ -6,20 +6,15 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getCartItems } from "@/action/server/cart";
-import { createOrderFromCart } from "@/action/server/order";
 import { FaArrowLeft, FaShoppingBag, FaTruck, FaCreditCard, FaCheckCircle } from "react-icons/fa";
 import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
-import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 import { useCartStore } from "@/lib/useCartStore";
 import {
   createOrderFromCart,
   createSingleFoodOrder,
 } from "@/action/server/order";
 import { getSingleFood } from "@/action/server/foods";
-import { FaArrowLeft, FaShoppingBag } from "react-icons/fa";
-import Swal from "sweetalert2";
-import AuthButtons from "../button/AuthButtons";
 import {
   createStripeCheckoutFromCart,
   createStripeCheckoutForSingleFood,

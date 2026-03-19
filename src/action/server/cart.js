@@ -6,10 +6,20 @@ import { revalidatePath } from "next/cache";
 
 const cartCollectionPromise = dbConnect(collections.CART);
 
-// ১. কার্টে প্রোডাক্ট যোগ করা
 export const addToCart = async (payload) => {
   try {
-    const { userEmail, foodId, stock = 0 } = payload;
+    const { 
+      userEmail, 
+      foodId, 
+      productName, 
+      image, 
+      price, 
+      stock = 0, 
+      brand, 
+      weight, 
+      weightUnit, 
+      inStock = true 
+    } = payload;
 
     if (!userEmail || !foodId) {
       return { success: false, message: "Please login first" };
@@ -17,12 +27,14 @@ export const addToCart = async (payload) => {
 
     const cartCollection = await cartCollectionPromise;
 
+    // ১. চেক করুন আইটেমটি আগে থেকে আছে কিনা
     const existingItem = await cartCollection.findOne({
       userEmail,
-      productId: foodId,
+      foodId: foodId, // এখানে productId বা foodId যেকোনো একটি কনসিস্টেন্টলি ব্যবহার করুন
     });
 
     if (existingItem) {
+      // ২. আইটেম থাকলে শুধু quantity আপডেট করুন
       const newQuantity = Math.min(
         Number(existingItem.quantity || 1) + 1,
         Number(stock || 999)
@@ -33,20 +45,20 @@ export const addToCart = async (payload) => {
         {
           $set: {
             quantity: newQuantity,
-            stock: Number(stock) || 0,
+            stock: Number(stock),
             inStock,
             updatedAt: new Date(),
           },
         }
       );
-    } else {
-      const doc = { ...payload, quantity: 1, createdAt: new Date(), updatedAt: new Date() };
-      await cartCollection.insertOne(doc);
-    }
+      
+      revalidatePath("/", "layout");
+      return { success: true, message: "Cart updated" };
+    } 
 
+    // ৩. আইটেম না থাকলে নতুন ডকুমেন্ট তৈরি করুন (একবারই)
     const doc = {
       userEmail,
-      productId: foodId,
       foodId,
       productName,
       image,
@@ -62,6 +74,7 @@ export const addToCart = async (payload) => {
     };
 
     const result = await cartCollection.insertOne(doc);
+    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -74,7 +87,6 @@ export const addToCart = async (payload) => {
   }
 };
 
-// ২. কার্টের সব আইটেম নিয়ে আসা
 export const getCartItems = async (userEmail) => {
   try {
     if (!userEmail) return [];
@@ -97,37 +109,25 @@ export const getCartItems = async (userEmail) => {
   }
 };
 
-// ৩. পরিমাণ আপডেট করা (প্লাস/মাইনাস বাটন)
 export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
   try {
     if (!cartId || !userEmail) return { success: false, message: "Authentication failed" };
 
     const cartCollection = await cartCollectionPromise;
+    const itemObjectId = new ObjectId(cartId);
 
     if (quantity <= 0) {
-      await cartCollection.deleteOne({ _id: new ObjectId(cartId), userEmail });
+      await cartCollection.deleteOne({ _id: itemObjectId, userEmail });
     } else {
+      // ৪. আপডেট করার আগে স্টক চেক করা ভালো (অপশনাল কিন্তু রিকমেন্ডেড)
       await cartCollection.updateOne(
-        { _id: new ObjectId(cartId), userEmail },
-        { $set: { quantity, updatedAt: new Date() } }
+        { _id: itemObjectId, userEmail },
+        { $set: { quantity: Number(quantity), updatedAt: new Date() } }
       );
     }
 
-    const safeQuantity = Math.min(Number(quantity), Number(item.stock || 999));
-
-    await cartCollection.updateOne(
-      {
-        _id: new ObjectId(cartId),
-        userEmail,
-      },
-      {
-        $set: {
-          quantity: safeQuantity,
-          updatedAt: new Date(),
-        },
-      }
-    );
-
+    revalidatePath("/", "layout");
+    revalidatePath("/cart");
     return { success: true, message: "Quantity updated" };
   } catch (error) {
     console.error("updateCartQuantity error:", error);
@@ -135,7 +135,6 @@ export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
   }
 };
 
-// ৪. নির্দিষ্ট আইটেম মুছে ফেলা
 export const removeCartItem = async ({ cartId, userEmail }) => {
   try {
     if (!cartId || !userEmail) return { success: false, message: "Authentication failed" };
@@ -152,7 +151,6 @@ export const removeCartItem = async ({ cartId, userEmail }) => {
   }
 };
 
-// ৫. পুরো কার্ট খালি করা (অর্ডার সাকসেস হলে বা ম্যানুয়ালি)
 export const clearCart = async (userEmail) => {
   try {
     if (!userEmail) return { success: false, message: "Authentication failed" };
