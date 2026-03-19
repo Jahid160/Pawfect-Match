@@ -1,6 +1,7 @@
 
 import { getUserAdoptions } from "@/action/userServerDash/adoption";
-import AdoptionListTable from "@/Components/dashboardlayouts/UserDashboard/AdoptionListTable";
+import AdoptionListTable from "./AdoptionListTable";
+
 
 const MyAdoptionsPage = async () => {
   const result = await getUserAdoptions();
