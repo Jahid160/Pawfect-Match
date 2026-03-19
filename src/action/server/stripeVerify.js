@@ -3,7 +3,8 @@
 import Stripe from "stripe";
 import { dbConnect, collections } from "@/lib/db";
 import { getCartItems } from "@/action/server/cart";
-import { reduceFoodStock } from "@/action/server/foods";
+// নতুন জেনেরিক স্টক রিডিউসার ইমপোর্ট করতে হবে (নিচে ব্যাখ্যা দিচ্ছি)
+import { reduceProductStock } from "@/action/server/stock"; 
 import { ObjectId } from "mongodb";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -36,36 +37,39 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
     let totalAmount = 0;
 
     if (mode === "buy-now") {
-      const foodsCollection = await dbConnect(collections.FOODS);
-      const foodId = metadata.foodId;
+      // ১. প্রোডাক্ট টাইপ চেক করা (মেটাডাটা থেকে আসছে)
+      const productType = metadata.productType || "food"; 
+      const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
+      
+      const productCollection = await dbConnect(collectionName);
+      const productId = metadata.productId || metadata.foodId;
       const quantity = Number(metadata.quantity || 1);
 
-      if (!foodId || !ObjectId.isValid(foodId)) {
+      if (!productId || !ObjectId.isValid(productId)) {
         return { success: false, message: "Invalid product in metadata." };
       }
 
-      const food = await foodsCollection.findOne({
-        _id: new ObjectId(foodId),
+      const product = await productCollection.findOne({
+        _id: new ObjectId(productId),
       });
 
-      if (!food) {
-        return { success: false, message: "Food not found." };
+      if (!product) {
+        return { success: false, message: "Product not found." };
       }
 
       const finalPrice =
-        food.discountPrice && Number(food.discountPrice) < Number(food.price)
-          ? Number(food.discountPrice)
-          : Number(food.price);
+        product.discountPrice && Number(product.discountPrice) < Number(product.price)
+          ? Number(product.discountPrice)
+          : Number(product.price);
 
       orderItems = [
         {
-          productId: food._id.toString(),
-          foodId: food._id.toString(),
-          productName: food.productName || "",
-          brand: food.brand || "",
-          image: food.image || "",
-          weight: food.weight || "",
-          weightUnit: food.weightUnit || "",
+          productId: product._id.toString(),
+          productName: product.productName || "",
+          brand: product.brand || "",
+          image: product.image || "",
+          category: product.category || "",
+          productType: productType, // অর্ডারে টাইপ সেভ রাখা ভালো
           quantity,
           price: finalPrice,
           lineTotal: finalPrice * quantity,
@@ -74,6 +78,7 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
 
       totalAmount = finalPrice * quantity;
     } else {
+      // ২. কার্ট থেকে অর্ডার (এখানে কার্ট আইটেমে আগে থেকেই productType থাকা উচিত)
       const cartItems = await getCartItems(userEmail);
 
       if (!cartItems.length) {
@@ -81,9 +86,9 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
       }
 
       orderItems = cartItems.map((item) => ({
-        productId: item.productId || item.foodId || item.product_id || null,
-        foodId: item.foodId || item.productId || item.product_id || null,
+        productId: item.productId || item.foodId || item._id,
         productName: item.productName || "",
+        productType: item.productType || "food", // ডিফল্ট ফুড
         quantity: Number(item.quantity || 1),
         price: Number(item.price || 0),
         lineTotal: Number(item.price || 0) * Number(item.quantity || 1),
@@ -108,10 +113,7 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
       paymentStatus: "paid",
       orderStatus: "processing",
       items: orderItems,
-      totalItems: orderItems.reduce(
-        (sum, item) => sum + Number(item.quantity || 0),
-        0
-      ),
+      totalItems: orderItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
       subtotal: totalAmount,
       shippingCost: 0,
       totalAmount,
@@ -127,11 +129,12 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
       return { success: false, message: "Order save failed." };
     }
 
-    const stockResult = await reduceFoodStock(orderItems);
+    // ৩. স্টক আপডেট (জেনেরিক ফাংশন যা টাইপ অনুযায়ী স্টক কমাবে)
+    const stockResult = await reduceProductStock(orderItems);
 
     if (!stockResult?.success) {
+      // স্টক আপডেট ফেইল করলে অর্ডার ডিলিট করে দেয়া (রোলব্যাক)
       await orderCollection.deleteOne({ _id: result.insertedId });
-
       return {
         success: false,
         message: stockResult?.message || "Stock update failed.",
