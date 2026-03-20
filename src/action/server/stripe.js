@@ -103,6 +103,7 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
 
     const qty = Number(quantity || 1);
     
+    // ডিসকাউন্ট প্রাইস চেক করে ফাইনাল প্রাইস নির্ধারণ
     const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
         ? Number(product.discountPrice)
         : Number(product.price);
