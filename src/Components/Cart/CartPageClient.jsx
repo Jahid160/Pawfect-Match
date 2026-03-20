@@ -42,7 +42,6 @@ const CartPageClient = () => {
       const items = await getCartItems(session.user.email);
       const safeItems = Array.isArray(items) ? items : [];
       setCartItems(safeItems);
-      // Navbar-এর কার্ট সংখ্যা আপডেট (Unique items count)
       setCartCount(safeItems.length);
     } catch (error) {
       console.error("Cart loading failed:", error);

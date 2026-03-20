@@ -5,9 +5,7 @@ import { ObjectId } from "mongodb";
 import { collections, dbConnect } from "@/lib/db";
 import { reduceProductStock } from "@/action/server/stock";
 
-/**
- * ১. কার্ট থেকে অর্ডার তৈরি করা (Cash on Delivery বা Stripe)
- */
+
 export const createOrderFromCart = async (payload) => {
   try {
     const {
@@ -21,7 +19,6 @@ export const createOrderFromCart = async (payload) => {
       note = "",
     } = payload || {};
 
-    // ভ্যালিডেশন
     if (!userEmail || !customerName || !phone || !address || !city || !area) {
       return { success: false, message: "Missing required checkout information." };
     }
@@ -35,7 +32,6 @@ export const createOrderFromCart = async (payload) => {
       return { success: false, message: "Your cart is empty." };
     }
 
-    // আইটেম ম্যাপিং
     const orderItems = cartItems.map((item) => ({
       productId: (item.productId || item.foodId || item._id).toString(),
       productName: item.productName || "",
@@ -45,7 +41,7 @@ export const createOrderFromCart = async (payload) => {
       weightUnit: item.weightUnit || "",
       quantity: Number(item.quantity || 1),
       price: Number(item.price || 0),
-      productType: item.productType || "food", // food/accessory
+      productType: item.productType || "food", 
       lineTotal: Number(item.price || 0) * Number(item.quantity || 1),
     }));
 
@@ -69,23 +65,20 @@ export const createOrderFromCart = async (payload) => {
       updatedAt: new Date(),
     };
 
-    // ১. আগে স্টক কমানোর চেষ্টা করা (Safety First)
+    // (Safety First)
     const stockResult = await reduceProductStock(orderItems);
     if (!stockResult?.success) {
       return { success: false, message: stockResult?.message || "Stock update failed." };
     }
 
-    // ২. এবার অর্ডারটি সেভ করা
     const result = await orderCollection.insertOne(orderDoc);
 
     if (!result.insertedId) {
       return { success: false, message: "Order creation failed." };
     }
 
-    // ৩. অর্ডার সফল হলে কার্ট খালি করা
     await cartCollection.deleteMany({ userEmail });
 
-    // ক্যাশ রিভ্যালিডেশন
     revalidatePath("/cart");
     revalidatePath("/dashboard/orders");
     revalidatePath("/pet-food");
@@ -102,9 +95,7 @@ export const createOrderFromCart = async (payload) => {
   }
 };
 
-/**
- * ২. সিঙ্গেল প্রোডাক্ট অর্ডার (Buy Now - Food/Accessory)
- */
+
 export const createSingleOrder = async (payload) => {
   try {
     const {
@@ -179,7 +170,6 @@ export const createSingleOrder = async (payload) => {
       updatedAt: new Date(),
     };
 
-    // স্টক কমানো
     const stockResult = await reduceProductStock(orderItems);
     if (!stockResult?.success) {
       return { success: false, message: "Stock update failed." };
@@ -201,9 +191,7 @@ export const createSingleOrder = async (payload) => {
   }
 };
 
-/**
- * ৩. ইউজারের ইমেইল অনুযায়ী সব অর্ডার নিয়ে আসা
- */
+
 export const getOrdersByEmail = async (userEmail) => {
   try {
     if (!userEmail) return [];
@@ -216,9 +204,7 @@ export const getOrdersByEmail = async (userEmail) => {
   }
 };
 
-/**
- * ৪. সিঙ্গেল অর্ডার ডিটেইলস দেখা
- */
+
 export const getSingleOrder = async (id, userEmail) => {
   try {
     if (!id || id.length !== 24) return null;
@@ -231,9 +217,7 @@ export const getSingleOrder = async (id, userEmail) => {
   }
 };
 
-/**
- * ৫. অ্যাডমিনের জন্য সব অর্ডার নিয়ে আসা
- */
+
 export const getAllOrders = async () => {
   try {
     const orderCollection = await dbConnect(collections.ORDER);
@@ -245,9 +229,7 @@ export const getAllOrders = async () => {
   }
 };
 
-/**
- * ৬. অর্ডার স্ট্যাটাস আপডেট (Admin-এর জন্য)
- */
+
 export const updateOrderStatus = async (orderId, status, paymentStatus) => {
   try {
     const orderCollection = await dbConnect(collections.ORDER);

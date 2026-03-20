@@ -11,7 +11,6 @@ import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
 import { useCartStore } from "@/lib/useCartStore";
 
-// সঠিক ফাংশন নামগুলো ইমপোর্ট করা হলো (ব্যাকএন্ডের সাথে মিলিয়ে)
 import {
   createOrderFromCart,
   createSingleOrder, 
@@ -19,7 +18,7 @@ import {
 import { getSingleFood } from "@/action/server/foods";
 import {
   createStripeCheckoutFromCart,
-  createStripeCheckoutForSingleProduct, // নাম আপডেট করা হয়েছে
+  createStripeCheckoutForSingleProduct,
 } from "@/action/server/stripe";
 
 const CheckoutPageClient = () => {
@@ -153,10 +152,10 @@ const CheckoutPageClient = () => {
     startTransition(async () => {
       if (formData.paymentMethod === "Online Payment") {
         const result = isBuyNow
-          ? await createStripeCheckoutForSingleProduct({ // ফাংশন নাম আপডেট করা হয়েছে
+          ? await createStripeCheckoutForSingleProduct({ 
               userEmail: session.user.email,
               ...formData,
-              productId: foodId, // জেনেরিক আইডি
+              productId: foodId, 
               quantity: 1,
             })
           : await createStripeCheckoutFromCart({

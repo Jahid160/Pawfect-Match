@@ -36,7 +36,6 @@ export const authOptions = {
         const usersCollection = await dbConnect(collections.USERS);
         const now = new Date();
 
-        // ইউজার ইনফো আপডেট বা ইনসার্ট একবারে করা (Atomicity)
         await usersCollection.updateOne(
           { email: user.email },
           {
@@ -52,7 +51,6 @@ export const authOptions = {
             $set: {
               provider: account?.provider || "credentials",
               lastLoginAt: now,
-              // সোশ্যাল লগইনের ক্ষেত্রে ইমেজ আপডেট রাখা ভালো
               ...(account?.provider !== "credentials" && { image: user.image }),
             },
           },
@@ -67,12 +65,10 @@ export const authOptions = {
     },
 
     async jwt({ token, user, trigger, session }) {
-      // ১. যদি ক্লায়েন্ট থেকে update() কল করা হয় (প্রোফাইল আপডেট)
       if (trigger === "update" && session) {
         return { ...token, ...session };
       }
 
-      // ২. যদি প্রথমবার লগইন হয় (user অবজেক্ট থাকবে)
       if (user) {
         const usersCollection = await dbConnect(collections.USERS);
         const dbUser = await usersCollection.findOne({ email: user.email });

@@ -24,10 +24,8 @@ export const metadata = {
   description: "Adopt your Pet",
 };
 
-// ফাংশনটিকে async করলাম যাতে ভেতরে ডাটা ফেচ করা যায়
 export default async function RootLayout({ children }) {
   
-  // ১. সেশন এবং কার্ট ডাটা সার্ভার সাইড থেকে নিয়ে আসা
   const session = await getServerSession();
   let initialCartCount = 0;
 
@@ -46,7 +44,6 @@ export default async function RootLayout({ children }) {
         <NextAuthProvider>
           <AuthModalProvider>
             
-            {/* ২. কার্ট স্টোর ইনিশিয়ালাইজ করা */}
             <CartStoreInitializer count={initialCartCount} />
             
             <Toaster position="top-right" reverseOrder={false} />

@@ -1,4 +1,4 @@
-import CartPageClient from "@/components/Cart/CartPageClient"; // 'c' small letter consistent rakha bhalo
+import CartPageClient from "@/components/Cart/CartPageClient"; 
 import { Suspense } from "react";
 import { getCartItems } from "@/action/server/cart"; 
 import { getServerSession } from "next-auth";
@@ -21,25 +21,21 @@ const CartPage = async () => {
   let initialCartCount = 0;
 
   if (session?.user?.email) {
-    // getCartItems এখন ফুড এবং এক্সেসরিজ সব মিক্সড ডাটা নিয়ে আসবে
     const cartData = await getCartItems(session.user.email);
     
-    // আইটেমের সংখ্যা (length) নাকি মোট কুয়ান্টিটি (quantity)? 
-    // যদি কুয়ান্টিটি দেখাতে চাও তবে নিচের reduce লজিকটি ব্যবহার করো:
+    
     initialCartCount = cartData?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
     
-    // অথবা যদি শুধু আইটেম টাইপ সংখ্যা দেখাতে চাও:
-    // initialCartCount = cartData?.length || 0;
+
   }
 
   return (
     <>
-      {/* Zustand Store-এ ইনিশিয়াল কাউন্ট পাঠিয়ে দেয়া হচ্ছে */}
+      {/* Zustand Store*/}
       <CartStoreInitializer count={initialCartCount} />
       
       <Suspense fallback={<CartLoader />}>
         <div className="bg-white min-h-screen">
-          {/* Client component-এ আর আলাদাভাবে ডাটা পাস করতে হবে না, সে নিজেই fetch করবে বা store থেকে নিবে */}
           <CartPageClient />
         </div>
       </Suspense>

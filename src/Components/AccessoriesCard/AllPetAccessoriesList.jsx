@@ -22,7 +22,6 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // তোমার JSON ডাটা অনুযায়ী ক্যাটাগরিগুলো আপডেট করা হয়েছে
   const categories = ["All", "Accessories", "Dog", "Cat", "Bird", "Fish"];
   const sortOptions = ["Recommended", "Price: Low to High", "Price: High to Low"];
 

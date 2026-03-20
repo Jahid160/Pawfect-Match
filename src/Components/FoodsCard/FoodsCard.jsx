@@ -66,7 +66,7 @@ export const FoodCard = ({ food }) => {
         stock: Number(food.stock),
         brand: food.brand,
         category: food.category,
-        productType: "food", // এটি মাস্ট
+        productType: "food",
         weight: `${food.weight || ""}${food.weightUnit || ""}`, // e.g., "87g"
         inStock: !isOutOfStock,
       });

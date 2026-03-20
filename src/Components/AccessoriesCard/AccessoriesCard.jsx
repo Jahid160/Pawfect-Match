@@ -34,18 +34,17 @@ export const AccessoriesCard = ({ item }) => {
     }
 
     startTransition(async () => {
-      // Accessories JSON ডাটা অনুযায়ী ম্যাপিং করা হয়েছে
       const result = await addToCart({
         userEmail: session.user.email,
-        productId: itemId,          // জেনেরিক আইডি
-        productName: item.title,    // এক্সেসরিজের ক্ষেত্রে 'title' ই হলো নাম
+        productId: itemId,
+        productName: item.title, 
         image: safeImageSrc,
         price: displayPrice,
         stock: Number(item.stock),
         brand: item.brand || "Premium Gear",
         category: item.category,
-        productType: "accessory",   // স্টক কন্ট্রোলের জন্য খুবই জরুরি
-        weight: item.weight || "",  // তোমার JSON-এ সরাসরি '450g' ফরম্যাটে আছে
+        productType: "accessory", 
+        weight: item.weight || "", 
         inStock: !isOutOfStock,
       });
 

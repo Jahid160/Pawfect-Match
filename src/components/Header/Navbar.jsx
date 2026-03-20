@@ -68,7 +68,6 @@ const Navbar = () => {
   const { openLoginModal } = useAuthModal();
   const userRole = user?.role;
 
-  // Zustand থেকে কার্ট কাউন্ট নিয়ে আসা
   const cartCount = useCartStore((state) => state.cartCount);
 
   // Filter Nav Links
@@ -180,7 +179,7 @@ const Navbar = () => {
               <AnimatePresence>
                 {cartCount > 0 && (
                   <motion.span
-                    key={cartCount} // সংখ্যা বদলালে এনিমেশন ট্রিগার হবে
+                    key={cartCount}
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.5, opacity: 0 }}
