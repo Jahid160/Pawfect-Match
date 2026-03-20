@@ -1,41 +1,66 @@
 "use server";
 
-import { collections, dbConnect } from "@/lib/db"; 
-import { ObjectId } from "mongodb"; 
-import { revalidatePath } from "next/cache"; 
+import { dbConnect, collections } from "@/lib/db";
+import { revalidatePath } from "next/cache";
+import { ObjectId } from "mongodb";
 
-export const addVaccine = async (vaccineData) => {
+/* ADD VACCINE */
+export const addVaccine = async (data) => {
   try {
-    const vaccineCollection = await dbConnect(collections.VACCINES);
-    const formattedData = {
-      vaccineName: vaccineData.vaccineName, // ডাটাবেজে এই নামে সেভ হবে
-      price: Number(vaccineData.price) || 0,
-      stock: Number(vaccineData.stock) || 0,
-      forPet: vaccineData.forPet || "All Pets",
-      description: vaccineData.description,
-      image: vaccineData.image,
+    const col = await dbConnect(collections.VACCINES);
+
+    await col.insertOne({
+      ...data,
+      price: Number(data.price),
+      stock: Number(data.stock),
       createdAt: new Date(),
-    };
-    await vaccineCollection.insertOne(formattedData);
+    });
+
     revalidatePath("/vaccination");
     return { success: true };
-  } catch (error) {
+  } catch (err) {
+    console.log(err);
     return { success: false };
   }
 };
 
-export const getVaccines = async () => {
+/* GET ALL (SORTED: NEW FIRST) */
+export const getVaccines = async (id) => {
   try {
-    const vaccineCollection = await dbConnect(collections.VACCINES);
-    const vaccines = await vaccineCollection.find({}).sort({ createdAt: -1 }).toArray();
-    return vaccines.map(v => ({
+    const col = await dbConnect(collections.VACCINES);
+
+    const data = await col
+      .find({})
+      .sort({ createdAt: -1 }) // 🔥 newest first
+      .toArray();
+
+    return data.map((v) => ({
       ...v,
       _id: v._id.toString(),
-      vaccineName: v.vaccineName || "Unnamed Vaccine", // প্রপার্টি নেম চেক
-      price: Number(v.price || 0),
-      stock: Number(v.stock || 0)
     }));
   } catch (error) {
+    console.log(error);
     return [];
+  }
+};
+
+/* GET SINGLE BY ID */
+export const getVaccineById = async (id) => {
+  try {
+    const col = await dbConnect(collections.VACCINES);
+
+    const vaccine = await col.findOne({
+      _id: new ObjectId(id),
+    });
+
+    if (!vaccine) return null;
+
+    return {
+      ...vaccine,
+      _id: vaccine._id.toString(),
+    };
+  } catch (error) {
+    console.log(error);
+    return null;
   }
 };
