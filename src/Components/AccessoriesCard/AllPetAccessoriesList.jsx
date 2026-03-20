@@ -4,6 +4,16 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Sparkles, ChevronDown } from "lucide-react";
 import { FaSearch, FaSortAmountDown } from "react-icons/fa";
 import { AccessoriesCard } from "./AccessoriesCard";
+import { motion, AnimatePresence } from "framer-motion";
+
+// --- Animation Variants (Matching PetFoods Style) ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
 
 const AllPetAccessoriesList = ({ accessories = [] }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,7 +22,8 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const categories = ["All", "Accessories", "Dog Gear", "Cat Comfort", "Fish Care"];
+  // তোমার JSON ডাটা অনুযায়ী ক্যাটাগরিগুলো আপডেট করা হয়েছে
+  const categories = ["All", "Accessories", "Dog", "Cat", "Bird", "Fish"];
   const sortOptions = ["Recommended", "Price: Low to High", "Price: High to Low"];
 
   useEffect(() => {
@@ -28,6 +39,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
   const filteredAccessories = useMemo(() => {
     let result = Array.isArray(accessories) ? [...accessories] : [];
     
+    // Search logic (Title and Brand)
     if (searchQuery) {
       result = result.filter(item => 
         item?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -35,16 +47,27 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
       );
     }
     
+    // Category & TargetPet filter
     if (selectedCategory !== "All") {
       result = result.filter(item => 
-        item?.category?.toLowerCase() === selectedCategory.toLowerCase()
+        item?.category?.toLowerCase() === selectedCategory.toLowerCase() ||
+        item?.targetPet?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
+    // Sorting Logic with price safety
     if (sortBy === "Price: Low to High") {
-      result.sort((a, b) => (Number(a?.discountPrice) || Number(a?.price)) - (Number(b?.discountPrice) || Number(b?.price)));
+      result.sort((a, b) => {
+        const priceA = Number(a?.discountPrice) || Number(a?.price) || 0;
+        const priceB = Number(b?.discountPrice) || Number(b?.price) || 0;
+        return priceA - priceB;
+      });
     } else if (sortBy === "Price: High to Low") {
-      result.sort((a, b) => (Number(b?.discountPrice) || Number(b?.price)) - (Number(a?.discountPrice) || Number(a?.price)));
+      result.sort((a, b) => {
+        const priceA = Number(a?.discountPrice) || Number(a?.price) || 0;
+        const priceB = Number(b?.discountPrice) || Number(b?.price) || 0;
+        return priceB - priceA;
+      });
     }
     
     return result;
@@ -52,31 +75,42 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
 
   return (
     <div className="bg-gradient-to-b from-orange-50 via-white to-white px-4 sm:px-8 py-14 min-h-screen font-sans">
-      <div className="mx-auto mb-12 max-w-7xl">
+      
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mx-auto mb-12 max-w-7xl"
+      >
         <div className="inline-flex items-center gap-2 bg-orange-100 mb-6 px-4 py-2 rounded-full font-bold text-[10px] text-orange-600 uppercase tracking-[0.2em]">
           <Sparkles size={14} /> New Lifestyle Collection
         </div>
 
         <div className="flex lg:flex-row flex-col lg:justify-between lg:items-end gap-4">
           <div className="max-w-2xl">
-            <h2 className="font-black text-gray-900 text-4xl sm:text-5xl md:text-6xl leading-none tracking-tight">
+            <h2 className="font-black text-gray-900 text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight">
               Complete <span className="text-orange-500">Gear</span> Pantry
             </h2>
             <p className="mt-4 max-w-xl text-gray-600 text-base leading-7">
-              Find everything your pet needs for a happy and active life.
+              Find everything your pet needs for a happy, safe, and active life. 
+              Quality accessories for every paw.
             </p>
           </div>
           <div className="font-medium text-gray-500 text-sm italic">
-            Found <span className="font-bold text-gray-900">{filteredAccessories.length}</span> items
+            Found <span className="font-bold text-gray-900">{filteredAccessories.length}</span> premium items
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Filter Bar */}
-      <div className="bg-white shadow-orange-100/40 shadow-xl mx-auto mb-12 p-5 border border-orange-100 rounded-[2.5rem] max-w-7xl">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white shadow-orange-100/40 shadow-xl mx-auto mb-12 p-5 border border-orange-100 rounded-[2.5rem] max-w-7xl"
+      >
         <div className="flex xl:flex-row flex-col xl:items-center gap-6">
           
-          {/* Search */}
+          {/* Search Input */}
           <div className="relative flex-1">
             <FaSearch className="top-1/2 left-6 absolute text-gray-400 -translate-y-1/2" />
             <input
@@ -106,58 +140,84 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
               ))}
             </div>
 
-            {/* --- Animated Custom Sort Dropdown --- */}
+            {/* Custom Sort Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsSortOpen(!isSortOpen)}
                 className="flex items-center gap-3 bg-gray-900 hover:bg-orange-600 shadow-gray-200 shadow-lg px-5 py-3 rounded-2xl font-bold text-[10px] text-white uppercase tracking-widest active:scale-95 transition-all"
               >
                 <FaSortAmountDown className={isSortOpen ? "animate-pulse" : ""} />
-                <span>Sort By: {sortBy}</span>
+                <span>Sort: {sortBy}</span>
                 <ChevronDown size={14} className={`transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
               </button>
 
-              {/* Dropdown Menu with Animation */}
-              <div className={`absolute right-0 mt-3 w-56 bg-white border border-orange-50 rounded-2xl shadow-2xl z-50 overflow-hidden transition-all duration-300 origin-top-right ${
-                isSortOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-              }`}>
-                <div className="p-2">
-                  {sortOptions.map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => {
-                        setSortBy(opt);
-                        setIsSortOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all ${
-                        sortBy === opt 
-                          ? "bg-orange-50 text-orange-600" 
-                          : "text-gray-600 hover:bg-orange-50/50 hover:text-orange-500"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <AnimatePresence>
+                {isSortOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    className="right-0 z-50 absolute bg-white shadow-2xl mt-3 border border-orange-50 rounded-2xl w-56 overflow-hidden origin-top-right"
+                  >
+                    <div className="p-2">
+                      {sortOptions.map((opt) => (
+                        <button
+                          key={opt}
+                          onClick={() => {
+                            setSortBy(opt);
+                            setIsSortOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all ${
+                            sortBy === opt 
+                              ? "bg-orange-50 text-orange-600" 
+                              : "text-gray-600 hover:bg-orange-50/50 hover:text-orange-500"
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Product Grid */}
-      <div className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl">
-        {filteredAccessories.length > 0 ? (
-          filteredAccessories.map((item, index) => (
-            <AccessoriesCard key={item?._id?.toString() || `acc-${index}`} item={item} />
-          ))
-        ) : (
-          <div className="col-span-full py-24 text-center">
-             <div className="opacity-10 mb-4 text-6xl">🐾</div>
-             <p className="font-bold text-gray-400 italic">No accessories found. Try another search!</p>
-          </div>
-        )}
-      </div>
+      {/* Product Grid with Animations */}
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl"
+      >
+        <AnimatePresence mode="popLayout">
+          {filteredAccessories.length > 0 ? (
+            filteredAccessories.map((item, index) => (
+              <motion.div
+                key={item?._id?.toString() || `acc-${index}`}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <AccessoriesCard item={item} />
+              </motion.div>
+            ))
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="col-span-full py-24 text-center"
+            >
+               <div className="opacity-20 mb-4 text-7xl">🐾</div>
+               <p className="font-bold text-gray-400 text-lg italic">No accessories found. Try another search or category!</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
