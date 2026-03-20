@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState, useMemo, useTransition } from "react";
+import React, { useTransition } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion"; // Added
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  FaLeaf,
   FaShoppingCart,
-  FaSearch,
-  FaWeightHanging,
   FaChevronRight,
   FaBan,
   FaStar,
-  FaFilter,
+  FaTag,
+  FaWeightHanging,
+  FaLeaf,
+  FaSearch,
+  FaFilter
 } from "react-icons/fa";
+import { Sparkle } from "lucide-react";
 import { addToCart } from "@/action/server/cart";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import toast from "react-hot-toast";
+import { useState, useMemo } from "react";
 
 // --- Animation Variants ---
 const containerVariants = {
@@ -35,39 +37,42 @@ const cardVariants = {
   exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
 };
 
-// --- FoodCard Component ---
+// --- FoodCard Component (Updated to match AccessoriesCard Design) ---
 export const FoodCard = ({ food }) => {
-  const foodId = food._id?.toString() || food.id;
   const { data: session } = useSession();
   const { openLoginModal } = useAuthModal();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState("");
 
+  const foodId = food._id?.toString() || food.id;
   const hasDiscount = food.discountPrice && Number(food.discountPrice) < Number(food.price);
-  const isOutOfStock = food.inStock === false || food.stock <= 0;
+  const isOutOfStock = Number(food.stock || 0) <= 0;
   const displayPrice = hasDiscount ? food.discountPrice : food.price;
   const discountPercent = hasDiscount ? Math.round(((food.price - food.discountPrice) / food.price) * 100) : 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.preventDefault();
     if (!session?.user?.email) {
       openLoginModal();
       return;
     }
+
     startTransition(async () => {
       const result = await addToCart({
         userEmail: session.user.email,
-        foodId: food._id?.toString() || food.id,
+        productId: foodId,
         productName: food.productName,
         image: food.image,
         price: displayPrice,
-        stock: food.stock,
+        stock: Number(food.stock),
         brand: food.brand,
-        weight: food.weight,
-        weightUnit: food.weightUnit,
-        inStock: food.inStock,
+        category: food.category,
+        productType: "food", // এটি মাস্ট
+        weight: `${food.weight || ""}${food.weightUnit || ""}`, // e.g., "87g"
+        inStock: !isOutOfStock,
       });
-      if (result?.acknowledged || result?.insertedId || result?.success) {
-        toast.success("Added to cart successfully 🛒");
+
+      if (result?.success || result?.acknowledged) {
+        toast.success("Added to cart! 🛒");
       } else {
         toast.error(result?.message || "Failed to add to cart");
       }
@@ -77,130 +82,108 @@ export const FoodCard = ({ food }) => {
   return (
     <motion.div
       variants={cardVariants}
-      layout // Ensures smooth movement when other cards disappear
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+      layout
+      className="group relative flex flex-col bg-white shadow-sm hover:shadow-2xl border border-gray-200 rounded-3xl overflow-hidden transition-all hover:-translate-y-1 duration-300"
     >
-      {/* Image Section */}
-      <div className="relative h-64 w-full overflow-hidden bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+      {/* Image Section - Matching Accessories Style */}
+      <div className="relative bg-gradient-to-br from-orange-50 via-white to-yellow-50 w-full h-64 overflow-hidden">
         <Image
           src={food.image || "https://placehold.co/600x400?text=Pet+Food"}
           alt={food.productName || "Product"}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-          className={`object-contain p-6 transition-transform duration-500 group-hover:scale-105 ${
-            isOutOfStock ? "grayscale opacity-70" : ""
-          }`}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className={`object-contain p-6 transition-transform duration-500 group-hover:scale-110 ${isOutOfStock ? "grayscale opacity-70" : ""}`}
         />
 
-        <div className="absolute left-4 top-4 flex flex-col gap-2">
+        {/* Badges */}
+        <div className="top-4 left-4 z-10 absolute flex flex-col gap-2">
           {hasDiscount && (
-            <span className="rounded-full bg-red-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow">
-              {discountPercent}% Off
+            <span className="flex items-center gap-1 bg-red-500 shadow-lg px-3 py-1 rounded-full font-bold text-[10px] text-white uppercase tracking-wide">
+              <FaTag size={8} /> {discountPercent}% Off
             </span>
           )}
           {food.featured && (
-            <span className="rounded-full bg-orange-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow">
-              Featured
+            <span className="flex items-center gap-1 bg-orange-500 shadow-lg px-3 py-1 rounded-full font-bold text-[10px] text-white uppercase tracking-wide">
+              <Sparkle size={10} /> Featured
             </span>
           )}
         </div>
 
-        <div className="absolute right-4 top-4">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur">
-            {food.foodType || "Food"}
-          </span>
-        </div>
-
+        {/* Out of stock overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/15 backdrop-blur-[2px]">
-            <span className="flex items-center gap-2 rounded-xl bg-black/80 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white">
-              <FaBan />
-              Out of Stock
+          <div className="z-10 absolute inset-0 flex justify-center items-center bg-black/15 backdrop-blur-[2px]">
+            <span className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-xl font-bold text-[10px] text-white uppercase tracking-wider">
+              <FaBan /> Out of Stock
             </span>
           </div>
         )}
 
+        {/* Quick cart button */}
         {!isOutOfStock && (
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={handleAddToCart}
             disabled={isPending}
-            className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-3 items-center justify-center rounded-full bg-orange-500 text-white shadow-lg opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:scale-110 disabled:cursor-not-allowed disabled:opacity-70"
-            aria-label="Add to cart"
+            className="right-4 bottom-4 z-20 absolute flex justify-center items-center bg-orange-500 hover:bg-gray-900 opacity-0 disabled:opacity-50 group-hover:opacity-100 shadow-lg rounded-full w-12 h-12 text-white hover:scale-110 transition-all translate-y-3 group-hover:translate-y-0 duration-300"
           >
-            <FaShoppingCart size={18} />
-          </motion.button>
+            {isPending ? <span className="loading loading-spinner loading-xs"></span> : <FaShoppingCart size={18} />}
+          </button>
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-orange-500">
-            {food.brand || "Brand"}
+      {/* Content Section */}
+      <div className="flex flex-col flex-1 p-5">
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-bold text-[10px] text-orange-500 uppercase tracking-[0.2em]">
+            {food.brand || "Premium Food"}
           </span>
-          <div className="flex items-center gap-1 text-sm text-amber-500">
-            <FaStar />
-            <span className="font-semibold text-gray-700">4.8</span>
+          <div className="flex items-center gap-1 text-amber-500 text-xs">
+            <FaStar /> <span className="font-semibold text-gray-700">4.8</span>
           </div>
         </div>
 
-        <h3 className="mb-2 line-clamp-2 min-h-[56px] text-lg font-extrabold leading-snug text-gray-900">
-          {food.productName}
-        </h3>
+        <Link href={`/pet-food/${foodId}`}>
+          <h3 className="mb-2 min-h-[48px] font-extrabold text-gray-900 hover:text-orange-500 text-lg line-clamp-2 leading-tight transition-colors cursor-pointer">
+            {food.productName}
+          </h3>
+        </Link>
 
-        <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-          <div className="flex items-center gap-1.5">
-            <FaWeightHanging className="text-orange-400" />
-            <span className="font-medium">
-              {food.weight}
-              {food.weightUnit}
-            </span>
-          </div>
-          <span className="h-1 w-1 rounded-full bg-gray-300"></span>
-          <div className="flex items-center gap-1.5">
-            <FaLeaf className="text-green-500" />
-            <span className="font-medium">{food.category || "Pet Food"}</span>
-          </div>
+        {/* Meta info like weight */}
+        <div className="flex items-center gap-3 mb-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">
+           <span className="flex items-center gap-1">
+             <FaWeightHanging className="text-orange-400" /> {food.weight}{food.weightUnit}
+           </span>
+           <span className="bg-gray-300 rounded-full w-1 h-1"></span>
+           <span className="flex items-center gap-1 uppercase">
+             {food.foodType || "Dry Food"}
+           </span>
         </div>
 
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
+        {/* Price + CTA */}
+        <div className="flex justify-between items-end gap-3 mt-auto pt-4 border-gray-100 border-t">
           <div className="flex flex-col">
             {hasDiscount ? (
               <>
-                <span className="text-sm font-medium text-gray-400 line-through">
-                  ${food.price}
-                </span>
-                <span className="text-2xl font-extrabold tracking-tight text-red-500">
-                  ${displayPrice}
-                </span>
+                <span className="font-medium text-[10px] text-gray-400 line-through">${food.price}</span>
+                <span className="font-black text-red-500 text-xl leading-none tracking-tight">${food.discountPrice}</span>
               </>
             ) : (
-              <span className="text-2xl font-extrabold tracking-tight text-gray-900">
-                ${displayPrice}
-              </span>
+              <span className="font-black text-gray-900 text-xl leading-none tracking-tight">${food.price || 0}</span>
             )}
           </div>
 
-          <motion.div whileHover={{ x: 3 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href={`/pet-food/${foodId}`}
-              className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-500"
-            >
-              View Details <FaChevronRight size={10} />
-            </Link>
-          </motion.div>
+          <Link
+            href={`/pet-food/${foodId}`}
+            className="inline-flex items-center gap-2 bg-gray-100 hover:bg-orange-500 px-4 py-2.5 rounded-xl font-bold text-[10px] text-gray-600 hover:text-white uppercase tracking-wider transition-all"
+          >
+            Details <FaChevronRight size={8} />
+          </Link>
         </div>
-
-        {message && (
-          <p className="mt-3 text-xs font-medium text-green-600">{message}</p>
-        )}
       </div>
     </motion.div>
   );
 };
 
-// --- Main PetFoods Component ---
+// --- Main PetFoods Component (Filters & Grid) ---
 const PetFoods = ({ foods = [] }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -237,81 +220,76 @@ const PetFoods = ({ foods = [] }) => {
   const categories = ["All", "Dry Food", "Wet Food", "Treats", "Supplements"];
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-white px-4 py-14 sm:px-8">
-      {/* Header Animations */}
+    <section className="bg-gradient-to-b from-orange-50 via-white to-white px-4 sm:px-8 py-14 min-h-screen">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto mb-12 max-w-7xl"
       >
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-orange-600">
+        <div className="inline-flex items-center gap-2 bg-orange-100 mb-6 px-4 py-2 rounded-full font-bold text-orange-600 text-xs uppercase tracking-[0.2em]">
           <FaLeaf />
           Premium Pet Nutrition
         </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex lg:flex-row flex-col lg:justify-between lg:items-end gap-4">
           <div className="max-w-2xl">
-            <h2 className="text-4xl font-black tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+            <h2 className="font-black text-gray-900 text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight">
               Shop Healthy Food <br />
               for Your Pets
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-7 text-gray-600">
-              Explore quality dry food, wet food, treats, and supplements made
-              to support your pet’s daily health and nutrition.
+            <p className="mt-4 max-w-xl text-gray-600 text-base leading-7">
+              Explore quality nutrition made to support your pet’s daily health.
             </p>
           </div>
 
-          <div className="text-sm text-gray-500">
-            Showing <span className="font-bold text-gray-900">{filteredFoods.length}</span> products
+          <div className="font-medium text-gray-500 text-sm">
+            Showing <span className="font-bold text-gray-900">{filteredFoods.length}</span> healthy options
           </div>
         </div>
       </motion.div>
 
-      {/* Filters Animation */}
+      {/* Filters */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mx-auto mb-12 max-w-7xl rounded-3xl border border-orange-100 bg-white p-5 shadow-lg shadow-orange-100/40"
+        className="bg-white shadow-lg shadow-orange-100/40 mx-auto mb-12 p-5 border border-orange-100 rounded-3xl max-w-7xl"
       >
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex xl:flex-row flex-col xl:justify-between xl:items-center gap-4">
           <div className="relative w-full xl:max-w-md">
-            <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <FaSearch className="top-1/2 left-5 absolute text-gray-400 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search pet food..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-medium text-gray-700 outline-none transition focus:border-orange-400 focus:bg-white"
+              className="bg-gray-50 focus:bg-white py-4 pr-4 pl-12 border border-gray-100 focus:border-orange-400 rounded-2xl outline-none w-full font-medium text-gray-700 text-sm transition"
             />
           </div>
 
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`rounded-full px-5 py-3 text-xs font-bold uppercase tracking-wider transition ${
+                className={`rounded-full px-5 py-3 text-[10px] font-bold uppercase tracking-wider transition ${
                   selectedCategory === cat
                     ? "bg-orange-500 text-white shadow-md"
                     : "bg-gray-100 text-gray-600 hover:bg-orange-100 hover:text-orange-600"
                 }`}
               >
                 {cat}
-              </motion.button>
+              </button>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-              <FaFilter className="text-orange-500" />
-              Sort by
+            <div className="flex items-center gap-2 font-bold text-gray-500 text-xs uppercase tracking-widest">
+              <FaFilter className="text-orange-500" /> Sort
             </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 outline-none focus:border-orange-400 focus:bg-white"
+              className="bg-gray-50 px-4 py-3 border border-gray-100 focus:border-orange-400 rounded-2xl outline-none font-bold text-gray-700 text-xs"
             >
               <option>Recommended</option>
               <option>Price: Low to High</option>
@@ -322,12 +300,12 @@ const PetFoods = ({ foods = [] }) => {
         </div>
       </motion.div>
 
-      {/* Product Grid Animation */}
+      {/* Grid */}
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl"
       >
         <AnimatePresence mode="popLayout">
           {filteredFoods.length > 0 ? (
@@ -343,14 +321,10 @@ const PetFoods = ({ foods = [] }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="col-span-full rounded-3xl border border-dashed border-gray-300 bg-white py-20 text-center"
+              className="col-span-full bg-white py-20 border border-gray-300 border-dashed rounded-3xl text-center"
             >
-              <h3 className="text-xl font-bold text-gray-800">
-                No products found
-              </h3>
-              <p className="mt-2 text-sm text-gray-500">
-                Try changing your search or category filter.
-              </p>
+              <h3 className="font-bold text-gray-800 text-xl">No food items found</h3>
+              <p className="mt-2 text-gray-500 text-sm">Try adjusting your filters.</p>
             </motion.div>
           )}
         </AnimatePresence>

@@ -34,22 +34,25 @@ export const AccessoriesCard = ({ item }) => {
     }
 
     startTransition(async () => {
+      // Accessories JSON ডাটা অনুযায়ী ম্যাপিং করা হয়েছে
       const result = await addToCart({
         userEmail: session.user.email,
-        accessoryId: itemId,
-        productName: item.title,
+        productId: itemId,          // জেনেরিক আইডি
+        productName: item.title,    // এক্সেসরিজের ক্ষেত্রে 'title' ই হলো নাম
         image: safeImageSrc,
         price: displayPrice,
-        stock: item.stock,
-        brand: item.brand,
+        stock: Number(item.stock),
+        brand: item.brand || "Premium Gear",
         category: item.category,
+        productType: "accessory",   // স্টক কন্ট্রোলের জন্য খুবই জরুরি
+        weight: item.weight || "",  // তোমার JSON-এ সরাসরি '450g' ফরম্যাটে আছে
         inStock: !isOutOfStock,
       });
 
       if (result?.success || result?.acknowledged) {
         toast.success("Added to cart! 🛒");
       } else {
-        toast.error("Failed to add to cart");
+        toast.error(result?.message || "Failed to add to cart");
       }
     });
   };
@@ -100,7 +103,7 @@ export const AccessoriesCard = ({ item }) => {
             disabled={isPending}
             className="right-4 bottom-4 z-20 absolute flex justify-center items-center bg-orange-500 hover:bg-gray-900 opacity-0 disabled:opacity-50 group-hover:opacity-100 shadow-lg rounded-full w-12 h-12 text-white hover:scale-110 transition-all translate-y-3 group-hover:translate-y-0 duration-300"
           >
-            <FaShoppingCart size={18} />
+            {isPending ? <span className="loading loading-spinner loading-xs"></span> : <FaShoppingCart size={18} />}
           </button>
         )}
       </div>
