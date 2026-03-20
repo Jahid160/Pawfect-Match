@@ -9,6 +9,11 @@ import SupportButton from "@/Components/HelpCenter/SupportButton";
 import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
 
+
+import { getCartItems } from "@/action/server/cart";
+import { getServerSession } from "next-auth";
+import CartStoreInitializer from "@/components/Cart/CartStoreInitializer";
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800"],
@@ -19,12 +24,31 @@ export const metadata = {
   description: "Adopt your Pet",
 };
 
-export default function RootLayout({ children }) {
+// ফাংশনটিকে async করলাম যাতে ভেতরে ডাটা ফেচ করা যায়
+export default async function RootLayout({ children }) {
+  
+  // ১. সেশন এবং কার্ট ডাটা সার্ভার সাইড থেকে নিয়ে আসা
+  const session = await getServerSession();
+  let initialCartCount = 0;
+
+  if (session?.user?.email) {
+    try {
+      const cartItems = await getCartItems(session.user.email);
+      initialCartCount = cartItems?.length || 0;
+    } catch (error) {
+      console.error("Cart fetch error in layout:", error);
+    }
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`}>
         <NextAuthProvider>
           <AuthModalProvider>
+            
+            {/* ২. কার্ট স্টোর ইনিশিয়ালাইজ করা */}
+            <CartStoreInitializer count={initialCartCount} />
+            
             <Toaster position="top-right" reverseOrder={false} />
 
             <header className="mx-auto mb-15 py-2 md:w-11/12">
