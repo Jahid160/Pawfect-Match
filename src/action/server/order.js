@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { collections, dbConnect } from "@/lib/db";
-import { reduceFoodStock } from "@/action/server/foods";
+import { reduceProductStock } from "@/action/server/stock";
+
 
 export const createOrderFromCart = async (payload) => {
   try {
@@ -18,18 +19,8 @@ export const createOrderFromCart = async (payload) => {
       note = "",
     } = payload || {};
 
-    if (
-      !userEmail ||
-      !customerName ||
-      !phone ||
-      !address ||
-      !city ||
-      !area
-    ) {
-      return {
-        success: false,
-        message: "Missing required checkout information.",
-      };
+    if (!userEmail || !customerName || !phone || !address || !city || !area) {
+      return { success: false, message: "Missing required checkout information." };
     }
 
     const cartCollection = await dbConnect(collections.CART);
@@ -38,88 +29,60 @@ export const createOrderFromCart = async (payload) => {
     const cartItems = await cartCollection.find({ userEmail }).toArray();
 
     if (!cartItems.length) {
-      return {
-        success: false,
-        message: "Your cart is empty.",
-      };
+      return { success: false, message: "Your cart is empty." };
     }
 
     const orderItems = cartItems.map((item) => ({
-      productId: item.productId || item.foodId || item.product_id || null,
-      foodId: item.foodId || item.productId || item.product_id || null,
+      productId: (item.productId || item.foodId || item._id).toString(),
       productName: item.productName || "",
       brand: item.brand || "",
       image: item.image || "",
       weight: item.weight || "",
       weightUnit: item.weightUnit || "",
       quantity: Number(item.quantity || 1),
-      stock: Number(item.stock || 0),
       price: Number(item.price || 0),
+      productType: item.productType || "food", 
       lineTotal: Number(item.price || 0) * Number(item.quantity || 1),
     }));
 
-    const totalItems = orderItems.reduce(
-      (sum, item) => sum + Number(item.quantity || 0),
-      0
-    );
-
-    const subtotal = orderItems.reduce(
-      (sum, item) => sum + Number(item.lineTotal || 0),
-      0
-    );
-
-    const shippingCost = 0;
-    const totalAmount = subtotal + shippingCost;
+    const subtotal = orderItems.reduce((sum, item) => sum + Number(item.lineTotal || 0), 0);
 
     const orderDoc = {
       userEmail,
       customerName,
       phone,
-      shippingAddress: {
-        address,
-        city,
-        area,
-      },
+      shippingAddress: { address, city, area },
       paymentMethod,
-      paymentStatus:
-        paymentMethod === "Cash on Delivery" ? "unpaid" : "pending",
+      paymentStatus: paymentMethod === "Stripe" ? "pending" : "unpaid",
       orderStatus: "pending",
       note,
       items: orderItems,
-      totalItems,
+      totalItems: orderItems.reduce((sum, item) => sum + item.quantity, 0),
       subtotal,
-      shippingCost,
-      totalAmount,
+      shippingCost: 0,
+      totalAmount: subtotal,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
+    // (Safety First)
+    const stockResult = await reduceProductStock(orderItems);
+    if (!stockResult?.success) {
+      return { success: false, message: stockResult?.message || "Stock update failed." };
+    }
+
     const result = await orderCollection.insertOne(orderDoc);
 
     if (!result.insertedId) {
-      return {
-        success: false,
-        message: "Order creation failed.",
-      };
-    }
-
-    const stockResult = await reduceFoodStock(orderItems);
-
-    if (!stockResult?.success) {
-      await orderCollection.deleteOne({ _id: result.insertedId });
-
-      return {
-        success: false,
-        message: stockResult?.message || "Stock update failed.",
-      };
+      return { success: false, message: "Order creation failed." };
     }
 
     await cartCollection.deleteMany({ userEmail });
 
     revalidatePath("/cart");
-    revalidatePath("/checkout");
     revalidatePath("/dashboard/orders");
     revalidatePath("/pet-food");
+    revalidatePath("/pet-accessories");
 
     return {
       success: true,
@@ -128,14 +91,12 @@ export const createOrderFromCart = async (payload) => {
     };
   } catch (error) {
     console.error("createOrderFromCart error:", error);
-    return {
-      success: false,
-      message: "Something went wrong while placing the order.",
-    };
+    return { success: false, message: "Something went wrong while placing the order." };
   }
 };
 
-export const createSingleFoodOrder = async (payload) => {
+
+export const createSingleOrder = async (payload) => {
   try {
     const {
       userEmail,
@@ -145,130 +106,79 @@ export const createSingleFoodOrder = async (payload) => {
       city,
       area,
       note = "",
-      foodId,
+      productId,
+      productType = "food",
       quantity = 1,
       paymentMethod = "Cash on Delivery",
     } = payload || {};
 
-    if (
-      !userEmail ||
-      !customerName ||
-      !phone ||
-      !address ||
-      !city ||
-      !area ||
-      !foodId
-    ) {
-      return {
-        success: false,
-        message: "Missing required checkout information.",
-      };
+    if (!userEmail || !customerName || !phone || !address || !city || !area || !productId) {
+      return { success: false, message: "Missing required checkout information." };
     }
 
-    if (!ObjectId.isValid(foodId)) {
-      return {
-        success: false,
-        message: "Invalid food ID.",
-      };
+    if (!ObjectId.isValid(productId)) {
+      return { success: false, message: "Invalid product ID." };
     }
 
-    const foodsCollection = await dbConnect(collections.FOODS);
+    const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
+    const productCollection = await dbConnect(collectionName);
     const orderCollection = await dbConnect(collections.ORDER);
 
-    const food = await foodsCollection.findOne({ _id: new ObjectId(foodId) });
+    const product = await productCollection.findOne({ _id: new ObjectId(productId) });
 
-    if (!food) {
-      return {
-        success: false,
-        message: "Food not found.",
-      };
+    if (!product) {
+      return { success: false, message: "Product not found." };
     }
 
     const qty = Number(quantity || 1);
-
-    if (Number(food.stock || 0) < qty) {
-      return {
-        success: false,
-        message: "Not enough stock available.",
-      };
+    if (Number(product.stock || 0) < qty) {
+      return { success: false, message: "Not enough stock available." };
     }
 
-    const orderItems = [
-      {
-        productId: food._id.toString(),
-        foodId: food._id.toString(),
-        productName: food.productName || "",
-        brand: food.brand || "",
-        image: food.image || "",
-        weight: food.weight || "",
-        weightUnit: food.weightUnit || "",
-        quantity: qty,
-        stock: Number(food.stock || 0),
-        price: Number(
-          food.discountPrice && Number(food.discountPrice) < Number(food.price)
-            ? food.discountPrice
-            : food.price
-        ),
-        lineTotal:
-          Number(
-            food.discountPrice && Number(food.discountPrice) < Number(food.price)
-              ? food.discountPrice
-              : food.price
-          ) * qty,
-      },
-    ];
+    const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
+      ? Number(product.discountPrice)
+      : Number(product.price);
 
-    const totalItems = qty;
-    const subtotal = orderItems[0].lineTotal;
-    const shippingCost = 0;
-    const totalAmount = subtotal + shippingCost;
+    const orderItems = [{
+      productId: product._id.toString(),
+      productName: product.productName || "",
+      brand: product.brand || "",
+      image: product.image || "",
+      weight: product.weight || "",
+      weightUnit: product.weightUnit || "",
+      productType,
+      quantity: qty,
+      price: finalPrice,
+      lineTotal: finalPrice * qty,
+    }];
 
     const orderDoc = {
       userEmail,
       customerName,
       phone,
-      shippingAddress: {
-        address,
-        city,
-        area,
-      },
+      shippingAddress: { address, city, area },
       paymentMethod,
-      paymentStatus:
-        paymentMethod === "Cash on Delivery" ? "unpaid" : "pending",
+      paymentStatus: paymentMethod === "Stripe" ? "pending" : "unpaid",
       orderStatus: "pending",
       note,
       items: orderItems,
-      totalItems,
-      subtotal,
-      shippingCost,
-      totalAmount,
+      totalItems: qty,
+      subtotal: orderItems[0].lineTotal,
+      shippingCost: 0,
+      totalAmount: orderItems[0].lineTotal,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
+    const stockResult = await reduceProductStock(orderItems);
+    if (!stockResult?.success) {
+      return { success: false, message: "Stock update failed." };
+    }
+
     const result = await orderCollection.insertOne(orderDoc);
 
-    if (!result.insertedId) {
-      return {
-        success: false,
-        message: "Order creation failed.",
-      };
-    }
-
-    const stockResult = await reduceFoodStock(orderItems);
-
-    if (!stockResult?.success) {
-      await orderCollection.deleteOne({ _id: result.insertedId });
-
-      return {
-        success: false,
-        message: stockResult?.message || "Stock update failed.",
-      };
-    }
-
-    revalidatePath("/pet-food");
-    revalidatePath("/checkout");
     revalidatePath("/dashboard/orders");
+    revalidatePath(productType === "accessory" ? "/pet-accessories" : "/pet-food");
 
     return {
       success: true,
@@ -276,11 +186,8 @@ export const createSingleFoodOrder = async (payload) => {
       message: "Order placed successfully.",
     };
   } catch (error) {
-    console.error("createSingleFoodOrder error:", error);
-    return {
-      success: false,
-      message: "Something went wrong while placing the order.",
-    };
+    console.error("createSingleOrder error:", error);
+    return { success: false, message: "Something went wrong while placing the order." };
   }
 };
 
@@ -288,58 +195,57 @@ export const createSingleFoodOrder = async (payload) => {
 export const getOrdersByEmail = async (userEmail) => {
   try {
     if (!userEmail) return [];
-
     const orderCollection = await dbConnect(collections.ORDER);
-
-    const orders = await orderCollection
-      .find({ userEmail })
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    return orders.map((order) => ({
-      ...order,
-      _id: order._id.toString(),
-    }));
+    const orders = await orderCollection.find({ userEmail }).sort({ createdAt: -1 }).toArray();
+    return orders.map((order) => ({ ...order, _id: order._id.toString() }));
   } catch (error) {
     console.error("getOrdersByEmail error:", error);
     return [];
   }
 };
 
+
 export const getSingleOrder = async (id, userEmail) => {
   try {
     if (!id || id.length !== 24) return null;
-
     const orderCollection = await dbConnect(collections.ORDER);
-
-    const order = await orderCollection.findOne({
-      _id: new ObjectId(id),
-      userEmail,
-    });
-
-    if (!order) return null;
-
-    return {
-      ...order,
-      _id: order._id.toString(),
-    };
+    const order = await orderCollection.findOne({ _id: new ObjectId(id), userEmail });
+    return order ? { ...order, _id: order._id.toString() } : null;
   } catch (error) {
     console.error("getSingleOrder error:", error);
     return null;
   }
 };
 
+
 export const getAllOrders = async () => {
   try {
     const orderCollection = await dbConnect(collections.ORDER);
     const orders = await orderCollection.find({}).sort({ createdAt: -1 }).toArray();
-
-    return orders.map((order) => ({
-      ...order,
-      _id: order._id.toString(),
-    }));
+    return orders.map((order) => ({ ...order, _id: order._id.toString() }));
   } catch (error) {
     console.error("getAllOrders error:", error);
     return [];
+  }
+};
+
+
+export const updateOrderStatus = async (orderId, status, paymentStatus) => {
+  try {
+    const orderCollection = await dbConnect(collections.ORDER);
+    const updateData = { updatedAt: new Date() };
+    if (status) updateData.orderStatus = status;
+    if (paymentStatus) updateData.paymentStatus = paymentStatus;
+
+    const result = await orderCollection.updateOne(
+      { _id: new ObjectId(orderId) },
+      { $set: updateData }
+    );
+
+    revalidatePath("/dashboard/orders");
+    return { success: result.modifiedCount > 0 };
+  } catch (error) {
+    console.error("updateOrderStatus error:", error);
+    return { success: false };
   }
 };
