@@ -84,6 +84,25 @@ const PetProfile = ({ pet }) => {
     setActiveImage(gallery[prevIndex]);
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${pet.petName || "Check out this pet for adoption!"}`,
+          text: 'Check this out!',
+          url: window.location.href,
+        });
+        console.log('Successfully shared');
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      // if Web Share API is not supported, fallback to copying the URL to clipboard
+      alert("Share API not supported. Copying link to clipboard!");
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
   const handleNext = () => {
     const currentIndex = gallery.indexOf(activeImage);
     const nextIndex =
@@ -117,11 +136,10 @@ const PetProfile = ({ pet }) => {
     }
   };
 
-  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${
-    pet.ageMonths
-      ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}`
-      : ""
-  }`;
+  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${pet.ageMonths
+    ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}`
+    : ""
+    }`;
 
   const quickStats = [
     {
@@ -238,7 +256,9 @@ const PetProfile = ({ pet }) => {
         </div>
 
         <div className="flex gap-3">
-          <button className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
+          <button
+            onClick={handleShare}
+            className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
             <Share2 size={20} />
           </button>
           <button className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
@@ -285,11 +305,10 @@ const PetProfile = ({ pet }) => {
                   <button
                     key={idx}
                     onClick={() => setActiveImage(thumb)}
-                    className={`relative aspect-square overflow-hidden rounded-2xl border-4 transition-all duration-300 ${
-                      activeImage === thumb
-                        ? "scale-95 border-primary shadow-lg"
-                        : "border-transparent opacity-70 hover:opacity-100"
-                    }`}
+                    className={`relative aspect-square overflow-hidden rounded-2xl border-4 transition-all duration-300 ${activeImage === thumb
+                      ? "scale-95 border-primary shadow-lg"
+                      : "border-transparent opacity-70 hover:opacity-100"
+                      }`}
                   >
                     <Image
                       fill
@@ -318,16 +337,14 @@ const PetProfile = ({ pet }) => {
                 {healthMilestones.map((item, idx) => (
                   <div
                     key={idx}
-                    className={`group relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse ${
-                      item.done ? "is-completed" : "opacity-70"
-                    }`}
+                    className={`group relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse ${item.done ? "is-completed" : "opacity-70"
+                      }`}
                   >
                     <div
-                      className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-base-100 shadow transition-colors duration-300 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${
-                        item.done
-                          ? "bg-primary text-white"
-                          : "bg-base-200 text-neutral/30"
-                      }`}
+                      className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-base-100 shadow transition-colors duration-300 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${item.done
+                        ? "bg-primary text-white"
+                        : "bg-base-200 text-neutral/30"
+                        }`}
                     >
                       {item.done ? (
                         <ShieldCheck size={16} />
