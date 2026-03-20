@@ -6,6 +6,7 @@ import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
+import { verifyAuth } from "@/lib/verifyAuth";
 
 const petCollectionPromise = dbConnect(collections.PETS);
 const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
@@ -66,14 +67,37 @@ export const getSinglePets = async (id) => {
 
   try {
     const Petcollection = await petCollectionPromise;
+
     const pet = await Petcollection.findOne({
       _id: new ObjectId(id),
     });
 
     if (!pet) return {};
 
-    // Serialization Fix
-    return JSON.parse(JSON.stringify(pet));
+    // ✅ try to get current user (optional)
+    let userId = null;
+    try {
+      const user = await verifyAuth();
+      userId = user._id.toString();
+    } catch (error) {
+      // user not logged in → ignore
+    }
+
+    const savedBy = pet.savedBy || [];
+
+    return {
+      _id: pet._id.toString(),
+      petName: pet.petName,
+      breed: pet.breed,
+      age: pet.age,
+      species: pet.species,
+      images: pet.images,
+      status: pet.status,
+
+      // 🔥 IMPORTANT
+      saveCount: savedBy.length,
+      isSaved: userId ? savedBy.includes(userId) : false,
+    };
   } catch (error) {
     console.error("Error fetching single pet:", error);
     return {};
@@ -81,7 +105,7 @@ export const getSinglePets = async (id) => {
 };
 
 export const AddPets = async (petdata) => {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
   if (!session || !session.user) {
     return { success: false, message: "Unauthorized" };
   }
@@ -196,12 +220,15 @@ export const UpdatePetStatus = async (id) => {
         updatedBy: adminEmail,
       },
     };
-    await adoptionCollection.updateOne({ petId: id }, {
-      $set: {
-        status: "adopted",
-        updatedTime: new Date()
+    await adoptionCollection.updateOne(
+      { petId: id },
+      {
+        $set: {
+          status: "adopted",
+          updatedTime: new Date(),
+        },
       },
-    });
+    );
 
     const result = await PetCollection.updateOne(query, updateStatus);
     revalidatePath("/dashboard/manage-pets");
