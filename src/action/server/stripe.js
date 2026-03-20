@@ -7,11 +7,14 @@ import { getCartItems } from "@/action/server/cart";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ১. কার্ট থেকে চেকআউট (এখানে খাবার ও এক্সেসরিজ মিক্স থাকলেও সমস্যা নেই)
+/**
+ * ১. কার্ট থেকে স্ট্রাইপ চেকআউট সেশন তৈরি করা
+ */
 export const createStripeCheckoutFromCart = async (payload) => {
   try {
     const { userEmail, customerName, phone, address, city, area, note } = payload || {};
 
+    // বেসিক ভ্যালিডেশন
     if (!userEmail || !customerName || !phone || !address || !city || !area) {
       return { success: false, message: "Missing checkout information." };
     }
@@ -22,15 +25,15 @@ export const createStripeCheckoutFromCart = async (payload) => {
       return { success: false, message: "Cart is empty." };
     }
 
+    // স্ট্রাইপ লাইন আইটেম তৈরি
     const line_items = cartItems.map((item) => ({
       price_data: {
         currency: "usd",
         product_data: {
           name: item.productName || "Pet Product",
-          // Stripe-এ খালি ইমেজ স্ট্রিং দিলে এরর দেয়, তাই চেক করে পাঠানো হচ্ছে
           ...(item.image && item.image.trim() !== "" ? { images: [item.image] } : {}),
         },
-        unit_amount: Math.round(Number(item.price || 0) * 100),
+        unit_amount: Math.round(Number(item.price || 0) * 100), // সেন্টে কনভার্ট
       },
       quantity: Number(item.quantity || 1),
     }));
@@ -40,6 +43,7 @@ export const createStripeCheckoutFromCart = async (payload) => {
       payment_method_types: ["card"],
       line_items,
       metadata: {
+        mode: "cart",
         userEmail,
         customerName,
         phone,
@@ -48,8 +52,9 @@ export const createStripeCheckoutFromCart = async (payload) => {
         area,
         note: note || "",
       },
+      // সাকসেস ইউআরএল-এ সেশন আইডি পাঠানো হচ্ছে যাতে পরে ভেরিফাই করা যায়
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
     });
 
     return { success: true, url: session.url };
@@ -59,7 +64,10 @@ export const createStripeCheckoutFromCart = async (payload) => {
   }
 };
 
-// ২. সিঙ্গেল প্রোডাক্ট চেকআউট (Food অথবা Accessory উভয়ের জন্য)
+/**
+ * ২. সিঙ্গেল প্রোডাক্ট (Buy Now) চেকআউট সেশন তৈরি করা
+ * এটি Food এবং Accessories দুটোর জন্যই কাজ করবে।
+ */
 export const createStripeCheckoutForSingleProduct = async (payload) => {
   try {
     const {
@@ -70,8 +78,8 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
       city,
       area,
       note,
-      productId, // foodId এর বদলে জেনেরিক নাম productId ব্যবহার করলাম
-      productType = "food", // 'food' অথবা 'accessory'
+      productId,
+      productType = "food", // ডিফল্ট ফুড, তবে এক্সেসরিজও হতে পারে
       quantity = 1,
     } = payload || {};
 
@@ -83,7 +91,7 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
       return { success: false, message: "Invalid product ID." };
     }
 
-    // কালেকশন সিলেক্ট করা (Food নাকি Accessory)
+    // টাইপ অনুযায়ী কালেকশন সিলেক্ট করা
     const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
     const productCollection = await dbConnect(collectionName);
 
@@ -95,7 +103,6 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
 
     const qty = Number(quantity || 1);
     
-    // ডিসকাউন্ট প্রাইস চেক
     const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
         ? Number(product.discountPrice)
         : Number(product.price);
@@ -130,7 +137,7 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
         quantity: String(qty),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pet-food/${productId}`,
     });
 
     return { success: true, url: session.url };
