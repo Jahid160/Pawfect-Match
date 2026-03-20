@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -43,6 +43,11 @@ const PetProfile = ({ pet }) => {
     return <div className="p-10 text-center">Loading pet details...</div>;
   }
 
+  const [isSaved, setIsSaved] = useState(false);
+useEffect(() => {
+  const savedPets = JSON.parse(localStorage.getItem("savedPets")) || [];
+  setIsSaved(savedPets.includes(pet._id));
+}, [pet._id]);
   const getStatIcon = (type) => {
     switch (type) {
       case "gender":
@@ -89,12 +94,12 @@ const PetProfile = ({ pet }) => {
       try {
         await navigator.share({
           title: `${pet.petName || "Check out this pet for adoption!"}`,
-          text: 'Check this out!',
+          text: "Check this out!",
           url: window.location.href,
         });
-        console.log('Successfully shared');
+        console.log("Successfully shared");
       } catch (error) {
-        console.log('Error sharing:', error);
+        console.log("Error sharing:", error);
       }
     } else {
       // if Web Share API is not supported, fallback to copying the URL to clipboard
@@ -102,6 +107,22 @@ const PetProfile = ({ pet }) => {
       navigator.clipboard.writeText(window.location.href);
     }
   };
+
+const handleSave = () => {
+  let savedPets = JSON.parse(localStorage.getItem("savedPets")) || [];
+
+  const isAlreadySaved = savedPets.includes(pet._id);
+
+  if (isAlreadySaved) {
+    savedPets = savedPets.filter((id) => id !== pet._id);
+    setIsSaved(false);
+  } else {
+    savedPets.push(pet._id);
+    setIsSaved(true);
+  }
+
+  localStorage.setItem("savedPets", JSON.stringify(savedPets));
+};
 
   const handleNext = () => {
     const currentIndex = gallery.indexOf(activeImage);
@@ -136,10 +157,11 @@ const PetProfile = ({ pet }) => {
     }
   };
 
-  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${pet.ageMonths
-    ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}`
-    : ""
-    }`;
+  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${
+    pet.ageMonths
+      ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}`
+      : ""
+  }`;
 
   const quickStats = [
     {
@@ -258,11 +280,18 @@ const PetProfile = ({ pet }) => {
         <div className="flex gap-3">
           <button
             onClick={handleShare}
-            className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
+            className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200"
+          >
             <Share2 size={20} />
           </button>
-          <button className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200">
-            <Heart size={20} />
+          <button
+            onClick={handleSave}
+            className="btn btn-circle btn-outline border-neutral/10 text-neutral shadow-sm hover:border-neutral/20 hover:bg-base-200"
+          >
+            <Heart
+              size={20}
+              className={isSaved ? "fill-red-500 text-red-500" : ""}
+            />
           </button>
         </div>
       </header>
@@ -305,10 +334,11 @@ const PetProfile = ({ pet }) => {
                   <button
                     key={idx}
                     onClick={() => setActiveImage(thumb)}
-                    className={`relative aspect-square overflow-hidden rounded-2xl border-4 transition-all duration-300 ${activeImage === thumb
-                      ? "scale-95 border-primary shadow-lg"
-                      : "border-transparent opacity-70 hover:opacity-100"
-                      }`}
+                    className={`relative aspect-square overflow-hidden rounded-2xl border-4 transition-all duration-300 ${
+                      activeImage === thumb
+                        ? "scale-95 border-primary shadow-lg"
+                        : "border-transparent opacity-70 hover:opacity-100"
+                    }`}
                   >
                     <Image
                       fill
@@ -337,14 +367,16 @@ const PetProfile = ({ pet }) => {
                 {healthMilestones.map((item, idx) => (
                   <div
                     key={idx}
-                    className={`group relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse ${item.done ? "is-completed" : "opacity-70"
-                      }`}
+                    className={`group relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse ${
+                      item.done ? "is-completed" : "opacity-70"
+                    }`}
                   >
                     <div
-                      className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-base-100 shadow transition-colors duration-300 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${item.done
-                        ? "bg-primary text-white"
-                        : "bg-base-200 text-neutral/30"
-                        }`}
+                      className={`z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-4 border-base-100 shadow transition-colors duration-300 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 ${
+                        item.done
+                          ? "bg-primary text-white"
+                          : "bg-base-200 text-neutral/30"
+                      }`}
                     >
                       {item.done ? (
                         <ShieldCheck size={16} />
