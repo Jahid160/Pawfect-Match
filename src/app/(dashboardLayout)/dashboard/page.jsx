@@ -1,5 +1,4 @@
 import DashboardHome from "@/Components/dashboardlayouts/DashboardHome/DashboardHome";
-import DashboardMainLayout from "@/Components/dashboardlayouts/DashboardMainLayout";
 import React from "react";
 
 const DashboardPage = () => {

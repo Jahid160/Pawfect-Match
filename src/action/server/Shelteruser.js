@@ -147,3 +147,38 @@ export const updateShelterStatus = async (id, newStatus) => {
           return { success: false, message: "Something went wrong while updating status." };
      }
 };
+
+
+
+export const deleteShelterRequest = async (id) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const result = await shelterRequestsCollection.deleteOne({ _id: new ObjectId(id) });
+
+          if (result.deletedCount === 1) {
+               return { success: true, message: "Deleted successfully" };
+          }
+          return { success: false, message: "Request not found" };
+     } catch (error) {
+          return { success: false, error: error.message };
+     }
+};
+
+
+export const updateShelterData = async (id, updatedFields) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const result = await shelterRequestsCollection.updateOne(
+               { _id: new ObjectId(id) },
+               { $set: { ...updatedFields, updatedAt: new Date() } }
+          );
+
+          if (result.matchedCount === 1) {
+               return { success: true, message: "Updated successfully" };
+          }
+          return { success: false, message: "Update failed" };
+     } catch (error) {
+          console.error("Update Error:", error);
+          return { success: false, error: error.message };
+     }
+};
