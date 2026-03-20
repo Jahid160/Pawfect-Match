@@ -92,12 +92,24 @@ const ManagePets = ({ initialPets }) => {
     }
   };
   const handleReject = async (pet) => {
-    const result = await UpdatePetStatusReject(pet._id,pet.adoptionCode);
-    console.log(pet._id,pet.adoptionCode);
-    if (result.success) {
-      alert("Pet adopted successfully");
-    } else {
-      alert("something went wrong");
+    const id = pet._id;
+    const code = pet.adoptionCode;
+
+    setPets((prev) =>
+      prev.map((item) =>
+        item._id === id ? { ...item, status: "Rejected" } : item,
+      ),
+    );
+
+    const result = await UpdatePetStatusReject(id, code);
+
+    if (!result.success) {
+      setPets((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, status: "Pending" } : item,
+        ),
+      );
+      alert(result.message || "Something went wrong");
     }
   };
   const handleEdit = (id) => {
@@ -367,7 +379,7 @@ const ManagePets = ({ initialPets }) => {
 
                             {/* Delete Disabled */}
                             <button
-                              disabled
+                              onClick={() => handleReject(pet)}
                               title="Adopted pets cannot be deleted"
                               className="p-2 text-slate-200 cursor-not-allowed transition-all"
                             >
