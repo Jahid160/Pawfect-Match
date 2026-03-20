@@ -22,18 +22,18 @@ import { useAuthModal } from "@/provider/AuthModalProvider";
 import { createStripeCheckoutFromCart } from "@/action/server/stripe";
 import toast from "react-hot-toast";
 import { useCartStore } from "@/lib/useCartStore";
+
 const AccessoriesDetails = ({ item }) => {
   const router = useRouter();
   const { data: session } = useSession();
   const { openLoginModal } = useAuthModal();
   const [isPending, startTransition] = useTransition();
   
-  // Zustand 
   const incrementCart = useCartStore((state) => state.incrementCart);
 
   if (!item?._id) {
     return (
-      <div className="flex flex-col justify-center items-center bg-gray-50 min-h-screen">
+      <div className="flex flex-col justify-center items-center bg-gray-50 min-h-screen font-sans">
         <FaTimesCircle className="mb-4 text-red-400 text-6xl animate-pulse" />
         <h2 className="font-black text-gray-900 text-3xl tracking-tight">Accessory not found</h2>
         <Link href="/pet-accessories" className="bg-orange-500 hover:bg-orange-600 shadow-lg mt-8 px-8 py-3 rounded-2xl font-bold text-white transition-all">
@@ -43,15 +43,13 @@ const AccessoriesDetails = ({ item }) => {
     );
   }
 
-  // --- Logic Helpers ---
   const hasDiscount = item.discountPrice && Number(item.discountPrice) < Number(item.price);
   const isOutOfStock = Number(item.stock || 0) <= 0;
   const finalPrice = hasDiscount ? item.discountPrice : item.price;
-
-  // --- Safe Image Logic ---
   const safeImageSrc = (Array.isArray(item?.images) ? item.images[0] : item?.image) || 
                        "https://placehold.co/700x700?text=No+Image";
 
+  // --- UPDATED Add to Cart Logic ---
   const handleAddToCart = () => {
     if (!session?.user?.email) {
       openLoginModal();
@@ -61,28 +59,27 @@ const AccessoriesDetails = ({ item }) => {
     startTransition(async () => {
       const result = await addToCart({
         userEmail: session.user.email,
-        accessoryId: item._id, 
+        productId: item._id.toString(), // Unified key
         productName: item.title,
         image: safeImageSrc,
         price: finalPrice,
-        stock: item.stock,
+        stock: Number(item.stock),
         brand: item.brand,
         category: item.category,
+        productType: "accessory", // Important: Identifies the collection
         inStock: !isOutOfStock,
       });
 
       if (result?.success || result?.acknowledged) {
         toast.success(`${item.title} added to cart! 🛒`);
-        
-        // Zustand 
         incrementCart(1); 
-        
       } else {
         toast.error(result?.message || "Failed to add to cart");
       }
     });
   };
 
+  // --- UPDATED Buy Now Logic ---
   const handleBuyNow = () => {
     if (!session?.user?.email) {
       openLoginModal();
@@ -90,15 +87,16 @@ const AccessoriesDetails = ({ item }) => {
     }
 
     startTransition(async () => {
-      
       const result = await createStripeCheckoutFromCart({
         userEmail: session.user.email,
         cartItems: [{
           ...item,
+          productId: item._id.toString(), // Unified key
           productName: item.title,
           image: safeImageSrc,
           price: finalPrice,
-          quantity: 1
+          quantity: 1,
+          productType: "accessory" // For server-side stock reduction
         }]
       });
 
@@ -111,7 +109,7 @@ const AccessoriesDetails = ({ item }) => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-orange-50/40 to-white px-4 sm:px-6 lg:px-8 py-12 min-h-screen">
+    <div className="bg-gradient-to-b from-orange-50/40 to-white px-4 sm:px-6 lg:px-8 py-12 min-h-screen font-sans">
       <div className="mx-auto max-w-7xl">
         
         {/* Navigation */}
@@ -126,19 +124,21 @@ const AccessoriesDetails = ({ item }) => {
           <div className="gap-12 grid grid-cols-1 lg:grid-cols-2 p-8 md:p-14">
             
             {/* LEFT SIDE: Image Section */}
-            <div className="group relative bg-gray-50 border border-gray-100 rounded-[2.5rem] h-[400px] md:h-[550px] overflow-hidden">
+            <div className="group relative flex justify-center items-center bg-gray-50 border border-gray-100 rounded-[2.5rem] h-[400px] md:h-[550px] overflow-hidden">
               {hasDiscount && (
                 <span className="top-6 left-6 z-10 absolute bg-red-500 shadow-lg px-5 py-2 rounded-full font-black text-[10px] text-white uppercase tracking-widest">
                   Sale Active
                 </span>
               )}
-              <Image
-                src={safeImageSrc}
-                alt={item.title}
-                fill
-                className="p-8 object-contain group-hover:scale-105 transition-transform duration-700"
-                priority
-              />
+              <div className="relative p-10 w-full h-full">
+                <Image
+                  src={safeImageSrc}
+                  alt={item.title}
+                  fill
+                  className="p-8 object-contain group-hover:scale-110 transition-transform duration-700"
+                  priority
+                />
+              </div>
             </div>
 
             {/* RIGHT SIDE: Content Section */}
@@ -161,21 +161,25 @@ const AccessoriesDetails = ({ item }) => {
                 Brand: <span className="text-gray-900">{item.brand || "Authentic Pet Gear"}</span>
               </div>
 
-              <p className="mb-8 text-gray-500 text-lg leading-relaxed">
-                {item.description || "Designed with premium materials to ensure the highest level of comfort and durability for your beloved pets."}
+              <p className="mb-8 text-gray-600 text-base leading-relaxed">
+                {item.description || "Designed with premium materials to ensure comfort and durability for your beloved pets."}
               </p>
 
-              {/* Accessories Specific Specs */}
-              <div className="flex gap-6 mb-8 text-gray-600 text-sm">
+              {/* Specs Grid */}
+              <div className="flex flex-wrap gap-6 mb-8 text-gray-700 text-sm">
                  {item.material && (
-                   <span className="flex items-center gap-2 font-bold"><FaTools className="text-orange-400"/> {item.material}</span>
+                   <span className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl font-bold">
+                     <FaTools className="text-orange-400"/> {item.material}
+                   </span>
                  )}
                  {item.size && (
-                   <span className="flex items-center gap-2 font-bold"><FaRulerCombined className="text-orange-400"/> Size: {item.size}</span>
+                   <span className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl font-bold">
+                     <FaRulerCombined className="text-orange-400"/> Size: {item.size}
+                   </span>
                  )}
               </div>
 
-              {/* Price & Stock info */}
+              {/* Price & Stock */}
               <div className="flex items-center gap-8 mb-10 pb-8 border-gray-100 border-b">
                 <div className="flex flex-col">
                   {hasDiscount && (
@@ -188,13 +192,13 @@ const AccessoriesDetails = ({ item }) => {
                   </span>
                 </div>
                 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   <div className={`flex items-center gap-2 font-bold text-sm ${isOutOfStock ? "text-red-500" : "text-green-600"}`}>
                     {isOutOfStock ? <FaTimesCircle /> : <FaCheckCircle />}
-                    {isOutOfStock ? "Out of Stock" : "In Stock & Ready"}
+                    {isOutOfStock ? "Out of Stock" : "In Stock"}
                   </div>
-                  <div className="flex items-center gap-2 font-medium text-gray-400 text-xs text-nowrap">
-                    <FaBoxOpen /> {item.stock || 0} units remaining
+                  <div className="flex items-center gap-2 font-medium text-gray-400 text-xs uppercase tracking-widest">
+                    <FaBoxOpen /> {item.stock || 0} left
                   </div>
                 </div>
               </div>
@@ -204,28 +208,29 @@ const AccessoriesDetails = ({ item }) => {
                 <button 
                   onClick={handleAddToCart}
                   disabled={isOutOfStock || isPending}
-                  className="flex flex-[1.5] justify-center items-center gap-3 bg-orange-500 hover:bg-gray-900 disabled:bg-gray-200 shadow-gray-200 shadow-xl py-5 rounded-[1.5rem] font-black text-white active:scale-95 transition-all"
+                  className="flex flex-[1.5] justify-center items-center gap-3 bg-orange-500 hover:bg-gray-900 disabled:bg-gray-200 shadow-orange-100 shadow-xl py-5 rounded-[1.5rem] font-black text-white active:scale-95 transition-all duration-300"
                 >
-                  <FaShoppingCart /> {isPending ? "Adding..." : "Add to Cart"}
+                  {isPending ? <span className="loading loading-spinner loading-sm"></span> : <FaShoppingCart />} 
+                  {isPending ? "Processing..." : "Add to Cart"}
                 </button>
                 <button 
                   onClick={handleBuyNow}
                   disabled={isOutOfStock || isPending}
-                  className="flex-1 hover:bg-orange-500 py-5 border-2 border-gray-900 rounded-[1.5rem] font-black text-gray-900 hover:text-white active:scale-95 transition-all"
+                  className="flex-1 hover:bg-orange-500 py-5 border-2 border-gray-900 rounded-[1.5rem] font-black text-gray-900 hover:text-white active:scale-95 transition-all duration-300"
                 >
                   Buy Now
                 </button>
               </div>
 
               {/* Trust Badges */}
-              <div className="gap-6 grid grid-cols-2 pt-8 border-t">
+              <div className="gap-6 grid grid-cols-2 pt-8 border-gray-50 border-t">
                 <div className="flex items-center gap-3 text-[10px] text-gray-500">
-                  <div className="bg-gray-100 p-2 rounded-lg text-orange-500"><FaTruck /></div>
-                  <span className="font-bold uppercase leading-tight">Fast & Safe<br/>Delivery</span>
+                  <div className="bg-orange-50 p-2.5 rounded-xl text-orange-500"><FaTruck size={16}/></div>
+                  <span className="font-bold uppercase leading-tight">Express<br/>Shipping</span>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-gray-500">
-                  <div className="bg-gray-100 p-2 rounded-lg text-orange-500"><FaShieldAlt /></div>
-                  <span className="font-bold uppercase leading-tight">Premium Quality<br/>Guaranteed</span>
+                  <div className="bg-orange-50 p-2.5 rounded-xl text-orange-500"><FaShieldAlt size={16}/></div>
+                  <span className="font-bold uppercase leading-tight">Warranty<br/>Included</span>
                 </div>
               </div>
 
