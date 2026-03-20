@@ -16,10 +16,12 @@ import {
   FaTrash,
   FaShoppingCart,
   FaArrowLeft,
+  FaShoppingBag,
 } from "react-icons/fa";
 import AuthButtons from "../button/AuthButtons";
 import toast from "react-hot-toast";
-import { useCartStore } from "@/lib/useCartStore"; // স্টোরটি ইমপোর্ট করুন
+import { useCartStore } from "@/lib/useCartStore";
+import { motion, AnimatePresence } from "framer-motion";
 
 const CartPageClient = () => {
   const { data: session, status } = useSession();
@@ -27,24 +29,24 @@ const CartPageClient = () => {
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   
-  // Zustand স্টোর থেকে সরাসরি setCount ফাংশন নিয়ে আসা
   const setCartCount = useCartStore((state) => state.setCartCount);
 
   const loadCart = async () => {
     if (!session?.user?.email) {
       setCartItems([]);
-      setCartCount(0); // স্টোর রিসেট
+      setCartCount(0);
       setLoading(false);
       return;
     }
     try {
       const items = await getCartItems(session.user.email);
-      const safeItems = items || [];
+      const safeItems = Array.isArray(items) ? items : [];
       setCartItems(safeItems);
-      // Navbar-এর কার্ট সংখ্যা আপডেট করা
+      // Navbar-এর কার্ট সংখ্যা আপডেট (Unique items count)
       setCartCount(safeItems.length);
     } catch (error) {
       console.error("Cart loading failed:", error);
+      toast.error("Failed to sync cart");
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,9 @@ const CartPageClient = () => {
         quantity,
       });
       if (result?.success) {
-        await loadCart(); // এটি কল করলেই Zustand স্টোর আপডেট হবে
+        // Optimistic UI update instead of full reload if possible, 
+        // but loadCart() is safer for data consistency.
+        await loadCart();
       }
     });
   };
@@ -99,212 +103,236 @@ const CartPageClient = () => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm("Are you sure you want to clear your cart?")) {
-      startTransition(async () => {
-        const result = await clearCart(session.user.email);
-        if (result?.success) {
-          toast.success("Cart cleared!");
-          await loadCart();
-        }
-      });
-    }
+    toast((t) => (
+      <span className="flex items-center gap-3 font-sans">
+        Clear all items?
+        <button 
+          className="bg-red-500 px-3 py-1 rounded-lg font-bold text-white text-xs"
+          onClick={async () => {
+            toast.dismiss(t.id);
+            startTransition(async () => {
+              const result = await clearCart(session.user.email);
+              if (result?.success) {
+                toast.success("Cart cleared!");
+                await loadCart();
+              }
+            });
+          }}
+        >
+          Yes
+        </button>
+      </span>
+    ));
   };
 
-  // --- UI Logic (অন্যান্য মেম্বারদের ডিজাইন ঠিক রেখে) ---
   if (status === "loading" || loading) {
     return (
-      <div className="flex justify-center items-center bg-base-200 min-h-screen">
-        <span className="text-primary loading loading-dots loading-lg"></span>
+      <div className="flex flex-col justify-center items-center bg-orange-50/30 min-h-screen">
+        <span className="loading-ring text-orange-500 loading loading-lg"></span>
+        <p className="mt-4 font-black text-gray-400 text-xs uppercase tracking-[0.3em]">Preparing your cart...</p>
       </div>
     );
   }
 
   if (!session?.user) {
     return (
-      <div className="flex flex-col justify-center items-center bg-base-200 px-4 min-h-screen text-center">
-        <div className="bg-base-100 shadow-lg mb-6 p-10 rounded-full">
-          <FaShoppingCart className="text-primary text-6xl" />
-        </div>
-        <h2 className="font-black text-neutral text-3xl uppercase tracking-tighter">Login Required</h2>
-        <p className="mt-3 max-w-sm font-medium text-neutral/60">
-          You need to be logged in to manage your shopping cart.
-        </p>
-        <div className="mt-8">
-          <AuthButtons />
-        </div>
+      <div className="flex flex-col justify-center items-center bg-gray-50 px-4 min-h-screen font-sans text-center">
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white shadow-2xl mb-8 p-12 border border-orange-100 rounded-[3rem]">
+          <FaShoppingCart className="mx-auto mb-6 text-orange-500 text-7xl" />
+          <h2 className="font-black text-gray-900 text-3xl uppercase tracking-tight">Login Required</h2>
+          <p className="mt-4 max-w-sm font-medium text-gray-500 leading-relaxed">
+            Your pet is waiting! Login to see the items you&apos;ve added to your cart.
+          </p>
+          <div className="mt-10">
+            <AuthButtons />
+          </div>
+        </motion.div>
       </div>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-      <div className="flex flex-col justify-center items-center bg-base-200 px-4 min-h-screen text-center">
-        <div className="bg-base-100 shadow-lg mb-6 p-10 border border-base-300 rounded-full">
-          <FaShoppingCart className="text-primary/20 text-6xl" />
-        </div>
-        <h2 className="font-black text-neutral text-3xl">Your cart is empty</h2>
-        <p className="mt-3 font-medium text-neutral/60">
-          Looks like you haven&apos;t added anything for your pets yet!
-        </p>
-        <div className="flex gap-4 mt-8">
-          <Link href="/pet-food" className="shadow-xl px-8 py-4 rounded-2xl h-auto font-black text-white hover:scale-105 transition-all btn btn-primary">
-            Browse Food
-          </Link>
-          <Link href="/pet-accessories" className="px-8 py-4 border-2 rounded-2xl btn-outline h-auto font-black hover:scale-105 transition-all btn">
-            Browse Gear
-          </Link>
-        </div>
+      <div className="flex flex-col justify-center items-center bg-gray-50 px-4 min-h-screen font-sans text-center">
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-col items-center">
+          <div className="bg-white shadow-xl mb-8 p-12 border border-orange-50 rounded-full">
+            <FaShoppingBag className="text-gray-200 text-7xl" />
+          </div>
+          <h2 className="font-black text-gray-900 text-4xl tracking-tight">Your cart is empty</h2>
+          <p className="mt-4 font-medium text-gray-500">
+            Looks like you haven&apos;t added anything for your pets yet!
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
+            <Link href="/petfoods" className="bg-orange-500 hover:bg-orange-600 shadow-orange-100 shadow-xl px-10 py-5 rounded-2xl font-black text-white active:scale-95 transition-all">
+              Browse Food
+            </Link>
+            <Link href="/pet-accessories" className="bg-gray-900 hover:bg-black shadow-xl px-10 py-5 rounded-2xl font-black text-white active:scale-95 transition-all">
+              Browse Gear
+            </Link>
+          </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="bg-base-200 px-4 md:px-8 py-10 min-h-screen">
+    <div className="bg-gradient-to-b from-orange-50/30 to-white px-4 md:px-8 py-14 min-h-screen font-sans">
       <div className="mx-auto max-w-7xl">
         <Link
-          href="/pet-food"
-          className="inline-flex items-center gap-2 hover:gap-3 mb-8 font-black text-primary text-sm uppercase tracking-widest transition-all"
+          href="/petfoods"
+          className="group inline-flex items-center gap-2 mb-10 font-black text-gray-400 hover:text-orange-500 text-xs uppercase tracking-widest transition-all"
         >
-          <FaArrowLeft />
+          <FaArrowLeft className="transition-transform group-hover:-translate-x-1" />
           Continue Shopping
         </Link>
 
-        <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
+        <div className="gap-10 grid grid-cols-1 lg:grid-cols-3">
           {/* Cart List Section */}
-          <div className="lg:col-span-2 bg-base-100 shadow-2xl p-6 md:p-8 border border-base-300 rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-10 pb-4 border-base-200 border-b">
-              <h1 className="font-black text-neutral text-3xl">Cart Details ({totalItems})</h1>
+          <div className="lg:col-span-2 bg-white shadow-2xl shadow-orange-100/50 p-6 md:p-10 border border-orange-50 rounded-[3rem]">
+            <div className="flex justify-between items-center mb-10 pb-6 border-gray-100 border-b">
+              <h1 className="font-black text-gray-900 text-3xl tracking-tight">Shopping Cart ({totalItems})</h1>
               <button
                 onClick={handleClearCart}
                 disabled={isPending}
-                className="shadow-error/20 shadow-lg border-none rounded-xl font-bold text-white capitalize btn btn-error btn-sm"
+                className="hover:bg-red-50 disabled:opacity-50 px-4 py-2 border border-red-100 rounded-xl font-bold text-red-500 text-xs uppercase tracking-widest transition-all"
               >
                 Clear Cart
               </button>
             </div>
 
-            <div className="space-y-6">
-              {cartItems.map((item) => (
-                <div
-                  key={item._id}
-                  className="group flex md:flex-row flex-col gap-6 bg-base-200 p-5 border-2 border-transparent hover:border-primary/20 rounded-[2rem] transition-all duration-300"
-                >
-                  {/* Image Container */}
-                  <div className="relative bg-white shadow-inner border border-base-300 rounded-2xl w-full md:w-36 h-36 overflow-hidden shrink-0">
-                    <Image
-                      src={item.image || "https://placehold.co/300x300"}
-                      alt={item.productName || "Product"}
-                      fill
-                      className="p-4 object-contain group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-
-                  {/* Info Section */}
-                  <div className="flex flex-col flex-1 justify-between py-1">
-                    <div>
-                      <h3 className="font-black text-neutral group-hover:text-primary text-xl leading-tight transition-colors">
-                        {item.productName}
-                      </h3>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <span className="bg-white px-3 py-1 border border-base-300 rounded-lg font-bold text-[10px] text-neutral/40 uppercase">
-                          {item.brand}
-                        </span>
-                        {item.weight && (
-                          <span className="bg-white px-3 py-1 border border-base-300 rounded-lg font-bold text-[10px] text-neutral/40 uppercase">
-                            {item.weight} {item.weightUnit}
-                          </span>
-                        )}
-                        {item.category && (
-                          <span className="bg-primary/10 px-3 py-1 rounded-lg font-black text-[10px] text-primary uppercase">
-                            {item.category}
-                          </span>
-                        )}
-                      </div>
+            <div className="space-y-8">
+              <AnimatePresence mode="popLayout">
+                {cartItems.map((item) => (
+                  <motion.div
+                    key={item._id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="group relative flex md:flex-row flex-col gap-6 bg-gray-50/50 hover:bg-white p-6 border border-transparent hover:border-orange-100 rounded-[2.5rem] transition-all duration-300"
+                  >
+                    {/* Image Container */}
+                    <div className="relative bg-white shadow-sm border border-gray-100 rounded-[1.5rem] w-full md:w-40 h-40 overflow-hidden shrink-0">
+                      <Image
+                        src={item.image || "https://placehold.co/300x300?text=Pet+Gear"}
+                        alt={item.productName || "Product"}
+                        fill
+                        className="p-5 object-contain group-hover:scale-110 transition-transform duration-700"
+                      />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 mt-6">
-                      {/* Quantity Controls */}
-                      <div className="flex items-center bg-white shadow-sm p-1 border border-base-300 rounded-xl">
-                        <button
-                          onClick={() => handleQuantityChange(item._id, item.quantity - 1, item.stock)}
-                          disabled={isPending || item.quantity <= 1}
-                          className="flex justify-center items-center hover:bg-primary/10 disabled:opacity-20 rounded-lg w-9 h-9 hover:text-primary transition-all"
-                        >
-                          <FaMinus size={12} />
-                        </button>
-                        <span className="min-w-[45px] font-black text-lg text-center">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => handleQuantityChange(item._id, item.quantity + 1, item.stock)}
-                          disabled={isPending || item.quantity >= item.stock}
-                          className="flex justify-center items-center hover:bg-primary/10 disabled:opacity-20 rounded-lg w-9 h-9 hover:text-primary transition-all"
-                        >
-                          <FaPlus size={12} />
-                        </button>
+                    {/* Info Section */}
+                    <div className="flex flex-col flex-1 justify-between">
+                      <div>
+                        <div className="flex justify-between items-start gap-4">
+                          <h3 className="font-black text-gray-900 group-hover:text-orange-500 text-xl leading-tight transition-colors">
+                            {item.productName}
+                          </h3>
+                          <button
+                            onClick={() => handleRemove(item._id)}
+                            disabled={isPending}
+                            className="bg-white hover:bg-red-500 shadow-sm p-3 rounded-xl text-gray-300 hover:text-white active:scale-90 transition-all"
+                            title="Remove item"
+                          >
+                            <FaTrash size={14} />
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <span className="bg-white px-3 py-1 border border-gray-100 rounded-lg font-bold text-[9px] text-gray-400 uppercase tracking-widest">
+                            {item.brand || "Authentic"}
+                          </span>
+                          {item.weight && (
+                            <span className="bg-white px-3 py-1 border border-gray-100 rounded-lg font-bold text-[9px] text-gray-400 uppercase">
+                              {item.weight} {item.weightUnit}
+                            </span>
+                          )}
+                          <span className="bg-orange-100 px-3 py-1 rounded-lg font-black text-[9px] text-orange-600 uppercase tracking-widest">
+                            {item.productType || "Premium"}
+                          </span>
+                        </div>
                       </div>
 
-                      <button
-                        onClick={() => handleRemove(item._id)}
-                        disabled={isPending}
-                        className="group/btn hover:bg-error/10 border-none rounded-xl text-error/60 hover:text-error btn btn-ghost btn-sm"
-                      >
-                        <FaTrash className="group-hover/btn:rotate-12 transition-transform" />
-                        <span className="font-bold">Remove</span>
-                      </button>
-                    </div>
-                  </div>
+                      <div className="flex justify-between items-center mt-6">
+                        {/* Quantity Controls */}
+                        <div className="flex items-center bg-white shadow-sm p-1.5 border border-gray-100 rounded-2xl">
+                          <button
+                            onClick={() => handleQuantityChange(item._id, item.quantity - 1, item.stock)}
+                            disabled={isPending || item.quantity <= 1}
+                            className="flex justify-center items-center hover:bg-orange-50 disabled:opacity-20 rounded-xl w-10 h-10 text-gray-400 hover:text-orange-500 transition-all"
+                          >
+                            <FaMinus size={10} />
+                          </button>
+                          <span className="min-w-[40px] font-black text-gray-900 text-lg text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => handleQuantityChange(item._id, item.quantity + 1, item.stock)}
+                            disabled={isPending || item.quantity >= item.stock}
+                            className="flex justify-center items-center hover:bg-orange-50 disabled:opacity-20 rounded-xl w-10 h-10 text-gray-400 hover:text-orange-500 transition-all"
+                          >
+                            <FaPlus size={10} />
+                          </button>
+                        </div>
 
-                  {/* Price Section */}
-                  <div className="flex md:flex-col justify-between items-end md:min-w-[120px] md:text-right">
-                    <p className="font-bold text-[10px] text-neutral/30 uppercase tracking-widest">Line Total</p>
-                    <p className="font-black text-primary text-2xl">
-                      ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                        <div className="text-right">
+                          <p className="mb-1 font-bold text-[10px] text-gray-300 uppercase tracking-[0.2em]">Subtotal</p>
+                          <p className="font-black text-gray-900 text-2xl tracking-tighter">
+                            ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
 
           {/* Sticky Summary Card */}
-          <div className="top-24 sticky bg-base-100 shadow-2xl p-8 border border-base-300 rounded-[2.5rem] h-fit overflow-hidden">
-             {/* Decorative element from other team members if any */}
-            <div className="-top-10 -right-10 absolute bg-primary/5 rounded-full w-32 h-32"></div>
+          <div className="top-24 sticky h-fit">
+            <div className="relative bg-gray-900 shadow-2xl shadow-gray-200 p-10 border border-gray-800 rounded-[3rem] overflow-hidden text-white">
+              <div className="top-0 right-0 absolute bg-orange-500 opacity-10 rounded-full w-40 h-40 -translate-y-1/2 translate-x-1/2"></div>
+              
+              <h2 className="relative mb-10 pb-4 border-gray-800 border-b font-black text-2xl italic uppercase tracking-tight">Order Summary</h2>
 
-            <h2 className="relative mb-8 pb-4 border-base-200 border-b font-black text-neutral text-2xl tracking-tighter">Order Summary</h2>
+              <div className="relative space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-gray-400 text-xs uppercase tracking-[0.2em]">Total Items</span>
+                  <span className="bg-gray-800 px-4 py-1.5 rounded-xl font-black text-orange-500">{totalItems}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-gray-400 text-xs uppercase tracking-[0.2em]">Subtotal</span>
+                  <span className="font-black text-xl">${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-gray-400 text-xs uppercase tracking-[0.2em]">Shipping</span>
+                  <span className="font-black text-green-400 text-xs uppercase tracking-widest">Free</span>
+                </div>
 
-            <div className="space-y-4 font-bold text-neutral/70">
-              <div className="flex justify-between items-center">
-                <span className="opacity-60 text-sm uppercase tracking-wider">Total Items</span>
-                <span className="bg-base-200 px-3 py-1 rounded-lg text-neutral">{totalItems}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="opacity-60 text-sm uppercase tracking-wider">Subtotal</span>
-                <span className="text-neutral">${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="opacity-60 text-sm uppercase tracking-wider">Shipping</span>
-                <span className="bg-success/10 px-3 py-1 rounded-lg font-black text-[10px] text-success uppercase tracking-widest">Free</span>
-              </div>
-
-              <div className="mt-8 pt-6 border-base-200 border-t-2 border-dashed">
-                <div className="flex justify-between items-end font-black text-neutral">
-                  <span className="opacity-60 text-sm uppercase tracking-widest">Grand Total</span>
-                  <span className="text-primary text-3xl tracking-tighter">${subtotal.toFixed(2)}</span>
+                <div className="mt-10 pt-8 border-gray-800 border-t-2 border-dashed">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-bold text-[10px] text-gray-400 uppercase tracking-[0.3em]">Estimated Total</span>
+                    <span className="font-black text-orange-500 text-5xl tracking-tighter">${subtotal.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <Link href='/checkout' className="block mt-10">
-              <button className="group bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 py-5 rounded-[1.5rem] w-full font-black text-white text-lg active:scale-95 transition-all hover:-translate-y-1">
-                Proceed to Checkout
-                <span className="block opacity-60 font-bold text-[10px] uppercase tracking-[0.2em]">Secure Stripe Payment</span>
-              </button>
-            </Link>
+              <Link href='/checkout' className="block mt-12">
+                <button className="group bg-orange-500 hover:bg-white shadow-orange-500/20 shadow-xl py-6 rounded-2xl w-full font-black text-white hover:text-orange-500 text-lg active:scale-95 transition-all duration-500">
+                  Checkout Now
+                  <span className="block opacity-60 font-bold text-[10px] uppercase tracking-[0.2em]">Stripe Secure Payment</span>
+                </button>
+              </Link>
+              
+              <div className="flex justify-center gap-4 opacity-30 grayscale hover:grayscale-0 mt-8 transition-all duration-500">
+                <div className="bg-white p-1 rounded-md w-10 h-6"></div>
+                <div className="bg-white p-1 rounded-md w-10 h-6"></div>
+                <div className="bg-white p-1 rounded-md w-10 h-6"></div>
+              </div>
+            </div>
             
-            <p className="mt-6 font-bold text-[10px] text-neutral/30 text-center uppercase tracking-widest">
-              Satisfaction Guaranteed • Pawfect Match
+            <p className="mt-6 font-bold text-[10px] text-gray-300 text-center uppercase tracking-[0.2em]">
+              Trusted by 10k+ Pet Parents
             </p>
           </div>
         </div>
