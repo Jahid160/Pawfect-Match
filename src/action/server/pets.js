@@ -181,6 +181,7 @@ export const UpdatePetStatus = async (id) => {
 
   try {
     const PetCollection = await petCollectionPromise;
+    const adoptionCollection = await adoptionCollectionPromise;
     const query = { _id: new ObjectId(id) };
 
     const updateStatus = {
@@ -189,6 +190,12 @@ export const UpdatePetStatus = async (id) => {
         updatedBy: adminEmail,
       },
     };
+    await adoptionCollection.updateOne({ petId: id }, {
+      $set: {
+        status: "adopted",
+        updatedTime: new Date()
+      },
+    });
 
     const result = await PetCollection.updateOne(query, updateStatus);
     revalidatePath("/dashboard/manage-pets");
@@ -231,7 +238,7 @@ export const UpdatePetStatusReject = async (id, adoptionCode) => {
         adoptedUserEmail: "",
         adoptionCode: "",
         updatedBy: "",
-        adoptedUserTime: ""
+        adoptedUserTime: "",
       },
     };
 
