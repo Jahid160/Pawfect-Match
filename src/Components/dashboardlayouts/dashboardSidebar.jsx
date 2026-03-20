@@ -47,7 +47,7 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/shelters",
       icon: BsHouseAddFill,
     },
-    { name: "Doctors Profiles", href: "/dashboard/doctors", icon: Stethoscope },
+    { name: "Doctors Management", href: "/dashboard/doctors", icon: Stethoscope },
     {
       name: "Vaccination Management",
       href: "/dashboard/vaccinations",
