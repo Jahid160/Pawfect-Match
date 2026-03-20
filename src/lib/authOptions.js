@@ -6,29 +6,22 @@ import { collections, dbConnect } from "./db";
 
 export const authOptions = {
   providers: [
-    //  Credentials
     CredentialsProvider({
       name: "Credentials",
       credentials: {},
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-
         const user = await loginUser({
           email: credentials.email,
           password: credentials.password,
         });
-
         return user || null;
       },
     }),
-
-    //  Google
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-
-    //  GitHub
     GitHubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
@@ -36,9 +29,6 @@ export const authOptions = {
   ],
 
   callbacks: {
-    /**
-     * সাইন ইন করার সময় ইউজারকে ডাটাবেজে সেভ বা আপডেট করা
-     */
     async signIn({ user, account }) {
       try {
         if (!user?.email) return false;
@@ -46,30 +36,27 @@ export const authOptions = {
         const usersCollection = await dbConnect(collections.USERS);
         const now = new Date();
 
-        // ইউজার থাকলে শুধু লগইন টাইম আপডেট হবে, না থাকলে নতুন ক্রিয়েট হবে
-        const result = await usersCollection.updateOne(
+        // ইউজার ইনফো আপডেট বা ইনসার্ট একবারে করা (Atomicity)
+        await usersCollection.updateOne(
           { email: user.email },
           {
             $setOnInsert: {
               email: user.email,
+              name: user.name,
+              image: user.image,
               role: "user",
               createdAt: now,
-              location: "Savar, Dhaka", // ডিফল্ট লোকেশন
+              location: "Savar, Dhaka",
+              status: "active",
             },
             $set: {
               provider: account?.provider || "credentials",
               lastLoginAt: now,
-              status: "active",
+              // সোশ্যাল লগইনের ক্ষেত্রে ইমেজ আপডেট রাখা ভালো
+              ...(account?.provider !== "credentials" && { image: user.image }),
             },
           },
           { upsert: true }
-        );
-
-        // নতুন ইউজার নাকি পুরাতন তা ডিটেক্ট করা
-        const action = result.upsertedCount > 0 ? "register" : "login";
-        await usersCollection.updateOne(
-          { email: user.email },
-          { $set: { lastAuthAction: action } }
         );
 
         return true;
@@ -79,40 +66,29 @@ export const authOptions = {
       }
     },
 
-    /**
-     * JWT টোকেনে কাস্টম ডাটা (role, id, location, image) সেট করা
-     */
     async jwt({ token, user, trigger, session }) {
-      const usersCollection = await dbConnect(collections.USERS);
-
-      // যদি ক্লায়েন্ট সাইড থেকে update() কল করা হয় (যেমন প্রোফাইল পিকচার চেঞ্জ করলে)
+      // ১. যদি ক্লায়েন্ট থেকে update() কল করা হয় (প্রোফাইল আপডেট)
       if (trigger === "update" && session) {
-        token.name = session.name || token.name;
-        token.picture = session.image || token.picture;
-        token.location = session.location || token.location;
+        return { ...token, ...session };
       }
 
-      // ইনিশিয়াল লগইন বা টোকেন রিফ্রেশ করার সময় DB থেকে ডাটা আনা
-      if (user?.email || token?.email) {
-        const dbUser = await usersCollection.findOne({
-          email: user?.email || token.email,
-        });
+      // ২. যদি প্রথমবার লগইন হয় (user অবজেক্ট থাকবে)
+      if (user) {
+        const usersCollection = await dbConnect(collections.USERS);
+        const dbUser = await usersCollection.findOne({ email: user.email });
 
         if (dbUser) {
           token.id = dbUser._id?.toString();
           token.role = dbUser.role;
           token.location = dbUser.location;
-          token.picture = dbUser.image || user?.image || token.picture;
-          token.name = dbUser.name || user?.name || token.name;
+          token.picture = dbUser.image || user.image;
+          token.name = dbUser.name || user.name;
         }
       }
 
       return token;
     },
 
-    /**
-     * সেশনে টোকেনের ডাটাগুলো এক্সপোজ করা যাতে useSession() দিয়ে পাওয়া যায়
-     */
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
@@ -127,6 +103,8 @@ export const authOptions = {
 
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
 
   pages: {
