@@ -10,14 +10,16 @@ import { FaArrowLeft, FaShoppingBag, FaTruck, FaCreditCard, FaCheckCircle } from
 import Swal from "sweetalert2";
 import AuthButtons from "../button/AuthButtons";
 import { useCartStore } from "@/lib/useCartStore";
+
+// সঠিক ফাংশন নামগুলো ইমপোর্ট করা হলো (ব্যাকএন্ডের সাথে মিলিয়ে)
 import {
   createOrderFromCart,
-  createSingleFoodOrder,
+  createSingleOrder, 
 } from "@/action/server/order";
 import { getSingleFood } from "@/action/server/foods";
 import {
   createStripeCheckoutFromCart,
-  createStripeCheckoutForSingleFood,
+  createStripeCheckoutForSingleProduct, // নাম আপডেট করা হয়েছে
 } from "@/action/server/stripe";
 
 const CheckoutPageClient = () => {
@@ -93,7 +95,6 @@ const CheckoutPageClient = () => {
     return Number(hasDiscount ? buyNowItem.discountPrice : buyNowItem.price);
   }, [buyNowItem]);
 
-  // মেইন সোর্স অফ ট্রুথ: এটি কার্ট এবং বাই-নাউ উভয়কেই হ্যান্ডেল করে
   const checkoutItems = useMemo(() => {
     if (isBuyNow && buyNowItem) {
       return [
@@ -108,6 +109,7 @@ const CheckoutPageClient = () => {
           weight: buyNowItem.weight,
           weightUnit: buyNowItem.weightUnit,
           stock: buyNowItem.stock,
+          productType: buyNowItem.productType || "food",
         },
       ];
     }
@@ -151,10 +153,10 @@ const CheckoutPageClient = () => {
     startTransition(async () => {
       if (formData.paymentMethod === "Online Payment") {
         const result = isBuyNow
-          ? await createStripeCheckoutForSingleFood({
+          ? await createStripeCheckoutForSingleProduct({ // ফাংশন নাম আপডেট করা হয়েছে
               userEmail: session.user.email,
               ...formData,
-              foodId,
+              productId: foodId, // জেনেরিক আইডি
               quantity: 1,
             })
           : await createStripeCheckoutFromCart({
@@ -172,10 +174,11 @@ const CheckoutPageClient = () => {
       }
 
       const result = isBuyNow
-        ? await createSingleFoodOrder({
+        ? await createSingleOrder({
             userEmail: session.user.email,
             ...formData,
-            foodId,
+            productId: foodId,
+            productType: buyNowItem?.productType || "food",
             quantity: 1,
           })
         : await createOrderFromCart({
@@ -188,7 +191,6 @@ const CheckoutPageClient = () => {
         return;
       }
 
-      // অর্ডার সাকসেস হলে কার্ট কাউন্ট ০ করে দেওয়া (যদি কার্ট থেকে অর্ডার হয়)
       if (!isBuyNow) {
         setCartCount(0);
       }
@@ -223,21 +225,6 @@ const CheckoutPageClient = () => {
         <h2 className="font-black text-gray-900 text-3xl">Please login first</h2>
         <p className="mt-3 max-w-sm text-gray-500">You need to be logged in to complete your purchase.</p>
         <div className="mt-8"><AuthButtons /></div>
-      </div>
-    );
-  }
-
-  if (!checkoutItems.length) {
-    return (
-      <div className="flex flex-col justify-center items-center bg-gray-50 px-4 min-h-screen text-center">
-        <div className="bg-white shadow-xl mb-6 p-10 rounded-full">
-          <FaShoppingBag className="text-gray-200 text-6xl" />
-        </div>
-        <h2 className="font-black text-3xl">{isBuyNow ? "Product not found" : "Your cart is empty"}</h2>
-        <p className="mt-3 text-gray-500">Add some products before going to checkout.</p>
-        <Link href="/petfoods" className="bg-primary shadow-lg shadow-orange-200 mt-6 px-8 py-3 rounded-xl font-bold text-white">
-          Continue Shopping
-        </Link>
       </div>
     );
   }
@@ -324,7 +311,7 @@ const CheckoutPageClient = () => {
             </button>
           </form>
 
-          {/* Right: Sticky Order Summary */}
+          {/* Right Summary */}
           <div className="top-24 sticky h-fit">
             <div className="bg-white shadow-2xl shadow-gray-200/50 p-8 border border-gray-100 rounded-[2.5rem]">
               <h2 className="mb-8 pb-4 border-gray-50 border-b font-black text-gray-900 text-2xl tracking-tight">Your Order</h2>
@@ -348,10 +335,6 @@ const CheckoutPageClient = () => {
                 <div className="flex justify-between font-bold text-gray-400 text-xs uppercase tracking-widest">
                   <span>Subtotal ({totalItems} items)</span>
                   <span className="font-black text-gray-900 text-sm">${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-gray-400 text-xs uppercase tracking-widest">
-                  <span>Shipping Fee</span>
-                  <span className="font-black text-green-500 tracking-normal">FREE</span>
                 </div>
                 <div className="flex justify-between pt-4 font-black text-gray-900 text-2xl tracking-tighter">
                   <span>Total Amount</span>
