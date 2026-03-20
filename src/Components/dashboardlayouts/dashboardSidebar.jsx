@@ -68,9 +68,9 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/adoption-requests",
       icon: PawPrint,
     },
-    { name: "Favorite Pets", href: "/dashboard/favorites", icon: HeartPlus  },
+    { name: "Favorite Pets", href: "/dashboard/favorites", icon: HeartPlus },
     { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint },
-    { name: "Pet Foods", href: "/dashboard/pet-foods", icon: BoneIcon  },
+    { name: "Pet Foods", href: "/dashboard/pet-foods", icon: BoneIcon },
     { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
   ];
 
@@ -87,8 +87,8 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: FileText,
     },
   ];
+
   const shelterNavItem = [
-    { name: "Manage Pets", href: "/dashboard/manage-pets", icon: PawPrint },
     {
       name: "Adoption Requests",
       href: "/dashboard/requests",
@@ -114,11 +114,10 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
   /* ---------------- STYLE HELPERS ---------------- */
   const getLinkStyle = (path) => {
     const isActive = pathname === path;
-    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${
-      isActive
-        ? "bg-orange-500 text-white shadow-md shadow-orange-200"
-        : "hover:bg-orange-100 text-slate-600"
-    } ${isCollapsed ? "justify-center px-2" : ""}`;
+    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${isActive
+      ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+      : "hover:bg-orange-100 text-slate-600"
+      } ${isCollapsed ? "justify-center px-2" : ""}`;
   };
 
   return (
