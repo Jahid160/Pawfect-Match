@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { motion } from "framer-motion";
-import { 
-  FileBarChart2, 
-  Download, 
-  Filter, 
-  TrendingUp, 
-  PieChart, 
+import {
+  FileBarChart2,
+  Download,
+  Filter,
+  TrendingUp,
+  PieChart,
   Calendar,
   ArrowRight,
   ShieldCheck,
@@ -29,7 +29,7 @@ const ReportAnalysis = () => {
 
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
-      
+
       {/* --- HEADER --- */}
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-12">
         <div>
@@ -38,7 +38,7 @@ const ReportAnalysis = () => {
           </h1>
           <p className="mt-2 font-medium text-slate-500">Generate, view, and export detailed system insights.</p>
         </div>
-        
+
         <div className="flex gap-3 w-full md:w-auto">
           <button className="flex flex-1 md:flex-none justify-center items-center gap-2 bg-white hover:bg-slate-50 shadow-sm px-6 py-3 border border-slate-200 rounded-2xl font-bold text-slate-700 transition-all">
             <Filter size={18} /> Filters
@@ -52,7 +52,7 @@ const ReportAnalysis = () => {
       {/* --- STATS GRID --- */}
       <div className="gap-6 grid grid-cols-1 md:grid-cols-3 mb-12">
         {reportStats.map((stat, index) => (
-          <motion.div 
+          <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -72,14 +72,14 @@ const ReportAnalysis = () => {
       </div>
 
       <div className="gap-8 grid grid-cols-1 lg:grid-cols-12">
-        
+
         {/* --- MAIN ANALYSIS TABLE --- */}
         <div className="lg:col-span-8 bg-white shadow-sm border border-slate-100 rounded-[3rem] overflow-hidden">
           <div className="flex justify-between items-center p-8 border-slate-50 border-b">
             <h3 className="font-black text-xl tracking-tight">Recent Generated Reports</h3>
             <span className="font-bold text-slate-400 text-xs uppercase tracking-tighter">Page 1 of 12</span>
           </div>
-          
+
           <div className="p-4 overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -105,9 +105,8 @@ const ReportAnalysis = () => {
                     <td className="px-6 py-5 text-slate-500 text-sm">{report.date}</td>
                     <td className="px-6 py-5 font-black text-slate-400 text-xs">{report.type}</td>
                     <td className="px-6 py-5">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
-                        report.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${report.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                        }`}>
                         {report.status}
                       </span>
                     </td>
@@ -125,7 +124,7 @@ const ReportAnalysis = () => {
 
         {/* --- SIDEBAR WIDGETS --- */}
         <div className="space-y-8 lg:col-span-4">
-          
+
           {/* Quick Action Card */}
           <div className="relative bg-slate-900 p-8 rounded-[2.5rem] overflow-hidden text-white">
             <div className="-top-4 -right-4 absolute bg-orange-500/20 blur-3xl rounded-full w-24 h-24"></div>
@@ -138,11 +137,11 @@ const ReportAnalysis = () => {
 
           {/* Alert Box */}
           <div className="flex gap-4 bg-rose-50 p-8 border border-rose-100 rounded-[2.5rem]">
-             <AlertCircle className="text-rose-500 shrink-0" size={24} />
-             <div>
-                <h5 className="font-bold text-rose-900">Weekly Reminder</h5>
-                <p className="mt-1 font-medium text-rose-700/70 text-sm leading-relaxed">Don't forget to sync the adoption logs with the main server before Sunday night.</p>
-             </div>
+            <AlertCircle className="text-rose-500 shrink-0" size={24} />
+            <div>
+              <h5 className="font-bold text-rose-900">Weekly Reminder</h5>
+              <p className="mt-1 font-medium text-rose-700/70 text-sm leading-relaxed">Do not forget to sync the adoption logs with the main server before Sunday night.</p>
+            </div>
           </div>
 
         </div>

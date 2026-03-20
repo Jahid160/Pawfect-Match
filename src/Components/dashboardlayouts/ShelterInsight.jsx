@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Edit3, Trash2, Trophy, Zap, Search, ChevronLeft, ChevronRight, ArrowUpDown, Inbox, SearchX } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { deleteShelterRequest, updateShelterData } from '@/action/server/Shelteruser';
 
 // --- 1. Move EmptyState OUTSIDE the main component ---topShelter={topShelter}
 const EmptyState = ({ icon: Icon, title, description }) => (
@@ -33,36 +34,73 @@ const ShelterInsight = ({ totalItems, requests = [], setRequests, currentPage, s
 
 
 
-
-
      const handleDelete = (id, name) => {
           Swal.fire({
                title: `Remove ${name}?`,
+               text: "This action cannot be undone!",
                icon: "warning",
                showCancelButton: true,
                confirmButtonColor: "#ef4444",
-               confirmButtonText: "Yes, Delete"
+               confirmButtonText: "Yes, Delete",
+               showLoaderOnConfirm: true,
+               preConfirm: async () => {
+                    const res = await deleteShelterRequest(id);
+                    if (!res.success) {
+                         Swal.showValidationMessage(`Error: ${res.message}`);
+                    }
+                    return res;
+               }
           }).then((result) => {
                if (result.isConfirmed) {
                     setRequests(prev => prev.filter(req => req._id !== id));
+                    Swal.fire("Deleted!", "The request has been removed.", "success");
                }
           });
      };
 
      const handleEdit = (request) => {
           Swal.fire({
-               title: 'Edit Shelter Stats',
-               input: 'number',
-               inputValue: request.petCount || 0,
-               inputLabel: `Update pet count for ${request.shelterName}`,
+               title: 'Update Shelter Information',
+               html: `
+            <div style="text-align: left;">
+                <label style="font-size: 14px; font-weight: bold;">Full Name</label>
+                <input id="swal-input1" class="swal2-input" placeholder="Full Name" value="${request.fullName}">
+                
+                <label style="font-size: 14px; font-weight: bold; margin-top: 10px; display: block;">Shelter Name</label>
+                <input id="swal-input2" class="swal2-input" placeholder="Shelter Name" value="${request.shelterName}">
+            </div>
+        `,
+               focusConfirm: false,
                showCancelButton: true,
-               confirmButtonText: 'Update',
+               confirmButtonText: 'Update Now',
                confirmButtonColor: '#fa6e1d',
+               showLoaderOnConfirm: true,
+               preConfirm: async () => {
+                    const fullName = document.getElementById('swal-input1').value;
+                    const shelterName = document.getElementById('swal-input2').value;
+
+                    if (!fullName || !shelterName) {
+                         Swal.showValidationMessage('Please fill in both fields');
+                         return false;
+                    }
+
+                    const res = await updateShelterData(request._id, { fullName, shelterName });
+
+                    if (!res.success) {
+                         Swal.showValidationMessage(`Error: ${res.message}`);
+                         return false;
+                    }
+
+                    return { fullName, shelterName };
+               }
           }).then((result) => {
                if (result.isConfirmed) {
                     setRequests(prev => prev.map(req =>
-                         req._id === request._id ? { ...req, petCount: parseInt(result.value) } : req
+                         req._id === request._id
+                              ? { ...req, fullName: result.value.fullName, shelterName: result.value.shelterName }
+                              : req
                     ));
+                    Swal.fire("Success!", "Information updated successfully.", "success");
                }
           });
      };
