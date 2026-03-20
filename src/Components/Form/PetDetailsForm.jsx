@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   PawPrint,
   Stethoscope,
@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { AddPets } from "@/action/server/pets";
+import { useSession } from "next-auth/react";
 
 const steps = [
   { id: 1, label: "Basic Info", icon: PawPrint },
@@ -121,12 +122,12 @@ function FieldError({ msg }) {
 
 export default function PetAdoptionForm() {
   const [currentStep, setCurrentStep] = useState(1);
+  const { data: session } = useSession()
   const [submitted, setSubmitted] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemperaments, setSelectedTemperaments] = useState([]);
   const [errors, setErrors] = useState({});
-
   const [form, setForm] = useState({
     petName: "",
     species: "",
@@ -158,10 +159,21 @@ export default function PetAdoptionForm() {
     ownerType: "",
   });
 
+
   const update = (f, v) => {
     setForm((p) => ({ ...p, [f]: v }));
     if (errors[f]) setErrors((p) => ({ ...p, [f]: "" }));
   };
+
+
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      update("email", session.user.email);
+    }
+  }, [session]);
+
+
 
   const toggleT = (t) =>
     setSelectedTemperaments((p) =>
@@ -336,7 +348,7 @@ export default function PetAdoptionForm() {
           <PawPrint size={11} /> PawFind Adoption Portal
         </div>
         <h1 className="text-4xl sm:text-5xl font-black text-neutral tracking-tight leading-[1.1] mb-3">
-          List Your Pet
+          List Pets
           <br />
           <span className="text-primary">for Adoption</span>
         </h1>
@@ -737,11 +749,10 @@ export default function PetAdoptionForm() {
                         if (errors.temperaments)
                           setErrors((p) => ({ ...p, temperaments: "" }));
                       }}
-                      className={`btn btn-sm rounded-full font-semibold transition-all duration-200 gap-1.5 ${
-                        selectedTemperaments.includes(t)
-                          ? "btn-primary shadow-md shadow-primary/25"
-                          : "btn-ghost border border-base-300 hover:border-primary/50 hover:text-primary"
-                      }`}
+                      className={`btn btn-sm rounded-full font-semibold transition-all duration-200 gap-1.5 ${selectedTemperaments.includes(t)
+                        ? "btn-primary shadow-md shadow-primary/25"
+                        : "btn-ghost border border-base-300 hover:border-primary/50 hover:text-primary"
+                        }`}
                     >
                       {selectedTemperaments.includes(t) && <Check size={11} />}
                       {t}
@@ -1109,12 +1120,12 @@ export default function PetAdoptionForm() {
                   <IconInput
                     icon={Mail}
                     type="email"
-                    placeholder="you@example.com"
-                    value={form.email}
-                    onChange={(e) => update("email", e.target.value)}
-                    className={
-                      errors.email ? "border-error focus:border-error" : ""
-                    }
+                    value={form.email || ""}
+                    readOnly={true}
+                    className={`
+    ${errors.email ? "border-error focus:border-error" : ""} 
+    bg-base-300 cursor-not-allowed opacity-70
+  `}
                   />
                   <FieldError msg={errors.email} />
                 </div>

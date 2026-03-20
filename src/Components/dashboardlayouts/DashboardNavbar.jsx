@@ -4,20 +4,20 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Bell,
-  User,
   Check,
-  MessageSquare,
   Heart,
   AlertCircle,
   ArrowRight,
+  User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 
-const DashboardNavbar = () => {
+const DashboardNavbar = ({ isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const session = useSession()
+  const { data: session } = useSession();
+
   // Fake Notification Data
   const notifications = [
     {
@@ -61,21 +61,23 @@ const DashboardNavbar = () => {
   }, []);
 
   return (
-    <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 py-3 border-gray-100 border-b">
-      {/* LEFT SIDE: Logo */}
-      <div>
-        <h1 className="hover:opacity-80 ml-9 lg:ml-1 font-black text-slate-800 text-xl tracking-tight transition-opacity">
+    <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px] transition-all duration-300">
+      
+      {/* LEFT SIDE: Title */}
+      <div className="flex items-center gap-4">
+        <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl tracking-tight transition-opacity">
           Dashboard <span className="text-orange-500 italic">Overview</span>
         </h1>
       </div>
 
       {/* RIGHT SIDE: Notifications & Profile */}
       <div className="flex items-center gap-5">
+        
         {/* Notification Container */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className={`relative p-2.5 rounded-2xl transition-all duration-300 ${
+            className={`relative rounded-2xl p-2.5 transition-all duration-300 ${
               isOpen
                 ? "bg-orange-50 text-orange-600"
                 : "hover:bg-slate-50 text-slate-500"
@@ -111,10 +113,10 @@ const DashboardNavbar = () => {
                   {notifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`p-4 flex gap-4 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-50 last:border-0 relative ${notif.isUnread ? "bg-blue-50/20" : ""}`}
+                      className={`relative flex cursor-pointer gap-4 border-b border-slate-50 p-4 transition-colors hover:bg-slate-50 last:border-0 ${notif.isUnread ? "bg-blue-50/20" : ""}`}
                     >
                       <div
-                        className={`${notif.bg} w-10 h-10 rounded-xl flex items-center justify-center shrink-0`}
+                        className={`${notif.bg} flex h-10 w-10 shrink-0 items-center justify-center rounded-xl`}
                       >
                         {notif.icon}
                       </div>
@@ -142,7 +144,7 @@ const DashboardNavbar = () => {
                 <Link
                   href="/notifications"
                   onClick={() => setIsOpen(false)}
-                  className="block flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-4 font-black text-orange-500 hover:text-white text-xs text-center uppercase tracking-widest transition-all"
+                  className="flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-4 font-black text-orange-500 hover:text-white text-xs text-center uppercase tracking-widest transition-all"
                 >
                   See all activities <ArrowRight size={14} />
                 </Link>
@@ -153,17 +155,20 @@ const DashboardNavbar = () => {
 
         {/* Profile Avatar */}
         <div className="flex items-center gap-3 pl-2 border-slate-100 border-l">
-          <button className="flex justify-center items-center bg-orange-100 border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 text-orange-600 transition-all">
-            {/* <User size={22} strokeWidth={2.5} /> */}
-            <img src={session?.data?.user?.image} alt="" />
+          <button className="flex justify-center items-center bg-orange-100 border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 overflow-hidden transition-all">
+            {session?.user?.image ? (
+              <img src={session.user.image} alt="User Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <User size={22} strokeWidth={2.5} className="text-orange-600" />
+            )}
           </button>
 
           <div className="hidden md:block">
             <p className="font-black text-slate-800 text-sm leading-none">
-              {session?.data?.user?.name}
+              {session?.user?.name || "User Name"}
             </p>
             <p className="mt-1 font-bold text-[10px] text-slate-400 italic uppercase tracking-tighter">
-              {session?.data?.user?.role}
+              {session?.user?.role || "Pet Lover"}
             </p>
           </div>
         </div>

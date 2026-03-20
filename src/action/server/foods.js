@@ -5,7 +5,6 @@ import { ObjectId } from "mongodb";
 
 const foodCollectionPromise = dbConnect(collections.FOODS);
 
-
 // =============================
 // CREATE FOOD
 // =============================
@@ -15,7 +14,10 @@ export const createFood = async (data) => {
 
     const result = await foodsCollection.insertOne({
       ...data,
+      price: Number(data.price) || 0,
+      discountPrice: Number(data.discountPrice) || 0,
       stock: Number(data.stock) || 0,
+      weight: Number(data.weight) || 0,
       inStock: Number(data.stock) > 0,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -31,7 +33,6 @@ export const createFood = async (data) => {
   }
 };
 
-
 // =============================
 // GET ALL FOODS
 // =============================
@@ -39,10 +40,7 @@ export const getPetFoods = async () => {
   try {
     const foodsCollection = await foodCollectionPromise;
 
-    const foods = await foodsCollection
-      .find()
-      .sort({ createdAt: -1 })
-      .toArray();
+    const foods = await foodsCollection.find().sort({ createdAt: -1 }).toArray();
 
     return foods.map((food) => ({
       ...food,
@@ -55,7 +53,6 @@ export const getPetFoods = async () => {
     return [];
   }
 };
-
 
 // =============================
 // GET SINGLE FOOD
@@ -89,80 +86,128 @@ export const getSingleFood = async (id) => {
 // =============================
 export const deleteFood = async (id) => {
   try {
-    if (!ObjectId.isValid(id)) return { success: false, error: "Invalid ID" };
+    if (!ObjectId.isValid(id)) {
+      return { success: false, error: "Invalid ID" };
+    }
+
     const foodsCollection = await foodCollectionPromise;
     const result = await foodsCollection.deleteOne({ _id: new ObjectId(id) });
-    
+
     return { success: result.deletedCount === 1 };
   } catch (error) {
     console.error("deleteFood error:", error);
     return { success: false, error: error.message };
   }
 };
+
 // =============================
-// REDUCE FOOD STOCK (MULTIPLE ITEMS)
+// REDUCE FOOD STOCK
 // =============================
 export const reduceFoodStock = async (items = []) => {
   try {
-    if (!items.length) return { success: false };
+    if (!items.length) {
+      return { success: false, message: "No items provided." };
+    }
 
     const foodsCollection = await dbConnect(collections.FOODS);
 
     for (const item of items) {
-      // 1. Identify the ID (check both productId and product_id)
-      const idStr = item.productId || item.product_id;
-      
-      if (!idStr || !ObjectId.isValid(idStr)) {
-        console.error("Invalid ID found in reduction list:", idStr);
-        continue;
-      }
-
+      const idStr = item.productId || item.foodId || item.product_id;
       const quantity = Number(item.quantity) || 1;
 
-      // 2. Perform the update
+      console.log("Reducing stock:", { idStr, quantity, item });
+
+      if (!idStr || !ObjectId.isValid(idStr)) {
+        console.error("Invalid product ID:", idStr, item);
+        return { success: false, message: "Invalid product ID found." };
+      }
+
+      const existingFood = await foodsCollection.findOne({
+        _id: new ObjectId(idStr),
+      });
+
+      if (!existingFood) {
+        console.error("Food not found:", idStr);
+        return { success: false, message: `Food not found: ${idStr}` };
+      }
+
+      if (Number(existingFood.stock || 0) < quantity) {
+        console.error("Not enough stock for:", idStr);
+        return {
+          success: false,
+          message: `Not enough stock for ${existingFood.productName || idStr}`,
+        };
+      }
+
       const result = await foodsCollection.updateOne(
-        { 
-          _id: new ObjectId(idStr), // Ensure this matches the _id in your JSON
-          stock: { $gte: quantity } 
+        {
+          _id: new ObjectId(idStr),
+          stock: { $gte: quantity },
         },
-        { 
+        {
           $inc: { stock: -quantity },
-          $set: { updatedAt: new Date() }
+          $set: { updatedAt: new Date() },
         }
       );
 
-      console.log(`Product ${idStr} updated: ${result.modifiedCount} documents modified.`);
+      console.log("Stock update result:", result);
+
+      if (result.modifiedCount !== 1) {
+        console.error("Stock update failed for:", idStr);
+        return {
+          success: false,
+          message: `Stock update failed for ${idStr}`,
+        };
+      }
     }
 
-    // 3. Cleanup: Set inStock to false if stock hit 0
     await foodsCollection.updateMany(
       { stock: { $lte: 0 } },
-      { $set: { inStock: false } }
+      {
+        $set: {
+          inStock: false,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    await foodsCollection.updateMany(
+      { stock: { $gt: 0 } },
+      {
+        $set: {
+          inStock: true,
+          updatedAt: new Date(),
+        },
+      }
     );
 
     return { success: true };
   } catch (error) {
     console.error("reduceFoodStock error:", error);
-    return { success: false };
+    return { success: false, message: error.message };
   }
 };
 
-
 // =============================
-// INCREASE STOCK (OPTIONAL)
+// INCREASE FOOD STOCK
 // =============================
 export const increaseFoodStock = async (items = []) => {
   try {
+    if (!items.length) {
+      return { success: false, message: "No items provided." };
+    }
+
     const foodsCollection = await foodCollectionPromise;
 
     for (const item of items) {
+      const idStr = item.productId || item.foodId || item.product_id;
 
-      if (!ObjectId.isValid(item.productId)) continue;
+      if (!idStr || !ObjectId.isValid(idStr)) continue;
 
       const quantity = Number(item.quantity) || 1;
 
       await foodsCollection.updateOne(
-        { _id: new ObjectId(item.productId) },
+        { _id: new ObjectId(idStr) },
         {
           $inc: { stock: quantity },
           $set: {
@@ -176,6 +221,6 @@ export const increaseFoodStock = async (items = []) => {
     return { success: true };
   } catch (error) {
     console.error("increaseFoodStock error:", error);
-    return { success: false };
+    return { success: false, message: error.message };
   }
 };

@@ -3,7 +3,8 @@
 import Stripe from "stripe";
 import { dbConnect, collections } from "@/lib/db";
 import { getCartItems } from "@/action/server/cart";
-import { reduceFoodStock } from "./foods";
+import { reduceFoodStock } from "@/action/server/foods";
+import { ObjectId } from "mongodb";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -12,67 +13,142 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
-      return { success: false };
+      return { success: false, message: "Payment not completed." };
     }
 
     const orderCollection = await dbConnect(collections.ORDER);
-    
-    // 1. Check if this order was already processed (Prevents stock reducing twice on refresh)
-    const existingOrder = await orderCollection.findOne({ stripeSessionId: sessionId });
+
+    const existingOrder = await orderCollection.findOne({
+      stripeSessionId: sessionId,
+    });
+
     if (existingOrder) {
-      return { success: true, orderId: existingOrder._id.toString() };
+      return {
+        success: true,
+        orderId: existingOrder._id.toString(),
+      };
     }
 
-    // 2. Get Cart Items and Metadata
-    const cartItems = await getCartItems(userEmail);
-    const { customerName, phone, address, city, area, note } = session.metadata;
+    const metadata = session.metadata || {};
+    const mode = metadata.mode || "cart";
 
-    if (!cartItems.length) return { success: false };
+    let orderItems = [];
+    let totalAmount = 0;
 
-    // 3. Create the Order Document
-    const orderItems = cartItems.map((item) => ({
-      productId: item.productId,
-      productName: item.productName,
-      quantity: item.quantity,
-      price: Number(item.price),
-      lineTotal: Number(item.price) * Number(item.quantity),
-    }));
+    if (mode === "buy-now") {
+      const foodsCollection = await dbConnect(collections.FOODS);
+      const foodId = metadata.foodId;
+      const quantity = Number(metadata.quantity || 1);
 
-    const totalAmount = orderItems.reduce((sum, item) => sum + item.lineTotal, 0);
+      if (!foodId || !ObjectId.isValid(foodId)) {
+        return { success: false, message: "Invalid product in metadata." };
+      }
+
+      const food = await foodsCollection.findOne({
+        _id: new ObjectId(foodId),
+      });
+
+      if (!food) {
+        return { success: false, message: "Food not found." };
+      }
+
+      const finalPrice =
+        food.discountPrice && Number(food.discountPrice) < Number(food.price)
+          ? Number(food.discountPrice)
+          : Number(food.price);
+
+      orderItems = [
+        {
+          productId: food._id.toString(),
+          foodId: food._id.toString(),
+          productName: food.productName || "",
+          brand: food.brand || "",
+          image: food.image || "",
+          weight: food.weight || "",
+          weightUnit: food.weightUnit || "",
+          quantity,
+          price: finalPrice,
+          lineTotal: finalPrice * quantity,
+        },
+      ];
+
+      totalAmount = finalPrice * quantity;
+    } else {
+      const cartItems = await getCartItems(userEmail);
+
+      if (!cartItems.length) {
+        return { success: false, message: "Cart is empty." };
+      }
+
+      orderItems = cartItems.map((item) => ({
+        productId: item.productId || item.foodId || item.product_id || null,
+        foodId: item.foodId || item.productId || item.product_id || null,
+        productName: item.productName || "",
+        quantity: Number(item.quantity || 1),
+        price: Number(item.price || 0),
+        lineTotal: Number(item.price || 0) * Number(item.quantity || 1),
+      }));
+
+      totalAmount = orderItems.reduce(
+        (sum, item) => sum + Number(item.lineTotal || 0),
+        0
+      );
+    }
 
     const orderDoc = {
       userEmail,
-      customerName,
-      phone,
-      shippingAddress: { address, city, area },
+      customerName: metadata.customerName || "",
+      phone: metadata.phone || "",
+      shippingAddress: {
+        address: metadata.address || "",
+        city: metadata.city || "",
+        area: metadata.area || "",
+      },
       paymentMethod: "Stripe",
       paymentStatus: "paid",
       orderStatus: "processing",
       items: orderItems,
+      totalItems: orderItems.reduce(
+        (sum, item) => sum + Number(item.quantity || 0),
+        0
+      ),
+      subtotal: totalAmount,
+      shippingCost: 0,
       totalAmount,
       stripeSessionId: sessionId,
-      note,
+      note: metadata.note || "",
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    // 4. Save Order to Database
     const result = await orderCollection.insertOne(orderDoc);
 
-    // 5. REDUCE STOCK IN DATABASE
-    // This is the missing piece!
-    await reduceFoodStock(orderItems);
+    if (!result.insertedId) {
+      return { success: false, message: "Order save failed." };
+    }
 
-    // 6. Clear the Cart
-    const cartCollection = await dbConnect(collections.CART);
-    await cartCollection.deleteMany({ userEmail });
+    const stockResult = await reduceFoodStock(orderItems);
+
+    if (!stockResult?.success) {
+      await orderCollection.deleteOne({ _id: result.insertedId });
+
+      return {
+        success: false,
+        message: stockResult?.message || "Stock update failed.",
+      };
+    }
+
+    if (mode !== "buy-now") {
+      const cartCollection = await dbConnect(collections.CART);
+      await cartCollection.deleteMany({ userEmail });
+    }
 
     return {
       success: true,
       orderId: result.insertedId.toString(),
     };
-
   } catch (error) {
     console.error("Stripe verify error:", error);
-    return { success: false };
+    return { success: false, message: error.message };
   }
 };

@@ -47,6 +47,7 @@ export const createAdoptionUser = async (data) => {
           status: "pending",
           adoptedUserEmail: userEmail,
           adoptionCode: adoptionId,
+          adoptedUserTime: new Date(),
         },
       },
     );
@@ -54,7 +55,8 @@ export const createAdoptionUser = async (data) => {
     const result = await adoptionCollection.insertOne({
       ...data,
       adoptionCode: adoptionId,
-      status: "pending"
+      status: "pending",
+      adoptedUserTime: new Date(),
     });
 
     return {
