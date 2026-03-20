@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { collections, dbConnect } from "@/lib/db";
-import { reduceProductStock } from "@/action/server/stock"; // জেনেরিক স্টক রিডিউসার
+import { reduceProductStock } from "@/action/server/stock";
 
 /**
- * ১. কার্ট থেকে অর্ডার তৈরি করা (Cash on Delivery বা অন্য পেমেন্ট)
+ * ১. কার্ট থেকে অর্ডার তৈরি করা (Cash on Delivery বা Stripe)
  */
 export const createOrderFromCart = async (payload) => {
   try {
@@ -35,7 +35,7 @@ export const createOrderFromCart = async (payload) => {
       return { success: false, message: "Your cart is empty." };
     }
 
-    // আইটেম ম্যাপিং (এখানে productType থাকা জরুরি)
+    // আইটেম ম্যাপিং
     const orderItems = cartItems.map((item) => ({
       productId: (item.productId || item.foodId || item._id).toString(),
       productName: item.productName || "",
@@ -49,9 +49,7 @@ export const createOrderFromCart = async (payload) => {
       lineTotal: Number(item.price || 0) * Number(item.quantity || 1),
     }));
 
-    const totalItems = orderItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
     const subtotal = orderItems.reduce((sum, item) => sum + Number(item.lineTotal || 0), 0);
-    const totalAmount = subtotal; // এখানে শিপিং কস্ট যোগ করতে পারো ভবিষ্যতে
 
     const orderDoc = {
       userEmail,
@@ -59,39 +57,36 @@ export const createOrderFromCart = async (payload) => {
       phone,
       shippingAddress: { address, city, area },
       paymentMethod,
-      paymentStatus: paymentMethod === "Cash on Delivery" ? "unpaid" : "pending",
+      paymentStatus: paymentMethod === "Stripe" ? "pending" : "unpaid",
       orderStatus: "pending",
       note,
       items: orderItems,
-      totalItems,
+      totalItems: orderItems.reduce((sum, item) => sum + item.quantity, 0),
       subtotal,
       shippingCost: 0,
-      totalAmount,
+      totalAmount: subtotal,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
+    // ১. আগে স্টক কমানোর চেষ্টা করা (Safety First)
+    const stockResult = await reduceProductStock(orderItems);
+    if (!stockResult?.success) {
+      return { success: false, message: stockResult?.message || "Stock update failed." };
+    }
+
+    // ২. এবার অর্ডারটি সেভ করা
     const result = await orderCollection.insertOne(orderDoc);
 
     if (!result.insertedId) {
       return { success: false, message: "Order creation failed." };
     }
 
-    // স্টক রিডাকশন (খাবার ও এক্সেসরিজ উভয়ের জন্য)
-    const stockResult = await reduceProductStock(orderItems);
-
-    if (!stockResult?.success) {
-      // স্টক কমাতে সমস্যা হলে অর্ডারটি রোলব্যাক (ডিলিট) করা হচ্ছে
-      await orderCollection.deleteOne({ _id: result.insertedId });
-      return { success: false, message: stockResult?.message || "Stock update failed." };
-    }
-
-    // অর্ডার সফল হলে কার্ট খালি করা
+    // ৩. অর্ডার সফল হলে কার্ট খালি করা
     await cartCollection.deleteMany({ userEmail });
 
     // ক্যাশ রিভ্যালিডেশন
     revalidatePath("/cart");
-    revalidatePath("/checkout");
     revalidatePath("/dashboard/orders");
     revalidatePath("/pet-food");
     revalidatePath("/pet-accessories");
@@ -121,7 +116,7 @@ export const createSingleOrder = async (payload) => {
       area,
       note = "",
       productId,
-      productType = "food", // 'food' বা 'accessory'
+      productType = "food",
       quantity = 1,
       paymentMethod = "Cash on Delivery",
     } = payload || {};
@@ -149,7 +144,6 @@ export const createSingleOrder = async (payload) => {
       return { success: false, message: "Not enough stock available." };
     }
 
-    // ডিসকাউন্ট প্রাইস হ্যান্ডলিং
     const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
       ? Number(product.discountPrice)
       : Number(product.price);
@@ -173,7 +167,7 @@ export const createSingleOrder = async (payload) => {
       phone,
       shippingAddress: { address, city, area },
       paymentMethod,
-      paymentStatus: paymentMethod === "Cash on Delivery" ? "unpaid" : "pending",
+      paymentStatus: paymentMethod === "Stripe" ? "pending" : "unpaid",
       orderStatus: "pending",
       note,
       items: orderItems,
@@ -185,16 +179,14 @@ export const createSingleOrder = async (payload) => {
       updatedAt: new Date(),
     };
 
-    const result = await orderCollection.insertOne(orderDoc);
-
+    // স্টক কমানো
     const stockResult = await reduceProductStock(orderItems);
-
     if (!stockResult?.success) {
-      await orderCollection.deleteOne({ _id: result.insertedId });
       return { success: false, message: "Stock update failed." };
     }
 
-    revalidatePath("/checkout");
+    const result = await orderCollection.insertOne(orderDoc);
+
     revalidatePath("/dashboard/orders");
     revalidatePath(productType === "accessory" ? "/pet-accessories" : "/pet-food");
 
@@ -210,7 +202,7 @@ export const createSingleOrder = async (payload) => {
 };
 
 /**
- * ৩. ইউজারের ইমেইল অনুযায়ী সব অর্ডার নিয়ে আসা
+ * ৩. ইউজারের ইমেইল অনুযায়ী সব অর্ডার নিয়ে আসা
  */
 export const getOrdersByEmail = async (userEmail) => {
   try {
@@ -240,7 +232,7 @@ export const getSingleOrder = async (id, userEmail) => {
 };
 
 /**
- * ৫. অ্যাডমিনের জন্য সব অর্ডার নিয়ে আসা
+ * ৫. অ্যাডমিনের জন্য সব অর্ডার নিয়ে আসা
  */
 export const getAllOrders = async () => {
   try {
@@ -250,5 +242,28 @@ export const getAllOrders = async () => {
   } catch (error) {
     console.error("getAllOrders error:", error);
     return [];
+  }
+};
+
+/**
+ * ৬. অর্ডার স্ট্যাটাস আপডেট (Admin-এর জন্য)
+ */
+export const updateOrderStatus = async (orderId, status, paymentStatus) => {
+  try {
+    const orderCollection = await dbConnect(collections.ORDER);
+    const updateData = { updatedAt: new Date() };
+    if (status) updateData.orderStatus = status;
+    if (paymentStatus) updateData.paymentStatus = paymentStatus;
+
+    const result = await orderCollection.updateOne(
+      { _id: new ObjectId(orderId) },
+      { $set: updateData }
+    );
+
+    revalidatePath("/dashboard/orders");
+    return { success: result.modifiedCount > 0 };
+  } catch (error) {
+    console.error("updateOrderStatus error:", error);
+    return { success: false };
   }
 };
