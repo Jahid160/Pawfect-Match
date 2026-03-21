@@ -1,7 +1,7 @@
 'use client'
 import { useSession } from 'next-auth/react';
 import React from 'react';
-import Profile from '../ShelterDashboard/Profile';
+import Shelterprofile from '../ShelterDashboard/ShelterProfile';
 
 const Profilehome = () => {
      const { data: session, status } = useSession();
@@ -18,7 +18,7 @@ const Profilehome = () => {
      //      return <UserDashboardHome></UserDashboardHome>
      // }
      if (userRole === "shelter") {
-          return <Profile></Profile>
+          return <Shelterprofile></Shelterprofile>
      }
      // else if (userRole === "doctor") {
      //      return <UserDashboardHome></UserDashboardHome>

@@ -6,9 +6,9 @@ import React from 'react';
 
 const adoptionRequest = () => {
   return (
-<>
-<MyAdoptionsPage/>
-</>
+    <>
+      <MyAdoptionsPage />
+    </>
   );
 };
 
