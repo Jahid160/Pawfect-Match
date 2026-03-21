@@ -24,7 +24,7 @@ export const createOrderFromCart = async (payload) => {
     }
 
     const cartCollection = await dbConnect(collections.CART);
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
 
     const cartItems = await cartCollection.find({ userEmail }).toArray();
 
@@ -122,7 +122,7 @@ export const createSingleOrder = async (payload) => {
 
     const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
     const productCollection = await dbConnect(collectionName);
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
 
     const product = await productCollection.findOne({ _id: new ObjectId(productId) });
 
@@ -195,7 +195,7 @@ export const createSingleOrder = async (payload) => {
 export const getOrdersByEmail = async (userEmail) => {
   try {
     if (!userEmail) return [];
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const orders = await orderCollection.find({ userEmail }).sort({ createdAt: -1 }).toArray();
     return orders.map((order) => ({ ...order, _id: order._id.toString() }));
   } catch (error) {
@@ -208,7 +208,7 @@ export const getOrdersByEmail = async (userEmail) => {
 export const getSingleOrder = async (id, userEmail) => {
   try {
     if (!id || id.length !== 24) return null;
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const order = await orderCollection.findOne({ _id: new ObjectId(id), userEmail });
     return order ? { ...order, _id: order._id.toString() } : null;
   } catch (error) {
@@ -220,7 +220,7 @@ export const getSingleOrder = async (id, userEmail) => {
 
 export const getAllOrders = async () => {
   try {
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const orders = await orderCollection.find({}).sort({ createdAt: -1 }).toArray();
     return orders.map((order) => ({ ...order, _id: order._id.toString() }));
   } catch (error) {
@@ -232,7 +232,7 @@ export const getAllOrders = async () => {
 
 export const updateOrderStatus = async (orderId, status, paymentStatus) => {
   try {
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const updateData = { updatedAt: new Date() };
     if (status) updateData.orderStatus = status;
     if (paymentStatus) updateData.paymentStatus = paymentStatus;
