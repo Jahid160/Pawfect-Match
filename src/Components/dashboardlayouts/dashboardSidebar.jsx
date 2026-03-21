@@ -70,8 +70,8 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     { name: "Favorite Pets", href: "/dashboard/favorites", icon: HeartPlus },
     { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint },
-    { name: "Pet Foods", href: "/dashboard/pet-foods", icon: BoneIcon },
-    { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
+    { name: "Pet Foods & Accessories", href: "/dashboard/pet-food&accessories", icon: ShoppingBagIcon  },
+    // { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
   ];
 
   const doctorNavItem = [

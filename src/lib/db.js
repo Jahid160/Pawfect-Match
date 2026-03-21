@@ -13,6 +13,7 @@ export const collections = {
   VACCINES: "vaccines",
   ORDERS: "orders",
   CART: "cart",
+  // ORDER:"order"
 };
 
 const client = new MongoClient(uri, {
