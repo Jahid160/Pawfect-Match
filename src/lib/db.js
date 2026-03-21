@@ -5,16 +5,14 @@ const dbname = process.env.DBNAME;
 
 export const collections = {
   USERS: "users",
-  PETS: 'pets',
-  FOODS: 'foods',
+  PETS: "pets",
+  FOODS: "foods",
   ACCESSORIES: "accessories",
-  ADOPTIONS: 'adoptionsInfo',
-  SHELTER: 'shelterInfo',
-  FOODS: 'foods',
-  VACCINES: 'vaccines',
-  ORDERS: "vaccine_orders",
-  CART: 'cart',
-  ORDER: 'order',
+  ADOPTIONS: "adoptionsInfo",
+  SHELTER: "shelterInfo",
+  VACCINES: "vaccines",
+  ORDERS: "orders",
+  CART: "cart",
 };
 
 const client = new MongoClient(uri, {
@@ -33,26 +31,29 @@ const setupIndices = async (db) => {
       { unique: true, name: "unique_email_idx" }
     );
   } catch (error) {
-    console.error(" Failed to setup indices:", error);
+    console.error("Failed to setup indices:", error);
   }
 };
 
 let dbInstance = null;
+
 
 export const dbConnect = async (cname) => {
   if (!cname) {
     throw new Error("Collection name is required for dbConnect!");
   }
 
-  if (!client.connect) {
-    await client.connect();
-  }
+  try {
+    if (!dbInstance) {
+      await client.connect();
+      dbInstance = client.db(dbname);
+      await setupIndices(dbInstance);
+      console.log("Successfully connected to MongoDB.");
+    }
 
-  if (!dbInstance) {
-    await client.connect();
-    dbInstance = client.db(dbname);
-    await setupIndices(dbInstance);
+    return dbInstance.collection(cname);
+  } catch (error) {
+    console.error("MongoDB Connection Error:", error);
+    throw new Error("Failed to connect to database");
   }
-
-  return dbInstance.collection(cname);
 };

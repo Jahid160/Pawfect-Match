@@ -3,45 +3,31 @@
 import Stripe from "stripe";
 import { ObjectId } from "mongodb";
 import { collections, dbConnect } from "@/lib/db";
-
 import { getCartItems } from "@/action/server/cart";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+
 export const createStripeCheckoutFromCart = async (payload) => {
   try {
-    const {
-      userEmail,
-      customerName,
-      phone,
-      address,
-      city,
-      area,
-      note,
-    } = payload || {};
+    const { userEmail, customerName, phone, address, city, area, note } = payload || {};
 
     if (!userEmail || !customerName || !phone || !address || !city || !area) {
-      return {
-        success: false,
-        message: "Missing checkout information.",
-      };
+      return { success: false, message: "Missing checkout information." };
     }
 
     const cartItems = await getCartItems(userEmail);
 
     if (!cartItems?.length) {
-      return {
-        success: false,
-        message: "Cart is empty.",
-      };
+      return { success: false, message: "Cart is empty." };
     }
 
     const line_items = cartItems.map((item) => ({
       price_data: {
         currency: "usd",
         product_data: {
-          name: item.productName || "Pet Food",
-          images: item.image ? [item.image] : [],
+          name: item.productName || "Pet Product",
+          ...(item.image && item.image.startsWith('http') ? { images: [item.image] } : {}),
         },
         unit_amount: Math.round(Number(item.price || 0) * 100),
       },
@@ -53,6 +39,7 @@ export const createStripeCheckoutFromCart = async (payload) => {
       payment_method_types: ["card"],
       line_items,
       metadata: {
+        mode: "cart",
         userEmail,
         customerName,
         phone,
@@ -62,26 +49,18 @@ export const createStripeCheckoutFromCart = async (payload) => {
         note: note || "",
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-cancel`,
     });
 
-    return {
-      success: true,
-      url: session.url,
-    };
+    return { success: true, url: session.url };
   } catch (error) {
     console.error("createStripeCheckoutFromCart error:", error);
-    return {
-      success: false,
-      message: error.message || "Stripe checkout session failed.",
-    };
+    return { success: false, message: error.message || "Cart checkout failed." };
   }
 };
 
 
-
-
-export const createStripeCheckoutForSingleFood = async (payload) => {
+export const createStripeCheckoutForSingleProduct = async (payload) => {
   try {
     const {
       userEmail,
@@ -91,48 +70,44 @@ export const createStripeCheckoutForSingleFood = async (payload) => {
       city,
       area,
       note,
-      foodId,
+      productId,
+      productType = "food",
       quantity = 1,
     } = payload || {};
 
-    if (
-      !userEmail ||
-      !customerName ||
-      !phone ||
-      !address ||
-      !city ||
-      !area ||
-      !foodId
-    ) {
-      return {
-        success: false,
-        message: "Missing checkout information.",
-      };
+ 
+
+    if (!userEmail || !productId) {
+      return { success: false, message: "User email and Product ID are required." };
     }
 
-    if (!ObjectId.isValid(foodId)) {
-      return {
-        success: false,
-        message: "Invalid food ID.",
-      };
+
+    if (!ObjectId.isValid(productId)) {
+      return { success: false, message: "Invalid product ID." };
     }
 
-    const foodsCollection = await dbConnect(collections.FOODS);
+    const type = productType.toLowerCase();
+    const isAccessory = type === "accessory" || type === "accessories";
+    const collectionName = isAccessory ? collections.ACCESSORIES : collections.FOODS;
 
-    const food = await foodsCollection.findOne({ _id: new ObjectId(foodId) });
+    const productCollection = await dbConnect(collectionName);
+    let product = await productCollection.findOne({ _id: new ObjectId(productId) });
 
-    if (!food) {
-      return {
-        success: false,
-        message: "Food not found.",
-      };
+    if (!product) {
+      const fallbackCollection = isAccessory ? collections.FOODS : collections.ACCESSORIES;
+      const fallbackDb = await dbConnect(fallbackCollection);
+      product = await fallbackDb.findOne({ _id: new ObjectId(productId) });
+
+      if (!product) {
+        return { success: false, message: `Product not found in database.` };
+      }
     }
 
     const qty = Number(quantity || 1);
-    const finalPrice =
-      food.discountPrice && Number(food.discountPrice) < Number(food.price)
-        ? Number(food.discountPrice)
-        : Number(food.price);
+
+    const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
+      ? Number(product.discountPrice)
+      : Number(product.price);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -142,8 +117,8 @@ export const createStripeCheckoutForSingleFood = async (payload) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: food.productName || "Pet Food",
-              images: food.image ? [food.image] : [],
+              name: product.productName || "Pet Product",
+              ...(product.image && product.image.startsWith('http') ? { images: [product.image] } : {}),
             },
             unit_amount: Math.round(finalPrice * 100),
           },
@@ -159,23 +134,17 @@ export const createStripeCheckoutForSingleFood = async (payload) => {
         city,
         area,
         note: note || "",
-        foodId: food._id.toString(),
+        productId: product._id.toString(),
+        productType: isAccessory ? "accessory" : "food",
         quantity: String(qty),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-cancel`,
     });
 
-    return {
-      success: true,
-      url: session.url,
-    };
+    return { success: true, url: session.url };
   } catch (error) {
-    console.error("createStripeCheckoutForSingleFood error:", error);
-    return {
-      success: false,
-      message: error.message || "Stripe session failed.",
-    };
+    console.error("Single product checkout error:", error);
+    return { success: false, message: error.message || "Stripe session failed." };
   }
 };
-

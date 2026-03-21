@@ -37,31 +37,82 @@ export const createShelterUser = async (data) => {
 }
 
 
-export const getShelterRequests = async (page = 1, limit = 10) => {
+export const getShelterRequests = async (page = 1, limit = 10, search = "", status = "All") => {
      try {
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
-          const skip = (page - 1) * limit;
+
+          const pageNum = parseInt(page);
+          const limitNum = parseInt(limit);
+          const skipAmount = (pageNum - 1) * limitNum;
 
 
-          const totalItems = await shelterRequestsCollection.countDocuments({});
+          let query = {};
+          if (status !== "All") {
+               query.status = status;
+          }
+          if (search) {
+               query.$or = [
+                    { shelterName: { $regex: search, $options: "i" } },
+                    { fullName: { $regex: search, $options: "i" } }
+               ];
+          }
 
-          const requests = await shelterRequestsCollection
-               .find({})
-               .sort({ submittedAt: -1 })
-               .skip(skip)
-               .limit(limit)
-               .toArray();
+          const totalItems = await shelterRequestsCollection.countDocuments(query);
 
-          const plainRequests = requests.map(doc => ({
-               ...doc,
-               _id: doc._id.toString(),
-          }));
+
+          const mvpResult = await shelterRequestsCollection.aggregate([
+               {
+                    $lookup: {
+                         from: "pets",
+                         localField: "email",
+                         foreignField: "email",
+                         as: "ownedPets"
+                    }
+               },
+               {
+                    $addFields: {
+                         petCount: { $size: "$ownedPets" }
+                    }
+               },
+               { $sort: { petCount: -1, submittedAt: -1 } },
+               { $limit: 1 }
+          ]).toArray();
+          let topShelterData = null;
+          if (mvpResult.length > 0) {
+
+               topShelterData = JSON.parse(JSON.stringify(mvpResult[0]));
+          }
+
+
+          const requests = await shelterRequestsCollection.aggregate([
+               { $match: query },
+               { $sort: { submittedAt: -1 } },
+               { $skip: skipAmount },
+               { $limit: limitNum },
+               {
+                    $lookup: {
+                         from: "pets",
+                         localField: "email",
+                         foreignField: "email",
+                         as: "ownedPets"
+                    }
+               },
+               {
+                    $addFields: {
+                         petCount: { $size: "$ownedPets" }
+                    }
+               },
+               { $project: { ownedPets: 0 } }
+          ]).toArray();
+
+          const plainRequests = JSON.parse(JSON.stringify(requests));
 
           return {
                success: true,
                data: plainRequests,
                totalItems,
-               totalPages: Math.ceil(totalItems / limit)
+               topShelter: topShelterData,
+               totalPages: Math.ceil(totalItems / limitNum)
           };
      } catch (error) {
           console.error("Database Error:", error);
@@ -94,5 +145,40 @@ export const updateShelterStatus = async (id, newStatus) => {
      } catch (error) {
           console.error("Database Error:", error);
           return { success: false, message: "Something went wrong while updating status." };
+     }
+};
+
+
+
+export const deleteShelterRequest = async (id) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const result = await shelterRequestsCollection.deleteOne({ _id: new ObjectId(id) });
+
+          if (result.deletedCount === 1) {
+               return { success: true, message: "Deleted successfully" };
+          }
+          return { success: false, message: "Request not found" };
+     } catch (error) {
+          return { success: false, error: error.message };
+     }
+};
+
+
+export const updateShelterData = async (id, updatedFields) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const result = await shelterRequestsCollection.updateOne(
+               { _id: new ObjectId(id) },
+               { $set: { ...updatedFields, updatedAt: new Date() } }
+          );
+
+          if (result.matchedCount === 1) {
+               return { success: true, message: "Updated successfully" };
+          }
+          return { success: false, message: "Update failed" };
+     } catch (error) {
+          console.error("Update Error:", error);
+          return { success: false, error: error.message };
      }
 };
