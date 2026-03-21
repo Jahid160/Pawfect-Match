@@ -182,3 +182,53 @@ export const updateShelterData = async (id, updatedFields) => {
           return { success: false, error: error.message };
      }
 };
+
+export const getSingleShelter = async (queryParam) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+
+          let query = {};
+
+
+          if (ObjectId.isValid(queryParam)) {
+               query = { _id: new ObjectId(queryParam) };
+          } else {
+               query = { email: queryParam };
+          }
+
+
+          const result = await shelterRequestsCollection.aggregate([
+               { $match: query },
+               {
+                    $lookup: {
+                         from: "pets",
+                         localField: "email",
+                         foreignField: "email",
+                         as: "ownedPets"
+                    }
+               },
+               {
+                    $addFields: {
+                         petCount: { $size: "$ownedPets" }
+                    }
+               },
+               { $project: { ownedPets: 0 } }
+          ]).toArray();
+
+          if (!result || result.length === 0) {
+               return { success: false, message: "Shelter not found" };
+          }
+
+
+          const shelterData = JSON.parse(JSON.stringify(result[0]));
+
+          return {
+               success: true,
+               data: shelterData
+          };
+
+     } catch (error) {
+          console.error("Database Error:", error);
+          return { success: false, error: error.message };
+     }
+}
