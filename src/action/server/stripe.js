@@ -55,7 +55,7 @@ export const createStripeCheckoutFromCart = async (payload) => {
     return { success: true, url: session.url };
   } catch (error) {
     console.error("createStripeCheckoutFromCart error:", error);
-    return { success: false, message: error.message || "Stripe checkout failed." };
+    return { success: false, message: error.message || "Cart checkout failed." };
   }
 };
 
@@ -75,26 +75,39 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
       quantity = 1,
     } = payload || {};
 
-    if (!userEmail || !customerName || !phone || !address || !city || !area || !productId) {
-      return { success: false, message: "Missing checkout information." };
+ 
+
+    if (!userEmail || !productId) {
+      return { success: false, message: "User email and Product ID are required." };
     }
+
 
     if (!ObjectId.isValid(productId)) {
       return { success: false, message: "Invalid product ID." };
     }
 
-    const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
+    const type = productType.toLowerCase();
+    const isAccessory = type === "accessory" || type === "accessories";
+    const collectionName = isAccessory ? collections.ACCESSORIES : collections.FOODS;
+
     const productCollection = await dbConnect(collectionName);
-    const product = await productCollection.findOne({ _id: new ObjectId(productId) });
+    let product = await productCollection.findOne({ _id: new ObjectId(productId) });
 
     if (!product) {
-      return { success: false, message: "Product not found." };
+      const fallbackCollection = isAccessory ? collections.FOODS : collections.ACCESSORIES;
+      const fallbackDb = await dbConnect(fallbackCollection);
+      product = await fallbackDb.findOne({ _id: new ObjectId(productId) });
+
+      if (!product) {
+        return { success: false, message: `Product not found in database.` };
+      }
     }
 
     const qty = Number(quantity || 1);
+
     const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
-        ? Number(product.discountPrice)
-        : Number(product.price);
+      ? Number(product.discountPrice)
+      : Number(product.price);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -122,7 +135,7 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
         area,
         note: note || "",
         productId: product._id.toString(),
-        productType,
+        productType: isAccessory ? "accessory" : "food",
         quantity: String(qty),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,

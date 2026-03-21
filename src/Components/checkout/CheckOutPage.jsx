@@ -16,6 +16,7 @@ import {
   createSingleOrder, 
 } from "@/action/server/order";
 import { getSingleFood } from "@/action/server/foods";
+import { getSingleAccessory } from "@/action/server/accessories";
 import {
   createStripeCheckoutFromCart,
   createStripeCheckoutForSingleProduct,
@@ -27,9 +28,11 @@ const CheckoutPageClient = () => {
   const setCartCount = useCartStore((state) => state.setCartCount);
   const searchParams = useSearchParams();
 
+  // URL Parameters
   const mode = searchParams.get("mode");
-  const foodId = searchParams.get("foodId");
-  const isBuyNow = mode === "buy-now" && !!foodId;
+  const productId = searchParams.get("productId") || searchParams.get("foodId"); 
+  const productType = searchParams.get("productType") || "food"; 
+  const isBuyNow = mode === "buy-now" && !!productId;
 
   const [cartItems, setCartItems] = useState([]);
   const [buyNowItem, setBuyNowItem] = useState(null);
@@ -58,7 +61,14 @@ const CheckoutPageClient = () => {
 
     try {
       if (isBuyNow) {
-        const item = await getSingleFood(foodId);
+        let item = null;
+        
+        if (productType === "accessory") {
+            item = await getSingleAccessory(productId);
+        } else {
+            item = await getSingleFood(productId);
+        }
+        
         setBuyNowItem(item?._id ? item : null);
         setCartItems([]);
       } else {
@@ -77,7 +87,7 @@ const CheckoutPageClient = () => {
     if (status !== "loading") {
       loadCheckoutData();
     }
-  }, [status, session?.user?.email, isBuyNow, foodId]);
+  }, [status, session?.user?.email, isBuyNow, productId, productType]);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -100,20 +110,17 @@ const CheckoutPageClient = () => {
         {
           _id: buyNowItem._id,
           productId: buyNowItem._id,
-          productName: buyNowItem.productName,
-          image: buyNowItem.image,
+          productName: buyNowItem.title || buyNowItem.productName,
+          image: (Array.isArray(buyNowItem.images) ? buyNowItem.images[0] : buyNowItem.image),
           price: finalBuyNowPrice,
           quantity: 1,
           brand: buyNowItem.brand,
-          weight: buyNowItem.weight,
-          weightUnit: buyNowItem.weightUnit,
-          stock: buyNowItem.stock,
-          productType: buyNowItem.productType || "food",
+          productType: productType,
         },
       ];
     }
     return cartItems;
-  }, [isBuyNow, buyNowItem, cartItems, finalBuyNowPrice]);
+  }, [isBuyNow, buyNowItem, cartItems, finalBuyNowPrice, productType]);
 
   const subtotal = useMemo(() => {
     return checkoutItems.reduce((sum, item) => {
@@ -155,7 +162,8 @@ const CheckoutPageClient = () => {
           ? await createStripeCheckoutForSingleProduct({ 
               userEmail: session.user.email,
               ...formData,
-              productId: foodId, 
+              productId: productId, 
+              productType: productType,
               quantity: 1,
             })
           : await createStripeCheckoutFromCart({
@@ -176,8 +184,8 @@ const CheckoutPageClient = () => {
         ? await createSingleOrder({
             userEmail: session.user.email,
             ...formData,
-            productId: foodId,
-            productType: buyNowItem?.productType || "food",
+            productId: productId,
+            productType: productType,
             quantity: 1,
           })
         : await createOrderFromCart({
@@ -232,7 +240,7 @@ const CheckoutPageClient = () => {
     <div className="bg-gray-50/50 px-4 md:px-8 py-10 min-h-screen font-sans">
       <div className="mx-auto max-w-7xl">
         <Link
-          href={isBuyNow ? `/petfoods/${foodId}` : "/cart"}
+          href={isBuyNow ? (productType === "accessory" ? `/pet-accessories/${productId}` : `/petfoods/${productId}`) : "/cart"}
           className="inline-flex items-center gap-2 hover:gap-3 mb-8 font-bold text-primary transition-all"
         >
           <FaArrowLeft />
@@ -240,6 +248,7 @@ const CheckoutPageClient = () => {
         </Link>
 
         <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
+          {/* Form and Summary Sections (Keep your original JSX here) */}
           <form onSubmit={handlePlaceOrder} className="lg:col-span-2 bg-white shadow-sm p-8 border border-gray-100 rounded-[2rem]">
             <h1 className="mb-2 font-black text-gray-900 text-3xl tracking-tight">
               {isBuyNow ? "Quick Checkout" : "Shipping Details"}
@@ -319,7 +328,7 @@ const CheckoutPageClient = () => {
                 {checkoutItems.map((item) => (
                   <div key={item._id || item.productId} className="flex items-center gap-4">
                     <div className="relative bg-gray-50 border border-gray-100 rounded-xl w-16 h-16 overflow-hidden shrink-0">
-                      <Image src={item.image || "https://placehold.co/200x200"} alt={item.productName} fill className="p-2 object-contain" />
+                      <Image src={item.image || "https://placehold.co/200x200"} alt={item.productName || "Product"} fill className="p-2 object-contain" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-gray-900 text-sm truncate">{item.productName}</h3>
