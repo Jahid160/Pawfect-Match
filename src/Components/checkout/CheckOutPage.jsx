@@ -6,9 +6,14 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getCartItems } from "@/action/server/cart";
-import { FaArrowLeft, FaShoppingBag, FaTruck, FaCreditCard, FaCheckCircle } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaShoppingBag,
+  FaTruck,
+  FaCreditCard,
+  FaCheckCircle,
+} from "react-icons/fa";
 import Swal from "sweetalert2";
-import AuthButtons from "../button/AuthButtons";
 import { useCartStore } from "@/lib/useCartStore";
 
 import {
@@ -16,7 +21,7 @@ import {
   createSingleOrder, 
 } from "@/action/server/order";
 import { getSingleFood } from "@/action/server/foods";
-import { getSingleAccessory } from "@/action/server/accessories";
+import AuthButtons from "../button/AuthButtons";
 import {
   createStripeCheckoutFromCart,
   createStripeCheckoutForSingleProduct,
@@ -172,7 +177,11 @@ const CheckoutPageClient = () => {
             });
 
         if (!result?.success) {
-          Swal.fire("Error", result?.message || "Payment session failed", "error");
+          Swal.fire(
+            "Error",
+            result?.message || "Payment session failed",
+            "error",
+          );
           return;
         }
 
@@ -218,7 +227,9 @@ const CheckoutPageClient = () => {
     return (
       <div className="flex flex-col justify-center items-center bg-gray-50 min-h-screen">
         <span className="text-primary loading loading-dots loading-lg"></span>
-        <p className="mt-4 font-bold text-gray-500 text-xs uppercase tracking-widest animate-pulse">Preparing Checkout...</p>
+        <p className="mt-4 font-bold text-gray-500 text-xs uppercase tracking-widest animate-pulse">
+          Preparing Checkout...
+        </p>
       </div>
     );
   }
@@ -264,8 +275,33 @@ const CheckoutPageClient = () => {
               </div>
 
               <div className="md:col-span-1">
-                <label className="block mb-2 font-bold text-gray-700 text-sm">Phone Number</label>
-                <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="01XXXXXXXXX" required />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="customerName"
+                  value={formData.customerName}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="01XXXXXXXXX"
+                  required
+                />
               </div>
 
               <div className="md:col-span-2 mt-4"><h3 className="font-bold text-gray-400 text-xs uppercase tracking-[0.2em]">Delivery Address</h3></div>
@@ -276,8 +312,18 @@ const CheckoutPageClient = () => {
               </div>
 
               <div>
-                <label className="block mb-2 font-bold text-gray-700 text-sm">City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="Dhaka" required />
+                <label className="block mb-2 font-bold text-gray-700 text-sm">
+                  City
+                </label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all"
+                  placeholder="Dhaka"
+                  required
+                />
               </div>
 
               <div>
