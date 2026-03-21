@@ -18,7 +18,7 @@ import {
   AreaChart, Area, PieChart, Pie, Cell 
 } from 'recharts';
 
-// আপনার নতুন সার্ভার অ্যাকশনটি ইম্পোর্ট করুন
+// সার্ভার অ্যাকশন ইম্পোর্ট
 import { getDashboardStats } from '@/action/server/dashboard';
 
 const DashboardMainLayout = () => {
@@ -36,6 +36,16 @@ const DashboardMainLayout = () => {
         vaccinePercent: 0,
         litterPercent: 65
     },
+    // ৫টি প্রধান প্রাণীর জন্য ক্যাটাগরি ডাটা
+    categories: [
+      { name: 'Dogs', value: 0, color: '#f97316' },
+      { name: 'Cats', value: 0, color: '#0ea5e9' },
+      { name: 'Rabbits', value: 0, color: '#6366f1' },
+      { name: 'Fish', value: 0, color: '#22c55e' },
+      { name: 'Others', value: 0, color: '#94a3b8' },
+    ],
+    // নতুন: ডাইনামিক চার্ট ডাটা স্টেট
+    chartData: [], 
     isLoading: true
   });
 
@@ -58,24 +68,7 @@ const DashboardMainLayout = () => {
     fetchDashboardData();
   }, []);
 
-  // ৩. Analytics Data (আপাতত স্ট্যাটিক)
-  const salesData = [
-    { name: 'Jan', sales: 4000, adoptions: 240 },
-    { name: 'Feb', sales: 3000, adoptions: 198 },
-    { name: 'Mar', sales: 5000, adoptions: 300 },
-    { name: 'Apr', sales: 2780, adoptions: 150 },
-    { name: 'May', sales: 1890, adoptions: 120 },
-    { name: 'Jun', sales: 2390, adoptions: 170 },
-  ];
-
-  // ৪. Pet Category Data
-  const categoryData = [
-    { name: 'Dogs', value: 45, color: '#f97316' },
-    { name: 'Cats', value: 35, color: '#0ea5e9' },
-    { name: 'Others', value: 20, color: '#6366f1' },
-  ];
-
-  // ৫. ডাইনামিক ৬টি মডিউল কার্ড
+  // ৩. ডাইনামিক ৬টি মডিউল কার্ড সামারি
   const modulesSummary = [
     { title: "Users", count: stats.users.toLocaleString(), icon: <Users size={18} />, color: "bg-blue-500", shadow: "shadow-blue-100" },
     { title: "Shelters", count: stats.shelters, icon: <ShieldCheck size={18} />, color: "bg-orange-500", shadow: "shadow-orange-100" },
@@ -112,7 +105,7 @@ const DashboardMainLayout = () => {
         </div>
       </div>
 
-      {/* --- MODULES OVERVIEW (GRID OF 6) --- */}
+      {/* --- TOP CARDS --- */}
       <div className="gap-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-12">
         {modulesSummary.map((mod, idx) => (
           <motion.div 
@@ -130,10 +123,10 @@ const DashboardMainLayout = () => {
         ))}
       </div>
 
-      {/* --- MAIN VISUAL ANALYTICS --- */}
+      {/* --- MAIN ANALYTICS --- */}
       <div className="gap-8 grid grid-cols-1 lg:grid-cols-12 mb-10">
         
-        {/* Growth Analytics Chart */}
+        {/* ডাইনামিক এরিয়া চার্ট (System Growth) */}
         <div className="relative lg:col-span-8 bg-white shadow-2xl shadow-slate-100 p-8 border border-slate-50 rounded-[3.5rem] overflow-hidden">
           <div className="flex justify-between items-center mb-10">
             <div>
@@ -142,7 +135,7 @@ const DashboardMainLayout = () => {
             </div>
             <div className="flex items-center gap-4">
                <div className="flex items-center gap-2 font-bold text-slate-400 text-xs">
-                  <div className="bg-orange-500 rounded-full w-2 h-2" /> Sales
+                  <div className="bg-orange-500 rounded-full w-2 h-2" /> Orders
                </div>
                <div className="flex items-center gap-2 font-bold text-slate-400 text-xs">
                   <div className="bg-blue-500 rounded-full w-2 h-2" /> Adoptions
@@ -152,7 +145,8 @@ const DashboardMainLayout = () => {
 
           <div className="w-full h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData}>
+              {/* ডাটাবেজ থেকে আসা chartData ব্যবহার করা হয়েছে */}
+              <AreaChart data={stats.chartData}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f97316" stopOpacity={0.2}/>
@@ -161,7 +155,7 @@ const DashboardMainLayout = () => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700, fill: '#94A3B8'}} />
-                <YAxis hide />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700, fill: '#94A3B8'}} />
                 <Tooltip contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'}} />
                 <Area type="monotone" dataKey="sales" stroke="#f97316" strokeWidth={5} fillOpacity={1} fill="url(#colorSales)" />
                 <Area type="monotone" dataKey="adoptions" stroke="#3b82f6" strokeWidth={5} fill="transparent" />
@@ -170,15 +164,21 @@ const DashboardMainLayout = () => {
           </div>
         </div>
 
-        {/* Pet Distribution & Category Breakdown */}
+        {/* ডাইনামিক পাই চার্ট (Pet Diversity) */}
         <div className="flex flex-col gap-8 lg:col-span-4">
           <div className="flex-1 bg-white shadow-2xl shadow-slate-100 p-8 border border-slate-50 rounded-[3.5rem]">
             <h3 className="mb-6 font-black text-slate-800 text-lg text-center italic uppercase">Pet <span className="text-orange-500">Diversity</span></h3>
-            <div className="w-full h-[200px]">
+            <div className="w-full h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={categoryData} innerRadius={60} outerRadius={80} paddingAngle={8} dataKey="value">
-                    {categoryData.map((entry, index) => (
+                  <Pie 
+                    data={stats.categories} 
+                    innerRadius={65} 
+                    outerRadius={85} 
+                    paddingAngle={5} 
+                    dataKey="value"
+                  >
+                    {stats.categories.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} cornerRadius={10} />
                     ))}
                   </Pie>
@@ -186,14 +186,15 @@ const DashboardMainLayout = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="space-y-3 mt-4">
-              {categoryData.map((item, i) => (
-                <div key={i} className="flex justify-between items-center bg-slate-50 px-5 py-3 rounded-2xl">
+            
+            <div className="space-y-2 mt-4 pr-2 max-h-[160px] overflow-y-auto custom-scrollbar">
+              {stats.categories.map((item, i) => (
+                <div key={i} className="flex justify-between items-center bg-slate-50 px-4 py-2.5 border border-slate-100 rounded-xl">
                    <div className="flex items-center gap-2">
                       <div className="rounded-full w-2 h-2" style={{backgroundColor: item.color}} />
-                      <span className="font-bold text-slate-600 text-xs">{item.name}</span>
+                      <span className="font-bold text-[11px] text-slate-600 uppercase">{item.name}</span>
                    </div>
-                   <span className="font-black text-slate-400 text-xs">{item.value}%</span>
+                   <span className="font-black text-[11px] text-slate-400">{item.value}%</span>
                 </div>
               ))}
             </div>
@@ -201,16 +202,14 @@ const DashboardMainLayout = () => {
         </div>
       </div>
 
-      {/* --- LOWER INSIGHTS AREA --- */}
+      {/* --- INVENTORY & HEALTH --- */}
       <div className="gap-8 grid grid-cols-1 lg:grid-cols-12">
-        {/* Inventory Analytics */}
         <div className="lg:col-span-7 bg-white shadow-2xl shadow-slate-100 p-10 border border-slate-50 rounded-[3.5rem]">
            <div className="flex justify-between items-center mb-10">
               <h3 className="font-black text-slate-800 text-xl uppercase tracking-tight">Inventory <span className="text-emerald-500">Status</span></h3>
               <TrendingUp size={20} className="text-emerald-500" />
            </div>
            <div className="gap-8 grid grid-cols-1 md:grid-cols-2">
-             {/* এখানে আমরা ডাইনামিক ভ্যালুগুলো পাস করছি */}
              <ProgressBar 
                 label="Food Supply" 
                 value={stats.inventory?.foodPercent || 0} 
@@ -234,7 +233,6 @@ const DashboardMainLayout = () => {
            </div>
         </div>
 
-        {/* System Health / Alert Banner */}
         <div className="group relative lg:col-span-5 bg-slate-900 shadow-2xl p-10 rounded-[3.5rem] overflow-hidden text-white">
           <div className="top-0 right-0 absolute bg-orange-500/10 rounded-bl-full w-32 h-32 group-hover:scale-150 transition-transform duration-700" />
           <div className="flex items-center gap-3 mb-6">
@@ -267,7 +265,7 @@ const ProgressBar = ({ label, value, color }) => (
     <div className="bg-slate-200 rounded-full w-full h-2 overflow-hidden">
       <motion.div 
         initial={{ width: 0 }} 
-        animate={{ width: `${value}%` }} // dynamic width
+        animate={{ width: `${value}%` }} 
         transition={{ duration: 1.5, ease: "circOut" }}
         className={`h-full ${color} rounded-full`}
       />

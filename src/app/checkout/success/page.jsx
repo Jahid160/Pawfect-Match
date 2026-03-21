@@ -74,7 +74,7 @@ const CheckoutSuccessPage = async ({ searchParams }) => {
           </Link>
           
           <Link
-            href="/dashboard/orders"
+            href="/dashboard/pet-food&accessories"
             className="inline-flex justify-center items-center gap-3 bg-gray-900 hover:bg-gray-800 px-8 py-5 rounded-2xl w-full md:w-auto font-black text-white active:scale-95 transition-all"
           >
             View My Orders

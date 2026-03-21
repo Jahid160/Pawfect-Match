@@ -10,35 +10,73 @@ export const getDashboardStats = async () => {
     const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
     const foodCollection = await dbConnect(collections.FOODS);
     const vaccinesCollection = await dbConnect(collections.VACCINES);
+    const adoptionsCollection = await dbConnect(collections.ADOPTIONS); // adoptionsInfo
+    const ordersCollection = await dbConnect(collections.ORDERS); // orders
 
-    // ১. সব কালেকশনের কাউন্ট একবারে নিয়ে আসা
+    // ১. বেসিক কাউন্টগুলো (আগের মতোই)
     const [
-      totalUsers,
-      totalPets,
-      totalShelters,
-      totalAccessories,
-      totalFoodItems,
-      totalVaccines
+      totalUsers, totalPets, totalShelters, totalAccessories, 
+      totalFoodItems, totalVaccines, dogCount, catCount, rabbitCount, fishCount
     ] = await Promise.all([
       usersCollection.countDocuments(),
       petsCollection.countDocuments(),
       sheltersCollection.countDocuments(),
       accessoriesCollection.countDocuments(),
       foodCollection.countDocuments(),
-      vaccinesCollection.countDocuments()
+      vaccinesCollection.countDocuments(),
+      petsCollection.countDocuments({ species: "Dog" }),
+      petsCollection.countDocuments({ species: "Cat" }),
+      petsCollection.countDocuments({ species: "Rabbit" }),
+      petsCollection.countDocuments({ species: "Fish" })
     ]);
 
-    /**
-     * ২. ইনভেন্টরি পার্সেন্টেজ ক্যালকুলেশন লজিক:
-     * ড্যাশবোর্ডের প্রোগ্রেস বার দেখাতে হলে আমাদের একটা পার্সেন্টেজ (%) লাগে।
-     * এখানে আমরা ধরে নিচ্ছি একটি আইডিয়াল টার্গেট (যেমন: ১০০ বা ২০০ আইটেম)। 
-     * আপনার ডাটাবেজে আইটেম বাড়লে বারটি বাড়বে।
-     */
-    const calculateStockPercent = (currentCount, target = 100) => {
-      const percent = (currentCount / target) * 100;
-      // পার্সেন্টেজ ৫% এর নিচে নামবে না আর ১০০% এর উপরে যাবে না (ভিজ্যুয়াল ব্যালেন্সের জন্য)
-      return Math.min(Math.max(Math.round(percent), 5), 100);
+    // ২. গ্রাফের জন্য গত ৬ মাসের ডাটা ক্যালকুলেশন (Aggregation)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1); // মাসের শুরু থেকে
+
+    const aggregateMonthlyData = async (collection) => {
+      return await collection.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo } } },
+        {
+          $group: {
+            _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]).toArray();
     };
+
+    const [monthlyAdoptions, monthlyOrders] = await Promise.all([
+      aggregateMonthlyData(adoptionsCollection),
+      aggregateMonthlyData(ordersCollection)
+    ]);
+
+    // গ্রাফের ফরম্যাটে ডাটা সাজানো (Jan, Feb...)
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const chartData = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const m = d.getMonth() + 1;
+      const y = d.getFullYear();
+
+      const adoptionMatch = monthlyAdoptions.find(item => item._id.month === m && item._id.year === y);
+      const orderMatch = monthlyOrders.find(item => item._id.month === m && item._id.year === y);
+
+      chartData.push({
+        name: monthNames[m - 1],
+        adoptions: adoptionMatch ? adoptionMatch.count : 0,
+        sales: orderMatch ? orderMatch.count : 0
+      });
+    }
+
+    // ৩. অন্যান্য ক্যালকুলেশন
+    const otherCount = Math.max(0, totalPets - (dogCount + catCount + rabbitCount + fishCount));
+    const calculateStockPercent = (currentCount, target = 100) => Math.min(Math.max(Math.round((currentCount / target) * 100), 5), 100);
+    const calculateDiversityPercent = (count) => totalPets > 0 ? Math.round((count / totalPets) * 100) : 0;
 
     return {
       success: true,
@@ -49,17 +87,24 @@ export const getDashboardStats = async () => {
         accessories: totalAccessories,
         food: totalFoodItems,
         vaccines: totalVaccines,
-        // ইনভেন্টরি ডেটা (যা প্রোগ্রেস বারে বসবে)
+        chartData, // নতুন ডাইনামিক গ্রাফ ডাটা
         inventory: {
-          foodPercent: calculateStockPercent(totalFoodItems, 100),   // টার্গেট ১০০ আইটেম
-          accPercent: calculateStockPercent(totalAccessories, 150), // টার্গেট ১৫০ আইটেম
-          vaccinePercent: calculateStockPercent(totalVaccines, 50),  // টার্গেট ৫০ আইটেম
-          litterPercent: 65 // লিটার কালেকশন আলাদা না থাকলে স্ট্যাটিক থাকলো
-        }
+          foodPercent: calculateStockPercent(totalFoodItems, 100),
+          accPercent: calculateStockPercent(totalAccessories, 150),
+          vaccinePercent: calculateStockPercent(totalVaccines, 50),
+          litterPercent: 65 
+        },
+        categories: [
+          { name: 'Dogs', value: calculateDiversityPercent(dogCount), color: '#f97316' },
+          { name: 'Cats', value: calculateDiversityPercent(catCount), color: '#0ea5e9' },
+          { name: 'Rabbits', value: calculateDiversityPercent(rabbitCount), color: '#6366f1' },
+          { name: 'Fish', value: calculateDiversityPercent(fishCount), color: '#22c55e' },
+          { name: 'Others', value: calculateDiversityPercent(otherCount), color: '#94a3b8' },
+        ]
       }
     };
   } catch (error) {
-    console.error("getDashboardStats error:", error);
-    return { success: false, error: "Failed to fetch dashboard stats" };
+    console.error(error);
+    return { success: false };
   }
 };
