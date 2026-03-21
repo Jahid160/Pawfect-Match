@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from "framer-motion";
 import { 
   PawPrint, 
@@ -11,8 +11,6 @@ import {
   Package,
   Soup,
   Activity,
-  ArrowUpRight,
-  TrendingDown,
   LayoutDashboard
 } from 'lucide-react';
 import { 
@@ -20,8 +18,47 @@ import {
   AreaChart, Area, PieChart, Pie, Cell 
 } from 'recharts';
 
+// আপনার নতুন সার্ভার অ্যাকশনটি ইম্পোর্ট করুন
+import { getDashboardStats } from '@/action/server/dashboard';
+
 const DashboardMainLayout = () => {
-  // ১. Analytics Data
+  // ১. ডাইনামিক স্ট্যাটাস হোল্ড করার জন্য স্টেট
+  const [stats, setStats] = useState({
+    users: 0,
+    pets: 0,
+    shelters: 0,
+    accessories: 0,
+    food: 0,
+    vaccines: 0,
+    inventory: {
+        foodPercent: 0,
+        accPercent: 0,
+        vaccinePercent: 0,
+        litterPercent: 65
+    },
+    isLoading: true
+  });
+
+  // ২. ডাটাবেজ থেকে ডাটা ফেচ করা
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await getDashboardStats();
+        if (response.success) {
+          setStats({
+            ...response.stats,
+            isLoading: false
+          });
+        }
+      } catch (error) {
+        console.error("Error loading dashboard stats:", error);
+        setStats(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+    fetchDashboardData();
+  }, []);
+
+  // ৩. Analytics Data (আপাতত স্ট্যাটিক)
   const salesData = [
     { name: 'Jan', sales: 4000, adoptions: 240 },
     { name: 'Feb', sales: 3000, adoptions: 198 },
@@ -31,21 +68,21 @@ const DashboardMainLayout = () => {
     { name: 'Jun', sales: 2390, adoptions: 170 },
   ];
 
-  // ২. Pet Category Data (Visual Breakdown)
+  // ৪. Pet Category Data
   const categoryData = [
     { name: 'Dogs', value: 45, color: '#f97316' },
     { name: 'Cats', value: 35, color: '#0ea5e9' },
     { name: 'Others', value: 20, color: '#6366f1' },
   ];
 
-  // ৩. ৬টি মডিউলের প্রফেশনাল কার্ড
+  // ৫. ডাইনামিক ৬টি মডিউল কার্ড
   const modulesSummary = [
-    { title: "Users", count: "1,248", icon: <Users size={18} />, color: "bg-blue-500", shadow: "shadow-blue-100" },
-    { title: "Shelters", count: "42", icon: <ShieldCheck size={18} />, color: "bg-orange-500", shadow: "shadow-orange-100" },
-    { title: "Vaccination", count: "15", icon: <Activity size={18} />, color: "bg-rose-500", shadow: "shadow-rose-100" },
-    { title: "Food Stock", count: "850kg", icon: <Soup size={18} />, color: "bg-emerald-500", shadow: "shadow-emerald-100" },
-    { title: "Accessories", count: "320", icon: <Package size={18} />, color: "bg-purple-500", shadow: "shadow-purple-100" },
-    { title: "Total Pets", count: "145", icon: <PawPrint size={18} />, color: "bg-slate-800", shadow: "shadow-slate-200" },
+    { title: "Users", count: stats.users.toLocaleString(), icon: <Users size={18} />, color: "bg-blue-500", shadow: "shadow-blue-100" },
+    { title: "Shelters", count: stats.shelters, icon: <ShieldCheck size={18} />, color: "bg-orange-500", shadow: "shadow-orange-100" },
+    { title: "Vaccination", count: stats.vaccines, icon: <Activity size={18} />, color: "bg-rose-500", shadow: "shadow-rose-100" },
+    { title: "Food Items", count: stats.food, icon: <Soup size={18} />, color: "bg-emerald-500", shadow: "shadow-emerald-100" },
+    { title: "Accessories", count: stats.accessories, icon: <Package size={18} />, color: "bg-purple-500", shadow: "shadow-purple-100" },
+    { title: "Total Pets", count: stats.pets, icon: <PawPrint size={18} />, color: "bg-slate-800", shadow: "shadow-slate-200" },
   ];
 
   return (
@@ -61,7 +98,9 @@ const DashboardMainLayout = () => {
             <h1 className="font-black text-slate-900 text-3xl tracking-tight">
               Control <span className="text-orange-500">Panel</span>
             </h1>
-            <p className="font-bold text-slate-400 text-xs uppercase tracking-widest">Master Insights & Analytics</p>
+            <p className="font-bold text-slate-400 text-xs italic uppercase tracking-widest">
+              {stats.isLoading ? "Syncing database..." : "Live System Insights"}
+            </p>
           </div>
         </div>
         
@@ -79,8 +118,9 @@ const DashboardMainLayout = () => {
           <motion.div 
             whileHover={{ y: -8 }}
             key={idx} 
-            className={`bg-white shadow-xl ${mod.shadow} p-6 border border-slate-50 rounded-[2.5rem] flex flex-col items-center text-center cursor-pointer transition-all`}
+            className={`bg-white shadow-xl ${mod.shadow} p-6 border border-slate-50 rounded-[2.5rem] flex flex-col items-center text-center cursor-pointer transition-all relative overflow-hidden`}
           >
+            {stats.isLoading && <div className="absolute inset-0 bg-white/50 animate-pulse" />}
             <div className={`${mod.color} text-white p-3 rounded-2xl mb-4 shadow-lg`}>
               {mod.icon}
             </div>
@@ -170,10 +210,27 @@ const DashboardMainLayout = () => {
               <TrendingUp size={20} className="text-emerald-500" />
            </div>
            <div className="gap-8 grid grid-cols-1 md:grid-cols-2">
-             <ProgressBar label="Food Supply" value={85} color="bg-emerald-500" />
-             <ProgressBar label="Accessories Stock" value={42} color="bg-purple-500" />
-             <ProgressBar label="Vaccine Inventory" value={20} color="bg-rose-500" />
-             <ProgressBar label="Litter Supply" value={65} color="bg-orange-500" />
+             {/* এখানে আমরা ডাইনামিক ভ্যালুগুলো পাস করছি */}
+             <ProgressBar 
+                label="Food Supply" 
+                value={stats.inventory?.foodPercent || 0} 
+                color="bg-emerald-500" 
+             />
+             <ProgressBar 
+                label="Accessories Stock" 
+                value={stats.inventory?.accPercent || 0} 
+                color="bg-purple-500" 
+             />
+             <ProgressBar 
+                label="Vaccine Inventory" 
+                value={stats.inventory?.vaccinePercent || 0} 
+                color="bg-rose-500" 
+             />
+             <ProgressBar 
+                label="Litter Supply" 
+                value={stats.inventory?.litterPercent || 65} 
+                color="bg-orange-500" 
+             />
            </div>
         </div>
 
@@ -187,7 +244,9 @@ const DashboardMainLayout = () => {
             <h3 className="font-black text-2xl italic tracking-tighter">System Health</h3>
           </div>
           <p className="mb-8 font-medium text-slate-400 text-sm leading-relaxed">
-            All systems are operational. <span className="font-bold text-white decoration-orange-500 underline underline-offset-4">12 Pending Shelters</span> require your attention for manual verification.
+            All systems are operational. <span className="font-bold text-white decoration-orange-500 underline underline-offset-4">
+              {stats.shelters} Pending Shelters
+            </span> require your attention for manual verification.
           </p>
           <button className="bg-orange-500 hover:bg-white shadow-lg shadow-orange-500/20 py-4 rounded-2xl w-full font-black text-white hover:text-slate-900 text-sm transition-all">
             Review Pending Tasks
@@ -208,7 +267,7 @@ const ProgressBar = ({ label, value, color }) => (
     <div className="bg-slate-200 rounded-full w-full h-2 overflow-hidden">
       <motion.div 
         initial={{ width: 0 }} 
-        whileInView={{ width: `${value}%` }}
+        animate={{ width: `${value}%` }} // dynamic width
         transition={{ duration: 1.5, ease: "circOut" }}
         className={`h-full ${color} rounded-full`}
       />
