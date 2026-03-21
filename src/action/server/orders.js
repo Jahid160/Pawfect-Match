@@ -3,15 +3,15 @@ import { collections, dbConnect } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 
-// ১. এটিই আপনার এরর দিচ্ছে - নিশ্চিত করুন নাম ঠিক আছে
+// ১. ভ্যাকসিন অর্ডার প্লেস করা
 export const placeVaccineOrder = async (data) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
     const newOrder = {
       vaccineId: data.vaccineId,
       vaccineName: data.vaccineName,
-      userName: data.userName || "Guest",
-      userEmail: data.userEmail || "N/A",
+      userName: data.userName || "MD SHAKIL", // ডিফল্ট নাম
+      userEmail: data.userEmail || "shakil@example.com",
       status: "Pending",
       adminAccepted: false,
       doctorAssigned: false,
@@ -20,7 +20,10 @@ export const placeVaccineOrder = async (data) => {
       createdAt: new Date(),
     };
     await orderCollection.insertOne(newOrder);
+    
+    // সব রিলেটেড পাথ রিভ্যালিডেট করুন
     revalidatePath("/dashboard/vaccinations");
+    revalidatePath("/dashboard/doctor"); 
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -35,14 +38,16 @@ export const adminAcceptOrder = async (orderId) => {
       { _id: new ObjectId(orderId) },
       { $set: { status: "AdminAccepted", adminAccepted: true } }
     );
+    
     revalidatePath("/dashboard/vaccinations");
+    revalidatePath("/dashboard/doctor"); 
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৩. ডক্টর শিডিউল
+// ৩. ডক্টর শিডিউল (এটিই আপনার ডক্টর পেজে ডাটা পাঠাবে)
 export const doctorScheduleOrder = async (orderId, days) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
@@ -58,14 +63,18 @@ export const doctorScheduleOrder = async (orderId, days) => {
         } 
       }
     );
+    
+    // এই পাথটি নিশ্চিত করুন আপনার ডক্টর পেজের সাথে মিল আছে কি না
     revalidatePath("/dashboard/vaccinations");
+    revalidatePath("/dashboard/doctor"); 
+    
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৪. কমপ্লিট
+// ৪. কমপ্লিট করা
 export const completeVaccination = async (orderId) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
@@ -73,7 +82,9 @@ export const completeVaccination = async (orderId) => {
       { _id: new ObjectId(orderId) },
       { $set: { status: "Completed", isCompleted: true } }
     );
+    
     revalidatePath("/dashboard/vaccinations");
+    revalidatePath("/dashboard/doctor"); 
     return { success: true };
   } catch (error) {
     return { success: false };
