@@ -1,6 +1,6 @@
-import CartPageClient from "@/Components/Cart/CartPageClient";
+import CartPageClient from "@/components/Cart/CartPageClient"; 
 import { Suspense } from "react";
-import { getCartItems } from "@/action/server/cart"; // ১. নাম ঠিক আছে
+import { getCartItems } from "@/action/server/cart"; 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import CartStoreInitializer from "@/components/Cart/CartStoreInitializer";
@@ -21,16 +21,17 @@ const CartPage = async () => {
   let initialCartCount = 0;
 
   if (session?.user?.email) {
-    // ২. এখানে getCartItems কল করতে হবে (আগে ভুল ছিল)
     const cartData = await getCartItems(session.user.email);
     
-    // ৩. cartData যেহেতু সরাসরি অ্যারে, তাই সরাসরি .length চেক করতে হবে
-    initialCartCount = cartData?.length || 0;
+    
+    initialCartCount = cartData?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
+    
+
   }
 
   return (
     <>
-      {/* ৪. Zustand Store ইনিশিয়ালাইজ করা */}
+      {/* Zustand Store*/}
       <CartStoreInitializer count={initialCartCount} />
       
       <Suspense fallback={<CartLoader />}>
