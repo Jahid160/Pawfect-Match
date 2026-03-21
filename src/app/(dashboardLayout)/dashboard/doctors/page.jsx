@@ -1,5 +1,6 @@
-import { getAllOrders } from "@/action/server/orders";
-import DoctorManagement from "@/Components/dashboardlayouts/DoctorsProfiles";
+
+import { getAllOrders } from "@/action/server/order";
+import DoctorManagement from "@/Components/dashboardlayouts/DoctorManagement.jsx";
 
 export default async function Page() {
   const orders = await getAllOrders();

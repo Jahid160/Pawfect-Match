@@ -3,13 +3,15 @@ import { collections, dbConnect } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 
-// ১. নতুন অর্ডার সেভ করার ফাংশন (User-side)
+// ১. এটিই আপনার এরর দিচ্ছে - নিশ্চিত করুন নাম ঠিক আছে
 export const placeVaccineOrder = async (data) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
     const newOrder = {
       vaccineId: data.vaccineId,
       vaccineName: data.vaccineName,
+      userName: data.userName || "Guest",
+      userEmail: data.userEmail || "N/A",
       status: "Pending",
       adminAccepted: false,
       doctorAssigned: false,
@@ -25,7 +27,7 @@ export const placeVaccineOrder = async (data) => {
   }
 };
 
-// ২. অ্যাডমিন একসেপ্ট করার ফাংশন (Admin-side)
+// ২. অ্যাডমিন একসেপ্ট
 export const adminAcceptOrder = async (orderId) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
@@ -40,12 +42,11 @@ export const adminAcceptOrder = async (orderId) => {
   }
 };
 
-// ৩. ডক্টর শিডিউল দেওয়ার ফাংশন (Doctor-side)
+// ৩. ডক্টর শিডিউল
 export const doctorScheduleOrder = async (orderId, days) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
     const deadline = new Date();
-    // ১ দিন বা তার বেশি দিনের ডেডলাইন সেট করা
     deadline.setDate(deadline.getDate() + parseInt(days)); 
 
     await orderCollection.updateOne(
@@ -64,17 +65,13 @@ export const doctorScheduleOrder = async (orderId, days) => {
   }
 };
 
-// ৪. ভ্যাকসিনেশন কমপ্লিট করার ফাংশন (New)
+// ৪. কমপ্লিট
 export const completeVaccination = async (orderId) => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
-      { $set: { 
-          status: "Completed", 
-          isCompleted: true 
-        } 
-      }
+      { $set: { status: "Completed", isCompleted: true } }
     );
     revalidatePath("/dashboard/vaccinations");
     return { success: true };
@@ -83,7 +80,7 @@ export const completeVaccination = async (orderId) => {
   }
 };
 
-// ৫. সব অর্ডার নিয়ে আসার ফাংশন
+// ৫. সব অর্ডার গেট করা
 export const getAllOrders = async () => {
   try {
     const orderCollection = await dbConnect(collections.ORDERS);
