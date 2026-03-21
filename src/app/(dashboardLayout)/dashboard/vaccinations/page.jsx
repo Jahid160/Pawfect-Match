@@ -1,4 +1,5 @@
-import { getAllOrders } from "@/action/server/orders";
+
+import { getAllOrders } from '@/action/server/orders';
 import VaccinationManagement from '@/Components/dashboardlayouts/VaccinationManagement';
 import React from 'react';
 
