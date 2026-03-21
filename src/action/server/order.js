@@ -80,7 +80,7 @@ export const createOrderFromCart = async (payload) => {
     await cartCollection.deleteMany({ userEmail });
 
     revalidatePath("/cart");
-    revalidatePath("/dashboard/orders");
+    revalidatePath("/dashboard/pet-food&accessories");
     revalidatePath("/pet-food");
     revalidatePath("/pet-accessories");
 
@@ -242,7 +242,7 @@ export const updateOrderStatus = async (orderId, status, paymentStatus) => {
       { $set: updateData }
     );
 
-    revalidatePath("/dashboard/orders");
+    revalidatePath("/dashboard/pet-food&accessories");
     return { success: result.modifiedCount > 0 };
   } catch (error) {
     console.error("updateOrderStatus error:", error);

@@ -26,6 +26,7 @@ import {
   createStripeCheckoutFromCart,
   createStripeCheckoutForSingleProduct,
 } from "@/action/server/stripe";
+import { getSingleAccessory } from "@/action/server/accessories";
 
 const CheckoutPageClient = () => {
   const { data: session, status } = useSession();
