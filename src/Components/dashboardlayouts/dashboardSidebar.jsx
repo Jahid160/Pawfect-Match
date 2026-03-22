@@ -47,7 +47,7 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/shelters",
       icon: BsHouseAddFill,
     },
-    { name: "Doctors Profiles", href: "/dashboard/doctors", icon: Stethoscope },
+    { name: "Doctors Management", href: "/dashboard/doctors", icon: Stethoscope },
     {
       name: "Vaccination Management",
       href: "/dashboard/vaccinations",
@@ -70,8 +70,8 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     { name: "Favorite Pets", href: "/dashboard/favorites", icon: HeartPlus },
     { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint },
-    { name: "Pet Foods", href: "/dashboard/pet-foods", icon: BoneIcon },
-    { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
+    { name: "Pet Foods & Accessories", href: "/dashboard/pet-food&accessories", icon: ShoppingBagIcon  },
+    // { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
   ];
 
   const doctorNavItem = [

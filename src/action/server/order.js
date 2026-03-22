@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { collections, dbConnect } from "@/lib/db";
 import { reduceProductStock } from "@/action/server/stock";
+import { createNotification } from "@/action/server/notifications";
 
 
 export const createOrderFromCart = async (payload) => {
@@ -24,7 +25,7 @@ export const createOrderFromCart = async (payload) => {
     }
 
     const cartCollection = await dbConnect(collections.CART);
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
 
     const cartItems = await cartCollection.find({ userEmail }).toArray();
 
@@ -65,7 +66,6 @@ export const createOrderFromCart = async (payload) => {
       updatedAt: new Date(),
     };
 
-    // (Safety First)
     const stockResult = await reduceProductStock(orderItems);
     if (!stockResult?.success) {
       return { success: false, message: stockResult?.message || "Stock update failed." };
@@ -77,10 +77,17 @@ export const createOrderFromCart = async (payload) => {
       return { success: false, message: "Order creation failed." };
     }
 
+    await createNotification({
+      title: "New Cart Order! 🛒",
+      message: `${customerName} has placed an order for ${orderItems.length} items. Total: ${subtotal} TK`,
+      type: "order",
+      receiverRole: "admin"
+    });
+
     await cartCollection.deleteMany({ userEmail });
 
     revalidatePath("/cart");
-    revalidatePath("/dashboard/orders");
+    revalidatePath("/dashboard/pet-food&accessories");
     revalidatePath("/pet-food");
     revalidatePath("/pet-accessories");
 
@@ -122,7 +129,7 @@ export const createSingleOrder = async (payload) => {
 
     const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
     const productCollection = await dbConnect(collectionName);
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
 
     const product = await productCollection.findOne({ _id: new ObjectId(productId) });
 
@@ -177,6 +184,15 @@ export const createSingleOrder = async (payload) => {
 
     const result = await orderCollection.insertOne(orderDoc);
 
+    if (result.insertedId) {
+        await createNotification({
+          title: "Direct Order Received! ⚡",
+          message: `${customerName} just bought ${product.productName}.`,
+          type: "order",
+          receiverRole: "admin"
+        });
+    }
+
     revalidatePath("/dashboard/orders");
     revalidatePath(productType === "accessory" ? "/pet-accessories" : "/pet-food");
 
@@ -195,7 +211,7 @@ export const createSingleOrder = async (payload) => {
 export const getOrdersByEmail = async (userEmail) => {
   try {
     if (!userEmail) return [];
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const orders = await orderCollection.find({ userEmail }).sort({ createdAt: -1 }).toArray();
     return orders.map((order) => ({ ...order, _id: order._id.toString() }));
   } catch (error) {
@@ -204,11 +220,10 @@ export const getOrdersByEmail = async (userEmail) => {
   }
 };
 
-
 export const getSingleOrder = async (id, userEmail) => {
   try {
     if (!id || id.length !== 24) return null;
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const order = await orderCollection.findOne({ _id: new ObjectId(id), userEmail });
     return order ? { ...order, _id: order._id.toString() } : null;
   } catch (error) {
@@ -217,10 +232,9 @@ export const getSingleOrder = async (id, userEmail) => {
   }
 };
 
-
 export const getAllOrders = async () => {
   try {
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const orders = await orderCollection.find({}).sort({ createdAt: -1 }).toArray();
     return orders.map((order) => ({ ...order, _id: order._id.toString() }));
   } catch (error) {
@@ -229,10 +243,9 @@ export const getAllOrders = async () => {
   }
 };
 
-
 export const updateOrderStatus = async (orderId, status, paymentStatus) => {
   try {
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS);
     const updateData = { updatedAt: new Date() };
     if (status) updateData.orderStatus = status;
     if (paymentStatus) updateData.paymentStatus = paymentStatus;
@@ -242,7 +255,7 @@ export const updateOrderStatus = async (orderId, status, paymentStatus) => {
       { $set: updateData }
     );
 
-    revalidatePath("/dashboard/orders");
+    revalidatePath("/dashboard/pet-food&accessories");
     return { success: result.modifiedCount > 0 };
   } catch (error) {
     console.error("updateOrderStatus error:", error);

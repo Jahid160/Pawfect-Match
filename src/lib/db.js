@@ -13,6 +13,7 @@ export const collections = {
   VACCINES: "vaccines",
   ORDERS: "orders",
   CART: "cart",
+  NOTIFICATIONS: "notifications", 
 };
 
 const client = new MongoClient(uri, {
@@ -23,7 +24,6 @@ const client = new MongoClient(uri, {
   },
 });
 
-// Helper to ensure indexes exist
 const setupIndices = async (db) => {
   try {
     await db.collection(collections.USERS).createIndex(
@@ -36,7 +36,6 @@ const setupIndices = async (db) => {
 };
 
 let dbInstance = null;
-
 
 export const dbConnect = async (cname) => {
   if (!cname) {
