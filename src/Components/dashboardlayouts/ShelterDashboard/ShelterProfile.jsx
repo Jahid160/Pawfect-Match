@@ -1,27 +1,16 @@
 "use client";
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import Loading from '@/components/Loading';
 import { motion } from 'framer-motion';
 import {
      FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaBuilding,
      FaCalendarAlt, FaPaw, FaUserAlt, FaEdit, FaCheckCircle
 } from 'react-icons/fa';
+import { getSingleShelter } from '@/action/server/Shelteruser';
 
-// Mock Data based on your requirements
-const shelterData = {
-     name: "Green Paws Shelter",
-     owner: "Rafiqul Islam Rafi",
-     photo: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=500",
-     address: "12, Mirpur Road, Dhaka",
-     city: "Dhaka",
-     contact: { phone: "+880 1712-345678", email: "contact@greenpaws.org" },
-     type: "NGO",
-     capacity: 80,
-     joined: "Jan 15, 2024",
-     petCount: 7,
-     status: "Approved",
-     description: "আমাদের মূল লক্ষ্য হলো রাস্তার অবহেলিত পশুদের নিরাপদ আশ্রয় দেওয়া। গত ২ বছরে আমরা প্রায় ১০০+ প্রাণীকে উদ্ধার করেছি এবং তাদের সঠিক চিকিৎসার ব্যবস্থা করেছি। আমাদের টিমে অভিজ্ঞ ভলান্টিয়ার রয়েছে যারা দিনরাত পশুদের সেবায় নিয়োজিত।"
-};
+
+
 
 const pets = [
      { id: 1, name: "Buddy", age: "2 Years", img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300" },
@@ -29,14 +18,46 @@ const pets = [
      { id: 3, name: "Max", age: "3 Years", img: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=300" },
 ];
 
-const ShelterProfile = () => {
+const ShelterProfile = ({ email }) => {
+
+     const [shelterData, setShelterData] = useState(null)
+     console.log(shelterData)
+     const [loading, setLoading] = useState(true);
+
+
+     // const 
+     useEffect(() => {
+          if (!email) {
+               console.log("Waiting for ID and Email...");
+               return;
+          }
+
+          const SelterProfileReq = async () => {
+               setLoading(true);
+               const result = await getSingleShelter(email);
+
+               if (result.success) {
+                    setShelterData(result.data);
+               } else {
+                    console.error("Fetch Error:", result.error || result.message || "Unknown error");
+               }
+               setLoading(false);
+          };
+
+          SelterProfileReq();
+     }, [email]);
+
+
      const fadeIn = {
           initial: { opacity: 0, y: 20 },
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.5 }
      };
 
+     if (loading) return <Loading />
+
      return (
+
           <div className="min-h-screen bg-base-200 pb-12 font-sans">
 
                {/* 1. Hero Section */}
@@ -136,11 +157,11 @@ const ShelterProfile = () => {
                                         </div>
                                         <div className="flex items-center gap-3">
                                              <FaPhoneAlt className="text-primary" />
-                                             <span className="text-sm">{shelterData.contact.phone}</span>
+                                             <span className="text-sm">{shelterData.phone}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                              <FaEnvelope className="text-primary" />
-                                             <span className="text-sm">{shelterData.contact.email}</span>
+                                             <span className="text-sm">{shelterData.email}</span>
                                         </div>
                                    </div>
                               </motion.div>

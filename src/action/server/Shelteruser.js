@@ -183,19 +183,15 @@ export const updateShelterData = async (id, updatedFields) => {
      }
 };
 
-export const getSingleShelter = async (queryParam) => {
+export const getSingleShelter = async (email) => {
      try {
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
-          let query = {};
 
 
-          if (ObjectId.isValid(queryParam)) {
-               query = { _id: new ObjectId(queryParam) };
-          } else {
-               query = { email: queryParam };
-          }
-
+          const query = {
+               email: email
+          };
 
           const result = await shelterRequestsCollection.aggregate([
                { $match: query },
@@ -216,7 +212,7 @@ export const getSingleShelter = async (queryParam) => {
           ]).toArray();
 
           if (!result || result.length === 0) {
-               return { success: false, message: "Shelter not found" };
+               return { success: false, error: "Shelter not found with this ID and Email" };
           }
 
 

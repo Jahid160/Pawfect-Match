@@ -7,7 +7,6 @@ const Profilehome = () => {
      const { data: session, status } = useSession();
      console.log(session);
      const userRole = session?.user?.role;
-     console.log(userRole);
      if (status === "loading") {
           return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
      }
@@ -18,7 +17,7 @@ const Profilehome = () => {
      //      return <UserDashboardHome></UserDashboardHome>
      // }
      if (userRole === "shelter") {
-          return <Shelterprofile></Shelterprofile>
+          return <Shelterprofile email={session?.user?.email} ></Shelterprofile>
      }
      // else if (userRole === "doctor") {
      //      return <UserDashboardHome></UserDashboardHome>
