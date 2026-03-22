@@ -2,13 +2,14 @@
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import Shelterprofile from '../ShelterDashboard/ShelterProfile';
+import Loading from '../../Loading';
 
 const Profilehome = () => {
      const { data: session, status } = useSession();
      console.log(session);
      const userRole = session?.user?.role;
      if (status === "loading") {
-          return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+          return <Loading />
      }
      // if (userRole === "admin") {
      //      return <DashboardMainLayout />;
