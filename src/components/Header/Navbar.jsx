@@ -12,7 +12,7 @@ import {
   User,
   ShoppingCart,
   ChevronRight,
-  Bell, // নতুন ইম্পোর্ট
+  Bell,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,7 +21,6 @@ import Logo from "./Logo";
 import Image from "next/image";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { useCartStore } from "@/lib/useCartStore";
-// নোটিফিকেশন অ্যাকশন ইম্পোর্ট
 import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
 
 const navLinks = [
@@ -37,8 +36,7 @@ const navLinks = [
       { name: "About", href: "/about" },
       { name: "Experts", href: "/experts" },
       { name: "FAQ", href: "/faq" },
-      { name: "Our Mission", href: "/ourmission" },
-      { name: "Team", href: "/about/team" },
+      { name: "Team", href: "/team" },
     ],
   },
   {
@@ -61,13 +59,13 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isNotifOpen, setIsNotifOpen] = useState(false); // নোটিফিকেশন ড্রপডাউন স্টেট
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   
   const [activeMobileSub, setActiveMobileSub] = useState(null);
   const profileRef = useRef(null);
-  const notifRef = useRef(null); // নোটিফিকেশন রিফ
+  const notifRef = useRef(null);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const user = session?.user;
@@ -79,7 +77,6 @@ const Navbar = () => {
 
   const cartCount = useCartStore((state) => state.cartCount);
 
-  // নোটিফিকেশন ফেচ করা (শুধুমাত্র লগইন থাকলে)
   useEffect(() => {
     if (isLoggedIn && userRole === "admin") {
       const fetchNotifs = async () => {
@@ -101,7 +98,6 @@ const Navbar = () => {
     }
   };
 
-  // Filter Nav Links
   const filteredNavLinks = useMemo(() => {
     return navLinks
       .filter((link) => {
