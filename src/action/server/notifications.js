@@ -26,6 +26,7 @@ export const getAdminNotifications = async () => {
 
     return { success: true, notifications: formattedNotifications, unreadCount };
   } catch (error) {
+    console.error("Fetch Notifications Error:", error);
     return { success: false, message: error.message };
   }
 };
@@ -38,8 +39,8 @@ export const createNotification = async ({ title, message, type, receiverRole })
     const newNotification = {
       title,
       message,
-      type, // 'order', 'adoption', 'user_reg', 'alert'
-      receiverRole, // 'admin', 'user', 'doctor', 'shelter'
+      type,
+      receiverRole,
       isRead: false,
       createdAt: new Date(),
     };
@@ -53,18 +54,22 @@ export const createNotification = async ({ title, message, type, receiverRole })
 };
 
 
-export const markAllAsRead = async (role = "admin") => {
+export const markNotificationsAsRead = async (role = "admin") => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
+    
     await notificationCollection.updateMany(
       { receiverRole: role, isRead: false },
       { $set: { isRead: true } }
     );
+    
     return { success: true };
   } catch (error) {
-    return { success: false };
+    console.error("Mark as Read Error:", error);
+    return { success: false, message: error.message };
   }
 };
+
 
 const formatNotificationTime = (date) => {
   const now = new Date();

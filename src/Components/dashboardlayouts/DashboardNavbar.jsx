@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
+// সার্ভার অ্যাকশন ইম্পোর্ট
 import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
 
 const DashboardNavbar = ({ isCollapsed }) => {
@@ -26,7 +27,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
   // ১. মাউন্ট চেক এবং নোটিফিকেশন ফেচ করা
   useEffect(() => {
-    setIsMounted(true); // কম্পোনেন্ট লোড হলে true হবে
+    setIsMounted(true); // ক্লায়েন্টে মাউন্ট হলে true হবে
     
     const fetchNotifications = async () => {
       const res = await getAdminNotifications();
@@ -37,21 +38,27 @@ const DashboardNavbar = ({ isCollapsed }) => {
     };
 
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 120000); // ২ মিনিট পর পর চেক
+    // প্রতি ২ মিনিট পর পর অটোমেটিক চেক করবে
+    const interval = setInterval(fetchNotifications, 120000); 
     return () => clearInterval(interval);
   }, []);
 
   // ২. নোটিফিকেশন ক্লিক এবং মার্ক এজ রিড হ্যান্ডলার
   const handleNotificationClick = async () => {
-    setIsOpen(!isOpen);
-    if (!isOpen && unreadCount > 0) {
+    // ড্রপডাউন ওপেন/ক্লোজ টগল
+    const nextState = !isOpen;
+    setIsOpen(nextState);
+    
+    // যদি ড্রপডাউন ওপেন করা হয় এবং আনরিড মেসেজ থাকে, তবে সার্ভারে আপডেট পাঠাও
+    if (nextState === true && unreadCount > 0) {
       const res = await markNotificationsAsRead("admin");
       if (res.success) {
-        setUnreadCount(0);
+        setUnreadCount(0); // সাথে সাথে ইউআই থেকে লাল ডট সরিয়ে দাও
       }
     }
   };
 
+  // টাইপ অনুযায়ী আইকন এবং কালার সেট করার হেল্পার
   const getIconDetails = (type) => {
     switch (type) {
       case 'adoption':
@@ -67,6 +74,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
     }
   };
 
+  // ড্রপডাউন বাইরে ক্লিক করলে বন্ধ হবে
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -77,20 +85,20 @@ const DashboardNavbar = ({ isCollapsed }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Hydration Error প্রতিরোধ করার জন্য
+  // Hydration Error প্রতিরোধ করার জন্য কঙ্কাল (Skeleton) রেন্ডার
   if (!isMounted) {
     return (
-        <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px]">
-            <div className="flex items-center gap-4">
-                <h1 className="font-black text-slate-800 lg:text-xl italic uppercase tracking-tight">
-                    Dashboard <span className="text-orange-500">Overview</span>
-                </h1>
-            </div>
-            <div className="flex items-center gap-5">
-                <div className="p-2.5 text-slate-300"><Bell size={22} /></div>
-                <div className="bg-slate-100 rounded-2xl w-10 h-10 animate-pulse"></div>
-            </div>
-        </nav>
+      <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px]">
+        <div className="flex items-center gap-4">
+          <h1 className="font-black text-slate-800 lg:text-xl italic uppercase tracking-tight">
+            Dashboard <span className="text-orange-500">Overview</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="p-2.5 text-slate-200"><Bell size={22} /></div>
+          <div className="bg-slate-50 rounded-2xl w-10 h-10 animate-pulse"></div>
+        </div>
+      </nav>
     );
   }
 
@@ -118,6 +126,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
             }`}
           >
             <Bell size={22} strokeWidth={2.5} />
+            {/* আনরিড থাকলে লাল ডট দেখাবে */}
             {unreadCount > 0 && (
               <span className="top-2.5 right-2.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">
                 {unreadCount}
@@ -125,6 +134,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
             )}
           </button>
 
+          {/* DROPDOWN MENU */}
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -134,6 +144,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="right-0 absolute bg-white shadow-2xl shadow-slate-200 mt-4 border border-slate-100 rounded-[2.5rem] w-80 md:w-96 overflow-hidden origin-top-right"
               >
+                {/* Dropdown Header */}
                 <div className="flex justify-between items-center bg-slate-50/50 p-6 border-slate-50 border-b">
                   <h3 className="font-black text-slate-800 text-sm italic uppercase tracking-widest">
                     Notifications
@@ -145,6 +156,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
                   )}
                 </div>
 
+                {/* Notification List */}
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                   {notifications.length > 0 ? (
                     notifications.map((notif) => {
@@ -152,7 +164,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
                       return (
                         <div
                           key={notif._id}
-                          className={`relative flex cursor-pointer gap-4 border-b border-slate-50 p-5 transition-colors hover:bg-slate-50 last:border-0 ${!notif.isRead ? "bg-orange-50/20" : ""}`}
+                          className={`relative flex cursor-pointer gap-4 border-b border-slate-50 p-5 transition-colors hover:bg-slate-50 last:border-0 ${!notif.isRead ? "bg-orange-50/10" : ""}`}
                         >
                           <div className={`${bg} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm`}>
                             {icon}
@@ -183,6 +195,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
                   )}
                 </div>
 
+                {/* View All Button */}
                 <Link
                   href="/admin/notifications"
                   onClick={() => setIsOpen(false)}
