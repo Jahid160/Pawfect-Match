@@ -1,5 +1,7 @@
 "use server";
 import { collections, dbConnect } from "@/lib/db";
+import { ObjectId } from "mongodb";
+
 
 export const getAdminNotifications = async () => {
   try {
@@ -16,8 +18,60 @@ export const getAdminNotifications = async () => {
       isRead: false 
     });
 
-    return { success: true, notifications, unreadCount };
+    const formattedNotifications = notifications.map(notif => ({
+        ...notif,
+        _id: notif._id.toString(),
+        time: formatNotificationTime(notif.createdAt) 
+    }));
+
+    return { success: true, notifications: formattedNotifications, unreadCount };
   } catch (error) {
     return { success: false, message: error.message };
   }
+};
+
+
+export const createNotification = async ({ title, message, type, receiverRole }) => {
+  try {
+    const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
+    
+    const newNotification = {
+      title,
+      message,
+      type, // 'order', 'adoption', 'user_reg', 'alert'
+      receiverRole, // 'admin', 'user', 'doctor', 'shelter'
+      isRead: false,
+      createdAt: new Date(),
+    };
+    
+    const result = await notificationCollection.insertOne(newNotification);
+    return { success: true, id: result.insertedId.toString() };
+  } catch (error) {
+    console.error("Notification Creation Error:", error);
+    return { success: false };
+  }
+};
+
+
+export const markAllAsRead = async (role = "admin") => {
+  try {
+    const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
+    await notificationCollection.updateMany(
+      { receiverRole: role, isRead: false },
+      { $set: { isRead: true } }
+    );
+    return { success: true };
+  } catch (error) {
+    return { success: false };
+  }
+};
+
+const formatNotificationTime = (date) => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  return new Date(date).toLocaleDateString();
 };
