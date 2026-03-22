@@ -24,9 +24,9 @@ const mainPage = () => {
       <HowItWorks />
 
       <VaccinationSection />
-
-      <InteractivePetFood />
       <PetAccessoriesSection />
+      <InteractivePetFood />
+      
 
       <ExpertSection />
       <SuccessStories />
