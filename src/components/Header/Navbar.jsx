@@ -12,6 +12,7 @@ import {
   User,
   ShoppingCart,
   ChevronRight,
+  Bell,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,6 +21,7 @@ import Logo from "./Logo";
 import Image from "next/image";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { useCartStore } from "@/lib/useCartStore";
+import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -31,10 +33,10 @@ const navLinks = [
     name: "About",
     href: "/about",
     subLinks: [
+      { name: "About", href: "/about" },
       { name: "Experts", href: "/experts" },
       { name: "FAQ", href: "/faq" },
-      { name: "Our Mission", href: "/ourmission" },
-      { name: "Team", href: "/about/team" },
+      { name: "Team", href: "/team" },
     ],
   },
   {
@@ -57,8 +59,13 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
   const [activeMobileSub, setActiveMobileSub] = useState(null);
   const profileRef = useRef(null);
+  const notifRef = useRef(null);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const user = session?.user;
@@ -70,7 +77,27 @@ const Navbar = () => {
 
   const cartCount = useCartStore((state) => state.cartCount);
 
-  // Filter Nav Links
+  useEffect(() => {
+    if (isLoggedIn && userRole === "admin") {
+      const fetchNotifs = async () => {
+        const res = await getAdminNotifications();
+        if (res.success) {
+          setNotifications(res.notifications);
+          setUnreadCount(res.unreadCount);
+        }
+      };
+      fetchNotifs();
+    }
+  }, [isLoggedIn, userRole]);
+
+  const handleNotifClick = async () => {
+    setIsNotifOpen(!isNotifOpen);
+    if (!isNotifOpen && unreadCount > 0) {
+      const res = await markNotificationsAsRead("admin");
+      if (res.success) setUnreadCount(0);
+    }
+  };
+
   const filteredNavLinks = useMemo(() => {
     return navLinks
       .filter((link) => {
@@ -97,19 +124,12 @@ const Navbar = () => {
 
   // Effects
   useEffect(() => {
-    const loginTrigger = searchParams.get("loginTrigger");
-    if (loginTrigger === "true") {
-      openLoginModal();
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("loginTrigger");
-      router.replace(pathname + (params.toString() ? `?${params.toString()}` : ""));
-    }
-  }, [searchParams, openLoginModal, router, pathname]);
-
-  useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setIsNotifOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -129,6 +149,7 @@ const Navbar = () => {
   const handleLinkClick = () => {
     setIsMenuOpen(false);
     setIsProfileOpen(false);
+    setIsNotifOpen(false);
     setActiveMobileSub(null);
   };
 
@@ -173,7 +194,46 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* --- Cart Icon with Animated Badge --- */}
+            
+            {/* --- Notification Icon (Desktop) --- */}
+            {isLoggedIn && userRole === "admin" && (
+              <div className="hidden sm:block relative" ref={notifRef}>
+                <button 
+                  onClick={handleNotifClick}
+                  className={`relative flex justify-center items-center rounded-full w-10 h-10 transition-all ${isNotifOpen ? "bg-orange-50 text-orange-500" : "bg-slate-50 text-slate-700 hover:bg-slate-100"}`}
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span className="top-0 -right-0.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {isNotifOpen && (
+                    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 15 }} className="right-0 z-[120] absolute bg-white shadow-2xl mt-4 border border-slate-100 rounded-[2rem] w-80 overflow-hidden">
+                       <div className="p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">Recent Notifications</div>
+                       <div className="max-h-64 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map(n => (
+                            <div key={n._id} className="hover:bg-slate-50 p-4 last:border-0 border-b transition-colors">
+                              <p className="font-bold text-slate-800 text-xs">{n.title}</p>
+                              <p className="text-[10px] text-slate-500 line-clamp-1">{n.message}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-slate-400 text-xs text-center italic">No new notifications</div>
+                        )}
+                       </div>
+                       <Link href="/dashboard" onClick={() => setIsNotifOpen(false)} className="block bg-slate-50 py-3 font-bold text-orange-500 text-xs text-center hover:underline">View Dashboard</Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* --- Cart Icon --- */}
             <Link href="/cart" className="relative flex justify-center items-center bg-slate-50 hover:bg-orange-50 border border-slate-100 rounded-full w-10 h-10 text-slate-700 transition-all">
               <ShoppingCart size={18} />
               <AnimatePresence>

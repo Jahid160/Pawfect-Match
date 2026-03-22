@@ -104,7 +104,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
   return (
     <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px] transition-all duration-300">
-      
       {/* LEFT SIDE: Title */}
       <div className="flex items-center gap-4">
         <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl italic uppercase tracking-tight transition-opacity">
@@ -114,7 +113,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
       {/* RIGHT SIDE: Notifications & Profile */}
       <div className="flex items-center gap-5">
-        
         {/* Notification Container */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -212,7 +210,11 @@ const DashboardNavbar = ({ isCollapsed }) => {
         <div className="flex items-center gap-3 pl-3 border-slate-100 border-l">
           <button className="flex justify-center items-center bg-orange-100 shadow-sm border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 overflow-hidden transition-all">
             {session?.user?.image ? (
-              <img src={session.user.image} alt="User Avatar" className="w-full h-full object-cover" />
+              <img
+                src={session.user.image}
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
             ) : (
               <User size={22} strokeWidth={2.5} className="text-orange-600" />
             )}
