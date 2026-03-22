@@ -94,7 +94,7 @@ const ManagePets = ({ initialPets }) => {
   const handleReject = async (pet) => {
     const id = pet._id;
     const code = pet.adoptionCode;
-
+    console.log(pet);
     setPets((prev) =>
       prev.map((item) =>
         item._id === id ? { ...item, status: "Rejected" } : item,
