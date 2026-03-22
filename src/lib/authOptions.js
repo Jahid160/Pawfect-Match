@@ -96,7 +96,7 @@ async signIn({ user, account }) {
         session.user.image = token.picture;
         session.user.name = token.name;
       }
-      return session;
+      return session
     },
   },
 

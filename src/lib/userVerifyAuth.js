@@ -5,7 +5,7 @@ import { dbConnect, collections } from "@/lib/db";
 export async function userVerifyAuth() {
 
   const session = await getServerSession(authOptions);
-// console.log("session",session);
+console.log("session",session);
   if (!session) {
     throw new Error("Not authenticated");
   }
