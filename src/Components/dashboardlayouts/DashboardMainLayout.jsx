@@ -11,18 +11,19 @@ import {
   Package,
   Soup,
   Activity,
-  LayoutDashboard
+  LayoutDashboard,
+  ChevronDown
 } from 'lucide-react';
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, PieChart, Pie, Cell 
 } from 'recharts';
 
-// সার্ভার অ্যাকশন ইম্পোর্ট
 import { getDashboardStats } from '@/action/server/dashboard';
 
 const DashboardMainLayout = () => {
-  // ১. ডাইনামিক স্ট্যাটাস হোল্ড করার জন্য স্টেট
+  const [filterRange, setFilterRange] = useState("6months");
+
   const [stats, setStats] = useState({
     users: 0,
     pets: 0,
@@ -36,7 +37,6 @@ const DashboardMainLayout = () => {
         vaccinePercent: 0,
         litterPercent: 65
     },
-    // ৫টি প্রধান প্রাণীর জন্য ক্যাটাগরি ডাটা
     categories: [
       { name: 'Dogs', value: 0, color: '#f97316' },
       { name: 'Cats', value: 0, color: '#0ea5e9' },
@@ -44,16 +44,15 @@ const DashboardMainLayout = () => {
       { name: 'Fish', value: 0, color: '#22c55e' },
       { name: 'Others', value: 0, color: '#94a3b8' },
     ],
-    // নতুন: ডাইনামিক চার্ট ডাটা স্টেট
     chartData: [], 
     isLoading: true
   });
 
-  // ২. ডাটাবেজ থেকে ডাটা ফেচ করা
   useEffect(() => {
     const fetchDashboardData = async () => {
+      setStats(prev => ({ ...prev, isLoading: true }));
       try {
-        const response = await getDashboardStats();
+        const response = await getDashboardStats(filterRange);
         if (response.success) {
           setStats({
             ...response.stats,
@@ -66,9 +65,8 @@ const DashboardMainLayout = () => {
       }
     };
     fetchDashboardData();
-  }, []);
+  }, [filterRange]);
 
-  // ৩. ডাইনামিক ৬টি মডিউল কার্ড সামারি
   const modulesSummary = [
     { title: "Users", count: stats.users.toLocaleString(), icon: <Users size={18} />, color: "bg-blue-500", shadow: "shadow-blue-100" },
     { title: "Shelters", count: stats.shelters, icon: <ShieldCheck size={18} />, color: "bg-orange-500", shadow: "shadow-orange-100" },
@@ -126,26 +124,42 @@ const DashboardMainLayout = () => {
       {/* --- MAIN ANALYTICS --- */}
       <div className="gap-8 grid grid-cols-1 lg:grid-cols-12 mb-10">
         
-        {/* ডাইনামিক এরিয়া চার্ট (System Growth) */}
+        {/*  (System Growth) */}
         <div className="relative lg:col-span-8 bg-white shadow-2xl shadow-slate-100 p-8 border border-slate-50 rounded-[3.5rem] overflow-hidden">
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex sm:flex-row flex-col justify-between items-start sm:items-center gap-4 mb-10">
             <div>
               <h2 className="font-black text-xl uppercase tracking-tight">System <span className="text-orange-500">Growth</span></h2>
-              <p className="font-bold text-[10px] text-slate-400 uppercase">Real-time Adoption & Sales Data</p>
+              <p className="font-bold text-[10px] text-slate-400 italic uppercase tracking-widest">Live Trend Analytics</p>
             </div>
+            
             <div className="flex items-center gap-4">
-               <div className="flex items-center gap-2 font-bold text-slate-400 text-xs">
-                  <div className="bg-orange-500 rounded-full w-2 h-2" /> Orders
+               <div className="relative">
+                  <select 
+                    value={filterRange}
+                    onChange={(e) => setFilterRange(e.target.value)}
+                    className="bg-slate-50 hover:bg-slate-100 px-6 py-2.5 pr-10 border border-slate-200 rounded-2xl outline-none font-black text-[10px] text-slate-600 uppercase tracking-tighter transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="7days">Last 7 Days</option>
+                    <option value="30days">Last 30 Days</option>
+                    <option value="6months">Last 6 Months</option>
+                    <option value="year">Full Year</option>
+                  </select>
+                  <ChevronDown size={14} className="top-1/2 right-4 absolute text-slate-400 -translate-y-1/2 pointer-events-none" />
                </div>
-               <div className="flex items-center gap-2 font-bold text-slate-400 text-xs">
-                  <div className="bg-blue-500 rounded-full w-2 h-2" /> Adoptions
+
+               <div className="hidden sm:flex items-center gap-3 ml-2">
+                  <div className="flex items-center gap-2 font-bold text-[10px] text-slate-400 uppercase">
+                     <div className="bg-orange-500 rounded-full w-2 h-2" /> Sales
+                  </div>
+                  <div className="flex items-center gap-2 font-bold text-[10px] text-slate-400 uppercase">
+                     <div className="bg-blue-500 rounded-full w-2 h-2" /> Adoptions
+                  </div>
                </div>
             </div>
           </div>
 
           <div className="w-full h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
-              {/* ডাটাবেজ থেকে আসা chartData ব্যবহার করা হয়েছে */}
               <AreaChart data={stats.chartData}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
@@ -154,9 +168,12 @@ const DashboardMainLayout = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700, fill: '#94A3B8'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700, fill: '#94A3B8'}} />
-                <Tooltip contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'}} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#94A3B8'}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#94A3B8'}} />
+                <Tooltip 
+                  contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '15px'}} 
+                  itemStyle={{fontWeight: 900, fontSize: '12px'}}
+                />
                 <Area type="monotone" dataKey="sales" stroke="#f97316" strokeWidth={5} fillOpacity={1} fill="url(#colorSales)" />
                 <Area type="monotone" dataKey="adoptions" stroke="#3b82f6" strokeWidth={5} fill="transparent" />
               </AreaChart>
@@ -164,7 +181,7 @@ const DashboardMainLayout = () => {
           </div>
         </div>
 
-        {/* ডাইনামিক পাই চার্ট (Pet Diversity) */}
+        {/*(Pet Diversity) */}
         <div className="flex flex-col gap-8 lg:col-span-4">
           <div className="flex-1 bg-white shadow-2xl shadow-slate-100 p-8 border border-slate-50 rounded-[3.5rem]">
             <h3 className="mb-6 font-black text-slate-800 text-lg text-center italic uppercase">Pet <span className="text-orange-500">Diversity</span></h3>

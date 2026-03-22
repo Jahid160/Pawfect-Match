@@ -13,7 +13,6 @@ export const getDashboardStats = async (range = "6months") => {
     const adoptionsCollection = await dbConnect(collections.ADOPTIONS); 
     const ordersCollection = await dbConnect(collections.ORDERS); 
 
-    // ১. বেসিক কাউন্টগুলো
     const [
       totalUsers, totalPets, totalShelters, totalAccessories, 
       totalFoodItems, totalVaccines, dogCount, catCount, rabbitCount, fishCount
@@ -30,7 +29,6 @@ export const getDashboardStats = async (range = "6months") => {
       petsCollection.countDocuments({ species: "Fish" })
     ]);
 
-    // ২. ফিল্টার রেঞ্জ অনুযায়ী ডেট সেট করা
     let startDate = new Date();
     let groupBy = {};
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -45,7 +43,6 @@ export const getDashboardStats = async (range = "6months") => {
       startDate = new Date(new Date().getFullYear(), 0, 1);
       groupBy = { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } };
     } else {
-      // ডিফল্ট ৬ মাস
       startDate.setMonth(startDate.getMonth() - 5);
       startDate.setDate(1);
       groupBy = { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } };
@@ -65,11 +62,9 @@ export const getDashboardStats = async (range = "6months") => {
       aggregateData(ordersCollection)
     ]);
 
-    // ৩. চার্ট ডাটা ফরম্যাটিং
     let chartData = [];
 
     if (range === "7days" || range === "30days") {
-      // দিন ভিত্তিক ডাটা সাজানো
       const limit = range === "7days" ? 7 : 30;
       for (let i = limit - 1; i >= 0; i--) {
         const d = new Date();
@@ -87,7 +82,6 @@ export const getDashboardStats = async (range = "6months") => {
         });
       }
     } else {
-      // মাস ভিত্তিক ডাটা (৬ মাস বা ১ বছর)
       const monthsToLookBack = range === "year" ? 11 : 5;
       for (let i = monthsToLookBack; i >= 0; i--) {
         const d = new Date();
@@ -106,7 +100,6 @@ export const getDashboardStats = async (range = "6months") => {
       }
     }
 
-    // ৪. ডাইভারসিটি এবং ইনভেন্টরি ক্যালকুলেশন
     const otherCount = Math.max(0, totalPets - (dogCount + catCount + rabbitCount + fishCount));
     const calculateStockPercent = (currentCount, target = 100) => Math.min(Math.max(Math.round((currentCount / target) * 100), 5), 100);
     const calculateDiversityPercent = (count) => totalPets > 0 ? Math.round((count / totalPets) * 100) : 0;
