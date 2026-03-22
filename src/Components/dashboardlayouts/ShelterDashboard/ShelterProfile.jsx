@@ -1,16 +1,18 @@
 "use client";
 import Image from 'next/image';
+import Link from "next/link";
 import React, { useEffect, useState } from 'react';
 import Loading from '@/components/Loading';
 import { motion } from 'framer-motion';
 import {
      FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaBuilding,
-     FaCalendarAlt, FaPaw, FaUserAlt, FaEdit, FaCheckCircle,
+     FaCalendarAlt, FaPaw, FaEdit, FaCheckCircle,
      FaCamera
 } from 'react-icons/fa';
 import { getSingleShelter } from '@/action/server/Shelteruser';
 
 import { Poppins } from "next/font/google";
+import { myEntryPets } from '@/action/server/pets';
 
 const poppins = Poppins({
      subsets: ["latin"],
@@ -18,20 +20,16 @@ const poppins = Poppins({
 });
 
 
-const pets = [
-     { id: 1, name: "Buddy", age: "2 Years", img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300" },
-     { id: 2, name: "Luna", age: "5 Months", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300" },
-     { id: 3, name: "Max", age: "3 Years", img: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=300" },
-];
+
 
 const ShelterProfile = ({ email }) => {
 
      const [shelterData, setShelterData] = useState(null)
-     console.log(shelterData)
+     const [pets, setPets] = useState([])
      const [loading, setLoading] = useState(true);
 
+     console.log("Shelter Pets:", pets);
 
-     // const 
      useEffect(() => {
           if (!email) {
                return;
@@ -40,6 +38,10 @@ const ShelterProfile = ({ email }) => {
           const SelterProfileReq = async () => {
                setLoading(true);
                const result = await getSingleShelter(email);
+               const { success, pets } = await myEntryPets(email);
+               if (success) {
+                    setPets(pets);
+               }
 
                if (result.success) {
                     setShelterData(result.data);
@@ -97,7 +99,6 @@ const ShelterProfile = ({ email }) => {
                     </div>
 
                     {/* Shelter Name on Cover */}
-                    {/* Shelter Name on Cover */}
                     <div className="container mx-auto h-full flex items-end pb-24 px-8 relative z-10">
                          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent -z-10" />
 
@@ -116,51 +117,98 @@ const ShelterProfile = ({ email }) => {
                          {/* 2. Profile Card Section (Left/Main) */}
                          <motion.div
                               {...fadeIn}
-                              className="lg:col-span-2 bg-base-100 rounded-3xl shadow-xl p-8 border border-base-300"
+                              className="lg:col-span-2 bg-base-100 rounded-3xl shadow-xl p-8 border border-base-300 relative overflow-hidden"
                          >
-                              <div className="flex flex-col md:flex-row gap-8 items-start">
-                                   <div className="relative group">
+                              {/* Background subtle pattern or accent */}
+                              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full z-0" />
+
+                              <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
+                                   {/* Profile Image Section */}
+                                   <div className="relative group shrink-0">
                                         <Image
                                              src={shelterData.shelterPhoto}
                                              alt="Shelter Profile Picture"
                                              width={192}
                                              height={192}
-                                             className="rounded-2xl object-cover ring-4 ring-base-100 shadow-lg"
+                                             className="rounded-2xl object-cover ring-4 ring-base-100 shadow-xl"
                                              priority
                                         />
-                                        <button className="absolute bottom-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform">
+                                        <button className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform border-2 border-base-100">
                                              <FaEdit size={14} />
                                         </button>
                                    </div>
 
-                                   <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                             <span className="badge badge-success gap-2 py-3 px-4 text-white font-semibold uppercase tracking-wider text-xs">
+
+                                   <div className="flex-1 space-y-5">
+                                        {/* Badges Row */}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                             <span className="badge badge-success gap-2 py-3.5 px-4 text-white font-bold uppercase tracking-wider text-[10px]">
                                                   <FaCheckCircle /> {shelterData.status}
                                              </span>
-                                             <span className="badge badge-ghost py-3 px-4 border-base-300 font-medium uppercase text-xs">
+                                             <span className="badge badge-outline py-3.5 px-4 border-base-300 font-bold uppercase text-[10px] text-base-content/70">
                                                   {shelterData.shelterType}
+                                             </span>
+                                             {/* Location Badge added from JSON */}
+                                             <span className="badge badge-ghost gap-1.5 py-3.5 px-4 border-base-200 font-bold uppercase text-[10px]">
+                                                  <FaMapMarkerAlt className="text-primary" /> {shelterData.city}
                                              </span>
                                         </div>
 
-                                        <h2 className="text-3xl font-bold flex items-center gap-2 text-base-content">
-                                             <FaUserAlt className="text-primary text-xl" /> {shelterData.fullName}
-                                        </h2>
+                                        {/* Name and Basic Title */}
+                                        <div>
+                                             <h2 className="text-3xl font-black text-base-content tracking-tight">
+                                                  {shelterData.fullName}
+                                             </h2>
+                                             <p className="text-primary font-bold text-sm flex items-center gap-2 mt-1">
+                                                  <FaPaw /> Lead Administrator at {shelterData.shelterName}
+                                             </p>
+                                        </div>
 
-
-                                        <p className="text-base-content/80 leading-relaxed font-normal">
-                                             {shelterData.motivation}
+                                        {/* Motivation Quote */}
+                                        <p className="text-base-content/70 leading-relaxed font-medium bg-base-200/50 p-4 rounded-xl border-l-4 border-primary">
+                                             " {shelterData.motivation}"
                                         </p>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-base-200">
-                                             <div className="flex items-center gap-2 text-sm font-medium">
-                                                  <FaCalendarAlt className="text-primary" />
-                                                  <span>Since: {shelterData.operatingSince}</span>
+                                        {/* Comprehensive Info Grid */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 pt-4 border-t border-base-200">
+                                             <div className="flex items-center gap-3 text-sm">
+                                                  <div className="p-2 bg-primary/10 rounded-lg text-primary"><FaCalendarAlt /></div>
+                                                  <div>
+                                                       <p className="text-[10px] uppercase font-bold opacity-50">Operating Since</p>
+                                                       <p className="font-bold">{shelterData.operatingSince}</p>
+                                                  </div>
                                              </div>
-                                             <div className="flex items-center gap-2 text-sm font-medium">
-                                                  <FaBuilding className="text-primary" />
-                                                  <span>Capacity: {shelterData.capacity} Animals</span>
+                                             <div className="flex items-center gap-3 text-sm">
+                                                  <div className="p-2 bg-primary/10 rounded-lg text-primary"><FaBuilding /></div>
+                                                  <div>
+                                                       <p className="text-[10px] uppercase font-bold opacity-50">Shelter Capacity</p>
+                                                       <p className="font-bold">{shelterData.capacity} Animals</p>
+                                                  </div>
                                              </div>
+                                             {/* Rescue Experience Highlight */}
+                                             <div className="flex items-center gap-3 text-sm">
+                                                  <div className="p-2 bg-secondary/10 rounded-lg text-secondary"><FaCheckCircle /></div>
+                                                  <div>
+                                                       <p className="text-[10px] uppercase font-bold opacity-50">Rescue Experience</p>
+                                                       <p className="font-bold">{shelterData.hasRescueExp === "Yes" ? "Expert Rescuer" : "New Member"}</p>
+                                                  </div>
+                                             </div>
+                                             {/* Vet Contact Info */}
+                                             <div className="flex items-center gap-3 text-sm">
+                                                  <div className="p-2 bg-success/10 rounded-lg text-success"><FaPhoneAlt /></div>
+                                                  <div>
+                                                       <p className="text-[10px] uppercase font-bold opacity-50">Vet Support</p>
+                                                       <p className="font-bold">{shelterData.hasVetContact === "Yes" ? "Verified Contact" : "Not Linked"}</p>
+                                                  </div>
+                                             </div>
+                                        </div>
+
+                                        {/* Experience Summary - Extra Info */}
+                                        <div className="pt-2">
+                                             <p className="text-xs font-bold uppercase opacity-40 mb-2">Background & Skills</p>
+                                             <p className="text-xs text-base-content/60 leading-tight italic">
+                                                  {shelterData.petExperience.substring(0, 120)}...
+                                             </p>
                                         </div>
                                    </div>
                               </div>
@@ -222,28 +270,35 @@ const ShelterProfile = ({ email }) => {
 
                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                               {pets.map((pet, index) => (
-                                   <motion.div
-                                        key={pet.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        whileHover={{ y: -8 }}
-                                        className="card bg-base-100 shadow-md hover:shadow-xl transition-all border border-base-300 overflow-hidden group"
+                                   <Link href={`/all-pets/${pet._id}`}
+                                        key={pet._id}
+                                        className="block"
                                    >
-                                        <figure className="relative h-52 w-full overflow-hidden">
-                                             <Image
-                                                  src={pet.img}
-                                                  alt={pet.name}
-                                                  fill
-                                                  sizes="(max-width: 768px) 100vw, 25vw"
-                                                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                             />
-                                        </figure>
-                                        <div className="card-body p-5 text-center">
-                                             <h4 className="card-title justify-center text-primary font-bold tracking-tight">{pet.name}</h4>
-                                             <p className="text-xs font-semibold text-base-content/60 uppercase tracking-widest">{pet.age}</p>
-                                        </div>
-                                   </motion.div>
+                                        <motion.div
+                                             key={pet._id}
+                                             initial={{ opacity: 0, y: 10 }}
+                                             animate={{ opacity: 1, y: 0 }}
+                                             transition={{ delay: index * 0.05 }}
+                                             whileHover={{ y: -8 }}
+                                             className="card bg-base-100 shadow-md hover:shadow-xl transition-all border border-base-300 overflow-hidden group"
+                                        >
+                                             <figure className="relative h-52 w-full overflow-hidden">
+                                                  <Image
+                                                       src={Array.isArray(pet.images) && pet.images.length > 0
+                                                            ? pet.images[0]
+                                                            : "https://via.placeholder.com/400x300?text=No+Image"}
+                                                       alt={pet.petName}
+                                                       fill
+                                                       sizes="(max-width: 768px) 100vw, 25vw"
+                                                       className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                  />
+                                             </figure>
+                                             <div className="card-body p-5 text-center">
+                                                  <h4 className="card-title justify-center text-primary font-bold tracking-tight">{pet.petName}</h4>
+                                                  <p className="text-xs font-semibold text-base-content/60 uppercase tracking-widest">age: {pet.ageYears}</p>
+                                             </div>
+                                        </motion.div>
+                                   </Link>
                               ))}
                          </div>
                     </div>

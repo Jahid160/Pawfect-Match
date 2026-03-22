@@ -297,3 +297,22 @@ export const UpdatePetStatusReject = async (id, adoptionCode) => {
     return { success: false, error: error.message };
   }
 };
+
+export const myEntryPets = async (email) => {
+  try {
+    const petCollection = await petCollectionPromise
+    const pets = await petCollection.find({ email: email }).project({
+      images: { $slice: 1 },
+      ageYears: 1,
+      petName: 1,
+      _id: 1
+    }).toArray()
+    const serializedPets = pets.map(pet => ({
+      ...pet,
+      _id: pet._id.toString(),
+    }));
+    return { success: true, pets: serializedPets };
+  } catch (error) {
+    return { success: false, message: "Error fetching entry pets" };
+  }
+}
