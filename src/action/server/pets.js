@@ -7,8 +7,10 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { verifyAuth } from "@/lib/verifyAuth";
+import { adminShelterAuth } from "@/lib/adminShelterAuth";
 
 const petCollectionPromise = dbConnect(collections.PETS);
+const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
 const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
 
 export const getPets = async () => {
@@ -106,15 +108,13 @@ export const getSinglePets = async (id) => {
 
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return { success: false, message: "Unauthorized" };
-  }
-
+  console.log(session.user)
+  adminShelterAuth()
   try {
-    const Petcollection = await petCollectionPromise;
-    const result = await Petcollection.insertOne({
+    const EntryReqcollection = await EntryReqCollectionPromise;
+    const result = await EntryReqcollection.insertOne({
       ...petdata,
-      status: "available",
+      status: "preview",
       email: session.user.email,
     });
     return { success: Boolean(result.insertedId) };

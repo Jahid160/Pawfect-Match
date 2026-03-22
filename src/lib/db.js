@@ -5,6 +5,7 @@ const dbname = process.env.DBNAME;
 
 export const collections = {
   USERS: "users",
+  ENTRYREQ: "entryreq",
   PETS: "pets",
   FOODS: "foods",
   ACCESSORIES: "accessories",
@@ -13,7 +14,7 @@ export const collections = {
   VACCINES: "vaccines",
   ORDERS: "orders",
   CART: "cart",
-  NOTIFICATIONS: "notifications", 
+  NOTIFICATIONS: "notifications",
 };
 
 const client = new MongoClient(uri, {
