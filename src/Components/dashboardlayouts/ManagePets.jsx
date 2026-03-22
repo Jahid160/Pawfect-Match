@@ -66,7 +66,7 @@ const ManagePets = ({ initialPets }) => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredPets.slice(indexOfFirstItem, indexOfLastItem);
-  // console.log(currentItems);
+  console.log(currentItems);
   const handleFilterChange = (setter, value) => {
     setter(value);
     setCurrentPage(1);
@@ -291,14 +291,14 @@ const ManagePets = ({ initialPets }) => {
                     <td className="px-6 py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${
-                          pet.status === "Available"
+                          pet.status === "Available" || pet.status === "available"
                             ? "bg-emerald-50 text-emerald-600"
                             : pet.status === "adopted"
                               ? "bg-blue-50 text-blue-600"
                               : "bg-amber-50 text-amber-600"
                         }`}
                       >
-                        {pet.status === "Available" ? (
+                        {pet.status === "Available" || pet.status === "available" ? (
                           <CheckCircle size={10} />
                         ) : (
                           <Clock size={10} />
@@ -380,8 +380,8 @@ const ManagePets = ({ initialPets }) => {
                             {/* Delete Disabled */}
                             <button
                               onClick={() => handleReject(pet)}
-                              title="Adopted pets cannot be deleted"
-                              className="p-2 text-slate-200 cursor-not-allowed transition-all"
+                              title="Reject"
+                              className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                             >
                               <Trash2 size={16} />
                             </button>
