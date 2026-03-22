@@ -9,10 +9,13 @@ import {
      FaCalendarAlt, FaPaw, FaEdit, FaCheckCircle,
      FaCamera
 } from 'react-icons/fa';
-import { getSingleShelter } from '@/action/server/Shelteruser';
+import { getSingleShelter, updateShelterCover } from '@/action/server/Shelteruser';
+import { useRouter } from 'next/navigation';
 
 import { Poppins } from "next/font/google";
 import { myEntryPets } from '@/action/server/pets';
+import Swal from 'sweetalert2';
+;
 
 const poppins = Poppins({
      subsets: ["latin"],
@@ -20,15 +23,14 @@ const poppins = Poppins({
 });
 
 
-
-
 const ShelterProfile = ({ email }) => {
 
      const [shelterData, setShelterData] = useState(null)
+     const [isUploading, setIsUploading] = useState(false);
      const [pets, setPets] = useState([])
      const [loading, setLoading] = useState(true);
 
-     console.log("Shelter Pets:", pets);
+     const router = useRouter()
 
      useEffect(() => {
           if (!email) {
@@ -53,6 +55,69 @@ const ShelterProfile = ({ email }) => {
 
           SelterProfileReq();
      }, [email]);
+
+
+
+     const handleCoverUpload = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          setIsUploading(true);
+
+
+          Swal.fire({
+               title: 'Uploading Image...',
+               text: 'Please wait while we update your cover photo.',
+               allowOutsideClick: false,
+               didOpen: () => {
+                    Swal.showLoading();
+               }
+          });
+
+          const formData = new FormData();
+          formData.append("image", file);
+
+          try {
+
+               const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+
+               const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                    method: "POST",
+                    body: formData,
+               });
+
+               const data = await response.json();
+
+               if (data.success) {
+                    const newImageUrl = data.data.url;
+                    const res = await updateShelterCover(shelterData.email, newImageUrl);
+
+                    if (res.success) {
+                         Swal.fire({
+                              icon: "success",
+                              title: "Success!",
+                              text: "Cover photo updated successfully.",
+                              timer: 2000,
+                              showConfirmButton: false
+                         });
+                         setShelterData(prev => ({ ...prev, shelterPhoto: newImageUrl }));
+
+                         router.refresh()
+                    }
+               } else {
+                    throw new Error(data.error?.message || "ImgBB upload failed");
+               }
+          } catch (error) {
+               console.error("Upload failed:", error);
+               Swal.fire({
+                    icon: "error",
+                    title: "Upload Failed",
+                    text: error.message || "Something went wrong. Please try again.",
+               });
+          } finally {
+               setIsUploading(false); // আপলোড শেষ
+          }
+     };
 
 
      const fadeIn = {
@@ -92,10 +157,17 @@ const ShelterProfile = ({ email }) => {
 
                     {/* Edit Cover Photo Button (Facebook Style) */}
                     <div className="absolute top-4 right-6 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button className="flex items-center gap-2 bg-white/90 hover:bg-white text-black px-4 py-2 rounded-lg shadow-lg text-sm font-bold transition-all active:scale-95">
-                              <FaCamera className="text-lg" />
-                              <span>Upload Cover Photo</span>
-                         </button>
+                         <label className={`flex items-center gap-2 bg-white/90 hover:bg-white text-black px-4 py-2 rounded-lg shadow-lg text-sm font-bold transition-all active:scale-95 cursor-pointer ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                              <FaCamera className={`${isUploading ? 'animate-bounce' : 'text-lg'}`} />
+                              <span>{isUploading ? 'Uploading...' : 'Upload Cover Photo'}</span>
+                              <input
+                                   type="file"
+                                   className="hidden"
+                                   accept="image/*"
+                                   onChange={handleCoverUpload}
+                                   disabled={isUploading}
+                              />
+                         </label>
                     </div>
 
                     {/* Shelter Name on Cover */}

@@ -9,7 +9,7 @@ export async function POST(req) {
           const base64Image = Buffer.from(buffer).toString("base64");
 
           const imgbbRes = await fetch(
-               `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+               `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
                {
                     method: "POST",
                     body: new URLSearchParams({

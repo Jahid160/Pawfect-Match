@@ -228,3 +228,21 @@ export const getSingleShelter = async (email) => {
           return { success: false, error: error.message };
      }
 }
+
+
+export const updateShelterCover = async (email, imageUrl) => {
+     try {
+          const shelterCollection = await shelterRequestsCollectionPromise; // আপনার কালেকশন প্রমিজ
+          const result = await shelterCollection.updateOne(
+               { email: email },
+               { $set: { shelterPhoto: imageUrl } }
+          );
+
+          if (result.modifiedCount > 0) {
+               return { success: true };
+          }
+          return { success: false };
+     } catch (error) {
+          return { success: false, message: error.message };
+     }
+}
