@@ -162,7 +162,7 @@ const CartPageClient = () => {
             Looks like you haven&apos;t added anything for your pets yet!
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-10">
-            <Link href="/petfoods" className="bg-orange-500 hover:bg-orange-600 shadow-orange-100 shadow-xl px-10 py-5 rounded-2xl font-black text-white active:scale-95 transition-all">
+            <Link href="/pet-food" className="bg-orange-500 hover:bg-orange-600 shadow-orange-100 shadow-xl px-10 py-5 rounded-2xl font-black text-white active:scale-95 transition-all">
               Browse Food
             </Link>
             <Link href="/pet-accessories" className="bg-gray-900 hover:bg-black shadow-xl px-10 py-5 rounded-2xl font-black text-white active:scale-95 transition-all">

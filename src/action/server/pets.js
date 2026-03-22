@@ -205,45 +205,52 @@ export const UpdatePetStatus = async (id) => {
   }
 
   const adminEmail = admin.email;
-  console.log("Action performed by:", adminEmail);
 
-  if (id?.length !== 24) return { success: false, message: "Invalid ID" };
+  if (id?.length !== 24) {
+    return { success: false, message: "Invalid ID" };
+  }
 
   try {
     const PetCollection = await petCollectionPromise;
     const adoptionCollection = await adoptionCollectionPromise;
-    const query = { _id: new ObjectId(id) };
 
-    const updateStatus = {
+    const petQuery = { _id: new ObjectId(id) };
+
+    const petUpdate = {
       $set: {
         status: "adopted",
         updatedBy: adminEmail,
       },
     };
+
     await adoptionCollection.updateOne(
       { petId: id },
       {
         $set: {
-          status: "adopted",
+          status: "approved",
           updatedTime: new Date(),
         },
-      },
+      }
     );
 
-    const result = await PetCollection.updateOne(query, updateStatus);
+    const result = await PetCollection.updateOne(petQuery, petUpdate);
+
     revalidatePath("/dashboard/manage-pets");
+    revalidatePath("/dashboard/my-adoptions");
+    revalidatePath("/dashboard/my-pets");
 
     return {
       success: result.modifiedCount > 0,
       message:
         result.modifiedCount > 0
           ? "Pet adopted successfully"
-          : "Status was already updated or not found",
+          : "Status was already updated or pet not found",
     };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
+
 
 export const UpdatePetStatusReject = async (id, adoptionCode) => {
   let admin;

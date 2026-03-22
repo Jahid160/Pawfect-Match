@@ -9,46 +9,72 @@ import {
   AlertCircle,
   ArrowRight,
   User,
+  Package,
+  UserPlus,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
+// সার্ভার অ্যাকশন ইম্পোর্ট
+import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
 
 const DashboardNavbar = ({ isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isMounted, setIsMounted] = useState(false); // Hydration fix এর জন্য
   const dropdownRef = useRef(null);
   const { data: session } = useSession();
-// Fake Notification Data
-  const notifications = [
-    {
-      id: 1,
-      title: "New Adoption Request",
-      desc: "Anisur Rahman wants to adopt Buddy.",
-      time: "2 mins ago",
-      icon: <Heart size={16} className="text-rose-500" />,
-      bg: "bg-rose-50",
-      isUnread: true,
-    },
-    {
-      id: 2,
-      title: "Medical Alert",
-      desc: "Luna's vaccination is overdue.",
-      time: "1 hour ago",
-      icon: <AlertCircle size={16} className="text-amber-500" />,
-      bg: "bg-amber-50",
-      isUnread: true,
-    },
-    {
-      id: 3,
-      title: "System Update",
-      desc: "Records synced with cloud storage.",
-      time: "5 hours ago",
-      icon: <Check size={16} className="text-emerald-500" />,
-      bg: "bg-emerald-50",
-      isUnread: false,
-    },
-  ];
 
-  // Close dropdown when clicking outside
+  // ১. মাউন্ট চেক এবং নোটিফিকেশন ফেচ করা
+  useEffect(() => {
+    setIsMounted(true); // ক্লায়েন্টে মাউন্ট হলে true হবে
+    
+    const fetchNotifications = async () => {
+      const res = await getAdminNotifications();
+      if (res.success) {
+        setNotifications(res.notifications);
+        setUnreadCount(res.unreadCount);
+      }
+    };
+
+    fetchNotifications();
+    // প্রতি ২ মিনিট পর পর অটোমেটিক চেক করবে
+    const interval = setInterval(fetchNotifications, 120000); 
+    return () => clearInterval(interval);
+  }, []);
+
+  // ২. নোটিফিকেশন ক্লিক এবং মার্ক এজ রিড হ্যান্ডলার
+  const handleNotificationClick = async () => {
+    // ড্রপডাউন ওপেন/ক্লোজ টগল
+    const nextState = !isOpen;
+    setIsOpen(nextState);
+    
+    // যদি ড্রপডাউন ওপেন করা হয় এবং আনরিড মেসেজ থাকে, তবে সার্ভারে আপডেট পাঠাও
+    if (nextState === true && unreadCount > 0) {
+      const res = await markNotificationsAsRead("admin");
+      if (res.success) {
+        setUnreadCount(0); // সাথে সাথে ইউআই থেকে লাল ডট সরিয়ে দাও
+      }
+    }
+  };
+
+  // টাইপ অনুযায়ী আইকন এবং কালার সেট করার হেল্পার
+  const getIconDetails = (type) => {
+    switch (type) {
+      case 'adoption':
+        return { icon: <Heart size={16} className="text-rose-500" />, bg: "bg-rose-50" };
+      case 'order':
+        return { icon: <Package size={16} className="text-orange-500" />, bg: "bg-orange-50" };
+      case 'user_reg':
+        return { icon: <UserPlus size={16} className="text-blue-500" />, bg: "bg-blue-50" };
+      case 'alert':
+        return { icon: <AlertCircle size={16} className="text-amber-500" />, bg: "bg-amber-50" };
+      default:
+        return { icon: <Check size={16} className="text-emerald-500" />, bg: "bg-emerald-50" };
+    }
+  };
+
+  // ড্রপডাউন বাইরে ক্লিক করলে বন্ধ হবে
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -59,12 +85,29 @@ const DashboardNavbar = ({ isCollapsed }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Hydration Error প্রতিরোধ করার জন্য কঙ্কাল (Skeleton) রেন্ডার
+  if (!isMounted) {
+    return (
+      <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px]">
+        <div className="flex items-center gap-4">
+          <h1 className="font-black text-slate-800 lg:text-xl italic uppercase tracking-tight">
+            Dashboard <span className="text-orange-500">Overview</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="p-2.5 text-slate-200"><Bell size={22} /></div>
+          <div className="bg-slate-50 rounded-2xl w-10 h-10 animate-pulse"></div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px] transition-all duration-300">
       {/* LEFT SIDE: Title */}
       <div className="flex items-center gap-4">
-        <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl tracking-tight transition-opacity">
-          Dashboard <span className="text-orange-500 italic">Overview</span>
+        <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl italic uppercase tracking-tight transition-opacity">
+          Dashboard <span className="text-orange-500">Overview</span>
         </h1>
       </div>
 
@@ -73,16 +116,20 @@ const DashboardNavbar = ({ isCollapsed }) => {
         {/* Notification Container */}
         <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={handleNotificationClick}
             className={`relative rounded-2xl p-2.5 transition-all duration-300 ${
               isOpen
-                ? "bg-orange-50 text-orange-600"
-                : "hover:bg-slate-50 text-slate-500"
+                ? "bg-orange-50 text-orange-600 shadow-inner"
+                : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
             }`}
           >
             <Bell size={22} strokeWidth={2.5} />
-            {/* Red Dot Indicator */}
-            <span className="top-2.5 right-2.5 absolute bg-rose-500 border-2 border-white rounded-full w-2.5 h-2.5"></span>
+            {/* আনরিড থাকলে লাল ডট দেখাবে */}
+            {unreadCount > 0 && (
+              <span className="top-2.5 right-2.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">
+                {unreadCount}
+              </span>
+            )}
           </button>
 
           {/* DROPDOWN MENU */}
@@ -93,55 +140,64 @@ const DashboardNavbar = ({ isCollapsed }) => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="right-0 absolute bg-white shadow-2xl shadow-slate-200 mt-4 border border-slate-100 rounded-[2rem] w-80 md:w-96 overflow-hidden origin-top-right"
+                className="right-0 absolute bg-white shadow-2xl shadow-slate-200 mt-4 border border-slate-100 rounded-[2.5rem] w-80 md:w-96 overflow-hidden origin-top-right"
               >
                 {/* Dropdown Header */}
-                <div className="flex justify-between items-center bg-slate-50/50 p-5 border-slate-50 border-b">
-                  <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">
+                <div className="flex justify-between items-center bg-slate-50/50 p-6 border-slate-50 border-b">
+                  <h3 className="font-black text-slate-800 text-sm italic uppercase tracking-widest">
                     Notifications
                   </h3>
-                  <span className="bg-orange-500 px-2 py-0.5 rounded-full font-black text-[10px] text-white">
-                    2 NEW
-                  </span>
+                  {unreadCount > 0 && (
+                    <span className="bg-orange-500 px-3 py-1 rounded-full font-black text-[10px] text-white animate-pulse">
+                      {unreadCount} NEW
+                    </span>
+                  )}
                 </div>
 
                 {/* Notification List */}
-                <div className="max-h-[400px] overflow-y-auto">
-                  {notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      className={`relative flex cursor-pointer gap-4 border-b border-slate-50 p-4 transition-colors hover:bg-slate-50 last:border-0 ${notif.isUnread ? "bg-blue-50/20" : ""}`}
-                    >
-                      <div
-                        className={`${notif.bg} flex h-10 w-10 shrink-0 items-center justify-center rounded-xl`}
-                      >
-                        {notif.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-bold text-slate-800 text-sm leading-tight">
-                            {notif.title}
-                          </h4>
-                          <span className="font-medium text-[10px] text-slate-400">
-                            {notif.time}
-                          </span>
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                  {notifications.length > 0 ? (
+                    notifications.map((notif) => {
+                      const { icon, bg } = getIconDetails(notif.type);
+                      return (
+                        <div
+                          key={notif._id}
+                          className={`relative flex cursor-pointer gap-4 border-b border-slate-50 p-5 transition-colors hover:bg-slate-50 last:border-0 ${!notif.isRead ? "bg-orange-50/10" : ""}`}
+                        >
+                          <div className={`${bg} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm`}>
+                            {icon}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-1">
+                              <h4 className="font-black text-slate-800 text-xs uppercase leading-tight tracking-tight">
+                                {notif.title || "Update"}
+                              </h4>
+                              <span className="font-bold text-[9px] text-slate-400 italic uppercase">
+                                {notif.time || "Just now"}
+                              </span>
+                            </div>
+                            <p className="font-medium text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                              {notif.message}
+                            </p>
+                          </div>
+                          {!notif.isRead && (
+                            <div className="top-1/2 right-3 absolute bg-orange-500 rounded-full w-1.5 h-1.5 -translate-y-1/2"></div>
+                          )}
                         </div>
-                        <p className="mt-1 font-medium text-slate-500 text-xs line-clamp-2 leading-relaxed">
-                          {notif.desc}
-                        </p>
-                      </div>
-                      {notif.isUnread && (
-                        <div className="top-1/2 right-2 absolute bg-blue-500 rounded-full w-1.5 h-1.5 -translate-y-1/2"></div>
-                      )}
+                      );
+                    })
+                  ) : (
+                    <div className="py-12 text-center">
+                       <p className="font-bold text-[10px] text-slate-400 italic uppercase tracking-[0.2em]">All caught up!</p>
                     </div>
-                  ))}
+                  )}
                 </div>
 
                 {/* View All Button */}
                 <Link
-                  href="/notifications"
+                  href="/admin/notifications"
                   onClick={() => setIsOpen(false)}
-                  className="flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-4 font-black text-orange-500 hover:text-white text-xs text-center uppercase tracking-widest transition-all"
+                  className="flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-5 border-slate-100 border-t font-black text-[10px] text-slate-500 hover:text-white text-center uppercase tracking-[0.2em] transition-all"
                 >
                   See all activities <ArrowRight size={14} />
                 </Link>
@@ -151,8 +207,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
         </div>
 
         {/* Profile Avatar */}
-        <div className="flex items-center gap-3 pl-2 border-slate-100 border-l">
-          <button className="flex justify-center items-center bg-orange-100 border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 overflow-hidden transition-all">
+        <div className="flex items-center gap-3 pl-3 border-slate-100 border-l">
+          <button className="flex justify-center items-center bg-orange-100 shadow-sm border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 overflow-hidden transition-all">
             {session?.user?.image ? (
               <img
                 src={session.user.image}
@@ -165,11 +221,11 @@ const DashboardNavbar = ({ isCollapsed }) => {
           </button>
 
           <div className="hidden md:block">
-            <p className="font-black text-slate-800 text-sm leading-none">
-              {session?.user?.name || "User Name"}
+            <p className="font-black text-slate-800 text-xs uppercase leading-none tracking-tight">
+              {session?.user?.name || "Admin"}
             </p>
-            <p className="mt-1 font-bold text-[10px] text-slate-400 italic uppercase tracking-tighter">
-              {session?.user?.role || "Pet Lover"}
+            <p className="mt-1 font-bold text-[9px] text-slate-400 italic uppercase tracking-tighter">
+              {session?.user?.role || "Administrator"}
             </p>
           </div>
         </div>
