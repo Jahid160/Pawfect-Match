@@ -59,10 +59,7 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/accessories-management",
       icon: ShoppingBag,
     },
-    { name: "Manage Pets", href: "/dashboard/manage-pets", icon: PawPrint },
-    {
-      name: "Pet Request", href: "/dashboard/pet-request", icon: PawPrint
-    }
+    { name: "Pet Management", href: "/dashboard/manage-pets", icon: PawPrint },
   ];
 
   const userNavItem = [
