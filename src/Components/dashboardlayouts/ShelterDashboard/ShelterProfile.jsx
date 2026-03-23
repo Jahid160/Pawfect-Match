@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Poppins } from "next/font/google";
 import { myEntryPets } from '@/action/server/pets';
 import Swal from 'sweetalert2';
+import { getSingleUser } from '@/action/server/users';
 ;
 
 const poppins = Poppins({
@@ -26,37 +27,44 @@ const poppins = Poppins({
 const ShelterProfile = ({ email }) => {
 
      const [shelterData, setShelterData] = useState(null)
+     const [userImg, setUserImg] = useState({})
+     console.log(userImg)
      const [isUploading, setIsUploading] = useState(false);
      const [pets, setPets] = useState([])
      const [loading, setLoading] = useState(true);
-
      const router = useRouter()
 
      useEffect(() => {
-          if (!email) {
-               return;
-          }
+          if (!email) return;
 
-          const SelterProfileReq = async () => {
+          const fetchAllData = async () => {
                setLoading(true);
-               const result = await getSingleShelter(email);
-               const { success, pets } = await myEntryPets(email);
-               if (success) {
-                    setPets(pets);
-               }
+               try {
+                    // সবগুলো রিকোয়েস্ট একসাথে (Parallel) কল করা হচ্ছে
+                    const [shelterRes, petsRes, userRes] = await Promise.all([
+                         getSingleShelter(email),
+                         myEntryPets(email),
+                         getSingleUser(email)
+                    ]);
 
-               if (result.success) {
-                    setShelterData(result.data);
-               } else {
-                    console.error("Fetch Error:", result.error || result.message || "Unknown error");
+                    // Shelter Data
+                    if (shelterRes.success) setShelterData(shelterRes.data);
+
+                    // Pets Data
+                    if (petsRes.success) setPets(petsRes.pets);
+
+                    // User Photo
+                    if (userRes.success) setUserImg(userRes.user);
+
+               } catch (error) {
+                    console.error("Data fetching failed:", error);
+               } finally {
+                    setLoading(false);
                }
-               setLoading(false);
           };
 
-          SelterProfileReq();
+          fetchAllData();
      }, [email]);
-
-
 
      const handleCoverUpload = async (e) => {
           const file = e.target.files[0];
@@ -198,7 +206,7 @@ const ShelterProfile = ({ email }) => {
                                    {/* Profile Image Section */}
                                    <div className="relative group shrink-0">
                                         <Image
-                                             src={shelterData.shelterPhoto}
+                                             src={userImg.image}
                                              alt="Shelter Profile Picture"
                                              width={192}
                                              height={192}
