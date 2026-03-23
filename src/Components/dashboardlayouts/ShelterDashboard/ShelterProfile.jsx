@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Poppins } from "next/font/google";
 import { myEntryPets } from '@/action/server/pets';
 import Swal from 'sweetalert2';
+import { getSingleUser, updateUserProfileImage } from '@/action/server/users';
 ;
 
 const poppins = Poppins({
@@ -26,35 +27,89 @@ const poppins = Poppins({
 const ShelterProfile = ({ email }) => {
 
      const [shelterData, setShelterData] = useState(null)
+     const [userImg, setUserImg] = useState({})
+     console.log(userImg)
      const [isUploading, setIsUploading] = useState(false);
      const [pets, setPets] = useState([])
      const [loading, setLoading] = useState(true);
-
+     const [showAll, setShowAll] = useState(false);
      const router = useRouter()
 
      useEffect(() => {
-          if (!email) {
-               return;
-          }
+          if (!email) return;
 
-          const SelterProfileReq = async () => {
+          const fetchAllData = async () => {
                setLoading(true);
-               const result = await getSingleShelter(email);
-               const { success, pets } = await myEntryPets(email);
-               if (success) {
-                    setPets(pets);
-               }
+               try {
+                    const [shelterRes, petsRes, userRes] = await Promise.all([
+                         getSingleShelter(email),
+                         myEntryPets(email),
+                         getSingleUser(email)
+                    ]);
+                    if (shelterRes.success) setShelterData(shelterRes.data);
 
-               if (result.success) {
-                    setShelterData(result.data);
-               } else {
-                    console.error("Fetch Error:", result.error || result.message || "Unknown error");
+                    if (petsRes.success) setPets(petsRes.pets);
+
+                    if (userRes.success) setUserImg(userRes.user);
+
+               } catch (error) {
+                    console.error("Data fetching failed:", error);
+               } finally {
+                    setLoading(false);
                }
-               setLoading(false);
           };
 
-          SelterProfileReq();
+          fetchAllData();
      }, [email]);
+
+
+     const handleProfilePicUpload = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          setIsUploading(true);
+          Swal.fire({
+               title: 'Updating Profile Picture...',
+               didOpen: () => Swal.showLoading(),
+               allowOutsideClick: false
+          });
+
+          const formData = new FormData();
+          formData.append("image", file);
+
+          try {
+               const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+               const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                    method: "POST",
+                    body: formData,
+               });
+
+               const data = await response.json();
+
+               if (data.success) {
+                    const newImageUrl = data.data.url;
+                    const res = await updateUserProfileImage(email, newImageUrl);
+
+                    if (res.success) {
+
+                         setUserImg({ image: newImageUrl });
+
+                         Swal.fire({
+                              icon: "success",
+                              title: "Profile picture updated!",
+                              timer: 1500,
+                              showConfirmButton: false
+                         });
+                         router.refresh();
+                    }
+               }
+          } catch (error) {
+               console.error("Profile upload error:", error);
+               Swal.fire("Error", "Could not update profile picture", "error");
+          } finally {
+               setIsUploading(false);
+          }
+     };
 
 
 
@@ -119,6 +174,7 @@ const ShelterProfile = ({ email }) => {
           }
      };
 
+     const displayedPets = showAll ? pets : pets.slice(0, 8);
 
      const fadeIn = {
           initial: { opacity: 0, y: 20 },
@@ -155,7 +211,7 @@ const ShelterProfile = ({ email }) => {
                     {/* Dark Overlay for Text Readability */}
                     <div className="absolute inset-0 bg-black/30 transition-opacity group-hover:bg-black/40" />
 
-                    {/* Edit Cover Photo Button (Facebook Style) */}
+                    {/* Edit Cover Photo Button  */}
                     <div className="absolute top-4 right-6 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
                          <label className={`flex items-center gap-2 bg-white/90 hover:bg-white text-black px-4 py-2 rounded-lg shadow-lg text-sm font-bold transition-all active:scale-95 cursor-pointer ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                               <FaCamera className={`${isUploading ? 'animate-bounce' : 'text-lg'}`} />
@@ -198,16 +254,23 @@ const ShelterProfile = ({ email }) => {
                                    {/* Profile Image Section */}
                                    <div className="relative group shrink-0">
                                         <Image
-                                             src={shelterData.shelterPhoto}
+                                             src={userImg?.image || "https://via.placeholder.com/192"}
                                              alt="Shelter Profile Picture"
                                              width={192}
                                              height={192}
                                              className="rounded-2xl object-cover ring-4 ring-base-100 shadow-xl"
                                              priority
                                         />
-                                        <button className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform border-2 border-base-100">
+
+                                        <label className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform border-2 border-base-100 cursor-pointer">
                                              <FaEdit size={14} />
-                                        </button>
+                                             <input
+                                                  type="file"
+                                                  className="hidden"
+                                                  accept="image/*"
+                                                  onChange={handleProfilePicUpload}
+                                             />
+                                        </label>
                                    </div>
 
 
@@ -278,7 +341,7 @@ const ShelterProfile = ({ email }) => {
                                         {/* Experience Summary - Extra Info */}
                                         <div className="pt-2">
                                              <p className="text-xs font-bold uppercase opacity-40 mb-2">Background & Skills</p>
-                                             <p className="text-xs text-base-content/60 leading-tight italic">
+                                             <p className="text-xs text-base-content/60 leading-tight ">
                                                   {shelterData.petExperience.substring(0, 120)}...
                                              </p>
                                         </div>
@@ -337,11 +400,13 @@ const ShelterProfile = ({ email }) => {
                     <div className="mt-16">
                          <div className="flex justify-between items-center mb-8 border-b border-base-300 pb-4">
                               <h3 className="text-2xl font-extrabold tracking-tight">Animals Currently in Care</h3>
-                              <button className="btn btn-primary btn-sm rounded-full px-6 font-bold uppercase text-xs">View All</button>
+                              <button
+                                   onClick={() => setShowAll(true)}
+                                   className="btn btn-primary btn-sm rounded-full px-6 font-bold uppercase text-xs">View All</button>
                          </div>
 
                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                              {pets.map((pet, index) => (
+                              {displayedPets.map((pet, index) => (
                                    <Link href={`/all-pets/${pet._id}`}
                                         key={pet._id}
                                         className="block"
