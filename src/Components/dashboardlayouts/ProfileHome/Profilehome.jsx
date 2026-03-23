@@ -1,15 +1,15 @@
 'use client'
 import { useSession } from 'next-auth/react';
 import React from 'react';
-import Profile from '../ShelterDashboard/Profile';
+import Shelterprofile from '../ShelterDashboard/ShelterProfile';
+import Loading from '../../Loading';
 
 const Profilehome = () => {
      const { data: session, status } = useSession();
      console.log(session);
      const userRole = session?.user?.role;
-     console.log(userRole);
      if (status === "loading") {
-          return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+          return <Loading />
      }
      // if (userRole === "admin") {
      //      return <DashboardMainLayout />;
@@ -18,7 +18,7 @@ const Profilehome = () => {
      //      return <UserDashboardHome></UserDashboardHome>
      // }
      if (userRole === "shelter") {
-          return <Profile></Profile>
+          return <Shelterprofile email={session?.user?.email} ></Shelterprofile>
      }
      // else if (userRole === "doctor") {
      //      return <UserDashboardHome></UserDashboardHome>
