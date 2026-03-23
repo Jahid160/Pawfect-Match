@@ -3,6 +3,7 @@
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -182,3 +183,68 @@ export const updateShelterData = async (id, updatedFields) => {
           return { success: false, error: error.message };
      }
 };
+
+export const getSingleShelter = async (email) => {
+     try {
+          const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+
+
+
+          const query = {
+               email: email
+          };
+
+          const result = await shelterRequestsCollection.aggregate([
+               { $match: query },
+               {
+                    $lookup: {
+                         from: "pets",
+                         localField: "email",
+                         foreignField: "email",
+                         as: "ownedPets"
+                    }
+               },
+               {
+                    $addFields: {
+                         petCount: { $size: "$ownedPets" }
+                    }
+               },
+               { $project: { ownedPets: 0 } }
+          ]).toArray();
+
+          if (!result || result.length === 0) {
+               return { success: false, error: "Shelter not found with this ID and Email" };
+          }
+
+
+          const shelterData = JSON.parse(JSON.stringify(result[0]));
+
+          return {
+               success: true,
+               data: shelterData
+          };
+
+     } catch (error) {
+          console.error("Database Error:", error);
+          return { success: false, error: error.message };
+     }
+}
+
+
+export const updateShelterCover = async (email, imageUrl) => {
+     try {
+          const shelterCollection = await shelterRequestsCollectionPromise;
+          const result = await shelterCollection.updateOne(
+               { email: email },
+               { $set: { shelterPhoto: imageUrl } }
+          );
+
+          if (result.modifiedCount > 0) {
+               revalidatePath('/dashboard/profile')
+               return { success: true };
+          }
+          return { success: false };
+     } catch (error) {
+          return { success: false, message: error.message };
+     }
+}

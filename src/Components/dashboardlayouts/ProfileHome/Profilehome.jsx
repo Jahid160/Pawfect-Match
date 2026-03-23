@@ -1,28 +1,33 @@
-'use client'
-import { useSession } from 'next-auth/react';
-import React from 'react';
-import Profile from '../ShelterDashboard/Profile';
+"use client";
+import { useSession } from "next-auth/react";
+import React from "react";
+import Shelterprofile from "../ShelterDashboard/ShelterProfile";
+import Loading from "../../Loading";
+
+import AdminProfile from "../AdminDashboard/AdminProfile";
+import UserProfile from "../UserDashboard/UserProfile";
 
 const Profilehome = () => {
-     const { data: session, status } = useSession();
-     console.log(session);
-     const userRole = session?.user?.role;
-     console.log(userRole);
-     if (status === "loading") {
-          return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-     }
-     // if (userRole === "admin") {
-     //      return <DashboardMainLayout />;
-     // }
-     // else if (userRole === "user") {
-     //      return <UserDashboardHome></UserDashboardHome>
-     // }
-     if (userRole === "shelter") {
-          return <Profile></Profile>
-     }
-     // else if (userRole === "doctor") {
-     //      return <UserDashboardHome></UserDashboardHome>
-     // }
+  const { data: session, status } = useSession();
+  // console.log(session);
+  const userRole = session?.user?.role;
+  console.log(userRole);
+  if (status === "loading") {
+    return <Loading />;
+  }
+  if (userRole === "admin") {
+    return <AdminProfile />;
+  }
+    else if (userRole === "user") {
+      return <UserProfile></UserProfile>;
+
+    }
+  if (userRole === "shelter") {
+    return <Shelterprofile email={session?.user?.email}></Shelterprofile>;
+  }
+  // else if (userRole === "doctor") {
+  //      return <UserDashboardHome></UserDashboardHome>
+  // }
 };
 
 export default Profilehome;
