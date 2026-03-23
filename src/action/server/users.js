@@ -70,3 +70,23 @@ export const getSingleUser = async (email) => {
   }
 }
 
+
+
+
+export const updateUserProfileImage = async (email, imageUrl) => {
+  try {
+    const UserCollection = await userCollectionPromise;
+    const result = await UserCollection.updateOne(
+      { email: email },
+      { $set: { image: imageUrl } }
+    );
+
+    if (result.modifiedCount > 0) {
+      revalidatePath('/dashboard/profile')
+      return { success: true };
+    }
+    return { success: false, message: "No changes made" };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
