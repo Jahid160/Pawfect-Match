@@ -423,44 +423,61 @@ const ShelterProfile = ({ email }) => {
                     <div className="mt-16">
                          <div className="flex justify-between items-center mb-8 border-b border-base-300 pb-4">
                               <h3 className="text-2xl font-extrabold tracking-tight">Animals Currently in Care</h3>
-                              <button
-                                   onClick={() => setShowAll(true)}
-                                   className="btn btn-primary btn-sm rounded-full px-6 font-bold uppercase text-xs">View All</button>
+                              {displayedPets.length > 0 && (
+                                   <button
+                                        onClick={() => setShowAll(true)}
+                                        className="btn btn-primary btn-sm rounded-full px-6 font-bold uppercase text-xs"
+                                   >
+                                        View All
+                                   </button>
+                              )}
                          </div>
 
-                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                              {displayedPets.map((pet, index) => (
-                                   <Link href={`/all-pets/${pet._id}`}
-                                        key={pet._id}
-                                        className="block"
-                                   >
-                                        <motion.div
-                                             key={pet._id}
-                                             initial={{ opacity: 0, y: 10 }}
-                                             animate={{ opacity: 1, y: 0 }}
-                                             transition={{ delay: index * 0.05 }}
-                                             whileHover={{ y: -8 }}
-                                             className="card bg-base-100 shadow-md hover:shadow-xl transition-all border border-base-300 overflow-hidden group"
-                                        >
-                                             <figure className="relative h-52 w-full overflow-hidden">
-                                                  <Image
-                                                       src={Array.isArray(pet.images) && pet.images.length > 0
-                                                            ? pet.images[0]
-                                                            : "https://via.placeholder.com/400x300?text=No+Image"}
-                                                       alt={pet.petName}
-                                                       fill
-                                                       sizes="(max-width: 768px) 100vw, 25vw"
-                                                       className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                                  />
-                                             </figure>
-                                             <div className="card-body p-5 text-center">
-                                                  <h4 className="card-title justify-center text-primary font-bold tracking-tight">{pet.petName}</h4>
-                                                  <p className="text-xs font-semibold text-base-content/60 uppercase tracking-widest">age: {pet.ageYears}</p>
-                                             </div>
-                                        </motion.div>
-                                   </Link>
-                              ))}
-                         </div>
+                         {displayedPets.length > 0 ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                   {displayedPets.map((pet, index) => (
+                                        <Link href={`/all-pets/${pet._id}`} key={pet._id} className="block">
+                                             <motion.div
+                                                  initial={{ opacity: 0, y: 10 }}
+                                                  animate={{ opacity: 1, y: 0 }}
+                                                  transition={{ delay: index * 0.05 }}
+                                                  whileHover={{ y: -8 }}
+                                                  className="card bg-base-100 shadow-md hover:shadow-xl transition-all border border-base-300 overflow-hidden group"
+                                             >
+                                                  <figure className="relative h-52 w-full overflow-hidden">
+                                                       <Image
+                                                            src={Array.isArray(pet.images) && pet.images.length > 0
+                                                                 ? pet.images[0]
+                                                                 : "https://via.placeholder.com/400x300?text=No+Image"}
+                                                            alt={pet.petName}
+                                                            fill
+                                                            sizes="(max-width: 768px) 100vw, 25vw"
+                                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                       />
+                                                  </figure>
+                                                  <div className="card-body p-5 text-center">
+                                                       <h4 className="card-title justify-center text-primary font-bold tracking-tight">{pet.petName}</h4>
+                                                       <p className="text-xs font-semibold text-base-content/60 uppercase tracking-widest">age: {pet.ageYears}</p>
+                                                  </div>
+                                             </motion.div>
+                                        </Link>
+                                   ))}
+                              </div>
+                         ) : (
+                              <motion.div
+                                   initial={{ opacity: 0 }}
+                                   animate={{ opacity: 1 }}
+                                   className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-base-300 rounded-3xl bg-base-200/50"
+                              >
+                                   <div className="bg-base-100 p-6 rounded-full shadow-inner mb-4">
+                                        <span className="text-5xl text-base-content/20">🐾</span>
+                                   </div>
+                                   <h4 className="text-xl font-bold text-base-content/70">No Pets Available Right Now</h4>
+                                   <p className="text-base-content/50 text-sm mt-2 max-w-xs text-center">
+                                        Currently, there are no animals in care for this shelter. Please check back later or explore other shelters.
+                                   </p>
+                              </motion.div>
+                         )}
                     </div>
                </div>
           </div>
