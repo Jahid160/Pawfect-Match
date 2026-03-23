@@ -8,8 +8,9 @@ import { cookies } from "next/headers"
 const userCollectionPromise = dbConnect(collections.USERS);
 
 export const getUsers = async () => {
-  try {
+    await verifyAdmin();
     const UserCollection = await userCollectionPromise;
+  try {
     const users = await UserCollection.find().toArray();
 
     return users.map((user) => ({
