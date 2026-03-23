@@ -108,8 +108,8 @@ export const getSinglePets = async (id) => {
 
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
-  console.log(session.user)
-  adminShelterAuth()
+  console.log(session.user);
+  adminShelterAuth();
   try {
     const EntryReqcollection = await EntryReqCollectionPromise;
     const result = await EntryReqcollection.insertOne({
@@ -230,7 +230,7 @@ export const UpdatePetStatus = async (id) => {
           status: "approved",
           updatedTime: new Date(),
         },
-      }
+      },
     );
 
     const result = await PetCollection.updateOne(petQuery, petUpdate);
@@ -250,7 +250,6 @@ export const UpdatePetStatus = async (id) => {
     return { success: false, error: error.message };
   }
 };
-
 
 export const UpdatePetStatusReject = async (id, adoptionCode) => {
   let admin;
@@ -298,16 +297,96 @@ export const UpdatePetStatusReject = async (id, adoptionCode) => {
   }
 };
 
+// for admin pet transfer preview to available
+export const ApprovePet = async (petId) => {
+  const session = await getServerSession(authOptions);
+  await verifyAdmin();
+
+  try {
+    const entryCollection = await EntryReqCollectionPromise;
+    const petCollection = await petCollectionPromise;
+
+    const objectId = new ObjectId(petId);
+
+    const petData = await entryCollection.findOne({ _id: objectId });
+
+    if (!petData) {
+      throw new Error("Pet not found in Entry Requests");
+    }
+
+    const approvedPetData = {
+      ...petData,
+      status: "available",
+      approvedBy: session.user.email,
+      approvedAt: new Date(),
+    };
+
+    await petCollection.insertOne(approvedPetData);
+
+    await entryCollection.deleteOne({ _id: objectId });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Approve Pet Error:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// getPetRequest for admin
+export const getPetRequests = async () => {
+  try {
+    // ✅ protect route (await must)
+    await verifyAdmin();
+
+    const entryCollection = await EntryReqCollectionPromise;
+
+    const pets = await entryCollection.find({ status: "preview" }).toArray();
+
+    // ✅ serialize _id (IMPORTANT for client)
+    const formattedPets = pets.map((pet) => ({
+      ...pet,
+      _id: pet._id.toString(),
+    }));
+
+    return { success: true, data: formattedPets };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message || "Failed to fetch pet requests",
+    };
+  }
+};
+
+export const RejectPet = async (petId) => {
+  try {
+    await verifyAdmin();
+
+    const entryCollection = await EntryReqCollectionPromise;
+
+    await entryCollection.deleteOne({
+      _id: new ObjectId(petId),
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// shelter entry
 export const myEntryPets = async (email) => {
   try {
-    const petCollection = await petCollectionPromise
-    const pets = await petCollection.find({ email: email }).project({
-      images: { $slice: 1 },
-      ageYears: 1,
-      petName: 1,
-      _id: 1
-    }).toArray()
-    const serializedPets = pets.map(pet => ({
+    const petCollection = await petCollectionPromise;
+    const pets = await petCollection
+      .find({ email: email })
+      .project({
+        images: { $slice: 1 },
+        ageYears: 1,
+        petName: 1,
+        _id: 1,
+      })
+      .toArray();
+    const serializedPets = pets.map((pet) => ({
       ...pet,
       _id: pet._id.toString(),
     }));
@@ -315,4 +394,4 @@ export const myEntryPets = async (email) => {
   } catch (error) {
     return { success: false, message: "Error fetching entry pets" };
   }
-}
+};
