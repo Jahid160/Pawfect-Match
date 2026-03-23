@@ -7,7 +7,6 @@ const profile = () => {
   return (
     <>
       <Profilehome></Profilehome>
-
     </>
   )
 

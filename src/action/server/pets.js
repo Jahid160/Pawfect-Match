@@ -7,8 +7,10 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { verifyAuth } from "@/lib/verifyAuth";
+import { adminShelterAuth } from "@/lib/adminShelterAuth";
 
 const petCollectionPromise = dbConnect(collections.PETS);
+const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
 const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
 
 export const getPets = async () => {
@@ -106,15 +108,13 @@ export const getSinglePets = async (id) => {
 
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return { success: false, message: "Unauthorized" };
-  }
-
+  console.log(session.user)
+  adminShelterAuth()
   try {
-    const Petcollection = await petCollectionPromise;
-    const result = await Petcollection.insertOne({
+    const EntryReqcollection = await EntryReqCollectionPromise;
+    const result = await EntryReqcollection.insertOne({
       ...petdata,
-      status: "available",
+      status: "preview",
       email: session.user.email,
     });
     return { success: Boolean(result.insertedId) };
@@ -297,3 +297,22 @@ export const UpdatePetStatusReject = async (id, adoptionCode) => {
     return { success: false, error: error.message };
   }
 };
+
+export const myEntryPets = async (email) => {
+  try {
+    const petCollection = await petCollectionPromise
+    const pets = await petCollection.find({ email: email }).project({
+      images: { $slice: 1 },
+      ageYears: 1,
+      petName: 1,
+      _id: 1
+    }).toArray()
+    const serializedPets = pets.map(pet => ({
+      ...pet,
+      _id: pet._id.toString(),
+    }));
+    return { success: true, pets: serializedPets };
+  } catch (error) {
+    return { success: false, message: "Error fetching entry pets" };
+  }
+}

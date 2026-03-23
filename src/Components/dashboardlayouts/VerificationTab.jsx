@@ -225,11 +225,11 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                                            <td className="">
                                                                                 <div className="flex justify-center items-center gap-1 md:gap-3">
                                                                                      {request.status === 'Suspended' ? (
-                                                                                          <button className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, 'Approved')}>
+                                                                                          <button className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, 'Active')}>
                                                                                                <LuUserRoundCheck size={18} />
                                                                                           </button>
                                                                                      ) : (
-                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Approved'} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, 'Approved')}>
+                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Approved'} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, 'Active')}>
                                                                                                <BiUserCheck size={18} />
                                                                                           </button>
                                                                                      )}
