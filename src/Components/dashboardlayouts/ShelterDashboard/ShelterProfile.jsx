@@ -16,6 +16,7 @@ import { Poppins } from "next/font/google";
 import { myEntryPets } from '@/action/server/pets';
 import Swal from 'sweetalert2';
 import { getSingleUser, updateUserProfileImage } from '@/action/server/users';
+import { MdBlock } from 'react-icons/md';
 ;
 
 const poppins = Poppins({
@@ -253,14 +254,25 @@ const ShelterProfile = ({ email }) => {
                               <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
                                    {/* Profile Image Section */}
                                    <div className="relative group shrink-0">
-                                        <Image
-                                             src={userImg?.image || "https://via.placeholder.com/192"}
-                                             alt="Shelter Profile Picture"
-                                             width={192}
-                                             height={192}
-                                             className="rounded-2xl object-cover ring-4 ring-base-100 shadow-xl"
-                                             priority
-                                        />
+                                        {/* কন্ডিশনাল রেন্ডারিং: ইমেজ থাকলে ইমেজ দেখাবে, না থাকলে আইকন দেখাবে */}
+                                        {userImg?.image ? (
+                                             <Image
+                                                  src={userImg.image}
+                                                  alt="Shelter Profile Picture"
+                                                  width={192}
+                                                  height={192}
+                                                  className="rounded-2xl object-cover ring-4 ring-base-100 shadow-xl w-48 h-48"
+                                                  priority
+                                             />
+                                        ) : (
+                                             <div className="w-48 h-48 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-2 ring-4 ring-base-100 shadow-xl overflow-hidden text-slate-400 group-hover:bg-slate-200 transition-colors">
+                                                  <div className="bg-slate-200 p-4 rounded-full">
+                                                       <FaCamera size={30} className="text-slate-500" />
+                                                  </div>
+                                                  <span className="text-[10px] font-bold uppercase tracking-tighter italic">No Image Profile</span>
+                                             </div>
+                                        )}
+
 
                                         <label className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform border-2 border-base-100 cursor-pointer">
                                              <FaEdit size={14} />
@@ -277,8 +289,19 @@ const ShelterProfile = ({ email }) => {
                                    <div className="flex-1 space-y-5">
                                         {/* Badges Row */}
                                         <div className="flex flex-wrap items-center gap-2">
-                                             <span className="badge badge-success gap-2 py-3.5 px-4 text-white font-bold uppercase tracking-wider text-[10px]">
-                                                  <FaCheckCircle /> {shelterData.status}
+                                             <span className={`badge gap-2 py-3.5 px-4 text-white font-bold uppercase tracking-wider text-[10px] 
+    ${shelterData.status === 'Suspended' ? 'bg-red-600 border-red-700 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-green-600 border-green-700'} 
+    transition-all duration-300`}>
+
+                                                  {shelterData.status === 'Suspended' ? (
+                                                       <>
+                                                            <MdBlock size={14} className="animate-pulse" /> {shelterData.status}
+                                                       </>
+                                                  ) : (
+                                                       <>
+                                                            <FaCheckCircle /> {shelterData.status}
+                                                       </>
+                                                  )}
                                              </span>
                                              <span className="badge badge-outline py-3.5 px-4 border-base-300 font-bold uppercase text-[10px] text-base-content/70">
                                                   {shelterData.shelterType}
