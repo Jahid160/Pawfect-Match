@@ -10,6 +10,7 @@ import ExpertSection from "@/components/ExpertSection/ExpertSection";
 import SuccessStories from "@/components/home/SuccessStories";
 import OurSponsor from "@/components/home/OurSponsor";
 import Newsletter from "@/components/home/Newsletter";
+import FAQSection from "@/components/home/FAQSection";
 
 const mainPage = () => {
   return (
@@ -32,6 +33,7 @@ const mainPage = () => {
       <SuccessStories />
 
       <OurSponsor />
+      <FAQSection></FAQSection>
 
       <Newsletter />
     </div>
