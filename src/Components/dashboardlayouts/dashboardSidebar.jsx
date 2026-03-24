@@ -13,7 +13,6 @@ import {
   Stethoscope,
   Syringe,
   FileText,
-  BarChart3,
   ClipboardCheck,
   LayoutDashboard,
   Menu,
@@ -23,7 +22,6 @@ import {
   ChevronLeft,
   ChevronRight,
   HeartPlus,
-  BoneIcon,
   ShoppingBagIcon,
 } from "lucide-react";
 
@@ -31,6 +29,7 @@ import { FaUserGroup } from "react-icons/fa6";
 import { BsHouseAddFill } from "react-icons/bs";
 
 import Logo from "../Header/Logo";
+import { LuClipboardList, LuHistory, LuUserPlus } from "react-icons/lu";
 
 const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const pathname = usePathname();
@@ -95,13 +94,18 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
     {
       name: "Entry Requests",
       href: "/dashboard/shelter-petsreq",
-      icon: ClipboardCheck,
+      icon: LuUserPlus,
     },
     {
       name: "Entry List",
       href: "/dashboard/shelter-pets",
-      icon: BarChart3
+      icon: LuClipboardList,
     },
+    {
+      name: "Pending Entries",
+      href: '/dashboard/shelter-pendings',
+      icon: LuHistory,
+    }
   ];
 
   let navItems =
