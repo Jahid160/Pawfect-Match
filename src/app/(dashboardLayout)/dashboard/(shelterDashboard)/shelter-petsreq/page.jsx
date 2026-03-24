@@ -1,10 +1,12 @@
-import ShelterPetReq from '@/components/dashboardlayouts/ShelterDashboard/ShelterPetReq';
+
 import React from 'react';
+import PetDetailsForm from "@/Components/Form/PetDetailsForm";
+
 
 const ShelterPetsreq = () => {
   return (
     <>
-      <ShelterPetReq></ShelterPetReq>
+      <PetDetailsForm></PetDetailsForm>
     </>
   );
 };
