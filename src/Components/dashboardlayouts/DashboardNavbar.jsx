@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 // সার্ভার অ্যাকশন ইম্পোর্ট
 import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
+import Image from "next/image";
 
 const DashboardNavbar = ({ isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -118,8 +119,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
           <button
             onClick={handleNotificationClick}
             className={`relative rounded-2xl p-2.5 transition-all duration-300 ${isOpen
-                ? "bg-orange-50 text-orange-600 shadow-inner"
-                : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
+              ? "bg-orange-50 text-orange-600 shadow-inner"
+              : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
               }`}
           >
             <Bell size={22} strokeWidth={2.5} />
@@ -209,7 +210,9 @@ const DashboardNavbar = ({ isCollapsed }) => {
         <div className="flex items-center gap-3 pl-3 border-slate-100 border-l">
           <button className="flex justify-center items-center bg-orange-100 shadow-sm border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 overflow-hidden transition-all">
             {session?.user?.image ? (
-              <img
+              <Image
+                width={196}
+                height={196}
                 src={session.user.image}
                 alt="User Avatar"
                 className="w-full h-full object-cover"

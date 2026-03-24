@@ -17,6 +17,7 @@ import { myEntryPets } from '@/action/server/pets';
 import Swal from 'sweetalert2';
 import { getSingleUser, updateUserProfileImage } from '@/action/server/users';
 import { MdBlock } from 'react-icons/md';
+import { useSession } from 'next-auth/react';
 ;
 
 const poppins = Poppins({
@@ -26,10 +27,10 @@ const poppins = Poppins({
 
 
 const ShelterProfile = ({ email }) => {
-
+     const { data: session, update } = useSession();
+     console.log(session)
      const [shelterData, setShelterData] = useState(null)
      const [userImg, setUserImg] = useState({})
-     console.log(userImg)
      const [isUploading, setIsUploading] = useState(false);
      const [pets, setPets] = useState([])
      const [loading, setLoading] = useState(true);
@@ -90,8 +91,14 @@ const ShelterProfile = ({ email }) => {
                if (data.success) {
                     const newImageUrl = data.data.url;
                     const res = await updateUserProfileImage(email, newImageUrl);
-
                     if (res.success) {
+
+                         await update({
+                              user: {
+                                   ...session?.user,
+                                   image: newImageUrl
+                              }
+                         });
 
                          setUserImg({ image: newImageUrl });
 
@@ -117,6 +124,7 @@ const ShelterProfile = ({ email }) => {
      const handleCoverUpload = async (e) => {
           const file = e.target.files[0];
           if (!file) return;
+
 
           setIsUploading(true);
 

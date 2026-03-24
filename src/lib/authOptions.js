@@ -29,48 +29,50 @@ export const authOptions = {
   ],
 
   callbacks: {
-async signIn({ user, account }) {
-  try {
-    if (!user?.email) return false;
+    async signIn({ user, account }) {
+      try {
+        if (!user?.email) return false;
 
-    const usersCollection = await dbConnect(collections.USERS);
-    const now = new Date();
+        const usersCollection = await dbConnect(collections.USERS);
+        const now = new Date();
 
-    await usersCollection.updateOne(
-      { email: user.email },
-      {
-        // প্রথমবার ইউজার তৈরি হলে এই ডাটাগুলো সেভ হবে
-        $setOnInsert: {
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: "user",
-          createdAt: now,
-          location: "Savar, Dhaka",
-          status: "active",
-        },
-        // প্রতিবার লগইন করলে নিচের ডাটাগুলো আপডেট হবে
-        $set: {
-          provider: account?.provider || "credentials",
-          lastLoginAt: now,
-          // image ফিল্ডটি এখানে $set এ রাখার দরকার নেই যদি আপনি প্রোফাইল পিকচার ফিক্সড রাখতে চান। 
-          // তবে যদি সবসময় গুগল থেকে লেটেস্ট ছবি নিতে চান, তবে $setOnInsert থেকে সরিয়ে শুধু এখানে রাখতে পারেন।
-        },
-      },
-      { upsert: true }
-    );
+        await usersCollection.updateOne(
+          { email: user.email },
+          {
 
-    return true;
-  } catch (error) {
-    console.error("signIn DB update error:", error);
-    return false;
-  }
-},
+            $setOnInsert: {
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              role: "user",
+              createdAt: now,
+              location: "Savar, Dhaka",
+              status: "active",
+            },
+
+            $set: {
+              provider: account?.provider || "credentials",
+              lastLoginAt: now,
+
+            },
+          },
+          { upsert: true }
+        );
+
+        return true;
+      } catch (error) {
+        console.error("signIn DB update error:", error);
+        return false;
+      }
+    },
 
     async jwt({ token, user, trigger, session }) {
-      if (trigger === "update" && session) {
-        return { ...token, ...session };
+      if (trigger === "update" && session?.user) {
+        if (session.user.image) token.picture = session.user.image;
+        if (session.user.name) token.name = session.user.name;
+        return token;
       }
+
 
       if (user) {
         const usersCollection = await dbConnect(collections.USERS);
@@ -96,7 +98,7 @@ async signIn({ user, account }) {
         session.user.image = token.picture;
         session.user.name = token.name;
       }
-      return session
+      return session;
     },
   },
 
