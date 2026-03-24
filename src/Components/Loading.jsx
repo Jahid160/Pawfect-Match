@@ -2,7 +2,7 @@
 
 import React from "react";
 
-const loading = () => {
+const Loading = () => {
      return (
           <div className="min-h-[80vh] w-full flex items-center justify-center px-4">
                <div className="w-full max-w-md">
@@ -64,4 +64,4 @@ const loading = () => {
      );
 };
 
-export default loading;
+export default Loading;

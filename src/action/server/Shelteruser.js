@@ -3,6 +3,7 @@
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -245,20 +246,32 @@ export const getSingleShelter = async (email) => {
 };
 
 export const updateShelterCover = async (email, imageUrl) => {
-  try {
-    const shelterCollection = await shelterRequestsCollectionPromise; // আপনার কালেকশন প্রমিজ
-    const result = await shelterCollection.updateOne(
-      { email: email },
-      { $set: { shelterPhoto: imageUrl } },
-    );
+     try {
+          const shelterCollection = await shelterRequestsCollectionPromise;
+          const result = await shelterCollection.updateOne(
+               { email: email },
+               { $set: { shelterPhoto: imageUrl } }
+          );
 
-    if (result.modifiedCount > 0) {
-      return { success: true };
-    }
-    return { success: false };
-  } catch (error) {
-    return { success: false, message: error.message };
-  }
-};
+          if (result.modifiedCount > 0) {
+               revalidatePath('/dashboard/profile')
+               return { success: true };
+          }
+          return { success: false };
+     } catch (error) {
+          return { success: false, message: error.message };
+     }
+}
 
-
+export const SheltergetStatus = async (email) => {
+     const shelterCollection = await shelterRequestsCollectionPromise;
+     const result = await shelterCollection.findOne(
+          { email: email },
+          {
+               projection: {
+                    status: 1, _id: 0
+               }
+          }
+     );
+     return result ? result.status : null;
+}

@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 export default function Logo() {
   const slogan = "Pet Adoption & Care";
 
-  // অক্ষরগুলোর জন্য এনিমেশন ভেরিয়েন্ট - Fixed Duration and Ease
   const charVariants = {
     initial: { y: 0 },
     hover: (i) => ({
@@ -18,7 +17,7 @@ export default function Logo() {
         delay: i * 0.05,
         repeat: Infinity,
         repeatDelay: 1,
-        ease: "easeInOut", // Spring এর বদলে ease ব্যবহার করা হয়েছে ৩টি কী-ফ্রেমের জন্য
+        ease: "easeInOut",
       },
     }),
   };
@@ -30,7 +29,6 @@ export default function Logo() {
         whileHover="hover"
         initial="initial"
       >
-        {/* --- ICON SECTION --- */}
         <div className="relative flex justify-center items-center w-12 h-12">
           <motion.div 
             className="absolute inset-0 border-2 border-orange-200 border-dashed rounded-2xl"
@@ -57,20 +55,19 @@ export default function Logo() {
               <PawPrint size={26} strokeWidth={2.5} />
             </motion.div>
 
-            {/* Fixed Heart Pop Animation */}
             <motion.div
               className="absolute text-orange-500"
               variants={{
                 initial: { scale: 0, opacity: 0, y: 0 },
                 hover: { 
-                  scale: 1, // Spring এ ৩টি কী-ফ্রেমের বদলে ১টি টার্গেট ভ্যালু দেওয়া হয়েছে
+                  scale: 1, 
                   opacity: 1,
                   y: -18,
                   x: 10,
                   transition: { 
                     type: "spring", 
                     stiffness: 400, 
-                    damping: 10 // এটি অটোমেটিক বাউন্স ইফেক্ট তৈরি করবে
+                    damping: 10
                   } 
                 }
               }}
@@ -80,7 +77,6 @@ export default function Logo() {
           </motion.div>
         </div>
 
-        {/* --- TEXT SECTION --- */}
         <div className="flex flex-col">
           <div className="flex overflow-hidden">
             {"PAWFECT".split("").map((char, i) => (
