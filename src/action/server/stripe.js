@@ -48,8 +48,8 @@ export const createStripeCheckoutFromCart = async (payload) => {
         area,
         note: note || "",
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-cancel`,
+      success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/payment-cancel`,
     });
 
     return { success: true, url: session.url };
@@ -138,8 +138,8 @@ export const createStripeCheckoutForSingleProduct = async (payload) => {
         productType: isAccessory ? "accessory" : "food",
         quantity: String(qty),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-cancel`,
+      success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/payment-cancel`,
     });
 
     return { success: true, url: session.url };
