@@ -11,17 +11,20 @@ import {
   AlertTriangle,
   Trash2,
   Loader2,
-  TrendingUp,
   DollarSign,
-  Calendar,
   BarChart3,
   ChevronRight,
+  Eye,
+  Pencil,
+  X,
 } from "lucide-react";
-import { getPetFoods, deleteFood } from "@/action/server/foods";
+import { getPetFoods, deleteFood, updateFood } from "@/action/server/foods";
 import { getAllOrders } from "@/action/server/order";
-
 import Link from "next/link";
 import Swal from "sweetalert2";
+// import ViewFoodModal from "../Modal/ViewFoodModal";
+import EditFoodModal from "../Modal/EditFoodModal";
+import ViewFoodModal from "../Modal/ViewFoodModal";
 
 const FoodManagement = () => {
   const [activeTab, setActiveTab] = useState("inventory");
@@ -29,6 +32,24 @@ const FoodManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [updating, setUpdating] = useState(false);
+
+  const [editForm, setEditForm] = useState({
+    productName: "",
+    brand: "",
+    category: "",
+    foodType: "",
+    image: "",
+    description: "",
+    price: "",
+    discountPrice: "",
+    stock: "",
+    weight: "",
+  });
 
   const tabs = [
     { id: "inventory", label: "Inventory", icon: <Package size={18} /> },
@@ -42,8 +63,8 @@ const FoodManagement = () => {
         getPetFoods(),
         getAllOrders(),
       ]);
-      setFoodItems(foodData);
-      setOrders(orderData);
+      setFoodItems(foodData || []);
+      setOrders(orderData || []);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -55,9 +76,8 @@ const FoodManagement = () => {
     fetchData();
   }, []);
 
-  // --- Dynamic Calculations for Sales ---
   const totalRevenue = orders.reduce(
-    (sum, order) => sum + (order.totalAmount || 0),
+    (sum, order) => sum + (Number(order.totalAmount) || 0),
     0,
   );
   const paidOrders = orders.filter((o) => o.paymentStatus === "paid").length;
@@ -65,7 +85,6 @@ const FoodManagement = () => {
     (o) => o.orderStatus === "pending",
   ).length;
 
-  // --- Inventory Logic ---
   const handleDelete = async (id, name) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -94,6 +113,99 @@ const FoodManagement = () => {
     }
   };
 
+  const openViewModal = (food) => {
+    setSelectedFood(food);
+    setShowViewModal(true);
+  };
+
+  const openEditModal = (food) => {
+    setSelectedFood(food);
+    setEditForm({
+      productName: food.productName || "",
+      brand: food.brand || "",
+      category: food.category || "",
+      foodType: food.foodType || "",
+      image: food.image || "",
+      description: food.description || "",
+      price: food.price || "",
+      discountPrice: food.discountPrice || "",
+      stock: food.stock || "",
+      weight: food.weight || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const closeModals = () => {
+    setShowViewModal(false);
+    setShowEditModal(false);
+    setSelectedFood(null);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdateFood = async (e) => {
+    e.preventDefault();
+
+    if (!selectedFood?._id) return;
+
+    try {
+      setUpdating(true);
+
+      const res = await updateFood(selectedFood._id, editForm);
+
+      if (res.success) {
+        setFoodItems((prev) =>
+          prev.map((item) =>
+            item._id === selectedFood._id
+              ? {
+                  ...item,
+                  ...editForm,
+                  price: Number(editForm.price) || 0,
+                  discountPrice: Number(editForm.discountPrice) || 0,
+                  stock: Number(editForm.stock) || 0,
+                  weight: Number(editForm.weight) || 0,
+                  inStock: Number(editForm.stock) > 0,
+                  updatedAt: new Date().toISOString(),
+                }
+              : item,
+          ),
+        );
+
+        Swal.fire({
+          title: "Updated successfully",
+          icon: "success",
+          toast: true,
+          position: "top-end",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        closeModals();
+      } else {
+        Swal.fire({
+          title: "Update failed",
+          text: res.error || "Something went wrong",
+          icon: "error",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error",
+        text: "Something went wrong while updating food.",
+        icon: "error",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-base-200">
@@ -104,7 +216,6 @@ const FoodManagement = () => {
 
   return (
     <div className="bg-base-200 min-h-screen p-6 lg:p-10 font-sans">
-      {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
           <h1 className="text-3xl font-black text-neutral tracking-tight">
@@ -123,7 +234,6 @@ const FoodManagement = () => {
         </Link>
       </div>
 
-      {/* --- TABBING SYSTEM --- */}
       <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-base-300 w-fit mb-8">
         {tabs.map((tab) => (
           <button
@@ -157,7 +267,6 @@ const FoodManagement = () => {
           transition={{ duration: 0.3 }}
         >
           {activeTab === "inventory" ? (
-            /* --- INVENTORY VIEW --- */
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="stats shadow-sm bg-base-100 border border-base-300 rounded-3xl">
@@ -173,13 +282,17 @@ const FoodManagement = () => {
                     </div>
                   </div>
                 </div>
+
                 <div className="stats shadow-sm bg-base-100 border border-base-300 rounded-3xl">
                   <div className="stat">
                     <div className="stat-title font-bold text-slate-500 uppercase text-xs">
                       Low Stock
                     </div>
                     <div className="stat-value text-error text-3xl font-black">
-                      {foodItems.filter((item) => item.stock < 15).length}
+                      {
+                        foodItems.filter((item) => Number(item.stock) < 15)
+                          .length
+                      }
                     </div>
                   </div>
                 </div>
@@ -195,6 +308,7 @@ const FoodManagement = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
+
                 <div className="overflow-x-auto p-4">
                   <table className="table w-full">
                     <thead>
@@ -237,23 +351,28 @@ const FoodManagement = () => {
                                 </div>
                               </div>
                             </td>
+
                             <td>
                               <p
-                                className={`font-black ${item.stock < 15 ? "text-error" : "text-slate-700"}`}
+                                className={`font-black ${
+                                  Number(item.stock) < 15
+                                    ? "text-error"
+                                    : "text-slate-700"
+                                }`}
                               >
                                 {item.stock} Units
                               </p>
                             </td>
+
                             <td>
                               <div className="flex flex-col">
-                                {/* Discounted Price (The Active Price) */}
                                 <p className="font-black text-neutral text-lg">
                                   ${item.discountPrice || item.price}
                                 </p>
 
-                                {/* Original Price (Shown only if a discount exists) */}
                                 {item.discountPrice &&
-                                  item.discountPrice < item.price && (
+                                  Number(item.discountPrice) <
+                                    Number(item.price) && (
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs font-bold text-slate-400 line-through">
                                         ${item.price}
@@ -270,15 +389,35 @@ const FoodManagement = () => {
                                   )}
                               </div>
                             </td>
+
                             <td className="text-center">
-                              <button
-                                onClick={() =>
-                                  handleDelete(item._id, item.productName)
-                                }
-                                className="btn btn-circle btn-ghost btn-sm text-error"
-                              >
-                                <Trash2 size={18} />
-                              </button>
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => openViewModal(item)}
+                                  className="btn btn-circle btn-ghost btn-sm text-info"
+                                  title="View Details"
+                                >
+                                  <Eye size={18} />
+                                </button>
+
+                                <button
+                                  onClick={() => openEditModal(item)}
+                                  className="btn btn-circle btn-ghost btn-sm text-primary"
+                                  title="Edit"
+                                >
+                                  <Pencil size={18} />
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    handleDelete(item._id, item.productName)
+                                  }
+                                  className="btn btn-circle btn-ghost btn-sm text-error"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -288,7 +427,6 @@ const FoodManagement = () => {
               </div>
             </div>
           ) : (
-            /* --- SELL DETAILS VIEW (Real Data) --- */
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="stats shadow-sm bg-base-100 border border-base-300 rounded-3xl">
@@ -325,8 +463,6 @@ const FoodManagement = () => {
                 </div>
               </div>
 
-              {/* Transaction List */}
-              {/* Transaction List */}
               <div className="bg-white rounded-[2.5rem] p-8 border border-base-300 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-black italic text-neutral">
@@ -344,7 +480,6 @@ const FoodManagement = () => {
                         key={order._id}
                         className="flex flex-col lg:flex-row lg:items-center justify-between p-5 bg-base-200/50 rounded-2xl border border-base-300 group hover:border-primary transition-all duration-300"
                       >
-                        {/* Customer & Payment Method Info */}
                         <div className="flex items-center gap-4">
                           <div
                             className={`p-3 rounded-xl shadow-sm transition-colors ${
@@ -356,11 +491,9 @@ const FoodManagement = () => {
                             <DollarSign size={20} />
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-black text-slate-800 italic text-lg tracking-tight">
-                                {order.customerName}
-                              </p>
-                            </div>
+                            <p className="font-black text-slate-800 italic text-lg tracking-tight">
+                              {order.customerName}
+                            </p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
                                 {order.paymentMethod}
@@ -377,9 +510,7 @@ const FoodManagement = () => {
                           </div>
                         </div>
 
-                        {/* Payment & Order Status Controls */}
                         <div className="flex items-center justify-between lg:justify-end gap-10 mt-6 lg:mt-0">
-                          {/* PAYMENT STATUS BADGE */}
                           <div className="text-left lg:text-center">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">
                               Payment
@@ -395,7 +526,6 @@ const FoodManagement = () => {
                             </div>
                           </div>
 
-                          {/* ORDER STATUS */}
                           <div className="text-left lg:text-center">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">
                               Delivery
@@ -405,7 +535,6 @@ const FoodManagement = () => {
                             </p>
                           </div>
 
-                          {/* AMOUNT */}
                           <div className="text-right min-w-[80px]">
                             <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">
                               Total
@@ -438,6 +567,26 @@ const FoodManagement = () => {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* VIEW MODAL */}
+      {showViewModal && (
+        <ViewFoodModal
+          isOpen={showViewModal} // ADD THIS LINE
+          food={selectedFood}
+          onClose={closeModals}
+        />
+      )}
+
+      {/* EDIT MODAL */}
+      {showEditModal && (
+        <EditFoodModal
+          formData={editForm}
+          updating={updating}
+          onClose={closeModals}
+          onChange={handleEditChange}
+          onUpdate={handleUpdateFood}
+        />
+      )}
     </div>
   );
 };

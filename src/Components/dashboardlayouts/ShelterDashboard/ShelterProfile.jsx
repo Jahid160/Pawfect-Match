@@ -16,6 +16,8 @@ import { Poppins } from "next/font/google";
 import { myEntryPets } from '@/action/server/pets';
 import Swal from 'sweetalert2';
 import { getSingleUser, updateUserProfileImage } from '@/action/server/users';
+import { MdBlock } from 'react-icons/md';
+import { useSession } from 'next-auth/react';
 ;
 
 const poppins = Poppins({
@@ -25,10 +27,10 @@ const poppins = Poppins({
 
 
 const ShelterProfile = ({ email }) => {
-
+     const { data: session, update } = useSession();
+     console.log(session)
      const [shelterData, setShelterData] = useState(null)
      const [userImg, setUserImg] = useState({})
-     console.log(userImg)
      const [isUploading, setIsUploading] = useState(false);
      const [pets, setPets] = useState([])
      const [loading, setLoading] = useState(true);
@@ -89,8 +91,14 @@ const ShelterProfile = ({ email }) => {
                if (data.success) {
                     const newImageUrl = data.data.url;
                     const res = await updateUserProfileImage(email, newImageUrl);
-
                     if (res.success) {
+
+                         await update({
+                              user: {
+                                   ...session?.user,
+                                   image: newImageUrl
+                              }
+                         });
 
                          setUserImg({ image: newImageUrl });
 
@@ -116,6 +124,7 @@ const ShelterProfile = ({ email }) => {
      const handleCoverUpload = async (e) => {
           const file = e.target.files[0];
           if (!file) return;
+
 
           setIsUploading(true);
 
@@ -253,14 +262,25 @@ const ShelterProfile = ({ email }) => {
                               <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
                                    {/* Profile Image Section */}
                                    <div className="relative group shrink-0">
-                                        <Image
-                                             src={userImg?.image || "https://via.placeholder.com/192"}
-                                             alt="Shelter Profile Picture"
-                                             width={192}
-                                             height={192}
-                                             className="rounded-2xl object-cover ring-4 ring-base-100 shadow-xl"
-                                             priority
-                                        />
+                                        {/* কন্ডিশনাল রেন্ডারিং: ইমেজ থাকলে ইমেজ দেখাবে, না থাকলে আইকন দেখাবে */}
+                                        {userImg?.image ? (
+                                             <Image
+                                                  src={userImg.image}
+                                                  alt="Shelter Profile Picture"
+                                                  width={192}
+                                                  height={192}
+                                                  className="rounded-2xl object-cover ring-4 ring-base-100 shadow-xl w-48 h-48"
+                                                  priority
+                                             />
+                                        ) : (
+                                             <div className="w-48 h-48 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-2 ring-4 ring-base-100 shadow-xl overflow-hidden text-slate-400 group-hover:bg-slate-200 transition-colors">
+                                                  <div className="bg-slate-200 p-4 rounded-full">
+                                                       <FaCamera size={30} className="text-slate-500" />
+                                                  </div>
+                                                  <span className="text-[10px] font-bold uppercase tracking-tighter italic">No Image Profile</span>
+                                             </div>
+                                        )}
+
 
                                         <label className="absolute -bottom-2 -right-2 p-2.5 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform border-2 border-base-100 cursor-pointer">
                                              <FaEdit size={14} />
@@ -277,8 +297,19 @@ const ShelterProfile = ({ email }) => {
                                    <div className="flex-1 space-y-5">
                                         {/* Badges Row */}
                                         <div className="flex flex-wrap items-center gap-2">
-                                             <span className="badge badge-success gap-2 py-3.5 px-4 text-white font-bold uppercase tracking-wider text-[10px]">
-                                                  <FaCheckCircle /> {shelterData.status}
+                                             <span className={`badge gap-2 py-3.5 px-4 text-white font-bold uppercase tracking-wider text-[10px] 
+    ${shelterData.status === 'Suspended' ? 'bg-red-600 border-red-700 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-green-600 border-green-700'} 
+    transition-all duration-300`}>
+
+                                                  {shelterData.status === 'Suspended' ? (
+                                                       <>
+                                                            <MdBlock size={14} className="animate-pulse" /> {shelterData.status}
+                                                       </>
+                                                  ) : (
+                                                       <>
+                                                            <FaCheckCircle /> {shelterData.status}
+                                                       </>
+                                                  )}
                                              </span>
                                              <span className="badge badge-outline py-3.5 px-4 border-base-300 font-bold uppercase text-[10px] text-base-content/70">
                                                   {shelterData.shelterType}
@@ -400,44 +431,61 @@ const ShelterProfile = ({ email }) => {
                     <div className="mt-16">
                          <div className="flex justify-between items-center mb-8 border-b border-base-300 pb-4">
                               <h3 className="text-2xl font-extrabold tracking-tight">Animals Currently in Care</h3>
-                              <button
-                                   onClick={() => setShowAll(true)}
-                                   className="btn btn-primary btn-sm rounded-full px-6 font-bold uppercase text-xs">View All</button>
+                              {displayedPets.length > 0 && (
+                                   <button
+                                        onClick={() => setShowAll(true)}
+                                        className="btn btn-primary btn-sm rounded-full px-6 font-bold uppercase text-xs"
+                                   >
+                                        View All
+                                   </button>
+                              )}
                          </div>
 
-                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                              {displayedPets.map((pet, index) => (
-                                   <Link href={`/all-pets/${pet._id}`}
-                                        key={pet._id}
-                                        className="block"
-                                   >
-                                        <motion.div
-                                             key={pet._id}
-                                             initial={{ opacity: 0, y: 10 }}
-                                             animate={{ opacity: 1, y: 0 }}
-                                             transition={{ delay: index * 0.05 }}
-                                             whileHover={{ y: -8 }}
-                                             className="card bg-base-100 shadow-md hover:shadow-xl transition-all border border-base-300 overflow-hidden group"
-                                        >
-                                             <figure className="relative h-52 w-full overflow-hidden">
-                                                  <Image
-                                                       src={Array.isArray(pet.images) && pet.images.length > 0
-                                                            ? pet.images[0]
-                                                            : "https://via.placeholder.com/400x300?text=No+Image"}
-                                                       alt={pet.petName}
-                                                       fill
-                                                       sizes="(max-width: 768px) 100vw, 25vw"
-                                                       className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                                  />
-                                             </figure>
-                                             <div className="card-body p-5 text-center">
-                                                  <h4 className="card-title justify-center text-primary font-bold tracking-tight">{pet.petName}</h4>
-                                                  <p className="text-xs font-semibold text-base-content/60 uppercase tracking-widest">age: {pet.ageYears}</p>
-                                             </div>
-                                        </motion.div>
-                                   </Link>
-                              ))}
-                         </div>
+                         {displayedPets.length > 0 ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                   {displayedPets.map((pet, index) => (
+                                        <Link href={`/all-pets/${pet._id}`} key={pet._id} className="block">
+                                             <motion.div
+                                                  initial={{ opacity: 0, y: 10 }}
+                                                  animate={{ opacity: 1, y: 0 }}
+                                                  transition={{ delay: index * 0.05 }}
+                                                  whileHover={{ y: -8 }}
+                                                  className="card bg-base-100 shadow-md hover:shadow-xl transition-all border border-base-300 overflow-hidden group"
+                                             >
+                                                  <figure className="relative h-52 w-full overflow-hidden">
+                                                       <Image
+                                                            src={Array.isArray(pet.images) && pet.images.length > 0
+                                                                 ? pet.images[0]
+                                                                 : "https://via.placeholder.com/400x300?text=No+Image"}
+                                                            alt={pet.petName}
+                                                            fill
+                                                            sizes="(max-width: 768px) 100vw, 25vw"
+                                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                       />
+                                                  </figure>
+                                                  <div className="card-body p-5 text-center">
+                                                       <h4 className="card-title justify-center text-primary font-bold tracking-tight">{pet.petName}</h4>
+                                                       <p className="text-xs font-semibold text-base-content/60 uppercase tracking-widest">age: {pet.ageYears}</p>
+                                                  </div>
+                                             </motion.div>
+                                        </Link>
+                                   ))}
+                              </div>
+                         ) : (
+                              <motion.div
+                                   initial={{ opacity: 0 }}
+                                   animate={{ opacity: 1 }}
+                                   className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-base-300 rounded-3xl bg-base-200/50"
+                              >
+                                   <div className="bg-base-100 p-6 rounded-full shadow-inner mb-4">
+                                        <span className="text-5xl text-base-content/20">🐾</span>
+                                   </div>
+                                   <h4 className="text-xl font-bold text-base-content/70">No Pets Available Right Now</h4>
+                                   <p className="text-base-content/50 text-sm mt-2 max-w-xs text-center">
+                                        Currently, there are no animals in care for this shelter. Please check back later or explore other shelters.
+                                   </p>
+                              </motion.div>
+                         )}
                     </div>
                </div>
           </div>
