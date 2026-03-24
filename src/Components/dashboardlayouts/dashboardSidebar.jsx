@@ -70,7 +70,7 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     { name: "Favorite Pets", href: "/dashboard/favorites", icon: HeartPlus },
     { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint },
-    { name: "Pet Foods & Accessories", href: "/dashboard/pet-food&accessories", icon: ShoppingBagIcon  },
+    { name: "Pet Foods & Accessories", href: "/dashboard/pet-food&accessories", icon: ShoppingBagIcon },
     // { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
   ];
 
@@ -90,11 +90,15 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   const shelterNavItem = [
     {
-      name: "Adoption Requests",
-      href: "/dashboard/requests",
+      name: "Entry Requests",
+      href: "/dashboard/shelter-petsreq",
       icon: ClipboardCheck,
     },
-    { name: "Shelter Reports", href: "/dashboard/reports", icon: BarChart3 },
+    {
+      name: "Entry List",
+      href: "/dashboard/shelter-pets",
+      icon: BarChart3
+    },
   ];
 
   let navItems =
