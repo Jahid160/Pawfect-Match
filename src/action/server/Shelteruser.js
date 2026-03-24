@@ -3,6 +3,7 @@
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -255,6 +256,7 @@ export const updateShelterCover = async (email, imageUrl) => {
           );
 
           if (result.modifiedCount > 0) {
+               revalidatePath('/dashboard/profile')
                return { success: true };
           }
           return { success: false };
