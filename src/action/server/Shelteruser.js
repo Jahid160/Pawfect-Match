@@ -3,10 +3,11 @@
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { ObjectId } from "mongodb";
-import { revalidatePath } from "next/cache";
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
+const userCollectionPromise = dbConnect(collections.USERS);
+
 
 export const createShelterUser = async (data) => {
      const session = await getServerSession(authOptions)
@@ -123,9 +124,10 @@ export const getShelterRequests = async (page = 1, limit = 10, search = "", stat
 
 
 
-export const updateShelterStatus = async (id, newStatus) => {
+export const updateShelterStatus = async (id, email, newStatus) => {
      try {
           const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+          const userCollection = await userCollectionPromise;
 
 
           const result = await shelterRequestsCollection.updateOne(
@@ -138,7 +140,20 @@ export const updateShelterStatus = async (id, newStatus) => {
                }
           );
 
-          if (result.matchedCount === 0) {
+          const shelterrole = await userCollection.updateOne(
+               { email: email },
+               {
+                    $set: {
+                         role: "shelter",
+                         updatedAt: new Date()
+
+                    }
+               }
+          )
+
+
+
+          if (result.matchedCount === 0 && shelterrole.matchedCount === 0) {
                return { success: false, message: "Request not found." };
           }
 
@@ -233,14 +248,13 @@ export const getSingleShelter = async (email) => {
 
 export const updateShelterCover = async (email, imageUrl) => {
      try {
-          const shelterCollection = await shelterRequestsCollectionPromise;
+          const shelterCollection = await shelterRequestsCollectionPromise; // আপনার কালেকশন প্রমিজ
           const result = await shelterCollection.updateOne(
                { email: email },
                { $set: { shelterPhoto: imageUrl } }
           );
 
           if (result.modifiedCount > 0) {
-               revalidatePath('/dashboard/profile')
                return { success: true };
           }
           return { success: false };
