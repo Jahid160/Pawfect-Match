@@ -91,3 +91,21 @@ export const updateUserProfileImage = async (email, imageUrl) => {
     return { success: false, message: error.message };
   }
 }
+
+export const updateUserCover = async (email, coverUrl) => {
+  try {
+    const UserCollection = await userCollectionPromise;
+    const result = await UserCollection.updateOne(
+      { email: email },
+      { $set: { coverImage: coverUrl } },
+    );
+
+    if (result.modifiedCount > 0) {
+      revalidatePath("/dashboard/profile");
+      return { success: true };
+    }
+    return { success: false, message: "No changes made" };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
