@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Link from 'next/link'
+import Link from "next/link";
 import {
   User,
   Home,
@@ -13,10 +13,13 @@ import {
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { createAdoptionUser } from "@/action/server/Adoptionuser";
+import { useSearchParams } from "next/navigation";
 
 const AdoptionForm = () => {
   const [step, setStep] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
+  const searchParams = useSearchParams();
+  const petId = searchParams.get("petId");
 
   // Form states (Guardian Details)
   const [formData, setFormData] = useState({
@@ -47,7 +50,7 @@ const AdoptionForm = () => {
         text: "Please fill in all Guardian Details and Living Environment requirements.",
         confirmButtonColor: "#f97316",
       });
-      return
+      return;
     }
     setStep(2);
   };
@@ -70,21 +73,20 @@ const AdoptionForm = () => {
       return;
     }
 
-
     try {
       // formData এবং quizData কে একসাথে একটি অবজেক্টে নেওয়া হচ্ছে
       const finalData = {
         ...formData,
-        ...quizData
+        ...quizData,
+        petId: petId,
       };
-
 
       // make server call to save the data
       const response = await createAdoptionUser(finalData);
 
       if (response) {
         setIsCompleted(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
       Swal.fire({
@@ -93,8 +95,6 @@ const AdoptionForm = () => {
         text: "Something went wrong. Please try again.",
       });
     }
-
-
   };
 
   return (

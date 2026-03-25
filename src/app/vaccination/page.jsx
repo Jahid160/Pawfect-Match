@@ -1,14 +1,16 @@
 import { getVaccines } from "@/action/server/vaccines";
 import { VaccinationCard } from "@/Components/cards/VaccinationCard";
 
-export default async function Vaccination() {
+export default async function VaccinationPage() {
   const vaccines = await getVaccines();
 
   return (
-    <div className="bg-base-200 grid grid-cols-1 md:grid-cols-4 mt-10 gap-6 p-5">
-      {vaccines.map((v) => (
-        <VaccinationCard key={v._id} vaccine={v} />
-      ))}
+    <div className="min-h-screen bg-[#FDF8F4] pt-32 pb-20 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {vaccines.map((item) => (
+          <VaccinationCard key={item._id} vaccine={item} />
+        ))}
+      </div>
     </div>
   );
 }

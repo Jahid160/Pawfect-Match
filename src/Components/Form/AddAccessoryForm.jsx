@@ -25,12 +25,10 @@ const AdminPetForm = () => {
     material: "",
     warranty: "",
   });
-
   const [errors, setErrors] = useState({});
 
   const validateStep = () => {
     let newErrors = {};
-
     if (step === 1) {
       if (!formData.title.trim()) newErrors.title = "Title is required!";
       if (!formData.category) newErrors.category = "Category is required!";
@@ -41,7 +39,7 @@ const AdminPetForm = () => {
         newErrors.stock = "Stock must be 1 or more!";
       if (!formData.price || formData.price <= 0)
         newErrors.price = "Valid Price is required!";
-      if (!formData.discountPrice)
+      if (formData.discountPrice === "")
         newErrors.discountPrice = "Discount Price is required! (Put 0 if none)";
       if (!formData.weight.trim()) newErrors.weight = "Weight is required!";
       if (!formData.size.trim()) newErrors.size = "Size is required!";
@@ -50,7 +48,6 @@ const AdminPetForm = () => {
       if (!formData.warranty)
         newErrors.warranty = "Please select warranty status!";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -61,7 +58,6 @@ const AdminPetForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep()) return;
-
     setLoading(true);
     try {
       if (!formData.image) {
@@ -82,9 +78,16 @@ const AdminPetForm = () => {
         return data.url;
       };
 
+      // ইমেজ আপলোড করে URL পাওয়া
       const imageUrl = await uploadToImgBB(formData.image);
-      const finalData = { ...formData, image: imageUrl };
 
+      // ডুপ্লিকেট সমস্যা সমাধান করা হয়েছে এখানে
+      const finalData = {
+        ...formData,
+        image: imageUrl,
+      };
+
+      // MongoDB create accessory (Internal API call)
       const response = await createAccessory(finalData);
       if (response.success) {
         setIsSubmitted(true);
@@ -102,12 +105,29 @@ const AdminPetForm = () => {
     }
   };
 
+  const inputClass = (field) =>
+    `input input-bordered w-full ${errors[field] ? "input-error" : ""}`;
+
+  const selectClass = (field) =>
+    `select select-bordered w-full ${errors[field] ? "select-error" : ""}`;
+
+  const ErrMsg = ({ field }) =>
+    errors[field] ? (
+      <span className="text-error text-xs mt-1 font-bold">{errors[field]}</span>
+    ) : null;
+
+  const stepConfig = [
+    { num: 1, label: "Identity" },
+    { num: 2, label: "Logistics" },
+    { num: 3, label: "Media" },
+  ];
+
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200 p-6">
         <div className="card w-full max-w-md bg-base-100 shadow-2xl text-center p-10 border-b-8 border-primary">
           <div className="text-7xl mb-4">✨</div>
-          <h2 className="text-3xl font-black text-neutral">SUCCESS!</h2>
+          <h2 className="text-3xl font-black text-neutral">Success!</h2>
           <p className="py-4 text-neutral/60 italic">
             Product `{formData.title}` is added!
           </p>
@@ -127,22 +147,21 @@ const AdminPetForm = () => {
       <h2 className="text-primary text-3xl pb-5 font-bold text-center">
         Add New Accessory
       </h2>
+
       <div className="max-w-4xl mx-auto">
-        <div className="steps w-full mb-10">
-          <li className={`step ${step >= 1 ? "step-primary font-bold" : ""}`}>
-            Identity
-          </li>
-          <li className={`step ${step >= 2 ? "step-primary font-bold" : ""}`}>
-            Logistics
-          </li>
-          <li className={`step ${step >= 3 ? "step-primary font-bold" : ""}`}>
-            Media
-          </li>
-        </div>
+        <ul className="steps w-full mb-10">
+          {stepConfig.map(({ num, label }) => (
+            <li
+              key={num}
+              className={`step ${step >= num ? "step-primary font-bold" : ""}`}
+            >
+              {label}
+            </li>
+          ))}
+        </ul>
 
         <div className="card bg-base-100 shadow-xl border border-base-300">
           <form onSubmit={handleSubmit}>
-            {/* STEP 1: Identity */}
             {step === 1 && (
               <div className="card-body">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -157,16 +176,11 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, title: e.target.value })
                       }
-                      className={`input input-bordered ${errors.title ? "border-error" : ""}`}
+                      className={inputClass("title")}
                       placeholder="Title"
                     />
-                    {errors.title && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.title}
-                      </span>
-                    )}
+                    <ErrMsg field="title" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Brand *</span>
@@ -176,16 +190,11 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, brand: e.target.value })
                       }
-                      className={`input input-bordered ${errors.brand ? "border-error" : ""}`}
+                      className={inputClass("brand")}
                       placeholder="Brand Name"
                     />
-                    {errors.brand && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.brand}
-                      </span>
-                    )}
+                    <ErrMsg field="brand" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">SKU Code *</span>
@@ -195,16 +204,24 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, sku: e.target.value })
                       }
-                      className={`input input-bordered ${errors.sku ? "border-error" : ""}`}
+                      className={inputClass("sku")}
                       placeholder="SKU-001"
                     />
-                    {errors.sku && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.sku}
-                      </span>
-                    )}
+                    <ErrMsg field="sku" />
                   </div>
-
+                  <div className="form-control md:col-span-2">
+                    <label className="label">
+                      <span className="label-text font-bold">Tags</span>
+                    </label>
+                    <input
+                      value={formData.tags}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tags: e.target.value })
+                      }
+                      className="input input-bordered w-full"
+                      placeholder="e.g. funny, toy, organic (comma separated)"
+                    />
+                  </div>
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Category *</span>
@@ -214,20 +231,15 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className={`select select-bordered ${errors.category ? "border-error" : ""}`}
+                      className={selectClass("category")}
                     >
                       <option value="">Select Category</option>
                       <option>Toys</option>
                       <option>Food</option>
                       <option>Accessories</option>
                     </select>
-                    {errors.category && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.category}
-                      </span>
-                    )}
+                    <ErrMsg field="category" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Targeted Pet</span>
@@ -237,7 +249,7 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, targetPet: e.target.value })
                       }
-                      className="select select-bordered"
+                      className="select select-bordered w-full"
                     >
                       <option>Dogs</option>
                       <option>Cats</option>
@@ -257,10 +269,11 @@ const AdminPetForm = () => {
               </div>
             )}
 
-            {/* STEP 2: Logistics & Pricing */}
             {step === 2 && (
-              <div className="card-body bg-secondary/5">
+              <div className="card-body bg-secondary/20">
+                {/* Logistics fields */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* (কোড একই থাকবে, শুধু ফিল্ডগুলো আগের মতো রাখুন) */}
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Stock *</span>
@@ -271,15 +284,12 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, stock: e.target.value })
                       }
-                      className={`input input-bordered ${errors.stock ? "border-error" : ""}`}
+                      className={inputClass("stock")}
+                      placeholder="0"
+                      min="1"
                     />
-                    {errors.stock && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.stock}
-                      </span>
-                    )}
+                    <ErrMsg field="stock" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Price *</span>
@@ -290,15 +300,13 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, price: e.target.value })
                       }
-                      className={`input input-bordered ${errors.price ? "border-error" : ""}`}
+                      className={inputClass("price")}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
                     />
-                    {errors.price && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.price}
-                      </span>
-                    )}
+                    <ErrMsg field="price" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">
@@ -314,16 +322,12 @@ const AdminPetForm = () => {
                           discountPrice: e.target.value,
                         })
                       }
-                      className={`input input-bordered ${errors.discountPrice ? "border-error" : ""}`}
+                      className={inputClass("discountPrice")}
                       placeholder="0"
+                      min="0"
                     />
-                    {errors.discountPrice && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.discountPrice}
-                      </span>
-                    )}
+                    <ErrMsg field="discountPrice" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Weight *</span>
@@ -333,16 +337,11 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, weight: e.target.value })
                       }
-                      className={`input input-bordered ${errors.weight ? "border-error" : ""}`}
+                      className={inputClass("weight")}
                       placeholder="e.g. 500g"
                     />
-                    {errors.weight && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.weight}
-                      </span>
-                    )}
+                    <ErrMsg field="weight" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Size *</span>
@@ -352,16 +351,11 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, size: e.target.value })
                       }
-                      className={`input input-bordered ${errors.size ? "border-error" : ""}`}
+                      className={inputClass("size")}
                       placeholder="e.g. Large / 10x12"
                     />
-                    {errors.size && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.size}
-                      </span>
-                    )}
+                    <ErrMsg field="size" />
                   </div>
-
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-bold">Material *</span>
@@ -371,16 +365,11 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, material: e.target.value })
                       }
-                      className={`input input-bordered ${errors.material ? "border-error" : ""}`}
+                      className={inputClass("material")}
                       placeholder="e.g. Cotton"
                     />
-                    {errors.material && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.material}
-                      </span>
-                    )}
+                    <ErrMsg field="material" />
                   </div>
-
                   <div className="form-control md:col-span-3">
                     <label className="label">
                       <span className="label-text font-bold">Warranty *</span>
@@ -390,18 +379,14 @@ const AdminPetForm = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, warranty: e.target.value })
                       }
-                      className={`select select-bordered ${errors.warranty ? "border-error" : ""}`}
+                      className={selectClass("warranty")}
                     >
                       <option value="">Select Warranty</option>
                       <option>No Warranty</option>
                       <option>6 Months</option>
                       <option>1 Year</option>
                     </select>
-                    {errors.warranty && (
-                      <span className="text-error text-xs mt-1 font-bold">
-                        {errors.warranty}
-                      </span>
-                    )}
+                    <ErrMsg field="warranty" />
                   </div>
                 </div>
                 <div className="card-actions justify-between mt-8">
@@ -423,37 +408,109 @@ const AdminPetForm = () => {
               </div>
             )}
 
-            {/* STEP 3: Media & Finalize */}
             {step === 3 && (
               <div className="card-body">
+                {/* Media fields */}
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text font-bold">Main Image *</span>
                   </label>
-                  <input
-                    type="file"
-                    onChange={(e) =>
-                      setFormData({ ...formData, image: e.target.files[0] })
-                    }
-                    className={`file-input file-input-bordered file-input-primary ${errors.image ? "file-input-error" : ""}`}
-                  />
-                  {errors.image && (
-                    <p className="text-error text-xs mt-1 font-bold">
-                      {errors.image}
-                    </p>
-                  )}
+
+                  <label
+                    htmlFor="main-image-upload"
+                    className={`relative flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 bg-base-200 hover:bg-base-300 group
+      ${errors.image ? "border-error" : "border-primary/40 hover:border-primary"}`}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files[0];
+                      if (file) setFormData({ ...formData, image: file });
+                    }}
+                  >
+                    {formData.image ? (
+                      <div className="flex flex-col items-center gap-1 px-4 text-center">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          {/* image icon */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-base-content truncate max-w-xs">
+                          {formData.image.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {(formData.image.size / 1024).toFixed(1)} KB — click
+                          to change
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-center px-4">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-base-content font-medium">
+                          Drag & drop or{" "}
+                          <span className="text-primary underline">browse</span>
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          High-quality JPG or PNG recommended
+                        </p>
+                      </div>
+                    )}
+
+                    <input
+                      id="main-image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        setFormData({ ...formData, image: e.target.files[0] })
+                      }
+                    />
+                  </label>
+
+                  <ErrMsg field="image" />
                 </div>
                 <div className="form-control mt-4">
                   <label className="label">
                     <span className="label-text font-bold">Description</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered h-28"
+                    className={`textarea textarea-bordered h-28 resize-none w-full ${
+                      errors.description ? "textarea-error" : ""
+                    }`}
+                    value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                  ></textarea>
+                    placeholder="Write a short product description..."
+                  />
                 </div>
+
                 <div className="card-actions justify-between mt-8">
                   <button
                     type="button"
@@ -469,7 +526,7 @@ const AdminPetForm = () => {
                     className="btn btn-primary px-16 text-white"
                   >
                     {loading ? (
-                      <span className="loading loading-spinner"></span>
+                      <span className="loading loading-spinner" />
                     ) : (
                       "Complete & Publish"
                     )}

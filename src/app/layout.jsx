@@ -1,7 +1,7 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
-import AuthModalProvider from "@/provider/AuthModalProvider"; // এটি ইমপোর্ট করা আছে
+import AuthModalProvider from "@/provider/AuthModalProvider";
 
 import Navbar from "@/Components/Header/Navbar";
 import Footer from "@/Components/Footer/Footer";
@@ -15,21 +15,20 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "Pawfact Match",
+  title: "Pawfect Match",
   description: "Adopt your Pet",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`}>
         <NextAuthProvider>
-          {/* এখানে <AuthModalProvider> ওপেনিং ট্যাগটি যোগ করা হয়েছে */}
           <AuthModalProvider>
-            <Toaster position="top-center" reverseOrder={false} />
+            <Toaster position="top-right" reverseOrder={false} />
 
-            <header className="mx-auto py-2 md:w-11/12 mb-15">
-              <Suspense fallback={<div className="h-16 bg-base-100" />}>
+            <header className="mx-auto mb-15 py-2 md:w-11/12">
+              <Suspense fallback={<div className="bg-base-100 h-16" />}>
                 <Navbar />
               </Suspense>
             </header>
@@ -37,7 +36,6 @@ export default function RootLayout({ children }) {
             <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
               {children}
             </main>
-            <Toaster position="top-right" />
 
             <SupportButton />
 

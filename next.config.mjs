@@ -8,7 +8,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "i.ibb.co.com",
+        hostname: "i.ibb.co",
       },
       {
         protocol: "https",
@@ -24,6 +24,15 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "30mb",
     },
+  },
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
   },
 };
 
