@@ -115,7 +115,7 @@ const VaccinationSection = () => {
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="pt-4">
                             <Link
                                 href="/vaccination"
-                                className="group inline-flex items-center gap-4 bg-slate-900 hover:bg-orange-500 shadow-xl px-10 py-5 rounded-2xl font-black text-white uppercase tracking-widest transition-all duration-500"
+                                className="group inline-flex items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-xl px-10 py-5 rounded-2xl font-black text-white uppercase tracking-widest transition-all duration-500"
                             >
                                 <Syringe size={20} />
                                 <span>See All Vaccines</span>
