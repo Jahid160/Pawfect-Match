@@ -29,6 +29,10 @@ export const getPets = async () => {
 };
 
 
+// Function to escape special characters for MongoDB Regex
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
 
 export const getEntriesPets = async ({ search, species, page, email }) => {
   const Petcollection = await petCollectionPromise;
@@ -36,17 +40,18 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
   try {
     const query = {};
 
-    // ১. ইমেইল বেসড ফিল্টার (অবশ্যই থাকতে হবে)
+    // 1. Filter by owner email (Security/Ownership)
     if (email) {
       query.email = email;
     }
 
-    // ২. সার্চ লজিক (Pet Name দিয়ে)
+    // 2. Search by Pet Name (Case-insensitive & Sanitized)
     if (search) {
-      query.petName = { $regex: search, $options: 'i' };
+      const safeSearch = escapeRegex(search);
+      query.petName = { $regex: safeSearch, $options: 'i' };
     }
 
-    // ৩. স্পেসিস ফিল্টার লজিক
+    // 3. Filter by Species
     if (species && species !== 'All') {
       query.species = species;
     }
@@ -54,18 +59,24 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
     const limit = 10;
     const skip = (parseInt(page) - 1) * limit;
 
-    // ডাটাবেস কোয়েরি
+    // Fetch total document count for pagination logic
+    const totalCount = await Petcollection.countDocuments(query);
+
+    // Fetch paginated data
     const pets = await Petcollection.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 }) // Sort by newest first
       .skip(skip)
       .limit(limit)
       .toArray();
 
-    return JSON.parse(JSON.stringify(pets));
+    return {
+      pets: JSON.parse(JSON.stringify(pets)),
+      totalPages: Math.ceil(totalCount / limit) || 1, // Default to 1 if no pets found
+    };
 
   } catch (error) {
     console.error("Error fetching pets:", error);
-    return [];
+    return { pets: [], totalPages: 0 };
   }
 };
 

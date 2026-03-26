@@ -6,15 +6,17 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
-const ShelterPetlist = ({ requests = [] }) => {
+const ShelterPetlist = ({ requests = [], totalPages }) => {
      const router = useRouter();
      const pathname = usePathname();
      const searchParams = useSearchParams();
-
      // current values from URL
      const currentPage = Number(searchParams.get('page')) || 1;
      const currentSearch = searchParams.get('search') || '';
      const currentSpecies = searchParams.get('species') || 'All';
+
+
+     const isLastPage = currentPage >= totalPages;
 
      // local state for debounce search input
      const [inputValue, setInputValue] = useState(currentSearch);
@@ -177,9 +179,11 @@ const ShelterPetlist = ({ requests = [] }) => {
                          {/* Attractive Pagination */}
                          <div className="px-6 py-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                               <p className="text-sm text-slate-500 font-medium">
-                                   Showing page <span className="text-slate-800">{currentPage}</span> of results
+                                   Showing page <span className="text-slate-800">{currentPage}</span> of <span className="text-slate-800">{totalPages}</span>
                               </p>
+
                               <div className="flex items-center gap-1.5">
+                                   {/* Previous Button */}
                                    <button
                                         onClick={() => updateQueryParams({ page: currentPage - 1 })}
                                         disabled={currentPage === 1}
@@ -188,20 +192,29 @@ const ShelterPetlist = ({ requests = [] }) => {
                                         <ChevronLeft size={18} className="text-slate-600" />
                                    </button>
 
-                                   {[1, 2, 3].map((num) => (
-                                        <button
-                                             key={num}
-                                             onClick={() => updateQueryParams({ page: num })}
-                                             className={`size-10 rounded-xl text-sm font-bold transition-all shadow-sm ${currentPage === num
-                                                  ? 'bg-primary text-white shadow-primary/20'
-                                                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                                                  }`}
-                                        >
-                                             {num}
-                                        </button>
-                                   ))}
+                                   {/* Dynamic Page Numbers */}
+                                   {[...Array(totalPages)].map((_, index) => {
+                                        const num = index + 1;
+                                        return (
+                                             <button
+                                                  key={num}
+                                                  onClick={() => updateQueryParams({ page: num })}
+                                                  className={`size-10 rounded-xl text-sm font-bold transition-all shadow-sm ${currentPage === num
+                                                       ? 'bg-primary text-white shadow-primary/20'
+                                                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                       }`}
+                                             >
+                                                  {num}
+                                             </button>
+                                        );
+                                   })}
 
-                                   <button className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 shadow-sm transition-all">
+                                   {/* Next Button - এখন এটি কাজ করবে এবং লাস্ট পেজে ডিসেবল হবে */}
+                                   <button
+                                        onClick={() => updateQueryParams({ page: currentPage + 1 })}
+                                        disabled={isLastPage}
+                                        className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                                   >
                                         <ChevronRight size={18} className="text-slate-600" />
                                    </button>
                               </div>
