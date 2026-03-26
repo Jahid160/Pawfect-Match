@@ -17,17 +17,17 @@ const mainPage = () => {
     <div className="space-y-10 lg:space-y-24 pb-20">
       <Banner />
 
-      <WhyChooseUs />
+      <ImpactSection />
 
-      <PetCategories />
       <RecentPets />
+      <PetCategories />
 
+      <WhyChooseUs />
       <HowItWorks />
 
       <VaccinationSection />
       <PetAccessoriesSection />
-      <InteractivePetFood />
-      
+      <InteractivePetFood />      
 
       <ExpertSection />
       <SuccessStories />
