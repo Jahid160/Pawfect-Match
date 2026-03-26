@@ -10,7 +10,7 @@ import Selterdashboardhome from '../ShelterDashboard/Selterdashboardhome';
 const DashboardHome = () => {
   const { data: session, status } = useSession();
   const userRole = session?.user?.role;
-  console.log(userRole);
+
 
   if (status === "loading") {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;

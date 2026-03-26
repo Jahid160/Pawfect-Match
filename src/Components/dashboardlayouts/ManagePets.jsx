@@ -65,8 +65,7 @@ const ManagePets = ({ initialPets }) => {
   const totalPages = Math.ceil(filteredPets.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredPets.slice(indexOfFirstItem, indexOfLastItem);
-  console.log(currentItems);
+  const currentItems = filteredPets.slice(indexOfFirstItem, indexOfLastItem);;
   const handleFilterChange = (setter, value) => {
     setter(value);
     setCurrentPage(1);
@@ -94,7 +93,6 @@ const ManagePets = ({ initialPets }) => {
   const handleReject = async (pet) => {
     const id = pet._id;
     const code = pet.adoptionCode;
-    console.log(pet);
     setPets((prev) =>
       prev.map((item) =>
         item._id === id ? { ...item, status: "Rejected" } : item,
@@ -155,14 +153,11 @@ const ManagePets = ({ initialPets }) => {
     }
   };
   const handleApproveEye = async (pet) => {
-    // console.log(pet.adoptionCode);
     const userData = await getAdoptionUserByCode(pet.adoptionCode);
-    console.log(userData.data);
     setSelectedPet(userData.data);
     setIsModalOpen(true);
   };
   const handleAvailableEye = (pet) => {
-    // console.log(pet);
     setSelectedProfilePet(pet);
     setIsProfileModalOpen(true);
   };
@@ -231,11 +226,10 @@ const ManagePets = ({ initialPets }) => {
             <button
               key={type}
               onClick={() => handleFilterChange(setFilterType, type)}
-              className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${
-                filterType === type
-                  ? "bg-slate-900 text-white shadow-md"
-                  : "text-slate-400 hover:text-slate-600"
-              }`}
+              className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${filterType === type
+                ? "bg-slate-900 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-600"
+                }`}
             >
               {type === "All" ? "All" : `${type}s`}
             </button>
@@ -290,13 +284,12 @@ const ManagePets = ({ initialPets }) => {
 
                     <td className="px-6 py-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${
-                          pet.status === "Available" || pet.status === "available"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : pet.status === "adopted"
-                              ? "bg-blue-50 text-blue-600"
-                              : "bg-amber-50 text-amber-600"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${pet.status === "Available" || pet.status === "available"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : pet.status === "adopted"
+                            ? "bg-blue-50 text-blue-600"
+                            : "bg-amber-50 text-amber-600"
+                          }`}
                       >
                         {pet.status === "Available" || pet.status === "available" ? (
                           <CheckCircle size={10} />

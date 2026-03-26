@@ -28,6 +28,47 @@ export const getPets = async () => {
   }
 };
 
+
+
+export const getEntriesPets = async ({ search, species, page, email }) => {
+  const Petcollection = await petCollectionPromise;
+
+  try {
+    const query = {};
+
+    // ১. ইমেইল বেসড ফিল্টার (অবশ্যই থাকতে হবে)
+    if (email) {
+      query.email = email;
+    }
+
+    // ২. সার্চ লজিক (Pet Name দিয়ে)
+    if (search) {
+      query.petName = { $regex: search, $options: 'i' };
+    }
+
+    // ৩. স্পেসিস ফিল্টার লজিক
+    if (species && species !== 'All') {
+      query.species = species;
+    }
+
+    const limit = 10;
+    const skip = (parseInt(page) - 1) * limit;
+
+    // ডাটাবেস কোয়েরি
+    const pets = await Petcollection.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    return JSON.parse(JSON.stringify(pets));
+
+  } catch (error) {
+    console.error("Error fetching pets:", error);
+    return [];
+  }
+};
+
 //admin dashboard manage pets api
 export async function getAllPetsAction() {
   try {
@@ -108,7 +149,6 @@ export const getSinglePets = async (id) => {
 
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
-  console.log(session.user);
   adminShelterAuth();
   try {
     const EntryReqcollection = await EntryReqCollectionPromise;
@@ -260,7 +300,7 @@ export const UpdatePetStatusReject = async (id, adoptionCode) => {
   }
 
   const adminEmail = admin.email;
-  console.log("Action performed by:", adminEmail);
+
 
   if (id?.length !== 24) return { success: false, message: "Invalid ID" };
 
