@@ -11,6 +11,7 @@ import SuccessStories from "@/components/home/SuccessStories";
 import OurSponsor from "@/components/home/OurSponsor";
 import Newsletter from "@/components/home/Newsletter";
 import FAQSection from "@/components/home/FAQSection";
+import ImpactSection from "@/components/home/ImpactSection";
 
 const mainPage = () => {
   return (
@@ -18,6 +19,7 @@ const mainPage = () => {
       <Banner />
 
       <WhyChooseUs />
+      <ImpactSection />
 
       <PetCategories />
       <RecentPets />
