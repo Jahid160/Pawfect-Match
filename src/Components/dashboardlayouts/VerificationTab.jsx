@@ -14,7 +14,7 @@ import ShelterDetailsModal from './ShelterDetailsModal';
 const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages, statusFilter, setStatusFilter, setSearchTerm }) => {
      const [selectedRequest, setSelectedRequest] = useState(null);
      const [isOpen, setIsOpen] = useState(false);
-     console.log(requests)
+
 
 
      const options = [

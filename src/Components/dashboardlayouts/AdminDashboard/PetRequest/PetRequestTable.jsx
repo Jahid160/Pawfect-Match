@@ -17,7 +17,6 @@ import Swal from "sweetalert2";
 import RequestPetDetailsModal from "./RequestPetDetailsModal";
 
 const PetRequestTable = ({ initialRequests }) => {
-  console.log(initialRequests);
   const [requests, setRequests] = useState(initialRequests);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +40,6 @@ const PetRequestTable = ({ initialRequests }) => {
     currentPage * itemsPerPage,
   );
 
-  console.log(currentItems);
 
   // Approve Handler
   const handleApprove = async (id) => {
@@ -189,11 +187,10 @@ const PetRequestTable = ({ initialRequests }) => {
                   {/* 4. Health & Status */}
                   <td className="px-6 py-4 text-center">
                     <span
-                      className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${
-                        req.healthCondition === "Excellent"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-blue-50 text-blue-600"
-                      }`}
+                      className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${req.healthCondition === "Excellent"
+                        ? "bg-emerald-50 text-emerald-600"
+                        : "bg-blue-50 text-blue-600"
+                        }`}
                     >
                       {req.healthCondition}
                     </span>

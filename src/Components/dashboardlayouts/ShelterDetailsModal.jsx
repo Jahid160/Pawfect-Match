@@ -7,7 +7,6 @@ import Image from 'next/image'
 
 
 const ShelterDetailsModal = ({ data, onClose }) => {
-     console.log("Modal Data:", data); // Debugging log 
      if (!data) return null;
 
      return (

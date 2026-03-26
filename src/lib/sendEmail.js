@@ -21,7 +21,6 @@ export async function sendResetEmail(email, resetLink) {
         <a href="${resetLink}">${resetLink}</a>
       `,
     });
-    console.log("✅ Email sent successfully!");
     return info;
   } catch (error) {
     console.error("❌ Send Email Error:", error);

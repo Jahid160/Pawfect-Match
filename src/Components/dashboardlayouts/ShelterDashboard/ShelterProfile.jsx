@@ -34,7 +34,6 @@ const poppins = Poppins({
 
 const ShelterProfile = ({ email }) => {
   const { data: session, update } = useSession();
-  console.log(session);
   const [shelterData, setShelterData] = useState(null);
   const [userImg, setUserImg] = useState({});
   const [isUploading, setIsUploading] = useState(false);
