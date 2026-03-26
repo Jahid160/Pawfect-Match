@@ -11,7 +11,7 @@ import { Suspense } from "react";
 
 import { getCartItems } from "@/action/server/cart";
 import { getServerSession } from "next-auth";
-import CartStoreInitializer from "@/components/Cart/CartStoreInitializer";
+import CartStoreInitializer from "@/Components/Cart/CartStoreInitializer";
 
 const poppins = Poppins({
   subsets: ["latin"],

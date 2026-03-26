@@ -24,16 +24,20 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "30mb",
     },
+    turbopack: {
+      // If you need specific file watching, you can add rules here
+      // But for most cases, empty object or default is enough
+    },
   },
-  webpack: (config, { dev, isServer }) => {
-    if (dev && !isServer) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
-    }
-    return config;
-  },
+  // webpack: (config, { dev, isServer }) => {
+  //   if (dev && !isServer) {
+  //     config.watchOptions = {
+  //       poll: 1000,
+  //       aggregateTimeout: 300,
+  //     };
+  //   }
+  //   return config;
+  // },
 };
 
 export default nextConfig;

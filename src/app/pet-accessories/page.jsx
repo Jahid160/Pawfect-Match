@@ -2,7 +2,7 @@ import { getPetAccessories } from "@/action/server/accessories";
 import React from "react";
 import { FaExclamationTriangle, FaShoppingBasket } from "react-icons/fa";
 import Link from "next/link";
-import AllPetAccessoriesList from "@/components/AccessoriesCard/AllPetAccessoriesList";
+import AllPetAccessoriesList from "@/Components/AccessoriesCard/AllPetAccessoriesList";
 
 export const metadata = {
   title: "Accessories Store | Pawfect Match",

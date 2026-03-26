@@ -1,4 +1,4 @@
-import ShelterPendingreq from '@/components/dashboardlayouts/ShelterDashboard/ShelterPendingreq';
+import ShelterPendingreq from '@/Components/dashboardlayouts/ShelterDashboard/ShelterPendingreq';
 import React from 'react';
 
 const ShelterPending = () => {
