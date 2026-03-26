@@ -1,4 +1,4 @@
-import AccessoriesManagement from '@/components/dashboardlayouts/AccessoriesManagement';
+import AccessoriesManagement from '@/Components/dashboardlayouts/AccessoriesManagement';
 import React from 'react';
 
 const page = () => {

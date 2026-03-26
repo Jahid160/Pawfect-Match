@@ -1,4 +1,4 @@
-import Profilehome from "@/components/dashboardlayouts/ProfileHome/Profilehome";
+import Profilehome from "@/Components/dashboardlayouts/ProfileHome/Profilehome";
 
 const profile = () => {
   return (

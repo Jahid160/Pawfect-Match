@@ -1,8 +1,8 @@
-import CheckoutPageClient from "@/components/checkout/CheckOutPage";
+import CheckoutPageClient from "@/Components/checkout/CheckOutPage";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { getCartItems } from "@/action/server/cart";
-import CartStoreInitializer from "@/components/Cart/CartStoreInitializer";
+import CartStoreInitializer from "@/Components/Cart/CartStoreInitializer";
 import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 

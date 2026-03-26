@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import Loading from "@/components/Loading";
+import Loading from "@/Components/Loading";
 import { motion } from "framer-motion";
 import {
   FaMapMarkerAlt,
@@ -34,7 +34,6 @@ const poppins = Poppins({
 
 const ShelterProfile = ({ email }) => {
   const { data: session, update } = useSession();
-  console.log(session);
   const [shelterData, setShelterData] = useState(null);
   const [userImg, setUserImg] = useState({});
   const [isUploading, setIsUploading] = useState(false);

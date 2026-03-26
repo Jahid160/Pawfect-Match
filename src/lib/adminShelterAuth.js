@@ -5,7 +5,6 @@ import { dbConnect, collections } from "@/lib/db";
 export async function adminShelterAuth() {
 
      const session = await getServerSession(authOptions);
-     console.log("session", session);
      if (!session) {
           throw new Error("Not authenticated");
      }

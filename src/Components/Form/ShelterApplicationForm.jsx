@@ -147,7 +147,6 @@ export default function ShelterApplicationForm() {
 
       const nidUrl = await uploadToCloudinary(formData.nidPdf);
       const shelterUrl = await uploadToCloudinary(formData.shelterPhoto);
-      console.log("Uploaded files:", { nidUrl, shelterUrl });
       const certUrl = formData.registrationCert
         ? await uploadToCloudinary(formData.registrationCert)
         : null;

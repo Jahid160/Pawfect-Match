@@ -4,24 +4,25 @@ import React from "react";
 import Shelterprofile from "../ShelterDashboard/ShelterProfile";
 import Loading from "../../Loading";
 
-import AdminProfile from "../AdminDashboard/AdminProfile";
+
 import UserProfile from "../UserDashboard/UserProfile";
+import AdminProfile from "../AdminDashboard/AdminProfile";
+
 
 const Profilehome = () => {
   const { data: session, status } = useSession();
-  // console.log(session);
   const userRole = session?.user?.role;
-  console.log(userRole);
+
   if (status === "loading") {
     return <Loading />;
   }
   if (userRole === "admin") {
     return <AdminProfile />;
   }
-    else if (userRole === "user") {
-      return <UserProfile></UserProfile>;
+  else if (userRole === "user") {
+    return <UserProfile></UserProfile>;
 
-    }
+  }
   if (userRole === "shelter") {
     return <Shelterprofile email={session?.user?.email}></Shelterprofile>;
   }

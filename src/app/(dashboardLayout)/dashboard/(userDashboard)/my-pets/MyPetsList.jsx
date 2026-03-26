@@ -4,7 +4,6 @@ import Image from "next/image";
 import React from "react";
 
 const MyPetsList = ({ pets }) => {
-  console.log(pets);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {pets.map((pet) => (
@@ -42,10 +41,10 @@ const MyPetsList = ({ pets }) => {
                 Approved On:{" "}
                 {pet.approvedAt
                   ? new Date(pet.approvedAt).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
                   : "Not Available"}
               </p>
             </div>

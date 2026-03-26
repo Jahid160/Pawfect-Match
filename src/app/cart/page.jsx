@@ -1,9 +1,9 @@
-import CartPageClient from "@/components/Cart/CartPageClient"; 
+import CartPageClient from "@/Components/Cart/CartPageClient"; 
 import { Suspense } from "react";
 import { getCartItems } from "@/action/server/cart"; 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import CartStoreInitializer from "@/components/Cart/CartStoreInitializer";
+import CartStoreInitializer from "@/Components/Cart/CartStoreInitializer";
 
 const CartLoader = () => (
   <div className="flex flex-col justify-center items-center bg-gray-50 min-h-screen">

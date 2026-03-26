@@ -19,7 +19,6 @@ export async function POST(req) {
           );
 
           const data = await imgbbRes.json();
-          // console.log("ImgBB response:", data);
 
           if (!data.success) {
                return NextResponse.json(
