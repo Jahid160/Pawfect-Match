@@ -1,25 +1,48 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { Eye, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight, ChevronDown, Check } from 'lucide-react';
 
-const ShelterPetlist = ({ requests = [], totalPages }) => {
+const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
      const router = useRouter();
      const pathname = usePathname();
      const searchParams = useSearchParams();
-     // current values from URL
+     const dropdownRef = useRef(null);
+
+     // 1. Initialize variables from URL
      const currentPage = Number(searchParams.get('page')) || 1;
      const currentSearch = searchParams.get('search') || '';
      const currentSpecies = searchParams.get('species') || 'All';
-
-
      const isLastPage = currentPage >= totalPages;
 
-     // local state for debounce search input
+     // 2. Local states
      const [inputValue, setInputValue] = useState(currentSearch);
+     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+     const speciesOptions = [
+          { label: 'All Species', value: 'All' },
+          { label: 'Dogs', value: 'Dog' },
+          { label: 'Cats', value: 'Cat' },
+          { label: 'Birds', value: 'Bird' },
+          { label: 'Rabbits', value: 'Rabbit' },
+          { label: 'Hamsters', value: 'Hamster' },
+          { label: 'Fish', value: 'Fish' },
+          { label: 'Turtles', value: 'Turtle' },
+     ];
+
+     // Close dropdown when clicking outside
+     useEffect(() => {
+          const handleClickOutside = (event) => {
+               if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                    setIsDropdownOpen(false);
+               }
+          };
+          document.addEventListener('mousedown', handleClickOutside);
+          return () => document.removeEventListener('mousedown', handleClickOutside);
+     }, []);
 
      // URL Update Function
      const updateQueryParams = (params) => {
@@ -31,9 +54,7 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                     newParams.set(key, params[key]);
                }
           });
-          // reset to page 1 if searching or filtering
           if (!params.page) newParams.set('page', '1');
-
           router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
      };
 
@@ -46,6 +67,8 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
           }, 500);
           return () => clearTimeout(delayDebounceFn);
      }, [inputValue]);
+
+     const selectedLabel = speciesOptions.find(s => s.value === currentSpecies)?.label || 'All Species';
 
      return (
           <div className="p-4 md:p-8 bg-slate-50 min-h-screen font-sans">
@@ -71,20 +94,49 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                                    />
                               </div>
 
-                              {/* Species Filter */}
-                              <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1 shadow-sm w-full sm:w-auto">
-                                   <Filter className="text-slate-400 size-4" />
-                                   <select
-                                        value={currentSpecies}
-                                        className="bg-transparent py-1.5 outline-none text-sm font-medium text-slate-700 cursor-pointer min-w-25"
-                                        onChange={(e) => updateQueryParams({ species: e.target.value })}
+                              {/* Custom Professional Species Dropdown */}
+                              <div className="relative w-full sm:w-52" ref={dropdownRef}>
+                                   <button
+                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        className={`flex items-center justify-between w-full px-4 py-2.5 bg-white border transition-all rounded-xl shadow-sm hover:border-primary/50 ${isDropdownOpen ? 'border-primary ring-4 ring-primary/10' : 'border-slate-200'
+                                             }`}
                                    >
-                                        <option value="All">All Species</option>
-                                        <option value="Dog">Dogs</option>
-                                        <option value="Cat">Cats</option>
-                                        <option value="Fish">Fish</option>
-                                        <option value="Bird">Birds</option>
-                                   </select>
+                                        <div className="flex items-center gap-2">
+                                             <Filter className={`${isDropdownOpen ? 'text-primary' : 'text-slate-400'} size-4`} />
+                                             <span className="text-sm font-semibold text-slate-700">{selectedLabel}</span>
+                                        </div>
+                                        <ChevronDown className={`size-4 text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180 text-primary' : ''}`} />
+                                   </button>
+
+                                   <AnimatePresence>
+                                        {isDropdownOpen && (
+                                             <motion.div
+                                                  initial={{ opacity: 0, y: 8 }}
+                                                  animate={{ opacity: 1, y: 0 }}
+                                                  exit={{ opacity: 0, y: 8 }}
+                                                  className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden"
+                                             >
+                                                  <div className="p-1.5 max-h-60 overflow-y-auto custom-scrollbar">
+                                                       {speciesOptions.map((option) => (
+                                                            <button
+                                                                 key={option.value}
+                                                                 onClick={() => {
+                                                                      updateQueryParams({ species: option.value });
+                                                                      setIsDropdownOpen(false);
+                                                                 }}
+                                                                 className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentSpecies === option.value
+                                                                      ? 'bg-primary/5 text-primary'
+                                                                      : 'text-slate-600 hover:bg-slate-50'
+                                                                      }`}
+                                                            >
+                                                                 {option.label}
+                                                                 {currentSpecies === option.value && <Check className="size-4" />}
+                                                            </button>
+                                                       ))}
+                                                  </div>
+                                             </motion.div>
+                                        )}
+                                   </AnimatePresence>
                               </div>
                          </div>
                     </div>
@@ -157,7 +209,7 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                                                                       <button className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all shadow-sm bg-white border border-slate-100" title="Edit">
                                                                            <Edit size={16} />
                                                                       </button>
-                                                                      <button className="p-2 text-slate-400 hover:text-error hover:bg-error/10 rounded-xl transition-all shadow-sm bg-white border border-slate-100" title="Delete">
+                                                                      <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm bg-white border border-slate-100" title="Delete">
                                                                            <Trash2 size={16} />
                                                                       </button>
                                                                  </div>
@@ -166,7 +218,7 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                                                   ))
                                              ) : (
                                                   <tr>
-                                                       <td colSpan="5" className="px-6 py-20 text-center text-slate-400">
+                                                       <td colSpan="5" className="px-6 py-20 text-center text-slate-400 font-medium">
                                                             No pets found matching your criteria.
                                                        </td>
                                                   </tr>
@@ -183,7 +235,6 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                               </p>
 
                               <div className="flex items-center gap-1.5">
-                                   {/* Previous Button */}
                                    <button
                                         onClick={() => updateQueryParams({ page: currentPage - 1 })}
                                         disabled={currentPage === 1}
@@ -192,7 +243,6 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                                         <ChevronLeft size={18} className="text-slate-600" />
                                    </button>
 
-                                   {/* Dynamic Page Numbers */}
                                    {[...Array(totalPages)].map((_, index) => {
                                         const num = index + 1;
                                         return (
@@ -209,7 +259,6 @@ const ShelterPetlist = ({ requests = [], totalPages }) => {
                                         );
                                    })}
 
-                                   {/* Next Button - এখন এটি কাজ করবে এবং লাস্ট পেজে ডিসেবল হবে */}
                                    <button
                                         onClick={() => updateQueryParams({ page: currentPage + 1 })}
                                         disabled={isLastPage}
