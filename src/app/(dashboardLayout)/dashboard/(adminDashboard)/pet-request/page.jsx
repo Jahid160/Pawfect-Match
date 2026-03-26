@@ -7,8 +7,6 @@ const PetRequestPage = async () => {
   const result = await getPetRequests();
   const requests = result.success ? result.data : [];
 
-  console.log(requests);
-
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen">
       <div className="mb-10">

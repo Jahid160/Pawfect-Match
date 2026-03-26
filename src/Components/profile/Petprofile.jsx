@@ -40,7 +40,7 @@ const PetProfile = ({ pet }) => {
   }, [pet]);
 
   const [activeImage, setActiveImage] = useState(gallery[0]);
-  
+
   // নতুন রিয়েল-টাইম ডাটাবেস ভিত্তিক হুক
   const { isSaved, count, handleToggle } = useSavedState(pet, toggleSaveAction);
 
@@ -123,9 +123,8 @@ const PetProfile = ({ pet }) => {
     }
   };
 
-  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${
-    pet.ageMonths ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}` : ""
-  }`;
+  const ageText = `${pet.ageYears || 0} year${Number(pet.ageYears) === 1 ? "" : "s"}${pet.ageMonths ? ` ${pet.ageMonths} month${Number(pet.ageMonths) === 1 ? "" : "s"}` : ""
+    }`;
 
   const quickStats = [
     { label: "Gender", value: pet.gender || "Not specified", type: "gender" },

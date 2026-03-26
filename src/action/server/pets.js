@@ -8,6 +8,8 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { verifyAuth } from "@/lib/verifyAuth";
 import { adminShelterAuth } from "@/lib/adminShelterAuth";
+// import { petCollectionPromise } from "@/lib/mongodb";
+
 
 const petCollectionPromise = dbConnect(collections.PETS);
 const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
@@ -25,6 +27,121 @@ export const getPets = async () => {
   } catch (error) {
     console.error("Error:", error);
     return [];
+  }
+};
+
+
+
+
+// Helper function to escape special characters for MongoDB Regex search
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
+
+export const getEntriesPets = async ({ search, species, page, email }) => {
+  const Petcollection = await petCollectionPromise;
+
+  try {
+    const query = {};
+
+    // Filter by owner email
+    if (email) {
+      query.email = email;
+    }
+
+    // Search by Pet Name (Case-insensitive)
+    if (search) {
+      const safeSearch = escapeRegex(search);
+      query.petName = { $regex: safeSearch, $options: "i" };
+    }
+
+    // Filter by Species
+    if (species && species !== "All") {
+      query.species = species;
+    }
+
+    const limit = 10;
+    const skip = (parseInt(page) - 1) * limit;
+
+    const totalCount = await Petcollection.countDocuments(query);
+
+    const pets = await Petcollection.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    return {
+      pets: JSON.parse(JSON.stringify(pets)),
+      totalPages: Math.ceil(totalCount / limit) || 1,
+    };
+  } catch (error) {
+    console.error("Error fetching pets:", error);
+    return { pets: [], totalPages: 0 };
+  }
+};
+
+/**
+ * 2. Update Pet Entry (With Security Check)
+ */
+export const updatePets = async (petId, updatedData, userEmail) => {
+  try {
+    const Petcollection = await petCollectionPromise;
+
+    // ১. প্রথমে চেক করছি এই পেটটি এই ইউজারের কি না
+    const existingPet = await Petcollection.findOne({ _id: new ObjectId(petId) });
+
+    if (!existingPet) {
+      return { success: false, message: "Pet not found" };
+    }
+
+    // ২. ইমেইল ম্যাচিং (Security Gate)
+    if (existingPet.email !== userEmail) {
+      return { success: false, message: "You are not authorized to update this entry!" };
+    }
+
+    const { _id, ...dataToUpdate } = updatedData;
+
+    const result = await Petcollection.updateOne(
+      { _id: new ObjectId(petId) },
+      { $set: dataToUpdate }
+    );
+
+    if (result.modifiedCount > 0) {
+      revalidatePath("/");
+      return { success: true, message: "Pet updated successfully" };
+    }
+
+    return { success: false, message: "No changes made" };
+  } catch (error) {
+    console.error("Error updating pet:", error);
+    return { success: false, message: "Server error occurred" };
+  }
+};
+
+/**
+ * 3. Delete Pet Entry (With Security Check)
+ */
+export const deletePet = async (petId, userEmail) => {
+  try {
+    const Petcollection = await petCollectionPromise;
+
+    // ডিলিট করার আগেও ইমেইল চেক করা হচ্ছে
+    const result = await Petcollection.deleteOne({
+      _id: new ObjectId(petId),
+      email: userEmail
+    });
+
+    if (result.deletedCount > 0) {
+      revalidatePath("/");
+      return { success: true, message: "Pet deleted successfully" };
+    }
+
+    return { success: false, message: "Unauthorized or Pet not found" };
+  } catch (error) {
+    console.error("Error deleting pet:", error);
+    return { success: false, message: "Server error" };
   }
 };
 
@@ -108,7 +225,6 @@ export const getSinglePets = async (id) => {
 
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
-  console.log(session.user);
   adminShelterAuth();
   try {
     const EntryReqcollection = await EntryReqCollectionPromise;
@@ -260,7 +376,7 @@ export const UpdatePetStatusReject = async (id, adoptionCode) => {
   }
 
   const adminEmail = admin.email;
-  console.log("Action performed by:", adminEmail);
+
 
   if (id?.length !== 24) return { success: false, message: "Invalid ID" };
 

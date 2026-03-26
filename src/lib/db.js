@@ -48,7 +48,6 @@ export const dbConnect = async (cname) => {
       await client.connect();
       dbInstance = client.db(dbname);
       await setupIndices(dbInstance);
-      console.log("Successfully connected to MongoDB.");
     }
 
     return dbInstance.collection(cname);
