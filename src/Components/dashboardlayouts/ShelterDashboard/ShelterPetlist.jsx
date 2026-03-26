@@ -3,48 +3,39 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight, ChevronDown, Check } from 'lucide-react';
+import { Eye, Edit, Trash2, Search, ChevronLeft, ChevronRight, ChevronDown, Check, X } from 'lucide-react';
+import Swal from 'sweetalert2';
+
+// Server Actions
+import { deletePet, updatePets } from '@/action/server/pets';
 
 const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
+     const { data: session } = useSession();
+     const userEmail = session?.user?.email;
+
      const router = useRouter();
      const pathname = usePathname();
      const searchParams = useSearchParams();
      const dropdownRef = useRef(null);
 
-     // 1. Initialize variables from URL
+     // Modal States
+     const [selectedPet, setSelectedPet] = useState(null);
+     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+     const [editFormData, setEditFormData] = useState({});
+
+     // Filter and Pagination States
      const currentPage = Number(searchParams.get('page')) || 1;
      const currentSearch = searchParams.get('search') || '';
      const currentSpecies = searchParams.get('species') || 'All';
-     const isLastPage = currentPage >= totalPages;
-
-     // 2. Local states
      const [inputValue, setInputValue] = useState(currentSearch);
      const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-     const speciesOptions = [
-          { label: 'All Species', value: 'All' },
-          { label: 'Dogs', value: 'Dog' },
-          { label: 'Cats', value: 'Cat' },
-          { label: 'Birds', value: 'Bird' },
-          { label: 'Rabbits', value: 'Rabbit' },
-          { label: 'Hamsters', value: 'Hamster' },
-          { label: 'Fish', value: 'Fish' },
-          { label: 'Turtles', value: 'Turtle' },
-     ];
+     const speciesOptions = ['All', 'Dog', 'Cat', 'Bird', 'Rabbit', 'Hamster', 'Fish', 'Turtle', 'Horse', 'Other'];
 
-     // Close dropdown when clicking outside
-     useEffect(() => {
-          const handleClickOutside = (event) => {
-               if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                    setIsDropdownOpen(false);
-               }
-          };
-          document.addEventListener('mousedown', handleClickOutside);
-          return () => document.removeEventListener('mousedown', handleClickOutside);
-     }, []);
-
-     // URL Update Function
+     // --- URL Update & Pagination Logic ---
      const updateQueryParams = (params) => {
           const newParams = new URLSearchParams(searchParams.toString());
           Object.keys(params).forEach(key => {
@@ -54,86 +45,111 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                     newParams.set(key, params[key]);
                }
           });
-          if (!params.page) newParams.set('page', '1');
+          if (!params.page && (params.species || params.search !== undefined)) {
+               newParams.set('page', '1');
+          }
           router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
      };
 
-     // Handle search with 500ms debounce
+     // Debounced Search
      useEffect(() => {
           const delayDebounceFn = setTimeout(() => {
                if (inputValue !== currentSearch) {
-                    updateQueryParams({ search: inputValue });
+                    updateQueryParams({ search: inputValue, page: '1' });
                }
           }, 500);
           return () => clearTimeout(delayDebounceFn);
      }, [inputValue]);
 
-     const selectedLabel = speciesOptions.find(s => s.value === currentSpecies)?.label || 'All Species';
+     // Close dropdown on click outside
+     useEffect(() => {
+          const handleClickOutside = (event) => {
+               if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                    setIsDropdownOpen(false);
+               }
+          };
+          document.addEventListener("mousedown", handleClickOutside);
+          return () => document.removeEventListener("mousedown", handleClickOutside);
+     }, []);
 
+     // --- Actions ---
+     const handleDelete = async (id) => {
+          if (!userEmail) return Swal.fire("Error", "Login required", "error");
+          Swal.fire({
+               title: "Are you sure?",
+               text: "This will permanently remove the pet entry.",
+               icon: "warning",
+               showCancelButton: true,
+               confirmButtonColor: "#ef4444",
+               confirmButtonText: "Yes, delete it!"
+          }).then(async (result) => {
+               if (result.isConfirmed) {
+                    const res = await deletePet(id, userEmail);
+                    if (res.success) Swal.fire("Deleted!", res.message, "success");
+                    else Swal.fire("Error!", res.message, "error");
+               }
+          });
+     };
+
+     const handleEditSubmit = async (e) => {
+          e.preventDefault();
+          const res = await updatePets(selectedPet._id, editFormData, userEmail);
+          if (res.success) {
+               setIsEditModalOpen(false);
+               Swal.fire("Updated!", res.message, "success");
+          } else {
+               Swal.fire("Error!", res.message, "error");
+          }
+     };
+
+     // --- Main Render ---
      return (
-          <div className="p-4 md:p-8 bg-slate-50 min-h-screen font-sans">
+          <div className="p-4 md:p-8 bg-slate-50 min-h-screen">
                <div className="max-w-7xl mx-auto">
-
-                    {/* Header Section */}
-                    <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    {/* Header & Filters */}
+                    <div className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                          <div>
                               <h1 className="text-2xl font-bold text-slate-800">Pet Entries</h1>
-                              <p className="text-slate-500">Manage and monitor your shelter animals</p>
+                              <p className="text-slate-500 text-sm">Update and manage pet listings</p>
                          </div>
 
-                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                              {/* Professional Search Bar */}
-                              <div className="relative w-full sm:w-72 group">
-                                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4 group-focus-within:text-primary transition-colors" />
+                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                              <div className="relative w-full sm:w-72">
+                                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
                                    <input
                                         type="text"
                                         value={inputValue}
-                                        placeholder="Search pets..."
-                                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                                        placeholder="Search by name..."
+                                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                                         onChange={(e) => setInputValue(e.target.value)}
                                    />
                               </div>
 
-                              {/* Custom Professional Species Dropdown */}
-                              <div className="relative w-full sm:w-52" ref={dropdownRef}>
+                              {/* Species Filter */}
+                              <div className="relative w-full sm:w-56" ref={dropdownRef}>
                                    <button
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                        className={`flex items-center justify-between w-full px-4 py-2.5 bg-white border transition-all rounded-xl shadow-sm hover:border-primary/50 ${isDropdownOpen ? 'border-primary ring-4 ring-primary/10' : 'border-slate-200'
-                                             }`}
+                                        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-slate-200 rounded-xl shadow-sm text-sm"
                                    >
-                                        <div className="flex items-center gap-2">
-                                             <Filter className={`${isDropdownOpen ? 'text-primary' : 'text-slate-400'} size-4`} />
-                                             <span className="text-sm font-semibold text-slate-700">{selectedLabel}</span>
-                                        </div>
-                                        <ChevronDown className={`size-4 text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180 text-primary' : ''}`} />
+                                        <span className="font-medium text-slate-700">{currentSpecies === 'All' ? 'Select Species' : currentSpecies}</span>
+                                        <ChevronDown className={`size-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                                    </button>
 
                                    <AnimatePresence>
                                         {isDropdownOpen && (
                                              <motion.div
-                                                  initial={{ opacity: 0, y: 8 }}
-                                                  animate={{ opacity: 1, y: 0 }}
-                                                  exit={{ opacity: 0, y: 8 }}
-                                                  className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden"
+                                                  initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                                                  className="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden max-h-64 overflow-y-auto"
                                              >
-                                                  <div className="p-1.5 max-h-60 overflow-y-auto custom-scrollbar">
-                                                       {speciesOptions.map((option) => (
-                                                            <button
-                                                                 key={option.value}
-                                                                 onClick={() => {
-                                                                      updateQueryParams({ species: option.value });
-                                                                      setIsDropdownOpen(false);
-                                                                 }}
-                                                                 className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentSpecies === option.value
-                                                                      ? 'bg-primary/5 text-primary'
-                                                                      : 'text-slate-600 hover:bg-slate-50'
-                                                                      }`}
-                                                            >
-                                                                 {option.label}
-                                                                 {currentSpecies === option.value && <Check className="size-4" />}
-                                                            </button>
-                                                       ))}
-                                                  </div>
+                                                  {speciesOptions.map((opt) => (
+                                                       <button
+                                                            key={opt}
+                                                            onClick={() => { updateQueryParams({ species: opt, page: '1' }); setIsDropdownOpen(false); }}
+                                                            className={`w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 flex items-center justify-between ${currentSpecies === opt ? 'bg-blue-50 text-blue-600' : 'text-slate-600'}`}
+                                                       >
+                                                            {opt} {currentSpecies === opt && <Check className="size-3" />}
+                                                       </button>
+                                                  ))}
                                              </motion.div>
                                         )}
                                    </AnimatePresence>
@@ -141,135 +157,152 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                          </div>
                     </div>
 
-                    {/* Main Table Container */}
-                    <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+                    {/* Table Section */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                          <div className="overflow-x-auto">
-                              <table className="w-full text-left border-separate border-spacing-0">
-                                   <thead className="bg-slate-50/80 backdrop-blur-md">
+                              <table className="w-full text-left">
+                                   <thead className="bg-slate-50">
                                         <tr>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Pet Information</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Species</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Age</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">Status</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-center text-slate-500 uppercase tracking-wider border-b border-slate-100">Actions</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Pet</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Species</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-center text-slate-500 uppercase">Actions</th>
                                         </tr>
                                    </thead>
                                    <tbody className="divide-y divide-slate-100">
-                                        <AnimatePresence mode='popLayout'>
-                                             {requests.length > 0 ? (
-                                                  requests.map((pet, index) => (
-                                                       <motion.tr
-                                                            key={pet._id}
-                                                            initial={{ opacity: 0, y: 10 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            exit={{ opacity: 0, scale: 0.95 }}
-                                                            transition={{ duration: 0.2, delay: index * 0.05 }}
-                                                            className="hover:bg-slate-50/80 group transition-all"
-                                                       >
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                 <div className="flex items-center gap-4">
-                                                                      <div className="relative size-12 rounded-2xl overflow-hidden border-2 border-white shadow-md group-hover:scale-105 transition-transform">
-                                                                           <Image
-                                                                                fill
-                                                                                src={pet.images?.[0] || "/default-pet.png"}
-                                                                                alt={pet.petName}
-                                                                                className="object-cover"
-                                                                           />
-                                                                      </div>
-                                                                      <div>
-                                                                           <div className="font-bold text-slate-800">{pet.petName}</div>
-                                                                           <div className="text-xs text-slate-500">ID: {pet._id.slice(-6)}</div>
-                                                                      </div>
-                                                                 </div>
-                                                            </td>
-                                                            <td className="px-6 py-4">
-                                                                 <span className="text-sm font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
-                                                                      {pet.species}
-                                                                 </span>
-                                                            </td>
-                                                            <td className="px-6 py-4">
-                                                                 <div className="text-sm text-slate-700 font-medium">
-                                                                      {pet.ageYears}y <span className="text-slate-400 font-normal">{pet.ageMonths}m</span>
-                                                                 </div>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ring-1 ring-inset ${pet.status === 'adopted'
-                                                                      ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-                                                                      : 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                                                                      }`}>
-                                                                      <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${pet.status === 'adopted' ? 'bg-emerald-600' : 'bg-amber-600'}`}></span>
-                                                                      {pet.status}
-                                                                 </span>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                                 <div className="flex items-center justify-center gap-2">
-                                                                      <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-all shadow-sm bg-white border border-slate-100" title="View">
-                                                                           <Eye size={16} />
-                                                                      </button>
-                                                                      <button className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all shadow-sm bg-white border border-slate-100" title="Edit">
-                                                                           <Edit size={16} />
-                                                                      </button>
-                                                                      <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm bg-white border border-slate-100" title="Delete">
-                                                                           <Trash2 size={16} />
-                                                                      </button>
-                                                                 </div>
-                                                            </td>
-                                                       </motion.tr>
-                                                  ))
-                                             ) : (
-                                                  <tr>
-                                                       <td colSpan="5" className="px-6 py-20 text-center text-slate-400 font-medium">
-                                                            No pets found matching your criteria.
-                                                       </td>
-                                                  </tr>
-                                             )}
-                                        </AnimatePresence>
+                                        {requests.length > 0 ? requests.map((pet) => (
+                                             <tr key={pet._id} className="hover:bg-slate-50/50 transition-colors">
+                                                  <td className="px-6 py-4">
+                                                       <div className="flex items-center gap-3">
+                                                            <div className="relative size-10 rounded-lg overflow-hidden border">
+                                                                 <Image fill src={pet.images?.[0] || "/placeholder.png"} alt={pet.petName} className="object-cover" />
+                                                            </div>
+                                                            <span className="font-bold text-slate-800 text-sm">{pet.petName}</span>
+                                                       </div>
+                                                  </td>
+                                                  <td className="px-6 py-4 text-sm text-slate-600">{pet.species}</td>
+                                                  <td className="px-6 py-4">
+                                                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${pet.status === 'adopted' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                            {pet.status}
+                                                       </span>
+                                                  </td>
+                                                  <td className="px-6 py-4">
+                                                       <div className="flex justify-center gap-2">
+                                                            <button onClick={() => { setSelectedPet(pet); setIsViewModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Eye size={16} /></button>
+                                                            <button onClick={() => { setSelectedPet(pet); setEditFormData({ ...pet }); setIsEditModalOpen(true); }} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg"><Edit size={16} /></button>
+                                                            <button onClick={() => handleDelete(pet._id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                                                       </div>
+                                                  </td>
+                                             </tr>
+                                        )) : (
+                                             <tr>
+                                                  <td colSpan="4" className="px-6 py-10 text-center text-slate-400 text-sm">No pets found matching your filters.</td>
+                                             </tr>
+                                        )}
                                    </tbody>
                               </table>
                          </div>
 
-                         {/* Attractive Pagination */}
-                         <div className="px-6 py-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                              <p className="text-sm text-slate-500 font-medium">
-                                   Showing page <span className="text-slate-800">{currentPage}</span> of <span className="text-slate-800">{totalPages}</span>
-                              </p>
-
-                              <div className="flex items-center gap-1.5">
-                                   <button
-                                        onClick={() => updateQueryParams({ page: currentPage - 1 })}
-                                        disabled={currentPage === 1}
-                                        className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-                                   >
-                                        <ChevronLeft size={18} className="text-slate-600" />
+                         {/* Pagination */}
+                         <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+                              <div className="text-xs text-slate-500">
+                                   Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+                              </div>
+                              <div className="flex gap-2">
+                                   <button disabled={currentPage <= 1} onClick={() => updateQueryParams({ page: currentPage - 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
+                                        <ChevronLeft size={14} /> Previous
                                    </button>
-
-                                   {[...Array(totalPages)].map((_, index) => {
-                                        const num = index + 1;
-                                        return (
-                                             <button
-                                                  key={num}
-                                                  onClick={() => updateQueryParams({ page: num })}
-                                                  className={`size-10 rounded-xl text-sm font-bold transition-all shadow-sm ${currentPage === num
-                                                       ? 'bg-primary text-white shadow-primary/20'
-                                                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                                                       }`}
-                                             >
-                                                  {num}
-                                             </button>
-                                        );
-                                   })}
-
-                                   <button
-                                        onClick={() => updateQueryParams({ page: currentPage + 1 })}
-                                        disabled={isLastPage}
-                                        className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-                                   >
-                                        <ChevronRight size={18} className="text-slate-600" />
+                                   <button disabled={currentPage >= totalPages} onClick={() => updateQueryParams({ page: currentPage + 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
+                                        Next <ChevronRight size={14} />
                                    </button>
                               </div>
                          </div>
                     </div>
                </div>
+
+               {/* --- VIEW MODAL (এখানে রাখা হয়েছে যাতে রেন্ডার হয়) --- */}
+               <AnimatePresence>
+                    {isViewModalOpen && selectedPet && (
+                         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                              <motion.div
+                                   initial={{ scale: 0.9, opacity: 0 }}
+                                   animate={{ scale: 1, opacity: 1 }}
+                                   exit={{ scale: 0.9, opacity: 0 }}
+                                   className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative"
+                              >
+                                   <button onClick={() => setIsViewModalOpen(false)} className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white z-10 transition-colors">
+                                        <X size={20} />
+                                   </button>
+
+                                   <div className="relative h-64 w-full bg-slate-100">
+                                        <Image fill src={selectedPet.images?.[0] || "/placeholder.png"} className="object-cover" alt={selectedPet.petName} />
+                                   </div>
+
+                                   <div className="p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                             <div>
+                                                  <h2 className="text-2xl font-bold text-slate-800">{selectedPet.petName}</h2>
+                                                  <p className="text-blue-600 font-medium">{selectedPet.species}</p>
+                                             </div>
+                                             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${selectedPet.status === 'adopted' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                  {selectedPet.status}
+                                             </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 mb-6">
+                                             <div className="bg-slate-50 p-3 rounded-2xl">
+                                                  <p className="text-[10px] text-slate-400 uppercase font-bold">Gender</p>
+                                                  <p className="text-sm font-semibold text-slate-700">{selectedPet.gender || 'Not specified'}</p>
+                                             </div>
+                                             <div className="bg-slate-50 p-3 rounded-2xl">
+                                                  <p className="text-[10px] text-slate-400 uppercase font-bold">Weight</p>
+                                                  <p className="text-sm font-semibold text-slate-700">{selectedPet.weight ? `${selectedPet.weight} kg` : 'N/A'}</p>
+                                             </div>
+                                        </div>
+
+                                        {selectedPet.description && (
+                                             <div className="mb-6">
+                                                  <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Description</p>
+                                                  <p className="text-sm text-slate-600 leading-relaxed">{selectedPet.description}</p>
+                                             </div>
+                                        )}
+
+                                        <button onClick={() => setIsViewModalOpen(false)} className="w-full py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-colors">
+                                             Close Details
+                                        </button>
+                                   </div>
+                              </motion.div>
+                         </div>
+                    )}
+               </AnimatePresence>
+
+               {/* --- EDIT MODAL --- */}
+               <AnimatePresence>
+                    {isEditModalOpen && (
+                         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                              <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl">
+                                   <h2 className="text-xl font-bold mb-4 text-slate-800">Edit Pet Status</h2>
+                                   <form onSubmit={handleEditSubmit} className="space-y-4">
+                                        <div>
+                                             <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Status</label>
+                                             <select
+                                                  value={editFormData.status || ''}
+                                                  onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                                                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20"
+                                             >
+                                                  <option value="available">Available</option>
+                                                  <option value="adopted">Adopted</option>
+                                             </select>
+                                        </div>
+                                        <div className="flex gap-3 mt-6">
+                                             <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 py-2.5 text-sm font-bold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50">Cancel</button>
+                                             <button type="submit" className="flex-1 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30">Update</button>
+                                        </div>
+                                   </form>
+                              </motion.div>
+                         </div>
+                    )}
+               </AnimatePresence>
           </div>
      );
 };
