@@ -11,6 +11,7 @@ import SuccessStories from "@/Components/home/SuccessStories";
 import OurSponsor from "@/Components/home/OurSponsor";
 import Newsletter from "@/Components/home/Newsletter";
 import FAQSection from "@/Components/home/FAQSection";
+import ImpactSection from "@/Components/home/ImpactSection";
 
 const mainPage = () => {
   return (

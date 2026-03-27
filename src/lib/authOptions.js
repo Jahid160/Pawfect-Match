@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { collections, dbConnect } from "./db";
+import { headers } from "next/headers";
 
 export const authOptions = {
   providers: [
@@ -33,30 +34,54 @@ export const authOptions = {
       try {
         if (!user?.email) return false;
 
+        const headersList = await headers();
+        const ip =
+          // headersList.get("x-forwarded-for")?.split(",")[0] ||
+          "103.205.69.67";
+        // 2. Fetch Location data using the IP
+        let location = "Localhost";
+
+        // Only fetch if it's NOT a local address
+        if (ip !== "::1" && ip !== "127.0.0.1") {
+          try {
+            // Using ip-api.com (Alternative provider)
+            const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+            const geoData = await geoRes.json();
+
+            if (geoData && geoData.status === "success") {
+              location = `${geoData.city}, ${geoData.country}`;
+            } else {
+              // If the API fails or returns 'fail' for a reserved IP
+              location = geoData.message || "Unknown Location";
+            }
+          } catch (err) {
+            console.error("Geo API Error:", err);
+            location = "Service Unavailable";
+          }
+        }
         const usersCollection = await dbConnect(collections.USERS);
         const now = new Date();
 
         await usersCollection.updateOne(
           { email: user.email },
           {
-
             $setOnInsert: {
               email: user.email,
               name: user.name,
               image: user.image,
               role: "user",
               createdAt: now,
-              location: "Savar, Dhaka",
               status: "active",
             },
 
             $set: {
               provider: account?.provider || "credentials",
               lastLoginAt: now,
-
+              ipAddress: ip,
+              location: location,
             },
           },
-          { upsert: true }
+          { upsert: true },
         );
 
         return true;
@@ -72,7 +97,6 @@ export const authOptions = {
         if (session.user.name) token.name = session.user.name;
         return token;
       }
-
 
       if (user) {
         const usersCollection = await dbConnect(collections.USERS);
