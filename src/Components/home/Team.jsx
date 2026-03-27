@@ -24,9 +24,9 @@ const Team = () => {
         {
             name: "Md Zahid Hasan",
             role: "Lead Full-Stack Developer",
-            image: "https://i.ibb.co.com/fYmmxjqD/Screenshot-3.png",
+            image: "https://i.ibb.co.com/bMgLpTdq/Gemini-Generated-Image-bp8kycbp8kycbp8k-1.png",
             bio: "Specialist in scalable web architectures. Managed task allocation and user-friendly functional developments.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/Jahid160", linkedin: "https://www.linkedin.com/in/md-zahid-hasan12/", twitter: "#" }
         },
         {
             name: "Forhad Redoy",
