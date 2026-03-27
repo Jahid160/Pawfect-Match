@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Selterdashboardhome = () => {
+const ShelterDashboardHome = () => {
      return (
           <div>
                <h2 className='text-red-800' >Shelter Dashboard</h2>
@@ -8,4 +8,4 @@ const Selterdashboardhome = () => {
      );
 };
 
-export default Selterdashboardhome;
+export default ShelterDashboardHome;
