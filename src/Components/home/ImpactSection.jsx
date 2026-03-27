@@ -69,7 +69,7 @@ const ImpactSection = () => {
       <div className="z-10 relative mx-auto px-6 max-w-7xl">
         
         {/* --- SECTION HEADER --- */}
-        <div className="flex lg:flex-row flex-col justify-between items-end gap-8 mb-20">
+        <div className="flex lg:flex-row flex-col justify-between items-end gap-12 mb-20">
           <div className="max-w-2xl lg:text-left text-center">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -84,7 +84,7 @@ const ImpactSection = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.9] tracking-tighter"
+              className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Numbers that tell <br />
               <span className="text-orange-500 italic">our story.</span>
@@ -94,7 +94,7 @@ const ImpactSection = () => {
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="hidden lg:block max-w-xs font-medium text-slate-400 text-sm leading-relaxed"
+            className="hidden lg:block max-w-xs font-medium text-slate-500 text-base leading-relaxed"
           >
             We're on a mission to bridge the gap between abandoned pets and loving homes, one pawsitive step at a time.
           </motion.p>
@@ -130,7 +130,7 @@ const ImpactSection = () => {
                   {stat.label}
                 </p>
                 
-                <p className="font-medium text-slate-400 group-hover:text-slate-400 text-sm leading-relaxed transition-colors duration-500">
+                <p className="font-medium text-slate-500 group-hover:text-slate-400 text-sm leading-relaxed transition-colors duration-500">
                   {stat.desc}
                 </p>
               </div>
