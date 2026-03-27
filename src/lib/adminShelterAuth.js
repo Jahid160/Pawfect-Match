@@ -14,8 +14,9 @@ export async function adminShelterAuth() {
      const dbUser = await usersCollection.findOne({
           email: session.user.email
      });
+     console.log(dbUser);
 
-     if (dbUser.role !== "shelter" || dbUser.role !== "admin") {
+     if (dbUser.role !== "shelter" && dbUser.role !== "admin") {
           throw new Error("User only");
      }
 
