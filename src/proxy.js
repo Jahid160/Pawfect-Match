@@ -11,6 +11,7 @@ const ROLE_PERMISSIONS = {
     "/addFoodForms",
     "/addAccessoryForm",
     "/vaccination/add",
+    "/dashboard/pet-request"
   ],
 };
 
