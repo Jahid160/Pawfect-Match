@@ -1,17 +1,21 @@
 "use client";
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, } from 'react';
 import Image from 'next/image';
 import {
      Search, ChevronDown, ChevronLeft, ChevronRight,
-     Eye, Edit, Trash2, X, Check, Save
+     Eye, Edit, Trash2, X, Check, Save,
+     AlertTriangle,
+     Mail
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { deleteEntry, updateEntry } from '@/action/server/Entries';
 import Swal from 'sweetalert2';
 
+
 const ShelterPendinglist = ({ pets = [] }) => {
      const [requests, setRequests] = useState(pets);
      const [inputValue, setInputValue] = useState("");
+     const [shelterStatus, setShelterStatus] = useState(null);
      const [currentSpecies, setCurrentSpecies] = useState("All");
      const [isDropdownOpen, setIsDropdownOpen] = useState(false);
      const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -20,8 +24,11 @@ const ShelterPendinglist = ({ pets = [] }) => {
      const [currentPage, setCurrentPage] = useState(1);
      const dropdownRef = useRef(null);
 
+
+
      const speciesOptions = ['All', 'Dog', 'Cat', 'Bird', 'Rabbit', 'Hamster', 'Fish', 'Turtle', 'Horse', 'Other'];
      const itemsPerPage = 5;
+
 
      // Filter Logic
      const filteredPets = requests.filter(pet => {
@@ -85,6 +92,37 @@ const ShelterPendinglist = ({ pets = [] }) => {
                Swal.fire("Error!", "Update failed.", "error");
           }
      };
+
+
+     if (shelterStatus === "Suspended") {
+          return (
+               <div className="card bg-base-100 shadow-2xl max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-error/20">
+                    <div className="p-12 text-center space-y-6">
+                         <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                              <AlertTriangle size={40} />
+                         </div>
+
+                         <div className="space-y-2">
+                              <h2 className="text-3xl font-black text-neutral tracking-tight">
+                                   Account Suspended
+                              </h2>
+                              <p className="text-base-content/70 font-medium px-4">
+                                   Your shelter account is currently suspended. You cannot list new pets at this moment.
+                              </p>
+                         </div>
+
+                         <div className="bg-base-200/50 p-6 rounded-2xl border border-base-300">
+                              <p className="text-sm text-neutral font-bold mb-3 flex items-center justify-center gap-2">
+                                   <Mail size={16} className="text-primary" /> How to resolve this?
+                              </p>
+                              <p className="text-sm text-base-content/60 ">
+                                   Please contact the system administrator to discuss the status of your account and request reactivation.
+                              </p>
+                         </div>
+                    </div>
+               </div>
+          );
+     }
 
      return (
           <div className="p-4 md:p-8 bg-slate-50 min-h-screen font-sans">
