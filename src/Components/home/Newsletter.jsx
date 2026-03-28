@@ -9,69 +9,73 @@ const Newsletter = () => {
     <section className="bg-[#FDFCFB] py-24 overflow-hidden">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         
-        {/* Main Wrapper with Gradient & Border */}
-        <div className="relative bg-gradient-to-br from-orange-500 to-orange-600 shadow-[0_40px_100px_-20px_rgba(251,146,60,0.4)] p-1 md:p-2 rounded-[3.5rem]">
+        {/* Main Wrapper with Multi-layered Shadows */}
+        <div className="relative bg-gradient-to-br from-orange-500 via-orange-550 to-orange-600 shadow-[0_50px_100px_-30px_rgba(249,115,22,0.5)] p-1 md:p-2 rounded-[3.5rem]">
           
           {/* Inner Content Box */}
-          <div className="relative bg-orange-500 px-8 md:px-20 py-16 md:py-24 border border-white/20 rounded-[3rem] overflow-hidden">
+          <div className="relative bg-orange-500 px-8 md:px-20 py-16 md:py-24 border border-white/20 rounded-[3.2rem] overflow-hidden">
             
-            {/* Animated Decorative Blobs */}
+            {/* Animated Decorative Elements */}
             <motion.div 
-              animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-              transition={{ duration: 20, repeat: Infinity }}
-              className="-top-24 -right-24 absolute bg-orange-400 opacity-40 blur-[80px] rounded-full w-96 h-96"
+              animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0], opacity: [0.3, 0.5, 0.3] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="-top-24 -right-24 absolute bg-orange-300 blur-[100px] rounded-full w-[500px] h-[500px] pointer-events-none"
             />
             <motion.div 
-              animate={{ scale: [1, 1.3, 1], x: [0, 50, 0] }}
-              transition={{ duration: 15, repeat: Infinity }}
-              className="-bottom-32 -left-32 absolute bg-orange-300 opacity-30 blur-[70px] rounded-full w-80 h-80"
+              animate={{ x: [0, 30, 0], y: [0, 50, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              className="-bottom-32 -left-32 absolute bg-white/20 blur-[80px] rounded-full w-96 h-96 pointer-events-none"
             />
 
-            {/* Floating Icon (The Farmer's Dog Style) */}
-            <div className="hidden lg:block top-10 left-10 absolute text-white/10 text-9xl -rotate-12">
+            {/* Background Icon (Branding) */}
+            <div className="hidden lg:block top-[-10%] right-[-5%] absolute text-[20rem] text-white/5 -rotate-12 pointer-events-none select-none">
               <FaPaw />
             </div>
 
-            <div className="z-10 relative items-center gap-12 grid lg:grid-cols-2">
+            <div className="z-10 relative items-center gap-16 grid lg:grid-cols-2">
               
-              {/* Text Side */}
+              {/* Text Side - Enhanced Typography */}
               <div className="lg:text-left text-center">
-                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm mb-6 px-4 py-2 border border-white/10 rounded-full font-bold text-white text-sm tracking-wide">
-                  <span className="bg-white rounded-full w-2 h-2 animate-pulse"></span>
-                  JOIN THE PACK
+                <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-md mb-8 px-6 py-2 border border-white/10 rounded-full font-black text-[10px] text-white uppercase tracking-[0.2em]">
+                  <span className="bg-white shadow-[0_0_10px_white] rounded-full w-2 h-2 animate-pulse"></span>
+                  Join the pack
                 </div>
-                <h2 className="mb-8 font-black text-white text-4xl md:text-6xl leading-[1.1] tracking-tighter">
+                <h2 className="mb-8 font-black text-white text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]">
                   Every tail has a <br />
-                  <span className="text-orange-200">Success Story.</span>
+                  <span className="text-orange-200 italic">Success Story.</span>
                 </h2>
-                <p className="opacity-90 max-w-lg font-medium text-orange-50 text-lg md:text-xl leading-relaxed">
+                <p className="opacity-90 max-w-lg font-medium text-orange-50 text-xl leading-relaxed">
                   Be the first to know about new rescues, expert pet care tips, and exclusive adoption events.
                 </p>
               </div>
 
-              {/* Form Side */}
+              {/* Form Side - Modern Glassmorphism */}
               <div className="flex justify-center lg:justify-end">
-                <div className="bg-white/10 shadow-2xl backdrop-blur-xl p-3 border border-white/30 rounded-[2.5rem] w-full max-w-md">
-                  <form className="space-y-3">
-                    <div className="relative">
+                <div className="bg-white/10 shadow-3xl backdrop-blur-2xl p-4 md:p-6 border border-white/20 rounded-[3rem] w-full max-w-md">
+                  <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                    <div className="group relative">
                       <input 
                         type="email" 
                         placeholder="Your best email address" 
-                        className="bg-white shadow-inner px-8 py-5 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-orange-300 w-full font-semibold text-gray-900 transition-all placeholder-gray-400"
+                        className="bg-white/95 group-hover:bg-white shadow-2xl px-10 py-6 rounded-[2.2rem] focus:outline-none focus:ring-4 focus:ring-white/30 w-full font-bold text-slate-900 transition-all placeholder-slate-400"
                         required
                       />
                     </div>
                     <button 
                       type="submit" 
-                      className="group flex justify-center items-center gap-3 bg-gray-900 hover:bg-black shadow-black/20 shadow-xl px-8 py-5 rounded-[2rem] w-full font-black text-white text-lg hover:scale-[1.02] active:scale-95 transition-all transform"
+                      className="group flex justify-center items-center gap-4 bg-slate-900 hover:bg-black shadow-2xl px-10 py-6 rounded-[2.2rem] w-full font-black text-[11px] text-white uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[0.98] transition-all transform"
                     >
-                      GET UPDATES 
-                      <FaPaperPlane className="text-sm transition-transform group-hover:-translate-y-1 group-hover:translate-x-2" />
+                      <span>Get Updates</span> 
+                      <FaPaperPlane className="text-xs transition-transform group-hover:-translate-y-1 group-hover:translate-x-2" />
                     </button>
                   </form>
-                  <p className="opacity-80 mt-5 font-medium text-[13px] text-orange-100 text-center">
-                    Join 8,000+ owners. No spam, just pure love. 🐾
-                  </p>
+                  <div className="flex justify-center items-center gap-3 mt-6">
+                    <div className="bg-orange-200/30 w-8 h-[1px]"></div>
+                    <p className="font-bold text-[11px] text-orange-100 uppercase leading-none tracking-widest">
+                      Join 8,000+ Pet Lovers
+                    </p>
+                    <div className="bg-orange-200/30 w-8 h-[1px]"></div>
+                  </div>
                 </div>
               </div>
 

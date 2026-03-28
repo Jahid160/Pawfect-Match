@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
     Heart, ShieldCheck, Users, PawPrint, Stethoscope,
-    ShoppingBag, Award, Target, Globe, CheckCircle2, Activity // এখানে Activity যোগ করা হয়েছে
+    ShoppingBag, Award, Target, Globe, CheckCircle2, Activity 
 } from 'lucide-react';
 import Newsletter from './Newsletter';
 
@@ -229,7 +229,7 @@ const About = () => {
                             {
                                 title: "Smart Management",
                                 desc: "With our advanced Admin Dashboard, tracking pet health records, appointments, and adoption status is seamless and user-friendly.",
-                                icon: <Activity className="w-8 h-8" />, // এখানে 'A' বড় হাতের করা হয়েছে
+                                icon: <Activity className="w-8 h-8" />, 
                                 color: "bg-green-50 text-green-600"
                             },
                             {
