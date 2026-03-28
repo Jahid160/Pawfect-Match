@@ -196,7 +196,18 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                                              </tr>
                                         )) : (
                                              <tr>
-                                                  <td colSpan="4" className="px-6 py-10 text-center text-slate-400 text-sm">No pets found matching your filters.</td>
+                                                  <td colSpan="4" className="px-6 py-20">
+                                                       <div className="flex flex-col items-center justify-center text-center">
+                                                            <div className="bg-slate-100 p-6 rounded-full mb-4">
+                                                                 <Search className="size-10 text-slate-400" />
+                                                            </div>
+                                                            <h3 className="text-lg font-bold text-slate-800 mb-1">No Pets Found</h3>
+                                                            <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
+                                                                 We couldn't find any pet entries matching your current search or filters .
+                                                                 Try adjusting your keywords.
+                                                            </p>
+                                                       </div>
+                                                  </td>
                                              </tr>
                                         )}
                                    </tbody>

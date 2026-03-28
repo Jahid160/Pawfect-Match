@@ -20,7 +20,7 @@ const ShelterPendinglist = ({ pets = [] }) => {
      const [currentPage, setCurrentPage] = useState(1);
      const dropdownRef = useRef(null);
 
-     const speciesOptions = ["All", "Dog", "Cat", "Rabbit", "Bird", "Fish"];
+     const speciesOptions = ['All', 'Dog', 'Cat', 'Bird', 'Rabbit', 'Hamster', 'Fish', 'Turtle', 'Horse', 'Other'];
      const itemsPerPage = 5;
 
      // Filter Logic
@@ -142,50 +142,94 @@ const ShelterPendinglist = ({ pets = [] }) => {
                     </div>
 
                     {/* Table Section */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
                          <div className="overflow-x-auto">
-                              <table className="w-full text-left">
-                                   <thead className="bg-slate-50 border-b">
+                              <table className="w-full text-left border-collapse">
+                                   <thead className="bg-slate-50/50">
                                         <tr>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Pet</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Species & Breed</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-center text-slate-500 uppercase">Actions</th>
+                                             <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Pet</th>
+                                             <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Species & Breed</th>
+                                             <th className="px-6 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                             <th className="px-6 py-5 text-xs font-bold text-center text-slate-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                    </thead>
-                                   <tbody className="divide-y">
-                                        {currentData.map((pet) => (
-                                             <tr key={pet._id} className="hover:bg-slate-50 transition-colors">
-                                                  <td className="px-6 py-4">
-                                                       <div className="flex items-center gap-4">
-                                                            <div className="relative size-12 rounded-xl overflow-hidden bg-slate-100">
-                                                                 <Image fill src={pet.images?.[0] || "/placeholder.png"} alt={pet.petName} className="object-cover" />
+                                   <tbody>
+                                        {requests.length === 0 ? (
+                                             <tr>
+                                                  <td colSpan="4" className="px-6 py-20">
+                                                       <motion.div
+                                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                                            className="flex flex-col items-center justify-center text-center max-w-sm mx-auto"
+                                                       >
+                                                            <div className="size-20 bg-amber-50 rounded-3xl flex items-center justify-center mb-6">
+                                                                 <Search className="size-10 text-amber-500" />
                                                             </div>
-                                                            <div>
-                                                                 <p className="font-bold text-sm">{pet.petName}</p>
-                                                                 <p className="text-[10px] text-slate-400">ID: {pet._id.slice(-6).toUpperCase()}</p>
-                                                            </div>
-                                                       </div>
-                                                  </td>
-                                                  <td className="px-6 py-4 text-sm font-semibold">{pet.species} <br /><span className="text-xs font-normal text-slate-400">{pet.breed}</span></td>
-                                                  <td className="px-6 py-4">
-                                                       <span className="px-3 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 uppercase italic">
-                                                            {pet.status}
-                                                       </span>
-                                                  </td>
-                                                  <td className="px-6 py-4">
-                                                       <div className="flex justify-center gap-2">
-                                                            <button onClick={() => { setSelectedPet(pet); setIsViewModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-500"><Eye size={18} /></button>
-
-                                                            {/* EDIT BUTTON FIXED */}
-                                                            <button onClick={() => { setSelectedPet(pet); setIsEditModalOpen(true); }} className="p-2 text-slate-400 hover:text-green-600"><Edit size={18} /></button>
-
-                                                            {/* DELETE BUTTON FIXED */}
-                                                            <button onClick={() => handleDelete(pet._id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 size={18} /></button>
-                                                       </div>
+                                                            <h3 className="text-xl font-bold text-slate-800 mb-2">No Pets Available</h3>
+                                                            <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                                                                 It looks like your shelter doesn't have any pet entries yet.
+                                                                 Start by adding a new pet to your listing.
+                                                            </p>
+                                                       </motion.div>
                                                   </td>
                                              </tr>
-                                        ))}
+                                        ) : filteredPets.length === 0 ? (
+                                             <tr>
+                                                  <td colSpan="4" className="px-6 py-20">
+                                                       <motion.div
+                                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                                            className="flex flex-col items-center justify-center text-center"
+                                                       >
+                                                            <div className="size-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                                                 <X className="size-8 text-slate-400" />
+                                                            </div>
+                                                            <h3 className="text-lg font-bold text-slate-800">No matching results</h3>
+                                                            <p className="text-slate-500 text-sm mt-1">
+                                                                 We couldn't find anything for "{inputValue}" in {currentSpecies}
+                                                            </p>
+                                                            <button
+                                                                 onClick={() => { setInputValue(""); setCurrentSpecies("All"); }}
+                                                                 className="mt-4 text-primary font-bold text-sm hover:underline"
+                                                            >
+                                                                 Clear all filters
+                                                            </button>
+                                                       </motion.div>
+                                                  </td>
+                                             </tr>
+                                        ) : (
+                                             currentData.map((pet) => (
+                                                  <tr key={pet._id} className="group hover:bg-slate-50/80 transition-all duration-300">
+                                                       <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-4">
+                                                                 <div className="relative size-12 rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
+                                                                      <Image fill src={pet.images?.[0] || "/placeholder.png"} alt={pet.petName} className="object-cover" />
+                                                                 </div>
+                                                                 <div>
+                                                                      <p className="font-bold text-sm text-slate-700">{pet.petName}</p>
+                                                                      <p className="text-[10px] text-slate-400 font-medium">ID: {pet._id.slice(-6).toUpperCase()}</p>
+                                                                 </div>
+                                                            </div>
+                                                       </td>
+                                                       <td className="px-6 py-4">
+                                                            <div className="flex flex-col">
+                                                                 <span className="text-sm font-semibold text-slate-600">{pet.species}</span>
+                                                                 <span className="text-xs text-slate-400">{pet.breed}</span>
+                                                            </div>
+                                                       </td>
+                                                       <td className="px-6 py-4">
+                                                            <span className="px-3 py-1 rounded-lg text-[10px] font-black bg-amber-50 text-amber-600 uppercase tracking-tighter border border-amber-100/50">
+                                                                 {pet.status}
+                                                            </span>
+                                                       </td>
+                                                       <td className="px-6 py-4">
+                                                            <div className="flex justify-center gap-1">
+                                                                 <button onClick={() => { setSelectedPet(pet); setIsViewModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"><Eye size={18} /></button>
+                                                                 <button onClick={() => { setSelectedPet(pet); setIsEditModalOpen(true); }} className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all"><Edit size={18} /></button>
+                                                                 <button onClick={() => handleDelete(pet._id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={18} /></button>
+                                                            </div>
+                                                       </td>
+                                                  </tr>
+                                             ))
+                                        )}
                                    </tbody>
                               </table>
 
@@ -231,27 +275,32 @@ const ShelterPendinglist = ({ pets = [] }) => {
                          </div>
 
                          {/* Pagination */}
-                         <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
-                              <div className="text-xs text-slate-500">
-                                   Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+                         {filteredPets.length > 0 && (
+                              <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+                                   <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+                                        <div className="text-xs text-slate-500">
+                                             Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                             <button
+                                                  disabled={currentPage <= 1}
+                                                  onClick={() => setCurrentPage(prev => prev - 1)}
+                                                  className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                                             >
+                                                  <ChevronLeft size={14} /> Prev
+                                             </button>
+                                             <button
+                                                  disabled={currentPage >= totalPages}
+                                                  onClick={() => setCurrentPage(prev => prev + 1)}
+                                                  className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
+                                             >
+                                                  Next <ChevronRight size={14} />
+                                             </button>
+                                        </div>
+                                   </div>
                               </div>
-                              <div className="flex gap-2">
-                                   <button
-                                        disabled={currentPage <= 1}
-                                        onClick={() => setCurrentPage(prev => prev - 1)}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-                                   >
-                                        <ChevronLeft size={14} /> Prev
-                                   </button>
-                                   <button
-                                        disabled={currentPage >= totalPages}
-                                        onClick={() => setCurrentPage(prev => prev + 1)}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm"
-                                   >
-                                        Next <ChevronRight size={14} />
-                                   </button>
-                              </div>
-                         </div>
+                         )}
+
                     </div>
                </div>
 
