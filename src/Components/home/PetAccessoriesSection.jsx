@@ -71,18 +71,18 @@ const PetAccessoriesSection = () => {
       <div className="z-10 relative mx-auto px-6 max-w-7xl">
         <div className="items-center gap-16 grid grid-cols-1 lg:grid-cols-2">
           
-          {/* Left Side: Interactive Accessory Slider */}
+          {/* Left Side: Interactive Accessory Slider (SIZE UNCHANGED) */}
           <div className="group relative order-2 lg:order-1">
             
-            {/* Main Featured Image Slider */}
+            {/* Image Slider Container - 500px aspect-square as requested */}
             <div className="z-20 relative bg-white shadow-2xl mx-auto border-[12px] border-white rounded-[3rem] w-full max-w-[500px] aspect-square overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={accessorySlides[currentIndex].id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.5 }}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 0.6 }}
                   className="relative w-full h-full"
                 >
                   <Image 
@@ -90,7 +90,9 @@ const PetAccessoriesSection = () => {
                     alt={accessorySlides[currentIndex].title}
                     fill
                     className="object-cover"
+                    priority
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -115,15 +117,15 @@ const PetAccessoriesSection = () => {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="-bottom-10 left-4 z-30 absolute flex items-center gap-4 bg-white shadow-2xl p-5 border border-orange-50 rounded-[2.5rem]"
+              className="-bottom-10 left-4 z-30 absolute flex items-center gap-4 bg-white shadow-2xl p-6 border border-orange-50 rounded-[2.5rem]"
             >
               <div className="bg-orange-500/10 p-3 rounded-2xl text-orange-600">
                 <Heart size={24} className="fill-orange-500" />
               </div>
               <div className="flex flex-col pr-6">
-                <p className="font-black text-[10px] text-orange-500 uppercase tracking-widest">{accessorySlides[currentIndex].name}</p>
-                <p className="font-black text-slate-800 text-xl leading-tight">{accessorySlides[currentIndex].title}</p>
-                <p className="font-medium text-slate-500 text-xs">{accessorySlides[currentIndex].tag}</p>
+                <p className="font-black text-[9px] text-orange-500 uppercase tracking-[0.25em]">{accessorySlides[currentIndex].name}</p>
+                <p className="font-black text-slate-900 text-xl leading-tight tracking-tight">{accessorySlides[currentIndex].title}</p>
+                <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase tracking-widest leading-none">{accessorySlides[currentIndex].tag}</p>
               </div>
             </motion.div>
 
@@ -133,29 +135,29 @@ const PetAccessoriesSection = () => {
               whileInView={{ scale: 1, rotate: -12 }}
               className="top-10 -left-8 z-40 absolute flex flex-col justify-center items-center bg-slate-900 shadow-2xl border-4 border-white rounded-full w-28 h-28 text-white"
             >
-              <span className="font-bold text-[10px] text-orange-400">Starts from</span>
+              <span className="font-black text-[8px] text-orange-400 uppercase tracking-widest">Starts from</span>
               <span className="font-black text-3xl">$09</span>
             </motion.div>
           </div>
 
-          {/* Right Side: Text & Content */}
+          {/* Right Side: Content */}
           <div className="space-y-8 order-1 lg:order-2">
             <motion.div 
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               className="inline-flex items-center gap-2 bg-orange-500/10 px-5 py-2 border border-orange-500/20 rounded-full"
             >
-              <Sparkles size={16} className="fill-orange-600 text-orange-600" />
-              <span className="font-black text-orange-600 text-xs uppercase tracking-widest">Premium Collection</span>
+              <Sparkles size={14} className="fill-orange-600 text-orange-600" />
+              <span className="font-black text-orange-600 text-[10px] uppercase tracking-[0.2em]">Premium Collection</span>
             </motion.div>
 
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="font-black text-slate-900 text-5xl md:text-7xl leading-tight"
+              className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Pet Gear & <br />
-              <span className="text-shadow-sm text-orange-500">Accessories</span>
+              <span className="text-orange-500 italic">Accessories</span>
             </motion.h2>
 
             <motion.p 
@@ -172,8 +174,8 @@ const PetAccessoriesSection = () => {
                   <Star size={24} className="fill-orange-500" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-sm uppercase">Top Rated</span>
-                  <span className="font-bold text-[10px] text-slate-500">Premium Quality</span>
+                  <span className="font-black text-sm uppercase tracking-wide">Top Rated</span>
+                  <span className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Premium Quality</span>
                 </div>
               </div>
               <div className="flex items-center gap-4 bg-white shadow-sm p-4 border border-orange-100/50 rounded-3xl text-slate-700">
@@ -181,8 +183,8 @@ const PetAccessoriesSection = () => {
                   <ShieldCheck size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-sm uppercase">Safe Materials</span>
-                  <span className="font-bold text-[10px] text-slate-500">Non-Toxic Gear</span>
+                  <span className="font-black text-sm uppercase tracking-wide">Safe Tools</span>
+                  <span className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Non-Toxic Gear</span>
                 </div>
               </div>
             </div>
@@ -194,11 +196,11 @@ const PetAccessoriesSection = () => {
             >
               <Link
                 href="/pet-accessories"
-                className="group inline-flex relative items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-[0_20px_40px_-15px_rgba(249,115,22,0.4)] hover:shadow-2xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white uppercase tracking-wider transition-all duration-500"
+                className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all duration-500"
               >
-                <ShoppingBag size={24} className="z-10 relative" />
-                <span className="z-10 relative uppercase tracking-[0.15em]">Shop All Gear</span>
-                <ArrowRight size={24} className="z-10 relative transition-transform group-hover:translate-x-2" />
+                <ShoppingBag size={20} className="z-10 relative" />
+                <span className="z-10 relative">Shop All Gear</span>
+                <ArrowRight size={20} className="z-10 relative transition-transform group-hover:translate-x-2" />
               </Link>
             </motion.div>
           </div>
