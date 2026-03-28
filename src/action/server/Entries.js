@@ -1,9 +1,11 @@
 'use server'
 import { collections, dbConnect } from "@/lib/db";
+import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
 import { ObjectId } from "mongodb";
 const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
 
 export const getPending = async (email) => {
+     await shelterVerifyAuth()
      try {
           const entryCollection = await EntryReqCollectionPromise;
           const query = { email: email };
@@ -20,6 +22,7 @@ export const getPending = async (email) => {
 }
 
 export const updateEntry = async (id, updatedData) => {
+     await shelterVerifyAuth()
      try {
           const entryCollection = await EntryReqCollectionPromise;
           const filter = { _id: new ObjectId(id) };
@@ -39,6 +42,7 @@ export const updateEntry = async (id, updatedData) => {
 }
 
 export const deleteEntry = async (id) => {
+     await shelterVerifyAuth()
      try {
           const entryCollection = await EntryReqCollectionPromise;
           const query = { _id: new ObjectId(id) };
