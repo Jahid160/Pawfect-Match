@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import DashboardMainLayout from "../DashboardMainLayout";
 import UserDashboardHome from "../UserDashboard/UserDashboardHome";
 import ShelterDashboardHome from "../ShelterDashboard/ShelterDashboardHome";
+import DoctorDashboardHome from "../DoctorDashboard/DoctorDashboardHome";
 
 const DashboardHome = () => {
   const { data: session, status } = useSession();
@@ -24,7 +25,7 @@ const DashboardHome = () => {
   } else if (userRole === "user") {
     return <UserDashboardHome></UserDashboardHome>;
   } else if (userRole === "doctor") {
-    return <div>doctor Dashboard</div>;
+    return <DoctorDashboardHome></DoctorDashboardHome>;
   }
 };
 

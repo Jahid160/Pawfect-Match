@@ -3,7 +3,13 @@ import { NextResponse } from "next/server";
 
 const ROLE_PERMISSIONS = {
   user: ["/adoptionfrom", "/shelterForm"],
-  shelter: ["/adoptionfrom", "/shelterForm", "/petdetailsform"],
+  shelter: ["/adoptionfrom",
+    "/shelterForm",
+    "/petdetailsform",
+    "/dashboard/shelter-pendings",
+    "/dashboard/shelter-pets",
+    "/dashboard/shelter-petsreq",
+  ],
   admin: [
     "/adoptionfrom",
     "/shelterForm",
@@ -11,6 +17,7 @@ const ROLE_PERMISSIONS = {
     "/addFoodForms",
     "/addAccessoryForm",
     "/vaccination/add",
+    "/dashboard/pet-request",
   ],
 };
 
@@ -54,5 +61,9 @@ export const config = {
     "/addFoodForms/:path*",
     "/addAccessoryForm/:path*",
     "/vaccination/add/:path*",
+    "/dashboard/pet-request/:path*",
+    "/dashboard/shelter-pendings/:path*",
+    "/dashboard/shelter-pets/:path*",
+    "/dashboard/shelter-petsreq/:path*",
   ],
 };
