@@ -1,5 +1,7 @@
 import { getEntriesPets } from '@/action/server/pets';
 import ShelterPetlist from '@/components/dashboardlayouts/ShelterDashboard/ShelterPetlist';
+import { authOptions } from '@/lib/authOptions';
+import { getServerSession } from 'next-auth';
 import React from 'react';
 
 const ShelterPets = async ({ searchParams }) => {
@@ -9,7 +11,9 @@ const ShelterPets = async ({ searchParams }) => {
      const search = params?.search || '';
      const species = params?.species || 'All';
      const page = params?.page || '1';
-     const userEmail = "alaminhossaintanvir42@gmail.com"; // Your session/user email
+     //  session/user email
+     const session = await getServerSession(authOptions)
+     const userEmail = session.user.email;
 
      // Destructure pets and totalPages from server response
      const { pets, totalPages } = await getEntriesPets({ search, species, page, email: userEmail });
