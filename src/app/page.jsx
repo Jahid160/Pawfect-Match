@@ -34,7 +34,7 @@ const mainPage = () => {
       <SuccessStories />
 
       <OurSponsor />
-      <FAQSection></FAQSection>
+      <FAQSection />
 
       <Newsletter />
     </div>

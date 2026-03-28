@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
     Heart, ShieldCheck, Users, PawPrint, Stethoscope,
-    ShoppingBag, Award, Target, Globe, CheckCircle2, Activity // এখানে Activity যোগ করা হয়েছে
+    ShoppingBag, Award, Target, Globe, CheckCircle2, Activity, ArrowRight
 } from 'lucide-react';
 import Newsletter from './Newsletter';
 
@@ -22,38 +22,39 @@ const About = () => {
         initial: { opacity: 0, y: 30 },
         whileInView: { opacity: 1, y: 0 },
         viewport: { once: true },
-        transition: { duration: 0.7 }
+        transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
     };
 
     return (
-        <div className="bg-white min-h-screen font-sans text-slate-900">
+        <div className="bg-white selection:bg-orange-100 min-h-screen font-sans text-slate-900 selection:text-orange-600">
 
             {/* --- 1. HERO SECTION --- */}
-            <section className="relative bg-[#fffaf5] pt-24 md:pt-40 pb-20 md:pb-32 overflow-hidden">
-                <div className="z-10 relative mx-auto px-6 container">
+            <section className="relative bg-[#fffaf5] pt-32 md:pt-48 pb-24 md:pb-40 overflow-hidden">
+                <div className="z-10 relative mx-auto px-6 max-w-7xl">
                     <div className="mx-auto max-w-4xl text-center">
                         <motion.div {...fadeInUp}>
-                            <span className="inline-block bg-orange-100 mb-6 px-5 py-2 rounded-full font-bold text-orange-600 text-xs uppercase tracking-[0.2em]">
+                            <span className="inline-flex items-center gap-2 bg-orange-500/10 mb-8 px-6 py-2 border border-orange-500/20 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.3em]">
+                                <span className="bg-orange-600 rounded-full w-1.5 h-1.5 animate-pulse"></span>
                                 Reimagining Pet Companionship
                             </span>
-                            <h1 className="mb-8 font-black text-slate-900 text-4xl md:text-7xl leading-[1.1]">
+                            <h1 className="mb-10 font-black text-slate-900 text-5xl md:text-8xl leading-[0.95] tracking-[-0.05em]">
                                 We Are The Bridge To Your <br />
-                                <span className="text-orange-500">New Family Member</span>
+                                <span className="text-orange-500 italic">New Family Member</span>
                             </h1>
-                            <p className="mx-auto max-w-3xl text-slate-600 text-lg md:text-xl leading-relaxed">
-                                Pawfect Match isn&apos;t just a directory; it&apos;s a high-tech ecosystem designed to ensure no soul is left behind. We combine advanced matching technology with human empathy to create lifelong bonds.
+                            <p className="mx-auto max-w-3xl font-medium text-slate-500 text-lg md:text-2xl leading-relaxed">
+                                Pawfect Match isn&apos;t just a directory; it&apos;s a high-tech ecosystem designed to ensure no soul is left behind. We combine empathy with innovation to create lifelong bonds.
                             </p>
-                            <div className="flex flex-wrap justify-center gap-6 mt-12">
+                            <div className="flex flex-wrap justify-center gap-6 mt-16">
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
+                                    whileHover={{ scale: 1.05, y: -5 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-orange-600 hover:bg-orange-700 shadow-orange-200 shadow-xl px-10 py-4 rounded-2xl font-bold text-white transition-all"
+                                    className="bg-orange-600 hover:bg-orange-500 shadow-2xl shadow-orange-600/20 px-12 py-6 rounded-[2rem] font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all"
                                 >
                                     Start Your Journey
                                 </motion.button>
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    className="bg-white shadow-sm px-10 py-4 border-2 border-slate-200 hover:border-orange-500 rounded-2xl font-bold text-slate-700 transition-all"
+                                    whileHover={{ scale: 1.05, y: -5 }}
+                                    className="bg-white shadow-sm px-12 py-6 border-2 border-slate-200 hover:border-orange-500 rounded-[2rem] font-black text-[11px] text-slate-700 uppercase tracking-[0.2em] transition-all"
                                 >
                                     Contact Support
                                 </motion.button>
@@ -62,28 +63,30 @@ const About = () => {
                     </div>
                 </div>
 
-                <div className="top-0 left-0 absolute opacity-5 w-full h-full pointer-events-none">
-                    <PawPrint className="top-20 left-[10%] absolute -rotate-12" size={120} />
-                    <PawPrint className="right-[10%] bottom-20 absolute text-orange-600 rotate-12" size={150} />
+                {/* Subtle Background Elements */}
+                <div className="top-0 left-0 absolute opacity-[0.03] w-full h-full pointer-events-none">
+                    <PawPrint className="top-20 left-[5%] absolute -rotate-12" size={200} />
+                    <PawPrint className="right-[5%] bottom-20 absolute text-orange-600 rotate-12" size={250} />
                 </div>
             </section>
 
             {/* --- 2. THE PROBLEM & OUR GENESIS --- */}
-            <section className="bg-white py-24 overflow-hidden">
-                <div className="mx-auto px-6 container">
-                    <div className="flex lg:flex-row flex-col items-center gap-20">
+            <section className="bg-white py-32 md:py-48 overflow-hidden">
+                <div className="mx-auto px-6 max-w-7xl">
+                    <div className="flex lg:flex-row flex-col items-center gap-24">
                         <motion.div className="lg:w-1/2" {...fadeInUp}>
-                            <h2 className="mb-8 font-extrabold text-slate-900 text-3xl md:text-5xl">
-                                Why We Created <span className="text-orange-500 italic">Pawfect Match</span>
+                            <h2 className="mb-10 font-black text-slate-900 text-4xl md:text-6xl leading-none tracking-tight">
+                                Why We Created <br />
+                                <span className="text-orange-500 italic">Pawfect Match</span>
                             </h2>
-                            <div className="space-y-6 text-slate-600 text-lg leading-relaxed">
+                            <div className="space-y-8 font-medium text-slate-500 text-lg md:text-xl leading-relaxed">
                                 <p>
-                                    Every year, millions of pets end up in shelters, and many more wander the streets without care. At the same time, thousands of potential pet parents struggle to find a reliable source for adoption, healthcare, and nutrition.
+                                    Every year, millions of pets end up in shelters, and many more wander the streets. We noticed a massive gap: a lack of transparency and a fragmented system.
                                 </p>
-                                <p>
-                                    We noticed a massive gap: a lack of transparency and a fragmented system. To solve this, we built a <strong>centralized platform</strong> where every pet is verified, every doctor is certified, and every transaction is secure.
+                                <p className="text-slate-900">
+                                    To solve this, we built a <span className="font-black text-orange-600 decoration-orange-200 underline underline-offset-8">centralized ecosystem</span> where every pet is verified, every doctor is certified, and every transaction is secure.
                                 </p>
-                                <ul className="space-y-4 pt-4">
+                                <ul className="space-y-6 pt-6">
                                     {[
                                         "Unified database for adoption across regions",
                                         "Instant access to professional veterinary experts",
@@ -91,10 +94,13 @@ const About = () => {
                                     ].map((text, i) => (
                                         <motion.li
                                             key={i}
-                                            whileHover={{ x: 10 }}
-                                            className="flex items-center gap-3 font-semibold text-slate-800 cursor-default"
+                                            whileHover={{ x: 15 }}
+                                            className="flex items-center gap-4 font-bold text-slate-800"
                                         >
-                                            <CheckCircle2 className="text-green-500" size={24} /> {text}
+                                            <div className="bg-orange-500 p-1.5 rounded-full text-white">
+                                                <CheckCircle2 size={18} />
+                                            </div>
+                                            {text}
                                         </motion.li>
                                     ))}
                                 </ul>
@@ -102,26 +108,26 @@ const About = () => {
                         </motion.div>
 
                         <motion.div className="group relative lg:w-1/2" {...fadeInUp}>
-                            <div className="-z-10 absolute -inset-4 bg-orange-100 rounded-[4rem] group-hover:rotate-3 transition-transform duration-500"></div>
+                            <div className="-z-10 absolute -inset-6 bg-orange-100 rounded-[5rem] group-hover:rotate-6 transition-transform duration-700 ease-out"></div>
 
-                            <div className="relative bg-slate-100 shadow-2xl border-[12px] border-white md:border-[16px] rounded-[3rem] aspect-square overflow-hidden">
+                            <div className="relative bg-slate-100 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border-[15px] border-white md:border-[20px] rounded-[4rem] aspect-[4/5] overflow-hidden">
                                 <Image
                                     src="https://i.ibb.co.com/jkVQgfyb/nunu.avif"
                                     alt="About our mission"
                                     fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                    className="object-cover group-hover:scale-110 transition-transform duration-1000"
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                     priority
                                 />
                             </div>
 
                             <motion.div
-                                whileHover={{ y: -10, rotate: -2 }}
-                                className="hidden md:block -right-8 -bottom-8 z-20 absolute bg-orange-600 shadow-2xl p-10 rounded-[2.5rem] text-white"
+                                whileHover={{ y: -15, rotate: -5 }}
+                                className="hidden md:block -right-12 -bottom-12 z-20 absolute bg-slate-900 shadow-3xl p-12 rounded-[3rem] text-white"
                             >
-                                <p className="mb-1 font-black text-5xl tracking-tighter">100%</p>
-                                <p className="opacity-90 font-bold text-[10px] uppercase leading-none tracking-widest">
-                                    Safe & Verified <br /> Process
+                                <p className="mb-2 font-black text-orange-500 text-6xl tracking-tighter">100%</p>
+                                <p className="font-black text-[11px] uppercase leading-none tracking-[0.25em]">
+                                    Verified <br /> Process
                                 </p>
                             </motion.div>
                         </motion.div>
@@ -129,70 +135,77 @@ const About = () => {
                 </div>
             </section>
 
-            {/* --- 3. OUR ECOSYSTEM --- */}
-            <section className="bg-slate-50 py-24">
-                <div className="mx-auto mb-16 px-6 text-center container">
-                    <h2 className="mb-6 font-black text-4xl md:text-6xl">A Complete Ecosystem</h2>
-                    <p className="mx-auto max-w-2xl text-slate-500 text-lg">
-                        We have integrated everything you need to be a successful and happy pet parent under one digital roof.
+            {/* --- 3. OUR ECOSYSTEM (Enhanced Cards) --- */}
+            <section className="bg-slate-50 py-32 md:py-48">
+                <div className="mx-auto mb-24 px-6 max-w-4xl text-center">
+                    <h2 className="mb-8 font-black text-5xl md:text-7xl leading-none tracking-tighter">A Complete Ecosystem</h2>
+                    <p className="font-medium text-slate-500 text-xl leading-relaxed">
+                        We have integrated everything you need to be a successful pet parent under one digital roof.
                     </p>
                 </div>
 
-                <div className="gap-10 grid md:grid-cols-3 mx-auto px-6 container">
+                <div className="gap-10 grid lg:grid-cols-3 mx-auto px-6 max-w-7xl">
                     {[
                         {
                             title: "Smart Adoption",
-                            icon: <PawPrint size={40} />,
+                            icon: <PawPrint size={44} />,
                             desc: "Our category-based search and smart filters allow you to find pets based on your lifestyle, home size, and energy levels."
                         },
                         {
                             title: "Expert Healthcare",
-                            icon: <Stethoscope size={40} />,
+                            icon: <Stethoscope size={44} />,
                             desc: "We host a network of certified doctors. From routine vaccinations to emergency consultations, book appointments instantly."
                         },
                         {
                             title: "Care & Supplies",
-                            icon: <ShoppingBag size={40} />,
+                            icon: <ShoppingBag size={44} />,
                             desc: "Beyond adoption, we provide curated nutrition guides and links to premium pet accessories for your new friend."
                         }
                     ].map((item, i) => (
                         <motion.div
                             key={i}
-                            whileHover={{ y: -15, scale: 1.02 }}
-                            className="group bg-white shadow-slate-200/50 shadow-xl p-12 border border-slate-100 rounded-[3rem] text-left transition-all"
+                            whileHover={{ y: -20 }}
+                            className="group relative bg-white shadow-2xl shadow-slate-200/50 p-14 border border-slate-100 rounded-[4rem] overflow-hidden transition-all duration-500"
                         >
-                            <div className="bg-orange-50 group-hover:bg-orange-600 mb-8 p-5 rounded-2xl w-fit text-orange-600 group-hover:text-white transition-all duration-300">
+                            <div className="bg-slate-50 group-hover:bg-orange-600 mb-10 p-6 rounded-[2rem] w-fit text-slate-900 group-hover:text-white group-hover:rotate-12 transition-all duration-500 transform">
                                 {item.icon}
                             </div>
-                            <h3 className="mb-4 font-bold group-hover:text-orange-600 text-2xl transition-colors">{item.title}</h3>
-                            <p className="text-slate-600 text-sm md:text-base leading-relaxed">{item.desc}</p>
+                            <h3 className="mb-6 font-black text-3xl tracking-tight transition-colors">{item.title}</h3>
+                            <p className="font-medium text-slate-500 text-lg leading-relaxed">{item.desc}</p>
+                            
+                            <div className="opacity-0 group-hover:opacity-100 mt-10 transition-opacity">
+                                <span className="inline-flex items-center gap-2 font-black text-[10px] text-orange-600 uppercase tracking-widest">
+                                    Explore more <ArrowRight size={14} />
+                                </span>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
             </section>
 
-            {/* --- 4. MISSION & VISION --- */}
-            <section className="mx-auto px-6 py-24 md:py-40 container">
-                <div className="items-start gap-16 grid md:grid-cols-2">
+            {/* --- 4. MISSION & VISION (High Contrast) --- */}
+            <section className="mx-auto px-6 py-32 md:py-56 max-w-7xl">
+                <div className="items-stretch gap-12 grid md:grid-cols-2">
                     <motion.div
                         whileHover={{ scale: 0.98 }}
                         {...fadeInUp}
-                        className="bg-orange-600 p-12 md:p-20 rounded-[4rem] text-white cursor-default"
+                        className="group relative bg-orange-600 p-16 md:p-24 rounded-[4.5rem] overflow-hidden text-white"
                     >
-                        <Target className="mb-8" size={60} />
-                        <h2 className="mb-6 font-black text-4xl italic uppercase tracking-tighter">Our Mission</h2>
-                        <p className="opacity-90 text-xl leading-relaxed">
+                        <Target className="opacity-20 mb-10 group-hover:scale-110 transition-transform duration-700" size={80} />
+                        <h2 className="mb-8 font-black text-5xl italic uppercase tracking-tighter">Our Mission</h2>
+                        <p className="font-medium text-orange-50 text-2xl leading-relaxed">
                             To revolutionize the pet adoption landscape by providing a secure, transparent, and technology-driven platform that minimizes animal homelessness.
                         </p>
                     </motion.div>
+
                     <motion.div
                         whileHover={{ scale: 0.98 }}
                         {...fadeInUp}
-                        className="bg-slate-900 p-12 md:p-20 rounded-[4rem] text-white cursor-default"
+                        className="group relative bg-slate-900 p-16 md:p-24 rounded-[4.5rem] overflow-hidden text-white"
                     >
-                        <Globe className="mb-8 text-orange-500" size={60} />
-                        <h2 className="mb-6 font-black text-4xl italic uppercase tracking-tighter">Our Vision</h2>
-                        <p className="opacity-80 text-xl leading-relaxed">
+                        <Globe className="opacity-20 mb-10 text-orange-500 group-hover:scale-110 transition-transform duration-700" size={80} />
+                        <h2 className="mb-8 font-black text-5xl italic uppercase tracking-tighter">Our Vision</h2>
+                        <p className="font-medium text-slate-300 text-2xl leading-relaxed">
                             We envision a world where every stray animal has a digital identity and a guaranteed path to a loving home and professional care.
                         </p>
                     </motion.div>
@@ -200,57 +213,54 @@ const About = () => {
             </section>
 
             {/* --- 5. CORE VALUES --- */}
-            <section className="bg-white py-24 overflow-hidden">
-                <div className="mx-auto px-6 container">
-                    <motion.div
-                        {...fadeInUp}
-                        className="mb-16 text-center"
-                    >
-                        <h2 className="mb-6 font-black text-slate-900 text-4xl md:text-5xl uppercase tracking-tight">
+            <section className="bg-white pb-32">
+                <div className="mx-auto px-6 max-w-7xl">
+                    <motion.div {...fadeInUp} className="mb-24 text-center">
+                        <h2 className="mb-6 font-black text-slate-900 text-5xl md:text-7xl uppercase tracking-tighter">
                             Our <span className="text-orange-500 italic">Core Values</span>
                         </h2>
-                        <div className="bg-orange-500 mx-auto rounded-full w-24 h-2"></div>
+                        <div className="bg-orange-500 mx-auto rounded-full w-32 h-2.5"></div>
                     </motion.div>
 
                     <div className="gap-8 grid md:grid-cols-2 lg:grid-cols-4">
                         {[
                             {
                                 title: "Medical Integrity",
-                                desc: "Every doctor on our platform is hand-verified through rigorous background checks to ensure your pet gets only the best professional care.",
-                                icon: <ShieldCheck className="w-8 h-8" />,
+                                desc: "Every doctor on our platform is hand-verified through rigorous background checks.",
+                                icon: <ShieldCheck className="w-9 h-9" />,
                                 color: "bg-blue-50 text-blue-600"
                             },
                             {
                                 title: "Unconditional Love",
-                                desc: "We don't just facilitate adoptions; we build families. Our success story section is a testament to the thousands of bonds we've helped create.",
-                                icon: <Heart className="w-8 h-8" />,
+                                desc: "We don't just facilitate adoptions; we build families with lifelong bonds.",
+                                icon: <Heart className="w-9 h-9" />,
                                 color: "bg-red-50 text-red-600"
                             },
                             {
                                 title: "Smart Management",
-                                desc: "With our advanced Admin Dashboard, tracking pet health records, appointments, and adoption status is seamless and user-friendly.",
-                                icon: <Activity className="w-8 h-8" />, // এখানে 'A' বড় হাতের করা হয়েছে
-                                color: "bg-green-50 text-green-600"
+                                desc: "Advanced Admin Dashboard for tracking health records and adoption status.",
+                                icon: <Activity className="w-9 h-9" />, 
+                                color: "bg-emerald-50 text-emerald-600"
                             },
                             {
                                 title: "Transparent Process",
-                                desc: "From the first click to the final adoption papers, our notification system keeps you updated at every single stage of the process.",
-                                icon: <Award className="w-8 h-8" />,
+                                desc: "Real-time updates via our notification system at every stage of adoption.",
+                                icon: <Award className="w-9 h-9" />,
                                 color: "bg-orange-50 text-orange-600"
                             }
                         ].map((value, i) => (
                             <motion.div
                                 key={i}
-                                whileHover={{ y: -10 }}
-                                className="group bg-slate-50/50 hover:bg-white hover:shadow-2xl hover:shadow-orange-100 p-10 border border-slate-100 rounded-[3rem] transition-all duration-500"
+                                whileHover={{ y: -15 }}
+                                className="group bg-slate-50/50 hover:bg-white hover:shadow-3xl p-12 border border-slate-100 rounded-[3.5rem] transition-all duration-500"
                             >
-                                <div className={`mb-8 p-4 rounded-2xl w-fit ${value.color} group-hover:scale-110 transition-transform`}>
+                                <div className={`mb-10 p-5 rounded-[1.5rem] w-fit ${value.color} group-hover:scale-110 transition-transform duration-500`}>
                                     {value.icon}
                                 </div>
-                                <h3 className="mb-4 font-black text-slate-900 text-xl italic uppercase tracking-tighter">
+                                <h3 className="mb-6 font-black text-slate-900 text-2xl italic uppercase tracking-tighter">
                                     {value.title}
                                 </h3>
-                                <p className="text-slate-600 text-sm leading-relaxed">
+                                <p className="font-medium text-[15px] text-slate-500 leading-relaxed">
                                     {value.desc}
                                 </p>
                             </motion.div>
@@ -260,9 +270,7 @@ const About = () => {
             </section>
 
             {/* --- 6. CTA --- */}
-            <section className="py-32">
-                <Newsletter></Newsletter>
-            </section>
+            <Newsletter />
         </div>
     );
 };
