@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import {
      Search, ChevronDown, ChevronLeft, ChevronRight,
@@ -10,6 +10,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { deleteEntry, updateEntry } from '@/action/server/Entries';
 import Swal from 'sweetalert2';
+import { SheltergetStatus } from '@/action/server/Shelteruser';
+import { useSession } from 'next-auth/react';
+import Loading from '@/components/Loading';
 
 
 const ShelterPendinglist = ({ pets = [] }) => {
@@ -22,9 +25,30 @@ const ShelterPendinglist = ({ pets = [] }) => {
      const [isEditModalOpen, setIsEditModalOpen] = useState(false);
      const [selectedPet, setSelectedPet] = useState(null);
      const [currentPage, setCurrentPage] = useState(1);
+     const { data: session } = useSession()
+     const [isLoading, setIsLoading] = useState(true);
      const dropdownRef = useRef(null);
 
+     useEffect(() => {
+          const checkShelterStatus = async () => {
+               const userEmail = session?.user?.email;
 
+               if (userEmail) {
+
+                    try {
+                         setIsLoading(true);
+                         const status = await SheltergetStatus(userEmail);
+                         setShelterStatus(status);
+                    } catch (error) {
+                         console.error("Status check failed:", error);
+                    } finally {
+                         setIsLoading(false);
+                    }
+               }
+          };
+
+          checkShelterStatus();
+     }, [session?.user?.email]);
 
      const speciesOptions = ['All', 'Dog', 'Cat', 'Bird', 'Rabbit', 'Hamster', 'Fish', 'Turtle', 'Horse', 'Other'];
      const itemsPerPage = 5;
@@ -122,6 +146,10 @@ const ShelterPendinglist = ({ pets = [] }) => {
                     </div>
                </div>
           );
+     }
+
+     if (isLoading) {
+          return <Loading />
      }
 
      return (

@@ -1,6 +1,6 @@
 "use client";
 import { getShelterDashboardStats } from "@/action/shelterServerDash/petList";
-import { Clock, Heart, PawPrint, UserStar, TrendingUp, BarChart3 } from "lucide-react";
+import { Clock, Heart, PawPrint, UserStar, TrendingUp, BarChart3, AlertTriangle, Mail } from "lucide-react";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -16,9 +16,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import Loading from "@/components/Loading";
+import { SheltergetStatus } from "@/action/server/Shelteruser";
+
 
 const ShelterDashboardHome = () => {
   const { data: session } = useSession();
+  const [shelterStatus, setShelterStatus] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     adopted: 0,
     pending: 0,
@@ -26,6 +31,27 @@ const ShelterDashboardHome = () => {
     available: 0,
     preview: 0,
   });
+
+  useEffect(() => {
+    const checkShelterStatus = async () => {
+      const userEmail = session?.user?.email;
+
+      if (userEmail) {
+
+        try {
+          setIsLoading(true);
+          const status = await SheltergetStatus(userEmail);
+          setShelterStatus(status);
+        } catch (error) {
+          console.error("Status check failed:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkShelterStatus();
+  }, [session?.user?.email])
 
   // Dummy data for the chart
   const chartData = [
@@ -57,6 +83,41 @@ const ShelterDashboardHome = () => {
     { title: "Pending Requests", value: stats.pending, icon: Clock, color: "bg-amber-500" },
     { title: "Preview Requests", value: stats.preview, icon: UserStar, color: "bg-cyan-500" },
   ];
+
+
+
+  if (shelterStatus === "Suspended") {
+    return (
+      <div className="card bg-base-100 shadow-2xl max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-error/20">
+        <div className="p-12 text-center space-y-6">
+          <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <AlertTriangle size={40} />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black text-neutral tracking-tight">
+              Account Suspended
+            </h2>
+            <p className="text-base-content/70 font-medium px-4">
+              Your shelter account is currently suspended. You cannot list new pets at this moment.
+            </p>
+          </div>
+
+          <div className="bg-base-200/50 p-6 rounded-2xl border border-base-300">
+            <p className="text-sm text-neutral font-bold mb-3 flex items-center justify-center gap-2">
+              <Mail size={16} className="text-primary" /> How to resolve this?
+            </p>
+            <p className="text-sm text-base-content/60 ">
+              Please contact the system administrator to discuss the status of your account and request reactivation.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (isLoading) {
+    return <Loading />
+  }
 
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen">
