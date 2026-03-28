@@ -4,8 +4,9 @@ import React from "react";
 import Shelterprofile from "../ShelterDashboard/ShelterProfile";
 import Loading from "../../Loading";
 
-import AdminProfile from "../AdminDashboard/AdminProfile";
+// import AdminProfile from "../AdminDashboard/AdminProfile";
 import UserProfile from "../UserDashboard/UserProfile";
+import AdminProfile from "../AdminDashboard/AdminProfile";
 
 const Profilehome = () => {
   const { data: session, status } = useSession();
