@@ -5,7 +5,6 @@ import { dbConnect, collections } from "@/lib/db";
 export async function adminShelterAuth() {
 
      const session = await getServerSession(authOptions);
-     console.log("session", session);
      if (!session) {
           throw new Error("Not authenticated");
      }
@@ -15,8 +14,9 @@ export async function adminShelterAuth() {
      const dbUser = await usersCollection.findOne({
           email: session.user.email
      });
+     console.log(dbUser);
 
-     if (dbUser.role !== "shelter" || dbUser.role !== "admin") {
+     if (dbUser.role !== "shelter" && dbUser.role !== "admin") {
           throw new Error("User only");
      }
 

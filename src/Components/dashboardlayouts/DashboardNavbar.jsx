@@ -22,13 +22,13 @@ const DashboardNavbar = ({ isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isMounted, setIsMounted] = useState(false); // Hydration fix এর জন্য
+  const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef(null);
   const { data: session } = useSession();
 
-  // ১. মাউন্ট চেক এবং নোটিফিকেশন ফেচ করা
+
   useEffect(() => {
-    setIsMounted(true); // ক্লায়েন্টে মাউন্ট হলে true হবে
+    setIsMounted(true);
 
     const fetchNotifications = async () => {
       const res = await getAdminNotifications();
@@ -39,27 +39,23 @@ const DashboardNavbar = ({ isCollapsed }) => {
     };
 
     fetchNotifications();
-    // প্রতি ২ মিনিট পর পর অটোমেটিক চেক করবে
+
     const interval = setInterval(fetchNotifications, 120000);
     return () => clearInterval(interval);
   }, []);
 
-  // ২. নোটিফিকেশন ক্লিক এবং মার্ক এজ রিড হ্যান্ডলার
+
   const handleNotificationClick = async () => {
-    // ড্রপডাউন ওপেন/ক্লোজ টগল
     const nextState = !isOpen;
     setIsOpen(nextState);
-
-    // যদি ড্রপডাউন ওপেন করা হয় এবং আনরিড মেসেজ থাকে, তবে সার্ভারে আপডেট পাঠাও
     if (nextState === true && unreadCount > 0) {
       const res = await markNotificationsAsRead("admin");
       if (res.success) {
-        setUnreadCount(0); // সাথে সাথে ইউআই থেকে লাল ডট সরিয়ে দাও
+        setUnreadCount(0);
       }
     }
   };
 
-  // টাইপ অনুযায়ী আইকন এবং কালার সেট করার হেল্পার
   const getIconDetails = (type) => {
     switch (type) {
       case 'adoption':
@@ -75,7 +71,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
     }
   };
 
-  // ড্রপডাউন বাইরে ক্লিক করলে বন্ধ হবে
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -86,7 +82,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Hydration Error প্রতিরোধ করার জন্য কঙ্কাল (Skeleton) রেন্ডার
   if (!isMounted) {
     return (
       <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px]">

@@ -1,15 +1,16 @@
 "use server";
 import { verifyAdmin } from "@/lib/adminAuth";
 import { collections, dbConnect } from "@/lib/db";
+import { verifyAuth } from "@/lib/verifyAuth";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers"
+import { cookies } from "next/headers";
 
 const userCollectionPromise = dbConnect(collections.USERS);
 
 export const getUsers = async () => {
-    await verifyAdmin();
-    const UserCollection = await userCollectionPromise;
+  await verifyAdmin();
+  const UserCollection = await userCollectionPromise;
   try {
     const users = await UserCollection.find().toArray();
 
@@ -31,7 +32,7 @@ export async function blockUser(id) {
     { _id: new ObjectId(id) },
     {
       $set: { status: "block" },
-    }
+    },
   );
   revalidatePath("/dashboard/users");
 }
@@ -43,12 +44,13 @@ export async function activeUser(id) {
     { _id: new ObjectId(id) },
     {
       $set: { status: "active" },
-    }
+    },
   );
   revalidatePath("/dashboard/users");
 }
 
 export const getSingleUser = async (email) => {
+  await verifyAuth();
   try {
     const UserCollection = await userCollectionPromise;
     const result = await UserCollection.findOne(
@@ -56,38 +58,74 @@ export const getSingleUser = async (email) => {
       {
         projection: {
           image: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     );
     if (!result) {
       return { success: false, message: "User not found" };
     }
     return { success: true, user: result };
-
   } catch (error) {
     console.error("Error fetching user:", error);
     return { success: false, message: "Internal Server Error" };
   }
-}
+};
+export const getAdminData = async (email) => {
+  await verifyAdmin();
+  try {
+    const UserCollection = await userCollectionPromise;
 
+    const result = await UserCollection.findOne({ email: email });
 
+    if (!result) {
+      return { success: false, message: "User not found" };
+    }
 
+    return {
+      success: true,
+      user: JSON.parse(JSON.stringify(result)),
+    };
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return { success: false, message: "Internal Server Error" };
+  }
+};
 
 export const updateUserProfileImage = async (email, imageUrl) => {
+  await verifyAuth();
   try {
     const UserCollection = await userCollectionPromise;
     const result = await UserCollection.updateOne(
       { email: email },
-      { $set: { image: imageUrl } }
+      { $set: { image: imageUrl } },
     );
 
     if (result.modifiedCount > 0) {
-      revalidatePath('/dashboard/profile')
+      revalidatePath("/dashboard/profile");
       return { success: true };
     }
     return { success: false, message: "No changes made" };
   } catch (error) {
     return { success: false, message: error.message };
   }
-}
+};
+
+export const updateUserCover = async (email, coverUrl) => {
+  await verifyAuth();
+  try {
+    const UserCollection = await userCollectionPromise;
+    const result = await UserCollection.updateOne(
+      { email: email },
+      { $set: { coverImage: coverUrl } },
+    );
+
+    if (result.modifiedCount > 0) {
+      revalidatePath("/dashboard/profile");
+      return { success: true };
+    }
+    return { success: false, message: "No changes made" };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};

@@ -50,7 +50,7 @@ const InteractivePetFood = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % foodSlides.length);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(timer);
   }, [foodSlides.length]);
 
@@ -78,25 +78,25 @@ const InteractivePetFood = () => {
               whileInView={{ opacity: 1, x: 0 }}
               className="inline-flex items-center gap-2 bg-orange-500/10 px-4 py-2 border border-orange-500/20 rounded-full"
             >
-              <Zap size={16} className="fill-orange-600 text-orange-600" />
-              <span className="font-black text-orange-600 text-xs uppercase tracking-widest">Limited Offer: 20% Off</span>
+              <Zap size={14} className="fill-orange-600 text-orange-600 animate-pulse" />
+              <span className="font-black text-[10px] text-orange-600 uppercase tracking-[0.2em]">Limited Offer: 20% Off</span>
             </motion.div>
 
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="font-black text-slate-900 text-5xl md:text-7xl leading-tight"
+              className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Premium Food <br />
-              <span className="text-shadow-sm text-orange-500">For All Pets</span>
+              <span className="text-orange-500 italic">For All Pets</span>
             </motion.h2>
 
             <motion.p 
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              className="max-w-md text-slate-600 text-lg leading-relaxed"
+              className="max-w-md font-medium text-slate-600 text-lg leading-relaxed"
             >
-              We don't just facilitate adoptions; we provide the foundation for a healthy life. Discover vet-approved nutrition tailored for your furry, feathered, or scaled friends.
+              We don't just facilitate adoptions; we provide the foundation for a healthy life. Discover vet-approved nutrition tailored for your pets.
             </motion.p>
 
             <div className="flex flex-wrap gap-8">
@@ -105,8 +105,8 @@ const InteractivePetFood = () => {
                   <Leaf size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-sm uppercase">100% Organic</span>
-                  <span className="text-[10px] text-slate-500">Natural Ingredients</span>
+                  <span className="font-black text-sm uppercase tracking-wide">100% Organic</span>
+                  <span className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Natural Ingredients</span>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-slate-700">
@@ -114,8 +114,8 @@ const InteractivePetFood = () => {
                   <ShieldCheck size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black text-sm uppercase">Vet Approved</span>
-                  <span className="text-[10px] text-slate-500">Verified Nutrition</span>
+                  <span className="font-black text-sm uppercase tracking-wide">Vet Approved</span>
+                  <span className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Verified Nutrition</span>
                 </div>
               </div>
             </div>
@@ -127,27 +127,26 @@ const InteractivePetFood = () => {
             >
               <Link
                 href="/pet-food"
-                className="group inline-flex relative items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-[0_20px_40px_-15px_rgba(249,115,22,0.4)] hover:shadow-2xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white uppercase tracking-wider transition-all duration-500"
+                className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
               >
-                <ShoppingBasket size={24} className="z-10 relative" />
-                <span className="z-10 relative uppercase tracking-[0.2em]">Explore Food Shop</span>
-                <ArrowRight size={24} className="z-10 relative transition-transform group-hover:translate-x-2" />
+                <ShoppingBasket size={20} className="z-10 relative" />
+                <span className="z-10 relative">Explore Food Shop</span>
+                <ArrowRight size={20} className="z-10 relative transition-transform group-hover:translate-x-2" />
               </Link>
             </motion.div>
           </div>
 
-          {/* Right Side: Interactive Food Slider */}
+          {/* Right Side: Interactive Food Slider (SIZE FIXED) */}
           <div className="group relative">
-            
-            {/* Main Featured Food Image Slider */}
+            {/* Image Slider Container - 500px aspect-square as requested */}
             <div className="z-20 relative bg-white shadow-2xl mx-auto border-[12px] border-white rounded-[3rem] w-full max-w-[500px] aspect-square overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={foodSlides[currentIndex].id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 0.6 }}
                   className="relative w-full h-full"
                 >
                   <Image 
@@ -155,7 +154,9 @@ const InteractivePetFood = () => {
                     alt={foodSlides[currentIndex].title}
                     fill
                     className="object-cover"
+                    priority
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -163,40 +164,39 @@ const InteractivePetFood = () => {
             {/* Slider Navigation Buttons */}
             <button 
               onClick={handlePrev} 
-              className="top-1/2 left-4 z-30 absolute bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 shadow-lg p-3 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
+              className="top-1/2 left-4 z-30 absolute bg-white/90 hover:bg-orange-500 opacity-0 group-hover:opacity-100 shadow-lg p-3 rounded-full text-slate-700 hover:text-white transition-all -translate-y-1/2"
             >
               <ChevronLeft size={24} />
             </button>
             <button 
               onClick={handleNext} 
-              className="top-1/2 right-4 z-30 absolute bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 shadow-lg p-3 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
+              className="top-1/2 right-4 z-30 absolute bg-white/90 hover:bg-orange-500 opacity-0 group-hover:opacity-100 shadow-lg p-3 rounded-full text-slate-700 hover:text-white transition-all -translate-y-1/2"
             >
               <ChevronRight size={24} />
             </button>
 
-            {/* Floating Info Element  */}
+            {/* Floating Info Element */}
             <motion.div 
               key={`info-${foodSlides[currentIndex].id}`}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="right-4 -bottom-10 z-30 absolute flex items-center gap-4 bg-white shadow-xl p-4 border border-orange-50 rounded-[2rem]"
+              className="right-4 -bottom-10 z-30 absolute flex items-center gap-4 bg-white shadow-xl p-6 border border-orange-50 rounded-[2.5rem] min-w-[280px]"
             >
               <div className="flex flex-col pr-4 pl-2">
-                <p className="font-black text-[10px] text-orange-500 uppercase">{foodSlides[currentIndex].name}</p>
-                <p className="font-black text-slate-800 text-lg leading-tight">{foodSlides[currentIndex].title}</p>
-                <p className="text-[10px] text-slate-500">{foodSlides[currentIndex].tag}</p>
+                <p className="font-black text-[9px] text-orange-500 uppercase tracking-[0.25em]">{foodSlides[currentIndex].name}</p>
+                <p className="font-black text-slate-900 text-xl leading-tight tracking-tight">{foodSlides[currentIndex].title}</p>
+                <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase tracking-widest">{foodSlides[currentIndex].tag}</p>
               </div>
             </motion.div>
 
-            {/* Price Tag Bubble (স্থির) */}
+            {/* Price Tag Bubble */}
             <motion.div 
               initial={{ scale: 0, rotate: -20 }}
               whileInView={{ scale: 1, rotate: 12 }}
               className="top-10 -right-8 z-40 absolute flex flex-col justify-center items-center bg-slate-900 shadow-2xl border-4 border-white rounded-full w-24 h-24 text-white"
             >
-              <span className="font-bold text-[10px] text-orange-400">Low as</span>
-              <span className="font-black text-2xl">$12</span>
+              <span className="font-black text-[8px] text-orange-400 uppercase tracking-widest">Low as</span>
+              <span className="font-black text-3xl">$12</span>
             </motion.div>
           </div>
 

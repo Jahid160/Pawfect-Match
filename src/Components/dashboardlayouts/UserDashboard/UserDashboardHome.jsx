@@ -14,11 +14,16 @@ import {
 import Link from "next/link";
 
 import { useEffect, useState } from "react";
-import { getUserDashboardStats } from "@/action/userServerDash/myPets";
+import {
+  getRecommendedPets,
+  getUserDashboardStats,
+  getUserRecentRequests,
+} from "@/action/userServerDash/myPets";
 
 const UserDashboardHome = () => {
   const { data: session } = useSession();
-
+  const [recentRequests, setRecentRequests] = useState([]);
+  const [recommendedPets, setRecommendedPets] = useState([]);
   // Use a single object for all stats
   const [stats, setStats] = useState({
     approved: 0,
@@ -40,6 +45,17 @@ const UserDashboardHome = () => {
       fetchAllStats();
     }
   }, [session]);
+
+  useEffect(() => {
+  const fetchPets = async () => {
+    const res = await getRecommendedPets();
+    setRecommendedPets(res);
+  };
+
+  fetchPets();
+}, []);
+
+console.log(recommendedPets);
 
   const overviewCards = [
     {
@@ -68,38 +84,22 @@ const UserDashboardHome = () => {
     },
   ];
 
-  const recentRequests = [
-    {
-      pet: "Golden Retriever",
-      status: "Pending",
-      date: "12 Mar 2026",
-      color: "text-amber-600 bg-amber-50",
-    },
-    {
-      pet: "Persian Cat",
-      status: "Approved",
-      date: "05 Mar 2026",
-      color: "text-emerald-600 bg-emerald-50",
-    },
-  ];
 
-  const recommendedPets = [
-    {
-      name: "Husky",
-      breed: "Siberian",
-      image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1",
-    },
-    {
-      name: "Labrador",
-      breed: "Retriever",
-      image: "https://images.unsplash.com/photo-1558788353-f76d92427f16",
-    },
-    {
-      name: "Persian Cat",
-      breed: "Longhair",
-      image: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131",
-    },
-  ];
+  useEffect(() => {
+    const fetchRecent = async () => {
+      const result = await getUserRecentRequests();
+
+      if (result.success) {
+        setRecentRequests(result.data);
+      }
+    };
+
+    if (session?.user) {
+      fetchRecent();
+    }
+  }, [session]);
+
+
 
   return (
     <div className="p-6 lg:p-10 space-y-10 bg-[#FDFCFB] min-h-screen">
@@ -153,12 +153,6 @@ const UserDashboardHome = () => {
             <h2 className="text-xl font-black text-slate-800">
               Recent Requests
             </h2>
-            <Link
-              href="#"
-              className="text-orange-500 text-sm font-bold flex items-center gap-1 hover:underline"
-            >
-              View All <ArrowRight size={16} />
-            </Link>
           </div>
 
           <div className="overflow-x-auto">
@@ -166,6 +160,7 @@ const UserDashboardHome = () => {
               <thead>
                 <tr className="text-left text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-50">
                   <th className="pb-4 px-2">Pet Name</th>
+                  <th className="pb-4 px-2">Pet Gender</th>
                   <th className="pb-4 px-2">Status</th>
                   <th className="pb-4 px-2 text-right">Date</th>
                 </tr>
@@ -177,17 +172,26 @@ const UserDashboardHome = () => {
                     className="group transition-colors hover:bg-slate-50/50"
                   >
                     <td className="py-4 px-2 font-bold text-slate-700">
-                      {item.pet}
+                      {item.petName}
+                    </td>
+                    <td className="py-4 px-2 font-bold text-slate-700">
+                      {item.gender}
                     </td>
                     <td className="py-4 px-2">
                       <span
-                        className={`px-3 py-1.5 text-[10px] font-black rounded-full uppercase tracking-tighter ${item.color}`}
+                        className={`px-3 py-1.5 text-[10px] font-black rounded-full uppercase ${
+                          item.status === "pending"
+                            ? "text-amber-600 bg-amber-50"
+                            : item.status === "adopted"
+                              ? "text-emerald-600 bg-emerald-50"
+                              : "text-rose-600 bg-rose-50"
+                        }`}
                       >
                         {item.status}
                       </span>
                     </td>
                     <td className="py-4 px-2 text-right text-slate-400 font-medium text-sm">
-                      {item.date}
+                      {new Date(item.date).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
@@ -202,17 +206,19 @@ const UserDashboardHome = () => {
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 gap-3">
-            <button className="flex items-center justify-between w-full p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-orange-200">
+            <Link
+              href="/all-pets"
+              className="flex items-center justify-between w-full p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-orange-200"
+            >
               Adopt a New Pet <ArrowRight size={18} />
-            </button>
-            <button className="flex items-center justify-between w-full p-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-bold transition-all">
+            </Link>
+            <Link
+              href="/dashboard/profile"
+              className="flex items-center justify-between w-full p-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-bold transition-all"
+            >
               Update Profile{" "}
               <ExternalLink size={18} className="text-slate-400" />
-            </button>
-            <button className="flex items-center justify-between w-full p-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-bold transition-all">
-              Support Center{" "}
-              <MessageCircle size={18} className="text-slate-400" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -249,9 +255,9 @@ const UserDashboardHome = () => {
                       {pet.breed}
                     </p>
                   </div>
-                  <button className="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-black hover:bg-orange-500 transition-colors">
+                  <Link href={`/all-pets/${pet.id}`} className="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-black hover:bg-orange-500 transition-colors">
                     ADOPT
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

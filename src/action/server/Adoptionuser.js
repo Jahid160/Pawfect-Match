@@ -23,7 +23,6 @@ const generateId = () => {
 
 export const createAdoptionUser = async (data) => {
   try {
-    console.log(data);
     let user;
     try {
       user = await userVerifyAuth();
@@ -32,7 +31,7 @@ export const createAdoptionUser = async (data) => {
     }
 
     const userEmail = user.email;
-    console.log("Action performed by:", userEmail);
+
 
     const adoptionCollection = await adoptionCollectionPromise;
     const petCollection = await petCollectionPromise;

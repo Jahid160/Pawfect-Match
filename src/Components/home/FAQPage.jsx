@@ -1,15 +1,14 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FaQuestionCircle, FaDog, FaShieldAlt, FaHandHoldingHeart } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaQuestionCircle, FaDog, FaShieldAlt, FaHandHoldingHeart, FaPlus, FaMinus, FaSearch } from 'react-icons/fa';
 
 const faqs = [
   {
     category: "Adoption Process",
     icon: <FaHandHoldingHeart />,
-    // DaisyUI secondary color (Peach/Cream) compatible
-    cardBg: "bg-secondary/30", 
+    cardBg: "bg-secondary/20", 
     iconColor: "text-primary",
     questions: [
       { q: "How does the matching process work?", a: "We use a personality-driven algorithm that considers your lifestyle, activity level, and home environment." },
@@ -20,7 +19,7 @@ const faqs = [
   {
     category: "Health & Safety",
     icon: <FaShieldAlt />,
-    cardBg: "bg-info/10", // Using DaisyUI info color
+    cardBg: "bg-info/10",
     iconColor: "text-info",
     questions: [
       { q: "Vaccinated & Microchipped?", a: "Yes, 100%. Every pet is fully vaccinated, dewormed, and microchipped before listing." },
@@ -31,7 +30,7 @@ const faqs = [
   {
     category: "Pet Care & Food",
     icon: <FaDog />,
-    cardBg: "bg-success/10", // Using DaisyUI success color
+    cardBg: "bg-success/10",
     iconColor: "text-success",
     questions: [
       { q: "What kind of food to give?", a: "We follow fresh, whole food philosophy. We provide a 7-day starter pack and a diet plan." },
@@ -41,92 +40,131 @@ const faqs = [
 ];
 
 const FAQPage = () => {
+  const [activeId, setActiveId] = useState(null);
+
+  const toggleAccordion = (id) => {
+    setActiveId(activeId === id ? null : id);
+  };
+
   return (
-    <section className="bg-base-100 py-24 min-h-screen">
+    <section className="bg-base-100 selection:bg-primary/20 py-32 min-h-screen overflow-hidden">
       <div className="mx-auto px-6 max-w-7xl">
         
-        {/* Header Section */}
-        <div className="mb-20 max-w-3xl">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 bg-primary/10 mb-6 px-4 py-2 rounded-full font-bold text-primary text-sm"
-          >
-            <FaQuestionCircle /> HELP CENTER
-          </motion.div>
-          
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-6 font-extrabold text-neutral text-5xl md:text-6xl tracking-tight"
-          >
-            Got questions? <br />
-            <span className="text-primary italic">We have answers.</span>
-          </motion.h2>
-
-          <p className="font-medium text-neutral/70 text-xl leading-relaxed">
-            Adopting a pet is a big decision. We've laid out everything you need to know to make the transition smooth for you and your future furry friend.
-          </p>
-        </div>
-
-        {/* FAQ Grid Layout */}
-        <div className="gap-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {faqs.map((group, idx) => (
+        {/* Header & Search */}
+        <div className="flex lg:flex-row flex-col justify-between items-start gap-12 mb-24">
+          <div className="max-w-3xl">
             <motion.div 
-              key={idx}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-2 bg-primary/10 mb-8 px-5 py-2.5 rounded-full font-black text-[10px] text-primary tracking-[0.2em]"
+            >
+              <FaQuestionCircle /> HELP CENTER
+            </motion.div>
+            
+            <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="flex flex-col"
+              className="mb-8 font-black text-neutral text-5xl md:text-7xl leading-[0.95] tracking-tighter"
             >
-              {/* Category Title Header */}
-              <div className={`flex items-center gap-4 mb-8 p-5 rounded-[2rem] ${group.cardBg}`}>
-                <span className={`bg-base-100 shadow-sm p-3 rounded-2xl text-2xl ${group.iconColor}`}>
+              Got questions? <br />
+              <span className="text-primary italic">We have answers.</span>
+            </motion.h2>
+
+            <p className="max-w-xl font-medium text-neutral/60 text-xl leading-relaxed">
+              Adopting a pet is a big decision. We've laid out everything you need to know to make the transition smooth.
+            </p>
+          </div>
+
+          {/* Quick Search Support */}
+          <div className="group relative w-full lg:w-96">
+            <input 
+              type="text" 
+              placeholder="Search help topics..."
+              className="bg-base-200 focus:bg-white shadow-neutral/5 shadow-xl py-5 pr-6 pl-14 border-2 border-transparent focus:border-primary rounded-3xl focus:outline-none w-full font-bold transition-all"
+            />
+            <FaSearch className="top-1/2 left-6 absolute text-neutral/30 -translate-y-1/2" />
+          </div>
+        </div>
+
+        {/* FAQ Categories & Accordions */}
+        <div className="gap-12 grid grid-cols-1 lg:grid-cols-3">
+          {faqs.map((group, groupIdx) => (
+            <div key={groupIdx} className="flex flex-col">
+              <div className={`flex items-center gap-5 mb-10 p-6 rounded-[2.5rem] ${group.cardBg}`}>
+                <span className={`bg-base-100 shadow-xl p-4 rounded-2xl text-3xl ${group.iconColor}`}>
                     {group.icon}
                 </span>
-                <h3 className={`font-black text-lg uppercase tracking-wider text-neutral/90`}>
+                <h3 className="font-black text-neutral/90 text-xl uppercase tracking-tighter">
                   {group.category}
                 </h3>
               </div>
 
-              {/* Questions List */}
-              <div className="space-y-8 pl-2">
-                {group.questions.map((item, i) => (
-                  <div key={i} className="group">
-                    <h4 className="mb-3 font-bold text-neutral group-hover:text-primary text-lg transition-colors duration-300">
-                      {item.q}
-                    </h4>
-                    <p className="font-medium text-neutral/60 leading-relaxed">
-                      {item.a}
-                    </p>
-                  </div>
-                ))}
+              <div className="space-y-4">
+                {group.questions.map((item, i) => {
+                  const id = `${groupIdx}-${i}`;
+                  const isOpen = activeId === id;
+                  
+                  return (
+                    <div key={i} className={`group border-b border-neutral/5 transition-all ${isOpen ? 'pb-6' : 'pb-4'}`}>
+                      <button 
+                        onClick={() => toggleAccordion(id)}
+                        className="flex justify-between items-center gap-4 w-full text-left"
+                      >
+                        <h4 className={`font-black text-lg tracking-tight transition-colors duration-300 ${isOpen ? 'text-primary' : 'text-neutral group-hover:text-primary'}`}>
+                          {item.q}
+                        </h4>
+                        <span className={`p-2 rounded-full transition-transform duration-500 ${isOpen ? 'bg-primary text-white rotate-180' : 'bg-neutral/5 text-neutral'}`}>
+                          {isOpen ? <FaMinus size={10} /> : <FaPlus size={10} />}
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <p className="mt-4 font-medium text-neutral/50 text-base leading-relaxed">
+                              {item.a}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Final CTA Card - Matches Neutral Charcoal from your CSS */}
+        {/* Final CTA Card */}
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative bg-neutral mt-32 p-10 md:p-16 rounded-[3.5rem] overflow-hidden text-neutral-content"
+          className="group relative bg-neutral mt-40 p-12 md:p-24 rounded-[4rem] overflow-hidden"
         >
-          {/* Subtle Glow using Primary Color */}
-          <div className="top-0 right-0 absolute bg-primary/20 blur-[120px] rounded-full w-80 h-80 -translate-y-1/2 translate-x-1/2" />
+          {/* Animated Glow */}
+          <div className="top-0 right-0 absolute bg-primary/20 group-hover:bg-primary/30 blur-[120px] rounded-full w-[500px] h-[500px] transition-colors -translate-y-1/2 translate-x-1/2 duration-700" />
           
-          <div className="z-10 relative flex md:flex-row flex-col justify-between items-center gap-10">
-            <div className="md:text-left text-center">
-              <h3 className="mb-4 font-black text-3xl md:text-5xl tracking-tight">Still curious?</h3>
-              <p className="max-w-md font-medium text-neutral-content/70 text-lg">
-                Our pet experts are available 24/7 to guide you through your adoption journey.
+          <div className="z-10 relative flex lg:flex-row flex-col justify-between items-center gap-16">
+            <div className="lg:text-left text-center">
+              <h3 className="mb-6 font-black text-white text-5xl md:text-7xl leading-none tracking-tighter">Still curious?</h3>
+              <p className="max-w-md font-medium text-neutral-content/60 text-xl leading-relaxed">
+                Our pet experts are available to guide you through your adoption journey.
               </p>
             </div>
-            <button className="shadow-2xl shadow-primary/30 px-12 rounded-2xl h-16 font-black hover:scale-105 transition-transform btn btn-primary btn-lg">
-              CHAT WITH AN EXPERT
-            </button>
+            <div className="flex sm:flex-row flex-col gap-4">
+                <button className="bg-primary hover:bg-white shadow-2xl shadow-primary/20 px-12 border-none rounded-[2rem] h-20 font-black text-white hover:text-neutral active:scale-95 transition-all btn-lg">
+                    CHAT WITH AN EXPERT
+                </button>
+                <button className="bg-white/5 hover:bg-white/10 px-10 border border-white/10 rounded-[2rem] h-20 font-black text-white active:scale-95 transition-all">
+                    EMAIL SUPPORT
+                </button>
+            </div>
           </div>
         </motion.div>
       </div>

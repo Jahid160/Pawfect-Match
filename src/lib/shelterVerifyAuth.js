@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
-import { dbConnect, collections } from "@/lib/db";
+import { authOptions } from "./authOptions";
+import { collections, dbConnect } from "./db";
 
-export async function verifyAdmin() {
-
+export async function shelterVerifyAuth() {
   const session = await getServerSession(authOptions);
   if (!session) {
     throw new Error("Not authenticated");
@@ -12,11 +11,11 @@ export async function verifyAdmin() {
   const usersCollection = await dbConnect(collections.USERS);
 
   const dbUser = await usersCollection.findOne({
-    email: session.user.email
+    email: session.user.email,
   });
 
-  if (dbUser.role !== "admin") {
-    throw new Error("Admin only");
+  if (dbUser.role !== "shelter") {
+    throw new Error("Shelter only");
   }
 
   return dbUser;

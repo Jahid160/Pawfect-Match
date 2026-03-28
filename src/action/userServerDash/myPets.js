@@ -5,6 +5,8 @@ import { userVerifyAuth } from "@/lib/userVerifyAuth";
 import { verifyAuth } from "@/lib/verifyAuth";
 import { ObjectId } from "mongodb";
 
+const petCollectionPromise = dbConnect(collections.PETS);
+
 export const getUserApprovedPets = async () => {
   try {
     const user = await verifyAuth();
@@ -68,6 +70,59 @@ export const getUserApprovedPets = async () => {
       data: [],
     };
   }
+};
+
+export const getUserRecentRequests = async () => {
+  try {
+    const user = await userVerifyAuth();
+    const petsCollection = await petCollectionPromise;
+
+    const requests = await petsCollection
+      .find(
+        { adoptedUserEmail: user.email },
+        {
+          projection: {
+            petName: 1,
+            status: 1,
+            adoptedUserTime: 1,
+            gender: 1,
+          },
+        },
+      )
+      .sort({ adoptedUserTime: -1 })
+      .limit(5)
+      .toArray();
+
+    // ✅ FIX: convert to plain object
+    const safeData = requests.map((item) => ({
+      petName: item.petName,
+      status: item.status,
+      gender: item.gender,
+      date: item.adoptedUserTime?.toISOString(), // convert Date → string
+    }));
+
+    return { success: true, data: safeData };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+export const getRecommendedPets = async () => {
+  await verifyAuth();
+  const petsCollection = await petCollectionPromise;
+
+  const pets = await petsCollection
+    .find({ status: "available" })
+    .sort({ createdAt: -1 })
+    .limit(6)
+    .toArray();
+
+  return pets.map((pet) => ({
+    name: pet.petName,
+    breed: pet.breed,
+    image: pet.images[0],
+    id: pet._id.toString(),
+  }));
 };
 
 export const getUserDashboardStats = async () => {

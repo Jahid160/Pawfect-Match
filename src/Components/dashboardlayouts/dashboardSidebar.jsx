@@ -13,7 +13,6 @@ import {
   Stethoscope,
   Syringe,
   FileText,
-  BarChart3,
   ClipboardCheck,
   LayoutDashboard,
   Menu,
@@ -23,7 +22,6 @@ import {
   ChevronLeft,
   ChevronRight,
   HeartPlus,
-  BoneIcon,
   ShoppingBagIcon,
 } from "lucide-react";
 
@@ -31,6 +29,7 @@ import { FaUserGroup } from "react-icons/fa6";
 import { BsHouseAddFill } from "react-icons/bs";
 
 import Logo from "../Header/Logo";
+import { LuClipboardList, LuHistory, LuUserPlus } from "react-icons/lu";
 
 const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const pathname = usePathname();
@@ -47,7 +46,11 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/shelters",
       icon: BsHouseAddFill,
     },
-    { name: "Doctors Management", href: "/dashboard/doctors", icon: Stethoscope },
+    {
+      name: "Doctors Management",
+      href: "/dashboard/doctors",
+      icon: Stethoscope,
+    },
     {
       name: "Vaccination Management",
       href: "/dashboard/vaccinations",
@@ -60,6 +63,11 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: ShoppingBag,
     },
     { name: "Pet Management", href: "/dashboard/manage-pets", icon: PawPrint },
+    {
+      name: "Pet Request",
+      href: "/dashboard/pet-request",
+      icon: PawPrint,
+    },
   ];
 
   const userNavItem = [
@@ -70,7 +78,11 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
     },
     { name: "Favorite Pets", href: "/dashboard/favorites", icon: HeartPlus },
     { name: "My Pets", href: "/dashboard/my-pets", icon: PawPrint },
-    { name: "My Orders", href: "/dashboard/pet-food&accessories", icon: ShoppingBagIcon  },
+    {
+      name: "My Orders",
+      href: "/dashboard/pet-food&accessories",
+      icon: ShoppingBagIcon,
+    },
     // { name: "Accessories", href: "/dashboard/accessories", icon: ShoppingBagIcon },
   ];
 
@@ -92,12 +104,17 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
     {
       name: "Entry Requests",
       href: "/dashboard/shelter-petsreq",
-      icon: ClipboardCheck,
+      icon: LuUserPlus,
     },
     {
       name: "Entry List",
       href: "/dashboard/shelter-pets",
-      icon: BarChart3
+      icon: LuClipboardList,
+    },
+    {
+      name: "Pending Entries",
+      href: "/dashboard/shelter-pendings",
+      icon: LuHistory,
     },
   ];
 
@@ -118,10 +135,11 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
   /* ---------------- STYLE HELPERS ---------------- */
   const getLinkStyle = (path) => {
     const isActive = pathname === path;
-    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${isActive
-      ? "bg-orange-500 text-white shadow-md shadow-orange-200"
-      : "hover:bg-orange-100 text-slate-600"
-      } ${isCollapsed ? "justify-center px-2" : ""}`;
+    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${
+      isActive
+        ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+        : "hover:bg-orange-100 text-slate-600"
+    } ${isCollapsed ? "justify-center px-2" : ""}`;
   };
 
   return (

@@ -33,11 +33,11 @@ export async function POST(req) {
     // 5. Update User Document
     await usersCollection.updateOne(
       { email },
-      { 
-        $set: { 
-          resetToken: token, 
-          resetTokenExpiry: expiry 
-        } 
+      {
+        $set: {
+          resetToken: token,
+          resetTokenExpiry: expiry
+        }
       }
     );
 
@@ -46,9 +46,6 @@ export async function POST(req) {
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
-    console.log(`--- Email Attempt ---`);
-    console.log(`To: ${email}`);
-    console.log(`Link: ${resetLink}`);
 
     // 7. Send the Email
     // We wrap this in a try/catch specifically to see Nodemailer errors
@@ -59,8 +56,8 @@ export async function POST(req) {
       console.error("❌ Nodemailer Error:", mailError.message);
       // We still return a 200/Success to the user for security, 
       // but YOU will see the error in your terminal now.
-      return Response.json({ 
-        message: "If the email exists, a reset link has been sent." 
+      return Response.json({
+        message: "If the email exists, a reset link has been sent."
       });
     }
 
@@ -71,7 +68,7 @@ export async function POST(req) {
   } catch (err) {
     console.error("SYSTEM ERROR in forgot-password route:", err);
     return Response.json(
-      { message: "An internal error occurred" }, 
+      { message: "An internal error occurred" },
       { status: 500 }
     );
   }

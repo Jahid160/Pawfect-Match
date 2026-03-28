@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Twitter, Mail, PawPrint } from 'lucide-react';
+import { Github, Linkedin, Twitter, PawPrint, ExternalLink } from 'lucide-react';
 
 const Team = () => {
     const teamMembers = [
@@ -24,9 +24,9 @@ const Team = () => {
         {
             name: "Md Zahid Hasan",
             role: "Lead Full-Stack Developer",
-            image: "https://i.ibb.co.com/fYmmxjqD/Screenshot-3.png",
+            image: "https://i.ibb.co.com/bMgLpTdq/Gemini-Generated-Image-bp8kycbp8kycbp8k-1.png",
             bio: "Specialist in scalable web architectures. Managed task allocation and user-friendly functional developments.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/Jahid160", linkedin: "https://www.linkedin.com/in/md-zahid-hasan12/", twitter: "#" }
         },
         {
             name: "Forhad Redoy",
@@ -51,104 +51,112 @@ const Team = () => {
         },
     ];
 
-    const fadeInUp = {
-        initial: { opacity: 0, y: 30 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { duration: 0.6 }
-    };
-
     return (
-        <section className="bg-[#fffaf5] py-24 min-h-screen">
+        <section className="bg-white selection:bg-orange-100 py-32 min-h-screen">
             <div className="mx-auto px-6 container">
                 
                 {/* --- Header Section --- */}
-                <motion.div 
-                    {...fadeInUp}
-                    className="mx-auto mb-20 max-w-3xl text-center"
-                >
-                    <span className="inline-block bg-orange-100 mb-6 px-5 py-2 rounded-full font-bold text-orange-600 text-xs uppercase tracking-widest">
-                        The Minds Behind Pawfect Match
-                    </span>
-                    <h2 className="mb-6 font-black text-slate-900 text-4xl md:text-6xl leading-tight">
-                        Meet Our <span className="text-orange-500 text-5xl md:text-7xl italic">Passionate</span> Team
-                    </h2>
-                    <p className="text-slate-600 text-lg md:text-xl leading-relaxed">
-                        We are a group of animal lovers, designers, and developers dedicated to making pet adoption safe, easy, and professional for everyone.
-                    </p>
-                </motion.div>
+                <div className="flex lg:flex-row flex-col justify-between items-end gap-12 mb-24">
+                    <div className="max-w-3xl">
+                        <motion.span 
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            className="inline-block bg-orange-100 mb-6 px-5 py-2 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.2em]"
+                        >
+                            The Minds Behind Pawfect Match
+                        </motion.span>
+                        <motion.h2 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            className="font-black text-slate-900 text-5xl md:text-8xl leading-[0.9] tracking-tighter"
+                        >
+                            Meet Our <br /> <span className="text-orange-500 italic">Passionate</span> Team
+                        </motion.h2>
+                    </div>
+                    <motion.p 
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="max-w-md font-medium text-slate-500 text-xl leading-relaxed"
+                    >
+                        We are a group of animal lovers, designers, and developers dedicated to making pet adoption safe, easy, and professional.
+                    </motion.p>
+                </div>
 
                 {/* --- Team Grid --- */}
-                <div className="gap-12 grid md:grid-cols-2 lg:grid-cols-3">
+                <div className="gap-x-8 gap-y-20 grid md:grid-cols-2 lg:grid-cols-3">
                     {teamMembers.map((member, i) => (
                         <motion.div 
                             key={i}
-                            initial={{ opacity: 0, y: 40 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.2, duration: 0.5 }}
+                            transition={{ delay: i * 0.1 }}
                             className="group relative"
                         >
-                            {/* Card Background Decoration */}
-                            <div className="-z-10 absolute -inset-2 bg-gradient-to-b from-orange-400 to-orange-600 opacity-0 group-hover:opacity-100 blur-xl group-hover:blur-2xl rounded-[3rem] transition-all duration-500"></div>
-                            
-                            <div className="z-10 relative flex flex-col bg-white shadow-orange-100/50 shadow-xl p-8 border border-orange-50 rounded-[2.5rem] h-full overflow-hidden">
+                            {/* Premium Card Layout */}
+                            <div className="relative bg-[#fffaf5] hover:bg-white shadow-2xl shadow-orange-100/30 p-2 rounded-[3.5rem] overflow-hidden transition-all duration-500">
                                 
-                                {/* Image Container */}
-                                <div className="relative mb-8 border-4 border-slate-50 group-hover:border-orange-100 rounded-[2rem] w-full aspect-square overflow-hidden transition-colors">
+                                {/* Image Container with Floating Action */}
+                                <div className="relative rounded-[3rem] w-full aspect-[4/5] overflow-hidden">
                                     <Image 
                                         src={member.image} 
                                         alt={member.name}
                                         fill
-                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                        className="grayscale group-hover:grayscale-0 object-cover group-hover:scale-105 transition-all duration-1000 ease-out"
                                     />
                                     
-                                    {/* Social Overlay */}
-                                    <div className="absolute inset-0 flex justify-center items-center gap-4 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all translate-y-full group-hover:translate-y-0 duration-300">
-                                        <a href={member.social.github} className="bg-white hover:bg-orange-500 p-3 rounded-xl text-slate-900 hover:text-white transition-all hover:-translate-y-1 transform">
-                                            <Github size={20} />
-                                        </a>
-                                        <a href={member.social.linkedin} className="bg-white hover:bg-orange-500 p-3 rounded-xl text-slate-900 hover:text-white transition-all hover:-translate-y-1 transform">
+                                    {/* Social Badge (Appears on Hover) */}
+                                    <div className="right-6 bottom-6 absolute flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-20 group-hover:translate-x-0 duration-500">
+                                        <a href={member.social.linkedin} className="bg-white hover:bg-orange-500 shadow-xl p-4 rounded-2xl text-slate-900 hover:text-white transition-all">
                                             <Linkedin size={20} />
                                         </a>
-                                        <a href={member.social.twitter} className="bg-white hover:bg-orange-500 p-3 rounded-xl text-slate-900 hover:text-white transition-all hover:-translate-y-1 transform">
-                                            <Twitter size={20} />
+                                        <a href={member.social.github} className="bg-white hover:bg-orange-500 shadow-xl p-4 rounded-2xl text-slate-900 hover:text-white transition-all">
+                                            <Github size={20} />
                                         </a>
                                     </div>
                                 </div>
 
-                                {/* Content */}
-                                <div className="flex-grow text-center">
-                                    <h3 className="mb-1 font-black text-slate-900 group-hover:text-orange-600 text-2xl transition-colors">
-                                        {member.name}
-                                    </h3>
-                                    <p className="mb-4 font-bold text-[10px] text-orange-500 uppercase tracking-[0.2em]">
-                                        {member.role}
-                                    </p>
-                                    <p className="mb-6 text-slate-500 text-sm italic leading-relaxed">
+                                {/* Content Section */}
+                                <div className="p-8 lg:text-left text-center">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="font-black text-slate-900 text-3xl tracking-tighter">
+                                                {member.name}
+                                            </h3>
+                                            <p className="font-black text-[10px] text-orange-500 uppercase tracking-[0.2em]">
+                                                {member.role}
+                                            </p>
+                                        </div>
+                                        <PawPrint className="hidden lg:block opacity-10 text-orange-500" size={40} />
+                                    </div>
+                                    <p className="font-medium text-slate-500 text-sm italic line-clamp-3 leading-relaxed">
                                         &quot;{member.bio}&quot;
                                     </p>
-                                </div>
-
-                                {/* Bottom Accent */}
-                                <div className="flex justify-center mt-auto pt-6 border-slate-50 border-t">
-                                    <PawPrint className="text-orange-100 group-hover:text-orange-400 transition-colors" size={32} />
                                 </div>
                             </div>
                         </motion.div>
                     ))}
                 </div>
 
-                {/* --- Join Us CTA --- */}
+                {/* --- Join Us Premium CTA --- */}
                 <motion.div 
-                    {...fadeInUp}
-                    className="bg-white mt-24 p-12 border-2 border-orange-200 border-dashed rounded-[3rem] text-center"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    className="group relative bg-slate-900 mt-40 p-12 md:p-24 rounded-[4rem] overflow-hidden lg:text-left text-center"
                 >
-                    <h4 className="mb-4 font-bold text-slate-800 text-2xl">Want to be part of our mission?</h4>
-                    <p className="mx-auto mb-8 max-w-xl text-slate-500">We are always looking for passionate volunteers, veterinarians, and animal lovers to expand our community.</p>
-                    <button className="bg-slate-900 hover:bg-orange-600 shadow-xl px-10 py-4 rounded-2xl font-black text-white text-xs uppercase tracking-widest active:scale-95 transition-all">
-                        Send Your Resume
-                    </button>
+                    <div className="z-10 relative flex lg:flex-row flex-col justify-between items-center gap-12">
+                        <div className="max-w-2xl">
+                            <h4 className="mb-6 font-black text-white text-4xl md:text-6xl tracking-tighter">Want to be part of <br /> <span className="text-orange-500">our mission?</span></h4>
+                            <p className="font-medium text-slate-400 text-lg leading-relaxed">We are always looking for passionate volunteers, veterinarians, and animal lovers to expand our community.</p>
+                        </div>
+                        <button className="bg-orange-600 hover:bg-white shadow-2xl shadow-orange-600/20 px-12 py-6 rounded-2xl h-fit font-black text-[11px] text-white hover:text-slate-900 uppercase tracking-[0.2em] hover:scale-105 transition-all duration-500">
+                            Apply to join the team
+                        </button>
+                    </div>
+                    
+                    {/* Decorative Background Elements */}
+                    <div className="-top-24 -right-24 absolute bg-orange-500/10 blur-[100px] rounded-full w-96 h-96"></div>
+                    <div className="-bottom-32 -left-32 absolute bg-white/5 blur-[80px] rounded-full w-80 h-80"></div>
                 </motion.div>
             </div>
         </section>
