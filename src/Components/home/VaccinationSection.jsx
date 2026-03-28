@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Syringe, ArrowRight, ShieldCheck, CalendarClock, Activity, ChevronLeft, ChevronRight, Bell, HeartPulse } from "lucide-react";
+import { Syringe, ArrowRight, ShieldCheck, Activity, ChevronLeft, ChevronRight, Bell, HeartPulse } from "lucide-react";
 import Link from "next/link";
 
 const VaccinationSection = () => {
@@ -56,7 +56,6 @@ const VaccinationSection = () => {
 
     return (
         <section className="relative bg-orange-50/30 mx-4 my-20 py-24 border border-orange-100 rounded-[4rem] overflow-hidden">
-            {/* Background Decorative Elements */}
             <div className="-top-24 -left-24 absolute bg-orange-200/20 blur-[100px] rounded-full w-96 h-96 pointer-events-none"></div>
             <div className="right-0 bottom-0 absolute bg-red-100/30 blur-[80px] rounded-full w-64 h-64 pointer-events-none"></div>
 
@@ -70,16 +69,16 @@ const VaccinationSection = () => {
                             whileInView={{ opacity: 1, x: 0 }}
                             className="inline-flex items-center gap-2 bg-red-50 px-4 py-2 border border-red-100 rounded-full"
                         >
-                            <Bell size={16} className="text-red-600 animate-bounce" />
-                            <span className="font-black text-[10px] text-red-600 uppercase tracking-widest">Health & Safety First</span>
+                            <Bell size={14} className="text-red-600 animate-bounce" />
+                            <span className="font-black text-[10px] text-red-600 uppercase tracking-[0.3em]">Health & Safety First</span>
                         </motion.div>
 
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            className="font-black text-slate-900 text-5xl md:text-7xl leading-tight tracking-tighter"
+                            className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
                         >
-                            Essential <span className="text-orange-500">Vaccines</span> <br />
+                            Essential <span className="text-orange-500 italic">Vaccines</span> <br />
                             For Your Pets
                         </motion.h2>
 
@@ -97,8 +96,8 @@ const VaccinationSection = () => {
                                     <ShieldCheck size={24} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="font-black text-slate-800 text-sm uppercase">Certified</span>
-                                    <span className="text-[10px] text-slate-500">Medical Grade</span>
+                                    <span className="font-black text-slate-800 text-sm uppercase tracking-wider">Certified</span>
+                                    <span className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Medical Grade</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
@@ -106,8 +105,8 @@ const VaccinationSection = () => {
                                     <HeartPulse size={24} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="font-black text-slate-800 text-sm uppercase">Safe & Care</span>
-                                    <span className="text-[10px] text-slate-500">Expert Handling</span>
+                                    <span className="font-black text-slate-800 text-sm uppercase tracking-wider">Safe & Care</span>
+                                    <span className="font-bold text-[10px] text-slate-400 uppercase tracking-widest">Expert Handling</span>
                                 </div>
                             </div>
                         </div>
@@ -115,19 +114,18 @@ const VaccinationSection = () => {
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="pt-4">
                             <Link
                                 href="/vaccination"
-                                className="group inline-flex items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-xl px-10 py-5 rounded-2xl font-black text-white uppercase tracking-widest transition-all duration-500"
+                                className="group inline-flex items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-10 py-5 rounded-2xl font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
                             >
-                                <Syringe size={20} />
+                                <Syringe size={18} />
                                 <span>See All Vaccines</span>
-                                <ArrowRight size={20} className="transition-transform group-hover:translate-x-2" />
+                                <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
                             </Link>
                         </motion.div>
                     </div>
 
-                    {/* Right Side: Interactive Vaccine Slider */}
+                    {/* Right Side: Image Slider (Size Original Rakha Hoyeche) */}
                     <div className="group relative">
-
-                        {/* Main Image Container */}
+                        {/* Main Image Container - ORIGINAL SIZE MAINTAINED */}
                         <div className="z-20 relative bg-white shadow-2xl mx-auto border-[12px] border-white rounded-[3.5rem] w-full max-w-[450px] aspect-[4/5] overflow-hidden">
                             <AnimatePresence mode="wait">
                                 <motion.div
@@ -143,6 +141,7 @@ const VaccinationSection = () => {
                                         alt={vaccineSlides[currentIndex].vaccineName}
                                         fill
                                         className="object-cover"
+                                        priority
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                 </motion.div>
@@ -157,7 +156,7 @@ const VaccinationSection = () => {
                             <ChevronRight size={24} />
                         </button>
 
-                        {/* Floating Info Box (Vaccine Details) */}
+                        {/* Floating Info Box */}
                         <motion.div
                             key={`info-${vaccineSlides[currentIndex].id}`}
                             initial={{ y: 30, opacity: 0 }}
@@ -168,21 +167,21 @@ const VaccinationSection = () => {
                                 <Activity size={24} />
                             </div>
                             <div className="flex flex-col">
-                                <p className="font-black text-[10px] text-orange-500 uppercase tracking-widest">{vaccineSlides[currentIndex].targetAudience}</p>
-                                <p className="font-black text-slate-800 text-xl leading-tight">{vaccineSlides[currentIndex].vaccineName}</p>
-                                <p className="mt-1 font-bold text-[10px] text-slate-500 line-clamp-1">{vaccineSlides[currentIndex].description}</p>
+                                <p className="font-black text-[9px] text-orange-500 uppercase tracking-[0.2em]">{vaccineSlides[currentIndex].targetAudience}</p>
+                                <p className="font-black text-slate-900 text-xl leading-tight tracking-tight">{vaccineSlides[currentIndex].vaccineName}</p>
+                                <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase line-clamp-1 tracking-wider">{vaccineSlides[currentIndex].description}</p>
                             </div>
                         </motion.div>
 
-                        {/* Price/Status Badge */}
+                        {/* Status Badge */}
                         <motion.div
                             initial={{ scale: 0, rotate: 15 }}
                             animate={{ scale: 1, rotate: -12 }}
                             className="top-10 -left-10 z-40 absolute flex flex-col justify-center items-center bg-red-600 shadow-2xl border-4 border-white rounded-full w-28 h-28 text-white text-center"
                         >
-                            <span className="opacity-80 mb-1 font-black text-[9px] uppercase leading-none tracking-tighter">Status</span>
-                            <span className="font-black text-xs uppercase leading-tight">{vaccineSlides[currentIndex].status}</span>
-                            <div className="bg-white/20 mt-1 px-2 py-0.5 rounded font-bold text-[10px]">
+                            <span className="opacity-80 mb-1 font-black text-[8px] uppercase tracking-widest">Status</span>
+                            <span className="font-black text-[11px] uppercase leading-tight tracking-tighter">{vaccineSlides[currentIndex].status}</span>
+                            <div className="bg-white/20 mt-1 px-2 py-0.5 rounded font-black text-[10px]">
                                 {vaccineSlides[currentIndex].price}
                             </div>
                         </motion.div>
