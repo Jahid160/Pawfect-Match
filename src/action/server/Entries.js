@@ -1,4 +1,6 @@
+'use server'
 import { collections, dbConnect } from "@/lib/db";
+import { ObjectId } from "mongodb";
 const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
 
 export const getPending = async (email) => {
@@ -22,19 +24,19 @@ export const updateEntry = async (id, updatedData) => {
           const entryCollection = await EntryReqCollectionPromise;
           const filter = { _id: new ObjectId(id) };
 
-          // We use $set to only update the fields provided
           const updateDoc = {
                $set: updatedData,
           };
 
           const result = await entryCollection.updateOne(filter, updateDoc);
-          return result;
+
+
+          return { success: result.modifiedCount > 0 };
      } catch (err) {
           console.error("Error updating entry:", err);
-          throw err;
+          return { success: false, error: err.message };
      }
 }
-
 
 export const deleteEntry = async (id) => {
      try {
@@ -42,9 +44,9 @@ export const deleteEntry = async (id) => {
           const query = { _id: new ObjectId(id) };
 
           const result = await entryCollection.deleteOne(query);
-          return result;
+          return { success: result.deletedCount > 0 };
      } catch (err) {
           console.error("Error deleting entry:", err);
-          throw err;
+          return { success: false, error: err.message };
      }
 }

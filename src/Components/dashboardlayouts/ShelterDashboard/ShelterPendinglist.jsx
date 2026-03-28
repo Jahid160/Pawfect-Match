@@ -1,14 +1,15 @@
 "use client";
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import {
      Search, ChevronDown, ChevronLeft, ChevronRight,
-     Eye, Edit, Trash2, X, Check
+     Eye, Edit, Trash2, X, Check, Save
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { deleteEntry, updateEntry } from '@/action/server/Entries';
+import Swal from 'sweetalert2';
 
 const ShelterPendinglist = ({ pets = [] }) => {
-     // States
      const [requests, setRequests] = useState(pets);
      const [inputValue, setInputValue] = useState("");
      const [currentSpecies, setCurrentSpecies] = useState("All");
@@ -32,10 +33,56 @@ const ShelterPendinglist = ({ pets = [] }) => {
      const totalPages = Math.ceil(filteredPets.length / itemsPerPage);
      const currentData = filteredPets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-     // Delete Action
-     const handleDelete = (id) => {
-          if (confirm("Are you sure you want to delete this?")) {
-               setRequests(requests.filter(p => p._id !== id));
+     // --- DELETE HANDLER ---
+     const handleDelete = async (id) => {
+          Swal.fire({
+               title: "Are you sure?",
+               icon: "warning",
+               showCancelButton: true,
+               confirmButtonColor: "#ef4444",
+               confirmButtonText: "Yes, delete it!",
+          }).then(async (result) => {
+               if (result.isConfirmed) {
+                    try {
+                         const res = await deleteEntry(id);
+                         if (res.success) {
+                              setRequests(prev => prev.filter(p => p._id !== id));
+                              Swal.fire("Deleted!", "Entry removed successfully.", "success");
+                         } else {
+                              Swal.fire("Failed!", "Entry not found or already deleted.", "error");
+                         }
+                    } catch (err) {
+                         Swal.fire("Error!", "Could not connect to server.", "error");
+                    }
+               }
+          });
+     };
+
+     // --- UPDATE HANDLER ---
+     const handleUpdateSubmit = async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const updatedFields = Object.fromEntries(formData.entries());
+
+          try {
+               const res = await updateEntry(selectedPet._id, updatedFields);
+
+               if (res.success) {
+                    setRequests(prev => prev.map(p =>
+                         p._id === selectedPet._id ? { ...p, ...updatedFields } : p
+                    ));
+                    setIsEditModalOpen(false);
+                    Swal.fire({
+                         title: "Updated!",
+                         icon: "success",
+                         timer: 1500,
+                         showConfirmButton: false
+                    });
+               } else {
+                    Swal.fire("Error!", "No changes were made.", "info");
+               }
+          } catch (err) {
+               Swal.fire("Error!", "Update failed.", "error");
           }
      };
 
@@ -97,56 +144,90 @@ const ShelterPendinglist = ({ pets = [] }) => {
                     {/* Table Section */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                          <div className="overflow-x-auto">
-                              <table className="w-full text-left border-collapse">
-                                   <thead className="bg-slate-50 border-b border-slate-100">
+                              <table className="w-full text-left">
+                                   <thead className="bg-slate-50 border-b">
                                         <tr>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pet</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Species & Breed</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                             <th className="px-6 py-4 text-xs font-bold text-center text-slate-500 uppercase tracking-wider">Actions</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Pet</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Species & Breed</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+                                             <th className="px-6 py-4 text-xs font-bold text-center text-slate-500 uppercase">Actions</th>
                                         </tr>
                                    </thead>
-                                   <tbody className="divide-y divide-slate-100">
-                                        {currentData.length > 0 ? currentData.map((pet) => (
-                                             <tr key={pet._id} className="hover:bg-slate-50/50 transition-colors group">
+                                   <tbody className="divide-y">
+                                        {currentData.map((pet) => (
+                                             <tr key={pet._id} className="hover:bg-slate-50 transition-colors">
                                                   <td className="px-6 py-4">
                                                        <div className="flex items-center gap-4">
-                                                            <div className="relative size-12 rounded-xl overflow-hidden border border-slate-100 shadow-sm">
-                                                                 <Image
-                                                                      width={196}
-                                                                      height={196}
-                                                                      src={pet.images?.[0] || "/placeholder.png"} alt={pet.petName} className="object-cover w-full h-full" />
+                                                            <div className="relative size-12 rounded-xl overflow-hidden bg-slate-100">
+                                                                 <Image fill src={pet.images?.[0] || "/placeholder.png"} alt={pet.petName} className="object-cover" />
                                                             </div>
                                                             <div>
-                                                                 <p className="font-bold text-slate-800 text-sm">{pet.petName}</p>
+                                                                 <p className="font-bold text-sm">{pet.petName}</p>
                                                                  <p className="text-[10px] text-slate-400">ID: {pet._id.slice(-6).toUpperCase()}</p>
                                                             </div>
                                                        </div>
                                                   </td>
+                                                  <td className="px-6 py-4 text-sm font-semibold">{pet.species} <br /><span className="text-xs font-normal text-slate-400">{pet.breed}</span></td>
                                                   <td className="px-6 py-4">
-                                                       <p className="text-sm font-semibold text-slate-700">{pet.species}</p>
-                                                       <p className="text-xs text-slate-400">{pet.breed}</p>
-                                                  </td>
-                                                  <td className="px-6 py-4">
-                                                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${pet.status === 'preview' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                                                       <span className="px-3 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 uppercase italic">
                                                             {pet.status}
                                                        </span>
                                                   </td>
                                                   <td className="px-6 py-4">
                                                        <div className="flex justify-center gap-2">
-                                                            <button onClick={() => { setSelectedPet(pet); setIsViewModalOpen(true); }} className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"><Eye size={18} /></button>
-                                                            <button onClick={() => { setSelectedPet(pet); setIsEditModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit size={18} /></button>
-                                                            <button onClick={() => handleDelete(pet._id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
+                                                            <button onClick={() => { setSelectedPet(pet); setIsViewModalOpen(true); }} className="p-2 text-slate-400 hover:text-blue-500"><Eye size={18} /></button>
+
+                                                            {/* EDIT BUTTON FIXED */}
+                                                            <button onClick={() => { setSelectedPet(pet); setIsEditModalOpen(true); }} className="p-2 text-slate-400 hover:text-green-600"><Edit size={18} /></button>
+
+                                                            {/* DELETE BUTTON FIXED */}
+                                                            <button onClick={() => handleDelete(pet._id)} className="p-2 text-slate-400 hover:text-red-500"><Trash2 size={18} /></button>
                                                        </div>
                                                   </td>
                                              </tr>
-                                        )) : (
-                                             <tr>
-                                                  <td colSpan="4" className="px-6 py-20 text-center text-slate-400 text-sm">No pets found matching your filters.</td>
-                                             </tr>
-                                        )}
+                                        ))}
                                    </tbody>
                               </table>
+
+
+                              <AnimatePresence>
+                                   {isEditModalOpen && selectedPet && (
+                                        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                                             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl">
+                                                  <div className="p-6 border-b flex justify-between items-center">
+                                                       <h2 className="text-xl font-black text-slate-800 tracking-tight">Update {selectedPet.petName}</h2>
+                                                       <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all"><X size={20} /></button>
+                                                  </div>
+
+                                                  <form onSubmit={handleUpdateSubmit} className="p-6 space-y-4">
+                                                       <div className="space-y-1">
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Pet Name</label>
+                                                            <input name="petName" defaultValue={selectedPet.petName} className="w-full px-4 py-3 bg-slate-50 border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-xl outline-none transition-all font-semibold" required />
+                                                       </div>
+
+                                                       <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-1">
+                                                                 <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Species</label>
+                                                                 <select name="species" defaultValue={selectedPet.species} className="w-full px-4 py-3 bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-xl outline-none font-semibold appearance-none">
+                                                                      {speciesOptions.filter(o => o !== "All").map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                                                 </select>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                 <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Breed</label>
+                                                                 <input name="breed" defaultValue={selectedPet.breed} className="w-full px-4 py-3 bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-xl outline-none font-semibold" />
+                                                            </div>
+                                                       </div>
+
+                                                       <div className="pt-4">
+                                                            <button type="submit" className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg">
+                                                                 <Save size={18} /> Save Changes
+                                                            </button>
+                                                       </div>
+                                                  </form>
+                                             </motion.div>
+                                        </div>
+                                   )}
+                              </AnimatePresence>
                          </div>
 
                          {/* Pagination */}

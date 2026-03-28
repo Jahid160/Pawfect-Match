@@ -1,6 +1,5 @@
 import { getPending } from '@/action/server/Entries';
 import ShelterPendinglist from '@/components/dashboardlayouts/ShelterDashboard/ShelterPendinglist';
-import ShelterPetlist from '@/components/dashboardlayouts/ShelterDashboard/ShelterPetlist';
 import { authOptions } from '@/lib/authOptions';
 import { getServerSession } from 'next-auth';
 import React from 'react';
