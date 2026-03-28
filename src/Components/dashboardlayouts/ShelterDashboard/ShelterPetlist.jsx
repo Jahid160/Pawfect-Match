@@ -203,8 +203,7 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                                                             </div>
                                                             <h3 className="text-lg font-bold text-slate-800 mb-1">No Pets Found</h3>
                                                             <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
-                                                                 We couldn't find any pet entries matching your current search or filters .
-                                                                 Try adjusting your keywords.
+                                                                 We couldn't find any pet entries .
                                                             </p>
                                                        </div>
                                                   </td>
@@ -215,19 +214,25 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                          </div>
 
                          {/* Pagination */}
-                         <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
-                              <div className="text-xs text-slate-500">
-                                   Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+
+                         {requests.length > 0 &&
+
+                              <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+                                   <div className="text-xs text-slate-500">
+                                        Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+                                   </div>
+                                   <div className="flex gap-2">
+                                        <button disabled={currentPage <= 1} onClick={() => updateQueryParams({ page: currentPage - 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
+                                             <ChevronLeft size={14} /> Previous
+                                        </button>
+                                        <button disabled={currentPage >= totalPages} onClick={() => updateQueryParams({ page: currentPage + 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
+                                             Next <ChevronRight size={14} />
+                                        </button>
+                                   </div>
                               </div>
-                              <div className="flex gap-2">
-                                   <button disabled={currentPage <= 1} onClick={() => updateQueryParams({ page: currentPage - 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
-                                        <ChevronLeft size={14} /> Previous
-                                   </button>
-                                   <button disabled={currentPage >= totalPages} onClick={() => updateQueryParams({ page: currentPage + 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
-                                        Next <ChevronRight size={14} />
-                                   </button>
-                              </div>
-                         </div>
+
+                         }
+
                     </div>
                </div>
 
