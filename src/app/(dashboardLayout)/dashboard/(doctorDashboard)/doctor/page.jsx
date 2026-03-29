@@ -1,7 +1,6 @@
 import DoctorDashboardHome from '@/Components/dashboardlayouts/DoctorDashboard/DoctorDashboardHome';
 import { getAppointmentsOrders, getCompletedOrdersHistory } from "@/action/doctorServerDash/vaccin";
 
-// ডাটা যেন সবসময় ফ্রেশ আসে তার জন্য এই লাইনটি জরুরি
 export const dynamic = "force-dynamic"; 
 
 const DoctorPage = async () => {

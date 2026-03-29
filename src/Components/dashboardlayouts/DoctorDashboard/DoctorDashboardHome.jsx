@@ -8,7 +8,6 @@ import {
 
 const DoctorDashboardHome = ({ stats }) => {
   
-  // ক্লায়েন্ট সাইড কনসোল লগ (ব্রাউজারের Inspect > Console এ চেক করবেন)
   useEffect(() => {
     console.log("Stats received in Client:", stats);
   }, [stats]);
