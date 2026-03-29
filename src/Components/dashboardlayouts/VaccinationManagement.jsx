@@ -1,35 +1,46 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, Plus, AlertCircle, Calendar,
-  CheckCircle2, Clock, FileText,
-  UserCheck, Stethoscope,
-  CircleCheckBig
-} from 'lucide-react';
+  Search,
+  Plus,
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  FileText,
+  UserCheck,
+  Stethoscope,
+  CircleCheckBig,
+  ClipboardClock,
+} from "lucide-react";
 import { adminAcceptOrder, doctorScheduleOrder } from "@/action/server/orders";
 import { toast } from "react-hot-toast";
+
 
 const VaccinationManagement = ({ initialOrders = [] }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [orders, setOrders] = useState(initialOrders);
-
+  console.log(orders);
   useEffect(() => {
     setOrders(initialOrders);
   }, [initialOrders]);
-
 
   const handleAdminAccept = async (id) => {
     console.log(id);
     const previousOrders = [...orders];
     try {
       // Optimistic Update
-      setOrders(prev => prev.map(order =>
-        order._id === id ? { ...order, status: "AdminAccepted", adminAccepted: true } : order
-      ));
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === id
+            ? { ...order, status: "AdminAccepted", adminAccepted: true }
+            : order,
+        ),
+      );
 
       const res = await adminAcceptOrder(id);
       if (res.success) {
@@ -52,14 +63,18 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
     optimisticDeadline.setDate(optimisticDeadline.getDate() + parseInt(days));
 
     try {
-      setOrders(prev => prev.map(order =>
-        order._id === id ? {
-          ...order,
-          status: "DoctorAccepted",
-          doctorAssigned: true,
-          deadlineDate: optimisticDeadline.toISOString()
-        } : order
-      ));
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === id
+            ? {
+                ...order,
+                status: "DoctorAccepted",
+                doctorAssigned: true,
+                deadlineDate: optimisticDeadline.toISOString(),
+              }
+            : order,
+        ),
+      );
 
       const res = await doctorScheduleOrder(id, days);
       if (res.success) {
@@ -77,19 +92,35 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
 
   const getStatusInfo = (order) => {
     if (order.isCompleted || order.status === "Completed") {
-      return { label: "Completed", color: "bg-emerald-50 text-emerald-600", icon: <CheckCircle2 size={12} /> };
+      return {
+        label: "Completed",
+        color: "bg-emerald-50 text-emerald-600",
+        icon: <CheckCircle2 size={12} />,
+      };
     }
     if (order.deadlineDate) {
       const isOverdue = new Date() > new Date(order.deadlineDate);
       return isOverdue
-        ? { label: "Overdue", color: "bg-rose-50 text-rose-600 animate-pulse", icon: <AlertCircle size={12} /> }
-        : { label: "Upcoming", color: "bg-blue-50 text-blue-600", icon: <Clock size={12} /> };
+        ? {
+            label: "Overdue",
+            color: "bg-rose-50 text-rose-600 animate-pulse",
+            icon: <AlertCircle size={12} />,
+          }
+        : {
+            label: "Upcoming",
+            color: "bg-blue-50 text-blue-600",
+            icon: <Clock size={12} />,
+          };
     }
-    return { label: order.status || "Pending", color: "bg-slate-100 text-slate-500", icon: <Clock size={12} /> };
+    return {
+      label: order.status || "Pending",
+      color: "bg-slate-100 text-slate-500",
+      icon: <Clock size={12} />,
+    };
   };
 
-  const filteredOrders = orders.filter(order =>
-    order.vaccineName?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrders = orders.filter((order) =>
+    order.vaccineName?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -97,7 +128,10 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
       {/* HEADER */}
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-10">
         <h1 className="font-black text-slate-900 text-4xl tracking-tight">
-          Vaccination <span className="text-blue-600 underline decoration-8 decoration-blue-100 underline-offset-[-2px]">Registry</span>
+          Vaccination{" "}
+          <span className="text-primary underline decoration-8 decoration-blue-100 underline-offset-[-2px]">
+            Registry
+          </span>
         </h1>
       </div>
 
@@ -114,7 +148,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              <AnimatePresence mode='popLayout'>
+              <AnimatePresence mode="popLayout">
                 {filteredOrders.map((order) => {
                   const status = getStatusInfo(order);
                   return (
@@ -128,35 +162,49 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                     >
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="bg-slate-100 rounded-xl p-2.5 text-blue-600 font-bold">
+                          <div className="bg-slate-100 rounded-xl p-2.5 text-primary font-bold">
                             <FileText size={20} />
                           </div>
                           <div>
-                            <p className="font-black text-slate-800 text-sm">{order.vaccineName}</p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: {order._id.slice(-6)}</p>
+                            <p className="font-black text-slate-800 text-sm">
+                              {order.vaccineName}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+                              ID: {order._id.slice(-6)}
+                            </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5 text-center">
-                        <p className={`text-xs font-black ${status.label === 'Overdue' ? 'text-rose-500' : 'text-slate-700'}`}>
+                        <p
+                          className={`text-xs font-black ${status.label === "Overdue" ? "text-rose-500" : "text-slate-700"}`}
+                        >
                           {order.deadlineDate
-                            ? new Date(order.deadlineDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                            ? new Date(order.deadlineDate).toLocaleDateString(
+                                "en-GB",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )
                             : "Waiting..."}
                         </p>
                       </td>
                       <td className="px-6 py-5 text-center">
-                        <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase inline-flex items-center gap-2 ${status.color}`}>
+                        <span
+                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase inline-flex items-center gap-2 ${status.color}`}
+                        >
                           {status.icon} {status.label}
                         </span>
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex justify-end gap-2">
-
                           {/* 1. Accept Button*/}
                           {(order.status === "Pending" || !order.status) && (
                             <button
                               onClick={() => handleAdminAccept(order._id)}
-                              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-100"
+                              className="flex items-center gap-2 bg-primary hover:bg-orange-700 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-100"
                             >
                               <UserCheck size={14} /> Accept Order
                             </button>
@@ -166,13 +214,17 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                           {order.status === "AdminAccepted" && (
                             <div className="flex gap-2">
                               <button
-                                onClick={() => handleDoctorSchedule(order._id, 2)}
+                                onClick={() =>
+                                  handleDoctorSchedule(order._id, 2)
+                                }
                                 className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-lg"
                               >
                                 2 Days
                               </button>
                               <button
-                                onClick={() => handleDoctorSchedule(order._id, 7)}
+                                onClick={() =>
+                                  handleDoctorSchedule(order._id, 7)
+                                }
                                 className="bg-slate-800 hover:bg-black text-white text-[10px] font-black px-4 py-2 rounded-xl"
                               >
                                 7 Days
@@ -180,16 +232,28 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                             </div>
                           )}
 
-
                           {/* ৩. Completed/Doctor Assigned Icon */}
-                          {(order.status === "DoctorAccepted" || order.status === "Completed" || order.status === "Completing") ? (
+                          {(order.status === "Completing" ||
+                            order.status === "Approving") && (
                             <div className="bg-emerald-50 text-orange-300 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
                               <CheckCircle2 size={16} /> Assigned
                             </div>
-                          ) : <div className="bg-emerald-50 text-green-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
-                            <CircleCheckBig size={16} /> Completed
-                          </div>}
-
+                          )}
+                          {order.status === "Pending" && (
+                            <div className="bg-emerald-50 text-orange-300 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                              <CheckCircle2 size={16} /> Pending
+                            </div>
+                          )}
+                          {order.status === "Completed" && (
+                            <div className="bg-emerald-50 text-green-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                              <CircleCheckBig size={16} /> Completed
+                            </div>
+                          )}
+                          {order.status === "Processing" && (
+                            <div className="bg-emerald-50 text-black p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                              <ClipboardClock  size={16} /> Processing
+                            </div>
+                          )}
                         </div>
                       </td>
                     </motion.tr>

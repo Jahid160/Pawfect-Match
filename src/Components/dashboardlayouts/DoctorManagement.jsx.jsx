@@ -12,9 +12,11 @@ import { useRouter } from "next/navigation";
 
 const DoctorManagement = ({ allOrders = [] }) => {
   const router = useRouter();
-  console.log(allOrders);
-  const pendingVaccinations = allOrders.filter(order => order.status === "Processing");
+
+  const pendingVaccinations = allOrders.filter(order => order.status === "Pending");
   const activeSchedules = allOrders.filter(order => order.status === "Processing" && !order.isCompleted);
+  
+
   const completedOrders = allOrders.filter(order => order.status === "Completed" || order.isCompleted);
 
   const doctors = [
