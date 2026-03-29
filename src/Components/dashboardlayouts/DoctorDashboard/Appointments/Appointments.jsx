@@ -1,142 +1,264 @@
-import React from 'react';
-import { 
-  CalendarDays, Clock, User, CheckCircle2, 
-  XCircle, Filter, Search, MoreVertical 
-} from 'lucide-react';
+"use client";
+import React, { useState } from "react";
+import {
+  CalendarDays,
+  Clock,
+  User,
+  CheckCircle2,
+  XCircle,
+  Filter,
+  Search,
+  Eye,
+  MapPin,
+  Mail,
+  MoreHorizontal,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import AppointmentModal from "./AppointmentModal";
+import { completedOrder, deleteOrder } from "@/action/doctorServerDash/vaccin";
 
-const Appointments = () => {
-  // ডাটাবেজ থেকে ডাটা না আসা পর্যন্ত এই ডামি ডাটা ব্যবহার করুন
-  const appointmentList = [
-    { 
-      id: "APT-7821", 
-      petName: "Max", 
-      breed: "Golden Retriever", 
-      owner: "MD SHAKIL", 
-      time: "10:30 AM", 
-      date: "28 Mar", 
-      status: "Confirmed", 
-      type: "Vaccination" 
-    },
-    { 
-      id: "APT-7822", 
-      petName: "Luna", 
-      breed: "Persian Cat", 
-      owner: "Jahid Hasan", 
-      time: "12:00 PM", 
-      date: "28 Mar", 
-      status: "Pending", 
-      type: "Checkup" 
-    },
-    { 
-      id: "APT-7823", 
-      petName: "Rocky", 
-      breed: "German Shepherd", 
-      owner: "Ariful Islam", 
-      time: "03:15 PM", 
-      date: "29 Mar", 
-      status: "Confirmed", 
-      type: "Surgery" 
-    },
-  ];
+const Appointments = ({ appointments = [] }) => {
+  const [selectedApt, setSelectedApt] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState(null);
+  const displayData = appointments.length > 0 ? appointments : [];
+
+  const handleAccept = async (id) => {
+    // Set loading for the specific row being clicked
+    setLoadingId(id);
+
+    try {
+      // Direct call to your server action
+      const response = await completedOrder(id);
+
+      if (response.success) {
+        // Force refresh to update UI based on revalidatePath in server action
+        router.refresh();
+        console.log("Status updated: Completed");
+      } else {
+        console.error("Update failed:", response.message);
+      }
+    } catch (error) {
+      console.error("Execution error:", error);
+    } finally {
+      // Clear loading state after process is done
+      setLoadingId(null);
+    }
+  };
+  
+  const handleReject = async (id) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to reject this appointment?",
+    );
+
+    if (!isConfirmed) return;
+
+    setLoadingId(id);
+
+    try {
+      const response = await deleteOrder(id);
+
+      if (response.success) {
+        router.refresh(); // Sync UI with server data
+        console.log("Appointment rejected and deleted.");
+      } else {
+        alert(response.message || "Something went wrong.");
+      }
+    } catch (error) {
+      console.error("Execution error:", error);
+      alert("Connection failed. Could not reject the order.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+  const handleEye = (data) => {
+    setSelectedApt(data);
+    setIsModalOpen(true);
+  };
 
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-screen font-sans">
-      {/* Top Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">
-            Appointments <span className="text-orange-500 text-sm align-top">● Live</span>
-          </h1>
-          <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">
-            Manage your medical schedule & pet consultations
+    <div className="p-4 md:p-10 bg-base-200 min-h-screen font-sans">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl font-black text-neutral tracking-tight uppercase">
+              Appointment <span className="text-primary">Registry</span>
+            </h1>
+            <p className="text-neutral/40 font-bold text-[10px] uppercase tracking-[0.3em] mt-1">
+              Internal Medical Record System v2.0
+            </p>
+          </div>
+
+          <div className="flex gap-3 w-full md:w-auto">
+            <div className="relative flex-1">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral/30"
+                size={18}
+              />
+              <input
+                type="text"
+                placeholder="Filter by name, email or vaccine..."
+                className="input input-bordered bg-base-100 border-none rounded-2xl w-full md:w-80 font-medium shadow-sm focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button className="btn btn-square bg-base-100 border-none hover:bg-base-300 shadow-sm">
+              <Filter size={20} className="text-neutral/60" />
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="bg-base-100 rounded-[2.5rem] shadow-xl overflow-hidden border border-base-300">
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full border-separate border-spacing-0">
+              {/* Table Head */}
+              <thead className="bg-base-200/50">
+                <tr className="text-neutral/40 border-b border-base-300">
+                  <th className="py-6 px-8 text-[10px] font-black uppercase tracking-widest">
+                    Patient Details
+                  </th>
+                  <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">
+                    Vaccine Info
+                  </th>
+                  <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">
+                    Deadline
+                  </th>
+                  <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">
+                    Status
+                  </th>
+                  <th className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-right">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+
+              {/* Table Body */}
+              <tbody className="text-neutral">
+                {displayData.map((apt) => (
+                  <tr
+                    key={apt._id}
+                    className="hover:bg-primary/5 transition-colors group"
+                  >
+                    {/* Patient Info */}
+                    <td className="py-5 px-8">
+                      <div className="flex items-center gap-4">
+                        <div className="avatar">
+                          <div className="mask mask-squircle w-12 h-12">
+                            <img src={apt.userImage} alt={apt.userName} />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-black text-sm leading-none mb-1 group-hover:text-primary transition-colors">
+                            {apt.userName}
+                          </p>
+                          <p className="text-[10px] font-bold text-neutral/40 flex items-center gap-1">
+                            <Mail size={10} /> {apt.userEmail}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Vaccine Info */}
+                    <td className="py-5 px-6 text-center">
+                      <div className="badge badge-outline border-base-300 font-bold text-[11px] px-4 py-3">
+                        {apt.vaccineName}
+                      </div>
+                    </td>
+
+                    {/* Deadline */}
+                    <td className="py-5 px-6 text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs font-black text-neutral/70">
+                          {new Date(apt.deadlineDate).toLocaleDateString(
+                            "en-GB",
+                            { day: "2-digit", month: "short", year: "numeric" },
+                          )}
+                        </span>
+                        <span className="text-[9px] font-bold text-primary uppercase tracking-tighter">
+                          Fast-Track
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-5 px-6 text-center">
+                      <span
+                        className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                          apt.status === "Completing"
+                            ? "bg-info/10 border-info text-info"
+                            : "bg-primary/10 border-primary text-primary"
+                        }`}
+                      >
+                        {apt.status}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-5 px-8">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleAccept(apt._id)}
+                          className="btn btn-sm btn-success text-white text-[9px] font-black uppercase rounded-xl px-4 hover:scale-105"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleReject(apt._id)}
+                          className="btn btn-sm btn-ghost text-error hover:bg-error/10 rounded-xl"
+                        >
+                          <XCircle size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleEye(apt)}
+                          className="btn btn-sm btn-circle bg-base-200 border-none hover:bg-neutral hover:text-white"
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Table Footer / Empty State */}
+          {displayData.length === 0 && (
+            <div className="p-20 text-center bg-base-100">
+              <CalendarDays size={48} className="mx-auto text-base-300 mb-4" />
+              <p className="text-neutral/30 font-black uppercase tracking-widest text-sm">
+                No Appointments Logged
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination Placeholder*/}
+        <div className="flex justify-between items-center mt-8 px-4">
+          <p className="text-[10px] font-black text-neutral/30 uppercase">
+            Showing {displayData.length} entries
           </p>
-        </div>
-        
-        <div className="flex gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search appointments..." 
-              className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 w-64 font-medium"
-            />
+          <div className="join">
+            <button className="join-item btn btn-sm bg-base-100 border-base-300">
+              Previous
+            </button>
+            <button className="join-item btn btn-sm bg-primary text-white border-none">
+              1
+            </button>
+            <button className="join-item btn btn-sm bg-base-100 border-base-300">
+              Next
+            </button>
           </div>
-          <button className="p-2.5 bg-white border border-slate-200 rounded-2xl text-slate-500 hover:bg-slate-50 transition-all">
-            <Filter size={20} />
-          </button>
         </div>
       </div>
 
-      {/* Appointment Cards Grid */}
-      <div className="grid grid-cols-1 gap-4">
-        {appointmentList.map((apt) => (
-          <div 
-            key={apt.id} 
-            className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-center justify-between group"
-          >
-            {/* Left: Pet & Owner Info */}
-            <div className="flex items-center gap-6 w-full md:w-auto">
-              <div className="h-16 w-16 bg-orange-50 rounded-[1.8rem] flex items-center justify-center text-orange-600 font-black text-xl group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
-                {apt.petName[0]}
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-black text-slate-800 text-lg leading-none">{apt.petName}</h3>
-                  <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter">
-                    {apt.breed}
-                  </span>
-                </div>
-                <p className="text-sm text-slate-400 font-bold flex items-center gap-1">
-                  <User size={14} className="text-orange-400" /> {apt.owner}
-                  <span className="mx-2 text-slate-200">|</span>
-                  <span className="text-orange-500/80 italic">{apt.type}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Middle: Time & Date */}
-            <div className="flex items-center gap-12 my-4 md:my-0">
-              <div className="text-center md:text-right">
-                <p className="font-black text-slate-800 text-xl flex items-center gap-2 tracking-tight">
-                  <Clock size={18} className="text-orange-500" /> {apt.time}
-                </p>
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
-                  Scheduled: {apt.date}
-                </p>
-              </div>
-
-              <div className="hidden lg:block">
-                <span className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest ${
-                  apt.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'
-                }`}>
-                  {apt.status}
-                </span>
-              </div>
-            </div>
-
-            {/* Right: Actions */}
-            <div className="flex items-center gap-3 w-full md:w-auto justify-end border-t md:border-t-0 pt-4 md:pt-0">
-              <button className="flex-1 md:flex-none px-6 py-3 bg-emerald-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
-                <CheckCircle2 size={16} /> Accept
-              </button>
-              <button className="p-3 bg-rose-50 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm">
-                <XCircle size={20} />
-              </button>
-              <button className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-200 transition-all">
-                <MoreVertical size={20} />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Empty State (Optional) */}
-      {appointmentList.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
-          <CalendarDays size={48} className="mx-auto text-slate-200 mb-4" />
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No Appointments Found for Today</p>
-        </div>
-      )}
+      <AppointmentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        data={selectedApt}
+      />
     </div>
   );
 };
