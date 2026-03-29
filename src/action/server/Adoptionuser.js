@@ -20,7 +20,7 @@ const generateId = () => {
 
 export const createAdoptionUser = async (data) => {
   try {
-    let user;
+    let user; 
     try {
       user = await userVerifyAuth();
     } catch (error) {
