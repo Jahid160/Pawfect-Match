@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, Plus, AlertCircle, Calendar, 
+import {
+  Search, Plus, AlertCircle, Calendar,
   CheckCircle2, Clock, FileText,
   UserCheck, Stethoscope,
   CircleCheckBig
@@ -21,13 +21,13 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
     setOrders(initialOrders);
   }, [initialOrders]);
 
-  // --- হ্যান্ডলার: অ্যাডমিন একসেপ্ট ---
+
   const handleAdminAccept = async (id) => {
     console.log(id);
     const previousOrders = [...orders];
     try {
       // Optimistic Update
-      setOrders(prev => prev.map(order => 
+      setOrders(prev => prev.map(order =>
         order._id === id ? { ...order, status: "AdminAccepted", adminAccepted: true } : order
       ));
 
@@ -45,26 +45,26 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
     }
   };
 
-  // --- হ্যান্ডলার: ডক্টর শিডিউল ---
+
   const handleDoctorSchedule = async (id, days) => {
     const previousOrders = [...orders];
     const optimisticDeadline = new Date();
     optimisticDeadline.setDate(optimisticDeadline.getDate() + parseInt(days));
 
     try {
-      setOrders(prev => prev.map(order => 
-        order._id === id ? { 
-          ...order, 
-          status: "DoctorAccepted", 
-          doctorAssigned: true, 
-          deadlineDate: optimisticDeadline.toISOString() 
+      setOrders(prev => prev.map(order =>
+        order._id === id ? {
+          ...order,
+          status: "DoctorAccepted",
+          doctorAssigned: true,
+          deadlineDate: optimisticDeadline.toISOString()
         } : order
       ));
 
       const res = await doctorScheduleOrder(id, days);
       if (res.success) {
         toast.success(`Scheduled for ${days} days`);
-        router.refresh(); 
+        router.refresh();
       } else {
         setOrders(previousOrders);
         toast.error("Failed to update server");
@@ -77,18 +77,18 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
 
   const getStatusInfo = (order) => {
     if (order.isCompleted || order.status === "Completed") {
-      return { label: "Completed", color: "bg-emerald-50 text-emerald-600", icon: <CheckCircle2 size={12}/> };
+      return { label: "Completed", color: "bg-emerald-50 text-emerald-600", icon: <CheckCircle2 size={12} /> };
     }
     if (order.deadlineDate) {
       const isOverdue = new Date() > new Date(order.deadlineDate);
-      return isOverdue 
-        ? { label: "Overdue", color: "bg-rose-50 text-rose-600 animate-pulse", icon: <AlertCircle size={12}/> }
-        : { label: "Upcoming", color: "bg-blue-50 text-blue-600", icon: <Clock size={12}/> };
+      return isOverdue
+        ? { label: "Overdue", color: "bg-rose-50 text-rose-600 animate-pulse", icon: <AlertCircle size={12} /> }
+        : { label: "Upcoming", color: "bg-blue-50 text-blue-600", icon: <Clock size={12} /> };
     }
-    return { label: order.status || "Pending", color: "bg-slate-100 text-slate-500", icon: <Clock size={12}/> };
+    return { label: order.status || "Pending", color: "bg-slate-100 text-slate-500", icon: <Clock size={12} /> };
   };
 
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = orders.filter(order =>
     order.vaccineName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -118,7 +118,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                 {filteredOrders.map((order) => {
                   const status = getStatusInfo(order);
                   return (
-                    <motion.tr 
+                    <motion.tr
                       key={order._id}
                       layout
                       initial={{ opacity: 0 }}
@@ -139,8 +139,8 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                       </td>
                       <td className="px-6 py-5 text-center">
                         <p className={`text-xs font-black ${status.label === 'Overdue' ? 'text-rose-500' : 'text-slate-700'}`}>
-                          {order.deadlineDate 
-                            ? new Date(order.deadlineDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                          {order.deadlineDate
+                            ? new Date(order.deadlineDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
                             : "Waiting..."}
                         </p>
                       </td>
@@ -151,27 +151,27 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex justify-end gap-2">
-                          
+
                           {/* 1. Accept Button*/}
                           {(order.status === "Pending" || !order.status) && (
-                            <button 
+                            <button
                               onClick={() => handleAdminAccept(order._id)}
                               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-100"
                             >
-                              <UserCheck size={14}/> Accept Order
+                              <UserCheck size={14} /> Accept Order
                             </button>
                           )}
 
                           {/* 2. Schedule Buttons */}
                           {order.status === "AdminAccepted" && (
                             <div className="flex gap-2">
-                              <button 
+                              <button
                                 onClick={() => handleDoctorSchedule(order._id, 2)}
                                 className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-lg"
                               >
                                 2 Days
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleDoctorSchedule(order._id, 7)}
                                 className="bg-slate-800 hover:bg-black text-white text-[10px] font-black px-4 py-2 rounded-xl"
                               >
@@ -179,16 +179,16 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                               </button>
                             </div>
                           )}
-                          
+
 
                           {/* ৩. Completed/Doctor Assigned Icon */}
-                          {(order.status === "DoctorAccepted" || order.status === "Completed" || order.status === "Completing")  ?  (
-                             <div className="bg-emerald-50 text-orange-300 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
-                               <CheckCircle2 size={16} /> Assigned
-                             </div>
+                          {(order.status === "DoctorAccepted" || order.status === "Completed" || order.status === "Completing") ? (
+                            <div className="bg-emerald-50 text-orange-300 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                              <CheckCircle2 size={16} /> Assigned
+                            </div>
                           ) : <div className="bg-emerald-50 text-green-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
-                               <CircleCheckBig  size={16} /> Completed
-                             </div>}
+                            <CircleCheckBig size={16} /> Completed
+                          </div>}
 
                         </div>
                       </td>

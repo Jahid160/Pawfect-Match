@@ -4,7 +4,7 @@ import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 
-// ১. Create Accessory
+//  Create Accessory
 export const createAccessory = async (data) => {
   try {
     const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
@@ -32,7 +32,7 @@ export const createAccessory = async (data) => {
     };
 
     const result = await accessoriesCollection.insertOne(newAccessory);
-    
+
     revalidatePath("/pet-accessories");
     revalidatePath("/dashboard/accessories-management");
 
@@ -47,7 +47,7 @@ export const createAccessory = async (data) => {
   }
 };
 
-// ২. Get All Accessories
+//  Get All Accessories
 export const getPetAccessories = async () => {
   try {
     const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
@@ -68,7 +68,7 @@ export const getPetAccessories = async () => {
   }
 };
 
-// ৩. Get Single Accessory
+//  Get Single Accessory
 export const getSingleAccessory = async (id) => {
   try {
     if (!id || !ObjectId.isValid(id)) return null;
@@ -90,11 +90,11 @@ export const getSingleAccessory = async (id) => {
   }
 };
 
-// ৪. Get Sales Statistics
+// Get Sales Statistics
 export const getSalesStats = async () => {
   try {
     const ordersCollection = await dbConnect(collections.ORDERS || "orders");
-    
+
     const orders = await ordersCollection
       .find({})
       .sort({ createdAt: -1 })
@@ -146,9 +146,9 @@ export const updateAccessory = async (id, data) => {
     revalidatePath("/pet-accessories");
     revalidatePath("/dashboard/accessories-management");
 
-    return { 
-      success: result.modifiedCount > 0 || result.matchedCount > 0, 
-      message: "Updated successfully" 
+    return {
+      success: result.modifiedCount > 0 || result.matchedCount > 0,
+      message: "Updated successfully"
     };
   } catch (error) {
     console.error("updateAccessory error:", error);
@@ -156,7 +156,7 @@ export const updateAccessory = async (id, data) => {
   }
 };
 
-// ৬. Delete Accessory
+// Delete Accessory
 export const deleteAccessory = async (id) => {
   try {
     if (!id || !ObjectId.isValid(id)) return { success: false, error: "Invalid ID" };
@@ -174,7 +174,7 @@ export const deleteAccessory = async (id) => {
   }
 };
 
-// ৭. Reduce Stock on Purchase
+//  Reduce Stock on Purchase
 export const reduceAccessoryStock = async (items = []) => {
   try {
     if (!items.length) return { success: false };
@@ -188,9 +188,9 @@ export const reduceAccessoryStock = async (items = []) => {
       const quantity = Number(item.quantity) || 1;
 
       await accessoriesCollection.updateOne(
-        { 
-          _id: new ObjectId(idStr), 
-          stock: { $gte: quantity } 
+        {
+          _id: new ObjectId(idStr),
+          stock: { $gte: quantity }
         },
         [
           {

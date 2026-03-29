@@ -8,7 +8,7 @@ export const useSavedState = (pet, toggleAction) => {
   const [isSaved, setIsSaved] = useState(false);
   const [count, setCount] = useState(pet?.saveCount || 0);
 
-  // একটা রেফারেন্স রাখছি যাতে আগের টাইমারটা ট্র্যাক করা যায়
+
   const debounceTimer = useRef(null);
 
   useEffect(() => {
