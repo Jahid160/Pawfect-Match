@@ -90,7 +90,6 @@ export const getShelterDashboardStats = async () => {
       name: monthNames[item._id.month - 1],
       count: item.count,
     }));
-
     return {
       success: true,
       data: {
