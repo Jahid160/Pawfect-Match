@@ -106,7 +106,7 @@ const ManagePets = ({ initialPets }) => {
     }
   };
 
-  // ✅ Reject Logic Updated to notify user
+  //  Reject Logic Updated to notify user
   const handleReject = async (pet) => {
     const id = pet._id;
     const code = pet.adoptionCode;
