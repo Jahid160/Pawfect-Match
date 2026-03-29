@@ -2,7 +2,7 @@
 
 import { userVerifyAuth } from "@/lib/userVerifyAuth";
 import { ObjectId } from "mongodb";
-import { createNotification } from "@/action/server/notifications"; // notification action-ta import korlam
+import { createNotification } from "@/action/server/notifications";
 
 const { dbConnect, collections } = require("@/lib/db");
 
@@ -28,15 +28,14 @@ export const createAdoptionUser = async (data) => {
     }
 
     const userEmail = user.email;
-    const userName = user.name || "A User"; // User-er naam nichi notification-e dekhate
+    const userId = user.id || user._id;
+    const userName = user.name || "A User";
 
     const adoptionCollection = await adoptionCollectionPromise;
     const petCollection = await petCollectionPromise;
 
-    // ✅ generate 10 character id
     const adoptionId = generateId();
 
-    // 1. Pet-er status update kora
     await petCollection.updateOne(
       { _id: new ObjectId(data.petId) },
       {
@@ -49,21 +48,27 @@ export const createAdoptionUser = async (data) => {
       },
     );
 
-    // 2. Adoption Request save kora
     const result = await adoptionCollection.insertOne({
       ...data,
+      userId: userId,
       adoptionCode: adoptionId,
       status: "pending",
       adoptedUserTime: new Date(),
     });
 
-    // ✅ 3. Admin Notification Create Kora (THIS WAS MISSING)
     if (result.insertedId) {
       await createNotification({
         title: "New Adoption Request",
-        message: `${userName} sent a request to adopt a pet (Code: ${adoptionId}). Check it out!`,
-        type: "adoption", // Navbar-er icon logic match korbe
+        message: `${userName} sent a request for adoption (Code: ${adoptionId}).`,
+        type: "adoption",
         receiverRole: "admin",
+      });
+
+      await createNotification({
+        title: "Adoption Request Pending",
+        message: `Your request for adoption (Code: ${adoptionId}) has been received. Please wait for approval.`,
+        type: "adoption",
+        receiverId: userId,
       });
     }
 
