@@ -6,6 +6,26 @@ import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
+export const getCompletedOrdersHistory = async () => {
+  await doctorAuth();
+
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return { success: false, message: "Doctor not authenticated" };
+  }
+  try {
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const orders = await orderCollection
+      .find({doctorEmail: session.user.email, status: "Completed"})
+      .sort({ createdAt: -1 })
+      .toArray();
+    return JSON.parse(JSON.stringify(orders));
+  } catch (error) {
+    return [];
+  }
+};
+
 export const getAppointmentsOrders = async () => {
   await doctorAuth();
   try {
@@ -67,10 +87,10 @@ export const deleteOrder = async (id) => {
 
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
-    
+
     // Fixed: Use 'id' which is passed as parameter
     const result = await orderCollection.deleteOne({
-      _id: new ObjectId(id), 
+      _id: new ObjectId(id),
     });
 
     if (result.deletedCount > 0) {
@@ -79,7 +99,7 @@ export const deleteOrder = async (id) => {
       revalidatePath("/dashboard/doctor");
       return { success: true, message: "Appointment rejected successfully" };
     }
-    
+
     return { success: false, message: "Order not found" };
   } catch (error) {
     console.error("Delete Error:", error);
