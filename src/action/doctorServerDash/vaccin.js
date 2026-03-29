@@ -17,7 +17,7 @@ export const getCompletedOrdersHistory = async () => {
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const orders = await orderCollection
-      .find({doctorEmail: session.user.email, status: "Completed"})
+      .find({ doctorEmail: session.user.email, status: "Completed" })
       .sort({ createdAt: -1 })
       .toArray();
     return JSON.parse(JSON.stringify(orders));

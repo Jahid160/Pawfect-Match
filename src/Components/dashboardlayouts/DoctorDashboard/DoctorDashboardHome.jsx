@@ -1,113 +1,128 @@
-import React from 'react';
+"use client";
+import React, { useEffect } from 'react';
+import { Clock, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 import { 
-  ClipboardList, 
-  Hourglass, 
-  CheckCircle2, 
-  AlertCircle, 
-  TrendingUp,
-  Calendar
-} from 'lucide-react';
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, Cell 
+} from 'recharts';
 
-const DoctorDashboardHome = () => {
-  // ডামি ডাটা
-  const stats = [
-    {
-      id: 1,
-      label: "Pending Requests",
-      value: "12",
-      icon: <Hourglass size={24} />,
-      bgColor: "bg-orange-500",
-      shadowColor: "shadow-orange-100"
-    },
-    {
-      id: 2,
-      label: "Completed",
-      value: "25",
-      icon: <CheckCircle2 size={24} />,
-      bgColor: "bg-emerald-500",
-      shadowColor: "shadow-emerald-100"
-    },
-    {
-      id: 3,
-      label: "Overdue",
-      value: "05",
-      icon: <AlertCircle size={24} />,
-      bgColor: "bg-rose-500",
-      shadowColor: "shadow-rose-100"
-    }
+const DoctorDashboardHome = ({ stats }) => {
+  
+  // ক্লায়েন্ট সাইড কনসোল লগ (ব্রাউজারের Inspect > Console এ চেক করবেন)
+  useEffect(() => {
+    console.log("Stats received in Client:", stats);
+  }, [stats]);
+
+  // যদি stats না আসে তবে ০ সেট হবে
+  const pendingCount = stats?.pending || 0;
+  const completedCount = stats?.completed || 0;
+  const overdueCount = stats?.overdue || 0;
+
+  const chartData = [
+    { name: 'Pending', value: pendingCount, color: '#570df8' },
+    { name: 'Completed', value: completedCount, color: '#36d399' },
+    { name: 'Overdue', value: overdueCount, color: '#f87272' },
   ];
 
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-screen">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-10">
-        <div className="flex items-center gap-4">
-          <div className="bg-orange-500 p-3 rounded-2xl shadow-lg shadow-orange-100 text-white">
-            <ClipboardList size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Doctor Panel</h1>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Vaccination Insights</p>
-          </div>
-        </div>
+    <div className="p-4 md:p-10 bg-base-200 min-h-screen">
+      <div className="max-w-7xl mx-auto">
         
-        <div className="bg-white px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-          <Calendar size={18} className="text-orange-500" />
-          <span className="text-sm font-black text-slate-600">29 Mar 2026</span>
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-4xl font-black text-neutral tracking-tight uppercase">
+            Doctor <span className="text-primary">Dashboard</span>
+          </h1>
+          <p className="text-neutral/40 font-bold text-[10px] uppercase tracking-widest mt-1">
+            Live Statistics & Analytics
+          </p>
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        {stats.map((stat) => (
-          <div 
-            key={stat.id} 
-            className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-xl transition-all duration-500 group relative overflow-hidden"
-          >
-            <div className="flex flex-col items-center text-center relative z-10">
-              <div className={`${stat.bgColor} p-4 rounded-2xl text-white mb-4 shadow-lg ${stat.shadowColor} group-hover:scale-110 transition-transform duration-300`}>
-                {stat.icon}
-              </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
-                {stat.label}
-              </p>
-              <h2 className="text-4xl font-black text-slate-800">{stat.value}</h2>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <StatCard 
+            title="Pending Requests" 
+            value={pendingCount} 
+            icon={<Clock size={24} />} 
+            color="border-primary text-primary" 
+          />
+          <StatCard 
+            title="Completed" 
+            value={completedCount} 
+            icon={<CheckCircle2 size={24} />} 
+            color="border-success text-success" 
+          />
+          <StatCard 
+            title="Overdue" 
+            value={overdueCount} 
+            icon={<AlertCircle size={24} />} 
+            color="border-error text-error" 
+          />
+        </div>
+
+        {/* Chart Section */}
+        <div className="bg-base-100 p-8 rounded-[2.5rem] shadow-xl border border-base-300">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+              <TrendingUp size={20} />
             </div>
-            
-            {/* Background Decoration */}
-            <div className={`absolute -right-4 -bottom-4 w-24 h-24 ${stat.bgColor} opacity-[0.03] rounded-full`}></div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-tight text-neutral">
+                Activity <span className="text-primary">Overview</span>
+              </h2>
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* System Growth Style Section (Bottom) */}
-      <div className="bg-white p-8 rounded-[3rem] border border-slate-50 shadow-sm">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
-              <TrendingUp size={20} className="text-orange-500" /> Vaccination Growth
-            </h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Monthly completion analytics</p>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#9ca3af', fontSize: 12, fontWeight: 800 }}
+                />
+                <YAxis hide />
+                <Tooltip 
+                  cursor={{ fill: 'transparent' }}
+                  content={({ active, payload }) => {
+                    if (active && payload?.length) {
+                      return (
+                        <div className="bg-neutral text-white p-2 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                          {`${payload[0].payload.name}: ${payload[0].value}`}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="value" radius={[10, 10, 10, 10]} barSize={50}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-xs font-bold text-slate-500 focus:ring-0 cursor-pointer">
-            <option>Last 6 Months</option>
-            <option>Last Year</option>
-          </select>
-        </div>
-
-        {/* Placeholder for Graph */}
-        <div className="h-48 w-full border-b border-dashed border-slate-100 flex items-end justify-between px-4">
-           {[40, 70, 45, 90, 65, 85].map((height, i) => (
-             <div 
-               key={i} 
-               style={{ height: `${height}%` }} 
-               className={`w-12 rounded-t-xl ${i === 3 ? 'bg-orange-500' : 'bg-slate-100'} transition-all duration-700`}
-             ></div>
-           ))}
         </div>
       </div>
     </div>
   );
 };
+
+const StatCard = ({ title, value, icon, color }) => (
+  <div className={`bg-base-100 rounded-[2rem] p-6 shadow-xl border-l-[6px] ${color.split(' ')[0]} hover:scale-[1.02] transition-all`}>
+    <div className="flex justify-between items-start">
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-widest text-neutral/40 mb-1">{title}</p>
+        <h2 className="text-4xl font-black text-neutral">{value}</h2>
+      </div>
+      <div className={`p-4 bg-base-200 rounded-2xl ${color.split(' ')[1]}`}>
+        {icon}
+      </div>
+    </div>
+  </div>
+);
 
 export default DoctorDashboardHome;
