@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  FaSyringe, FaPaw, FaDollarSign, FaBoxes, 
+import {
+  FaSyringe, FaPaw, FaDollarSign, FaBoxes,
   FaCalendarAlt, FaBuilding, FaTag, FaArrowLeft
 } from "react-icons/fa";
 import { getVaccineById } from "@/action/server/vaccines";
@@ -30,12 +30,11 @@ export default function VaccineDetails({ params }) {
 
   const handleRequest = async () => {
     setIsRequesting(true);
-    
-    // এখানে আপনি চাইলে ইউজার ডাটা হার্ডকোড করে দিতে পারেন টেস্ট করার জন্য
+
     const orderData = {
       vaccineId: vaccine._id,
       vaccineName: vaccine.vaccineName,
-      userName: "MD SHAKIL", // সেশন না থাকলে আপাতত নাম লিখে দিতে পারেন
+      userName: "MD SHAKIL",
       userEmail: "shakil@example.com"
     };
 
@@ -63,23 +62,23 @@ export default function VaccineDetails({ params }) {
   return (
     <div className="min-h-screen bg-[#FDF8F4] pt-32 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
-        
+
         <Link href="/vaccination" className="inline-flex items-center gap-2 text-slate-400 hover:text-orange-500 font-bold text-xs mb-8 transition-all uppercase tracking-widest">
           <FaArrowLeft /> Back to Registry
         </Link>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          
+
           {/* IMAGE SECTION */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             className="relative"
           >
             <div className="absolute -inset-4 bg-orange-200/30 rounded-[4rem] blur-3xl"></div>
             <div className="relative h-[500px] rounded-[3.5rem] overflow-hidden border-[10px] border-white shadow-2xl">
-              <img 
-                src={vaccine.image || "https://images.unsplash.com/photo-1584107662774-8d575e8f3550"} 
+              <img
+                src={vaccine.image || "https://images.unsplash.com/photo-1584107662774-8d575e8f3550"}
                 alt={vaccine.vaccineName}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               />
@@ -92,7 +91,7 @@ export default function VaccineDetails({ params }) {
           </motion.div>
 
           {/* CONTENT SECTION */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             className="space-y-8"
@@ -108,42 +107,41 @@ export default function VaccineDetails({ params }) {
 
             {/* INFO GRID */}
             <div className="grid grid-cols-2 gap-4">
-              <InfoBox icon={<FaDollarSign/>} label="Retail Price" value={`$${vaccine.price}`} color="text-emerald-500" />
-              <InfoBox icon={<FaBoxes/>} label="Available Stock" value={`${vaccine.stock} Units`} color="text-blue-500" />
-              <InfoBox icon={<FaBuilding/>} label="Manufacturer" value={vaccine.manufacturer || "HealthVet"} color="text-purple-500" />
-              <InfoBox icon={<FaTag/>} label="Batch Code" value={vaccine.batchNumber || "V-098"} color="text-orange-500" />
+              <InfoBox icon={<FaDollarSign />} label="Retail Price" value={`$${vaccine.price}`} color="text-emerald-500" />
+              <InfoBox icon={<FaBoxes />} label="Available Stock" value={`${vaccine.stock} Units`} color="text-blue-500" />
+              <InfoBox icon={<FaBuilding />} label="Manufacturer" value={vaccine.manufacturer || "HealthVet"} color="text-purple-500" />
+              <InfoBox icon={<FaTag />} label="Batch Code" value={vaccine.batchNumber || "V-098"} color="text-orange-500" />
             </div>
 
             {/* EXPIRY SECTION */}
             <div className="p-7 bg-white rounded-[2.5rem] border border-slate-100 flex items-center gap-6 shadow-sm">
-                <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 text-xl shadow-inner">
-                    <FaCalendarAlt />
-                </div>
-                <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiration Date</p>
-                    <p className="text-xl font-black text-slate-800">{vaccine.expiryDate || "Aug 2026"}</p>
-                </div>
+              <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 text-xl shadow-inner">
+                <FaCalendarAlt />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiration Date</p>
+                <p className="text-xl font-black text-slate-800">{vaccine.expiryDate || "Aug 2026"}</p>
+              </div>
             </div>
 
             {/* ACTION BUTTON */}
-            <button 
+            <button
               disabled={isRequesting || vaccine.stock <= 0}
               onClick={handleRequest}
-              className={`w-full py-6 rounded-[2.2rem] font-black text-[11px] uppercase tracking-[0.3em] shadow-2xl transition-all flex items-center justify-center gap-4 ${
-                vaccine.stock <= 0 
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed" 
-                : "bg-slate-900 text-white hover:bg-orange-600 hover:-translate-y-1 active:scale-95 shadow-orange-100"
-              }`}
+              className={`w-full py-6 rounded-[2.2rem] font-black text-[11px] uppercase tracking-[0.3em] shadow-2xl transition-all flex items-center justify-center gap-4 ${vaccine.stock <= 0
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-slate-900 text-white hover:bg-orange-600 hover:-translate-y-1 active:scale-95 shadow-orange-100"
+                }`}
             >
               {isRequesting ? "Processing Request..." : (
                 <>
-                   Confirm Vaccine Request <FaSyringe className="rotate-45 text-lg" />
+                  Confirm Vaccine Request <FaSyringe className="rotate-45 text-lg" />
                 </>
               )}
             </button>
 
             <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                * By requesting, you agree to our veterinary consultation terms.
+              * By requesting, you agree to our veterinary consultation terms.
             </p>
           </motion.div>
 

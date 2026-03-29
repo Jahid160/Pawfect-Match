@@ -2,14 +2,13 @@
 import { collections, dbConnect } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
-import { userVerifyAuth } from "@/lib/userVerifyAuth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { verifyAdmin } from "@/lib/adminAuth";
 import { verifyAuth } from "@/lib/verifyAuth";
 
 // start of vaccine
-// ১. ভ্যাকসিন অর্ডার প্লেস করা
+
 export const placeVaccineOrder = async (data) => {
   await verifyAuth();
   const session = await getServerSession(authOptions);
@@ -32,7 +31,7 @@ export const placeVaccineOrder = async (data) => {
     };
     await orderCollection.insertOne(newOrder);
 
-    // সব রিলেটেড পাথ রিভ্যালিডেট করুন
+
     revalidatePath("/dashboard/vaccinations");
     revalidatePath("/dashboard/doctor");
     return { success: true };
@@ -41,7 +40,7 @@ export const placeVaccineOrder = async (data) => {
   }
 };
 
-// ২. অ্যাডমিন একসেপ্ট
+
 export const adminAcceptOrder = async (orderId) => {
   await verifyAdmin();
   try {
@@ -59,7 +58,7 @@ export const adminAcceptOrder = async (orderId) => {
   }
 };
 
-// ৩. ডক্টর শিডিউল (এটিই আপনার ডক্টর পেজে ডাটা পাঠাবে)
+
 export const doctorScheduleOrder = async (orderId, days) => {
   await verifyAdmin()
   try {
@@ -78,7 +77,7 @@ export const doctorScheduleOrder = async (orderId, days) => {
       },
     );
 
-    // এই পাথটি নিশ্চিত করুন আপনার ডক্টর পেজের সাথে মিল আছে কি না
+
     revalidatePath("/dashboard/vaccinations");
     revalidatePath("/dashboard/doctor");
 
@@ -88,7 +87,7 @@ export const doctorScheduleOrder = async (orderId, days) => {
   }
 };
 
-// ৪. কমপ্লিট করা
+
 export const completeVaccination = async (orderId) => {
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
@@ -107,13 +106,13 @@ export const completeVaccination = async (orderId) => {
 
 // end of vaccine
 
-// ৫. সব অর্ডার গেট করা
+
 export const getDoctorOrders = async () => {
   await verifyAdmin();
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const orders = await orderCollection
-      .find({status: "Processing" })
+      .find({ status: "Processing" })
       .sort({ createdAt: -1 })
       .toArray();
     return JSON.parse(JSON.stringify(orders));
@@ -128,7 +127,7 @@ export const getVaccineOrders = async () => {
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const orders = await orderCollection
-      .find({ })
+      .find({})
       .sort({ createdAt: -1 })
       .toArray();
     return JSON.parse(JSON.stringify(orders));
