@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
-// সার্ভার অ্যাকশন ইম্পোর্ট
+
 import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
 import Image from "next/image";
 
@@ -119,7 +119,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
               }`}
           >
             <Bell size={22} strokeWidth={2.5} />
-            {/* আনরিড থাকলে লাল ডট দেখাবে */}
             {unreadCount > 0 && (
               <span className="top-2.5 right-2.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">
                 {unreadCount}
