@@ -6,51 +6,112 @@ import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
 export const getShelterDashboardStats = async () => {
   try {
     const user = await shelterVerifyAuth();
+    if (!user) throw new Error("Unauthorized");
 
     const petCollection = await dbConnect(collections.PETS);
-    const pendingCollection = await dbConnect(collections.ENTRYREQ);
+    const entryReqCollection = await dbConnect(collections.ENTRYREQ);
 
-    const totalPetCollection = await petCollection.find({ email: user.email }).toArray();
-
-
-    const entries = await pendingCollection
-      .find({ email: user.email })
+    const petStats = await petCollection
+      .aggregate([
+        { $match: { email: user.email } },
+        {
+          $group: {
+            _id: null,
+            adopted: {
+              $sum: { $cond: [{ $eq: ["$status", "adopted"] }, 1, 0] },
+            },
+            pending: {
+              $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] },
+            },
+            available: {
+              $sum: { $cond: [{ $eq: ["$status", "available"] }, 1, 0] },
+            },
+            favorites: { $sum: { $size: { $ifNull: ["$savedBy", []] } } },
+          },
+        },
+      ])
       .toArray();
 
+    const statsResult = petStats[0] || {
+      adopted: 0,
+      pending: 0,
+      available: 0,
+      favorites: 0,
+    };
 
-    const approvedCount = totalPetCollection.filter(
-      (a) => a.status === "adopted",
-    ).length;
-    const pendingCount = totalPetCollection.filter(
-      (a) => a.status === "pending",
-    ).length;
-
-    const previewCount = entries.filter((a) => a.status === "preview").length;
-
-
-    const favoriteCount = totalPetCollection.reduce((total, pet) => {
-      return total + (pet.savedBy?.length || 0);
-    }, 0);
-    const availablePetsCount = await petCollection.countDocuments({
+    // ২. Preview Requests Count
+    const previewCount = await entryReqCollection.countDocuments({
       email: user.email,
-      status: "available",
+      status: "preview",
     });
-    console.log(availablePetsCount);
+
+    // ৩. Dynamic Monthly Adoption/Entry Data (Area Chart
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+
+    const monthlyStats = await entryReqCollection
+      .aggregate([
+        {
+          $match: {
+            email: user.email,
+            createdAt: { $gte: sixMonthsAgo },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              month: { $month: "$createdAt" },
+              year: { $year: "$createdAt" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ])
+      .toArray();
+
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const formattedMonthlyData = monthlyStats.map((item) => ({
+      name: monthNames[item._id.month - 1],
+      count: item.count,
+    }));
     return {
       success: true,
       data: {
-        adopted: approvedCount,
-        pending: pendingCount,
-        preview: previewCount,
-        favorites: favoriteCount,
-        available: availablePetsCount,
+        currentStats: {
+          adopted: statsResult.adopted,
+          pending: statsResult.pending,
+          preview: previewCount,
+          favorites: statsResult.favorites,
+          available: statsResult.available,
+        },
+        monthlyData:
+          formattedMonthlyData.length > 0
+            ? formattedMonthlyData
+            : [{ name: "No Data", count: 0 }],
       },
     };
   } catch (error) {
     console.error("Dashboard stats error:", error);
     return {
       success: false,
-      data: { approved: 0, pending: 0, favorites: 0, messages: 0 },
+      data: null,
+      message: error.message,
     };
   }
 };
