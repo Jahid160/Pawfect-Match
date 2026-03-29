@@ -102,7 +102,7 @@ console.log(recommendedPets);
 
 
   return (
-    <div className="p-6 lg:p-10 space-y-10 bg-[#FDFCFB] min-h-screen">
+    <div className="p-6 lg:p-10 space-y-10 bg-[#FDFCFB] min-h-screen -mt-22.5 md:m-auto lg:m-auto">
       {/* 1. Welcome Section - Modern Glassmorphism Look */}
       {/* <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 lg:p-12 text-white shadow-2xl shadow-slate-200">
         <div className="relative z-10">
