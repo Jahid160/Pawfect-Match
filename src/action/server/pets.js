@@ -196,27 +196,19 @@ export const getSinglePets = async (id) => {
 
     if (!pet) return {};
 
-    // ✅ try to get current user (optional)
     let userId = null;
     try {
       const user = await verifyAuth();
       userId = user._id.toString();
-    } catch (error) {
-      // user not logged in → ignore
-    }
+    } catch {}
 
     const savedBy = pet.savedBy || [];
 
     return {
+      ...pet, // 🔥 return everything
       _id: pet._id.toString(),
-      petName: pet.petName,
-      breed: pet.breed,
-      age: pet.age,
-      species: pet.species,
-      images: pet.images,
-      status: pet.status,
 
-      // 🔥 IMPORTANT
+      // keep save logic
       saveCount: savedBy.length,
       isSaved: userId ? savedBy.includes(userId) : false,
     };
