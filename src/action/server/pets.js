@@ -50,7 +50,7 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
       query.email = email;
     }
 
-    // Search by Pet Name (Case-insensitive)
+    // Search by Pet Name
     if (search) {
       const safeSearch = escapeRegex(search);
       query.petName = { $regex: safeSearch, $options: "i" };
@@ -67,6 +67,15 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
     const totalCount = await Petcollection.countDocuments(query);
 
     const pets = await Petcollection.find(query)
+      .project({
+        images: 1,
+        petName: 1,
+        species: 1,
+        status: 1,
+        _id: 1,
+        weight: 1,
+        gender: 1
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -89,14 +98,14 @@ export const updatePets = async (petId, updatedData, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
 
-    // ১. প্রথমে চেক করছি এই পেটটি এই ইউজারের কি না
+
     const existingPet = await Petcollection.findOne({ _id: new ObjectId(petId) });
 
     if (!existingPet) {
       return { success: false, message: "Pet not found" };
     }
 
-    // ২. ইমেইল ম্যাচিং (Security Gate)
+
     if (existingPet.email !== userEmail) {
       return { success: false, message: "You are not authorized to update this entry!" };
     }
@@ -120,9 +129,6 @@ export const updatePets = async (petId, updatedData, userEmail) => {
   }
 };
 
-/**
- * 3. Delete Pet Entry (With Security Check)
- */
 export const deletePet = async (petId, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
