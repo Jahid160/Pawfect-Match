@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  Search, FileText, Activity, Calendar, 
-  ExternalLink, Plus, History, ChevronRight 
+import {
+  Search, FileText, Activity, Calendar,
+  ExternalLink, Plus, History, ChevronRight
 } from 'lucide-react';
 
 const PetRecords = () => {
-  // ডামি রেকর্ড ডাটা (পরে ডাটাবেজ থেকে কানেক্ট করবেন)
+
   const medicalRecords = [
     {
       id: "REC-2024-001",
@@ -52,9 +52,9 @@ const PetRecords = () => {
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search by Pet Name or Owner..." 
+            <input
+              type="text"
+              placeholder="Search by Pet Name or Owner..."
               className="w-full pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/10 font-medium text-sm"
             />
           </div>
@@ -67,12 +67,12 @@ const PetRecords = () => {
       {/* Main Content Area */}
       <div className="grid grid-cols-1 gap-6">
         {medicalRecords.map((record) => (
-          <div 
-            key={record.id} 
+          <div
+            key={record.id}
             className="bg-white border border-slate-50 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
           >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              
+
               {/* Pet Basic Info */}
               <div className="flex items-center gap-5">
                 <div className="h-20 w-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-orange-500 border border-slate-100 group-hover:bg-orange-500 group-hover:text-white transition-colors duration-500">
@@ -105,9 +105,8 @@ const PetRecords = () => {
                   <p className="text-sm font-black text-slate-800 flex items-center gap-2 justify-end">
                     <Calendar size={16} className="text-orange-500" /> {record.lastVisit}
                   </p>
-                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${
-                    record.status === 'Stable' ? 'text-emerald-500' : 'text-orange-500'
-                  }`}>
+                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${record.status === 'Stable' ? 'text-emerald-500' : 'text-orange-500'
+                    }`}>
                     Condition: {record.status}
                   </p>
                 </div>

@@ -11,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const verifyStripePayment = async (sessionId, email) => {
   try {
-   
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
@@ -43,9 +43,9 @@ export const verifyStripePayment = async (sessionId, email) => {
     let totalAmount = 0;
 
     if (mode === "buy-now") {
-      const productType = metadata.productType || "food"; 
+      const productType = metadata.productType || "food";
       const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
-      
+
       const productCollection = await dbConnect(collectionName);
       const productId = metadata.productId;
       const quantity = Number(metadata.quantity || 1);
@@ -61,17 +61,17 @@ export const verifyStripePayment = async (sessionId, email) => {
       }
 
       const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
-          ? Number(product.discountPrice)
-          : Number(product.price);
+        ? Number(product.discountPrice)
+        : Number(product.price);
 
       orderItems = [{
-          productId: product._id.toString(),
-          productName: product.productName || "Pet Product",
-          image: product.image || "",
-          productType: productType,
-          quantity: quantity,
-          price: finalPrice,
-          lineTotal: finalPrice * quantity,
+        productId: product._id.toString(),
+        productName: product.productName || "Pet Product",
+        image: product.image || "",
+        productType: productType,
+        quantity: quantity,
+        price: finalPrice,
+        lineTotal: finalPrice * quantity,
       }];
 
       totalAmount = finalPrice * quantity;
@@ -79,7 +79,7 @@ export const verifyStripePayment = async (sessionId, email) => {
       const cartItems = await getCartItems(userEmail);
 
       if (!cartItems || cartItems.length === 0) {
-        
+
         return { success: false, message: "Cart items not found for this user." };
       }
 
@@ -138,7 +138,7 @@ export const verifyStripePayment = async (sessionId, email) => {
       await cartCollection.deleteMany({ userEmail });
     }
 
-    // ১০. ক্যাশ রিভ্যালিডেট করা যাতে ড্যাশবোর্ডে অর্ডার দেখায়
+
     // revalidatePath("/dashboard/orders");
     // revalidatePath("/cart");
 

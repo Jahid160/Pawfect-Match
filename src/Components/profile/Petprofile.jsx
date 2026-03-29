@@ -41,7 +41,7 @@ const PetProfile = ({ pet }) => {
 
   const [activeImage, setActiveImage] = useState(gallery[0]);
 
-  // নতুন রিয়েল-টাইম ডাটাবেস ভিত্তিক হুক
+
   const { isSaved, count, handleToggle } = useSavedState(pet, toggleSaveAction);
 
   if (!pet || Object.keys(pet).length === 0) {

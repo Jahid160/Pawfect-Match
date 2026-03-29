@@ -14,6 +14,7 @@ import {
   UserCheck,
   Stethoscope,
   CircleCheckBig,
+  ClipboardClock,
 } from "lucide-react";
 import { adminAcceptOrder, doctorScheduleOrder } from "@/action/server/orders";
 import { toast } from "react-hot-toast";
@@ -55,7 +56,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
     }
   };
 
-  // --- হ্যান্ডলার: ডক্টর শিডিউল ---
+
   const handleDoctorSchedule = async (id, days) => {
     const previousOrders = [...orders];
     const optimisticDeadline = new Date();
@@ -128,7 +129,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-10">
         <h1 className="font-black text-slate-900 text-4xl tracking-tight">
           Vaccination{" "}
-          <span className="text-blue-600 underline decoration-8 decoration-blue-100 underline-offset-[-2px]">
+          <span className="text-primary underline decoration-8 decoration-blue-100 underline-offset-[-2px]">
             Registry
           </span>
         </h1>
@@ -161,7 +162,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                     >
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="bg-slate-100 rounded-xl p-2.5 text-blue-600 font-bold">
+                          <div className="bg-slate-100 rounded-xl p-2.5 text-primary font-bold">
                             <FileText size={20} />
                           </div>
                           <div>
@@ -203,7 +204,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                           {(order.status === "Pending" || !order.status) && (
                             <button
                               onClick={() => handleAdminAccept(order._id)}
-                              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-100"
+                              className="flex items-center gap-2 bg-primary hover:bg-orange-700 text-white text-[10px] font-black px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-100"
                             >
                               <UserCheck size={14} /> Accept Order
                             </button>
@@ -246,6 +247,11 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                           {order.status === "Completed" && (
                             <div className="bg-emerald-50 text-green-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
                               <CircleCheckBig size={16} /> Completed
+                            </div>
+                          )}
+                          {order.status === "Processing" && (
+                            <div className="bg-emerald-50 text-black p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                              <ClipboardClock  size={16} /> Processing
                             </div>
                           )}
                         </div>

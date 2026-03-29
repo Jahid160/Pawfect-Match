@@ -45,7 +45,7 @@ const PetCategories = () => {
         {/* --- SECTION HEADER --- */}
         <div className="flex lg:flex-row flex-col justify-between items-end gap-12 mb-20">
           <div className="max-w-3xl">
-             <div className="inline-flex items-center gap-2 bg-orange-50 mb-6 px-4 py-2 border border-orange-100 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.3em]">
+            <div className="inline-flex items-center gap-2 bg-orange-50 mb-6 px-4 py-2 border border-orange-100 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.3em]">
               Explore
             </div>
 
@@ -54,7 +54,7 @@ const PetCategories = () => {
               companion by category.
             </h2>
           </div>
-          
+
           <p className="hidden lg:block max-w-xs font-medium text-slate-500 text-base leading-relaxed">
             Whether you're looking for a hiking buddy or a lap-warmer,
             we have the right match for your lifestyle.
@@ -72,13 +72,13 @@ const PetCategories = () => {
               <div className={`relative overflow-hidden rounded-[3rem] ${cat.color} p-5 transition-all duration-500 shadow-sm border border-transparent hover:border-white group-hover:shadow-2xl group-hover:shadow-orange-100`}>
 
                 {/* Image Container */}
-                {/* এখানে আমরা relative পজিশন রেখেছি যাতে 'fill' ঠিকমতো কাজ করে */}
+
                 <div className="relative mb-8 rounded-[2.5rem] w-full h-72 overflow-hidden">
                   <Image
                     src={cat.image}
                     alt={cat.name}
-                    fill // এটি ইমেজকে প্যারেন্ট ডিভ অনুযায়ী সেট করবে
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" // অপ্টিমাইজেশনের জন্য
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     className="object-cover group-hover:scale-110 transition-transform duration-1000"
                   />
                   <div className="absolute inset-0 flex justify-center items-center bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
