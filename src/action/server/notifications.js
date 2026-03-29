@@ -1,6 +1,8 @@
 "use server";
+
 import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 export const getAdminNotifications = async () => {
   try {
@@ -30,20 +32,21 @@ export const getAdminNotifications = async () => {
   }
 };
 
-export const getUserNotifications = async (userId) => {
+
+export const getUserNotifications = async (userEmail) => {
   try {
-    if (!userId) return { success: false, message: "User ID is required" };
+    if (!userEmail) return { success: false, message: "User Email is required" };
     
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
     
     const notifications = await notificationCollection
-      .find({ receiverId: userId }) 
+      .find({ receiverEmail: userEmail }) 
       .sort({ createdAt: -1 })
       .limit(10)
       .toArray();
 
     const unreadCount = await notificationCollection.countDocuments({ 
-      receiverId: userId, 
+      receiverEmail: userEmail, 
       isRead: false 
     });
 
@@ -60,7 +63,8 @@ export const getUserNotifications = async (userId) => {
   }
 };
 
-export const createNotification = async ({ title, message, type, receiverRole, receiverId }) => {
+
+export const createNotification = async ({ title, message, type, receiverRole, receiverEmail }) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
     
@@ -69,12 +73,15 @@ export const createNotification = async ({ title, message, type, receiverRole, r
       message,
       type,
       receiverRole: receiverRole || null, 
-      receiverId: receiverId || null,
+      receiverEmail: receiverEmail || null, 
       isRead: false,
       createdAt: new Date(),
     };
     
     const result = await notificationCollection.insertOne(newNotification);
+    
+    revalidatePath("/dashboard");
+    
     return { success: true, id: result.insertedId.toString() };
   } catch (error) {
     console.error("Notification Creation Error:", error);
@@ -82,19 +89,26 @@ export const createNotification = async ({ title, message, type, receiverRole, r
   }
 };
 
-export const markNotificationsAsRead = async (role = null, userId = null) => {
+
+export const markNotificationsAsRead = async (role = null, userEmail = null) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
     
     let query = {};
-    if (role) query = { receiverRole: role, isRead: false };
-    else if (userId) query = { receiverId: userId, isRead: false };
+    if (role) {
+      query = { receiverRole: role, isRead: false };
+    } else if (userEmail) {
+      query = { receiverEmail: userEmail, isRead: false };
+    }
+
+    if (Object.keys(query).length === 0) return { success: false };
 
     await notificationCollection.updateMany(
       query,
       { $set: { isRead: true } }
     );
     
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error("Mark as Read Error:", error);
@@ -109,5 +123,10 @@ const formatNotificationTime = (date) => {
   if (diffInSeconds < 60) return "Just now";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  return new Date(date).toLocaleDateString();
+  
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
 };
