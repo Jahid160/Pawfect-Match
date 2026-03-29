@@ -31,6 +31,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
   const { data: session } = useSession();
 
   const isAdmin = session?.user?.role === "admin";
+  const userEmail = session?.user?.email;
 
   useEffect(() => {
     setIsMounted(true);
@@ -39,8 +40,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
       let res;
       if (isAdmin) {
         res = await getAdminNotifications();
-      } else if (session?.user?.id) {
-        res = await getUserNotifications(session.user.id);
+      } else if (userEmail) {
+        res = await getUserNotifications(userEmail);
       }
 
       if (res?.success) {
@@ -53,7 +54,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, [isAdmin, session?.user?.id]);
+  }, [isAdmin, userEmail]); 
 
   const handleNotificationClick = async () => {
     const nextState = !isOpen;
@@ -63,8 +64,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
       let res;
       if (isAdmin) {
         res = await markNotificationsAsRead("admin", null);
-      } else {
-        res = await markNotificationsAsRead(null, session?.user?.id);
+      } else if (userEmail) {
+        res = await markNotificationsAsRead(null, userEmail);
       }
 
       if (res?.success) {

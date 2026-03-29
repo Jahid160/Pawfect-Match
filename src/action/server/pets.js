@@ -8,8 +8,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { verifyAuth } from "@/lib/verifyAuth";
 import { adminShelterAuth } from "@/lib/adminShelterAuth";
-// import { petCollectionPromise } from "@/lib/mongodb";
-
+import { createNotification } from "@/action/server/notifications"; 
 
 const petCollectionPromise = dbConnect(collections.PETS);
 const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
@@ -19,7 +18,6 @@ export const getPets = async () => {
   try {
     const Petcollection = await petCollectionPromise;
     const pets = await Petcollection.find().toArray();
-
     return pets.map((pet) => ({
       ...pet,
       _id: pet._id.toString(),
@@ -30,42 +28,25 @@ export const getPets = async () => {
   }
 };
 
-
-
-
-// Helper function to escape special characters for MongoDB Regex search
+// Helper function to escape regex
 function escapeRegex(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
-
 export const getEntriesPets = async ({ search, species, page, email }) => {
   const Petcollection = await petCollectionPromise;
-
   try {
     const query = {};
-
-    // Filter by owner email
-    if (email) {
-      query.email = email;
-    }
-
-    // Search by Pet Name
+    if (email) query.email = email;
     if (search) {
       const safeSearch = escapeRegex(search);
       query.petName = { $regex: safeSearch, $options: "i" };
     }
-
-    // Filter by Species
-    if (species && species !== "All") {
-      query.species = species;
-    }
+    if (species && species !== "All") query.species = species;
 
     const limit = 10;
     const skip = (parseInt(page) - 1) * limit;
-
     const totalCount = await Petcollection.countDocuments(query);
-
     const pets = await Petcollection.find(query)
       .project({
         images: 1,
@@ -91,122 +72,78 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
   }
 };
 
-/**
- * 2. Update Pet Entry (With Security Check)
- */
 export const updatePets = async (petId, updatedData, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
-
     const existingPet = await Petcollection.findOne({ _id: new ObjectId(petId) });
-
-    if (!existingPet) {
-      return { success: false, message: "Pet not found" };
-    }
-
-    if (existingPet.email !== userEmail) {
-      return { success: false, message: "You are not authorized to update this entry!" };
-    }
+    if (!existingPet) return { success: false, message: "Pet not found" };
+    if (existingPet.email !== userEmail) return { success: false, message: "Unauthorized!" };
 
     const { _id, ...dataToUpdate } = updatedData;
-
     const result = await Petcollection.updateOne(
       { _id: new ObjectId(petId) },
       { $set: dataToUpdate }
     );
-
     if (result.modifiedCount > 0) {
       revalidatePath("/");
       return { success: true, message: "Pet updated successfully" };
     }
-
     return { success: false, message: "No changes made" };
   } catch (error) {
-    console.error("Error updating pet:", error);
-    return { success: false, message: "Server error occurred" };
+    return { success: false, message: "Server error" };
   }
 };
 
 export const deletePet = async (petId, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
-
     const result = await Petcollection.deleteOne({
       _id: new ObjectId(petId),
       email: userEmail
     });
-
     if (result.deletedCount > 0) {
       revalidatePath("/");
       return { success: true, message: "Pet deleted successfully" };
     }
-
     return { success: false, message: "Unauthorized or Pet not found" };
   } catch (error) {
-    console.error("Error deleting pet:", error);
     return { success: false, message: "Server error" };
   }
 };
 
-//admin dashboard manage pets api
-export async function getAllPetsAction() {
+export const getAllPetsAction = async () => {
   try {
     const Petcollection = await petCollectionPromise;
-
-    // Fetch all pets and convert Mongoose documents to plain JS objects
     const pets = await Petcollection.find({}).toArray();
-
-    // Map through pets to ensure uniform data structure
-    const formattedPets = pets.map((pet) => {
-      return {
-        _id: pet._id.toString(),
-        name: pet.petName,
-        breed: pet.breed,
-        age: pet.age,
-        type: pet.species,
-        image: pet.images[0],
-        status: pet.status || "Available",
-        adoptionCode: pet.adoptionCode,
-      };
-    });
-
-    return {
-      success: true,
-      data: formattedPets,
-    };
+    const formattedPets = pets.map((pet) => ({
+      _id: pet._id.toString(),
+      name: pet.petName,
+      breed: pet.breed,
+      age: pet.age,
+      type: pet.species,
+      image: pet.images[0],
+      status: pet.status || "Available",
+      adoptionCode: pet.adoptionCode,
+      adoptedUserEmail: pet.adoptedUserEmail, 
+    }));
+    return { success: true, data: formattedPets };
   } catch (error) {
-    console.error("Error fetching pets:", error);
-    return {
-      success: false,
-      message: "Failed to fetch pets data.",
-      data: [],
-    };
+    return { success: false, message: "Failed to fetch pets data.", data: [] };
   }
 }
 
 export const getSinglePets = async (id) => {
   if (id?.length !== 24) return {};
-
   try {
     const Petcollection = await petCollectionPromise;
-
-    const pet = await Petcollection.findOne({
-      _id: new ObjectId(id),
-    });
-
+    const pet = await Petcollection.findOne({ _id: new ObjectId(id) });
     if (!pet) return {};
-
-    // ✅ try to get current user (optional)
     let userId = null;
     try {
       const user = await verifyAuth();
       userId = user._id.toString();
-    } catch (error) {
-      // user not logged in → ignore
-    }
-
+    } catch (error) {}
     const savedBy = pet.savedBy || [];
-
     return {
       _id: pet._id.toString(),
       petName: pet.petName,
@@ -215,13 +152,10 @@ export const getSinglePets = async (id) => {
       species: pet.species,
       images: pet.images,
       status: pet.status,
-
-      // 🔥 IMPORTANT
       saveCount: savedBy.length,
       isSaved: userId ? savedBy.includes(userId) : false,
     };
   } catch (error) {
-    console.error("Error fetching single pet:", error);
     return {};
   }
 };
@@ -242,275 +176,163 @@ export const AddPets = async (petdata) => {
   }
 };
 
-// admin action
 export const DeletePets = async (id) => {
   verifyAdmin();
-
   if (!id || id.length !== 24) return { success: false, message: "Invalid ID" };
-
   try {
     const PetCollection = await petCollectionPromise;
-
     const result = await PetCollection.deleteOne({ _id: new ObjectId(id) });
-
-    // Revalidate the page route (optional if using server component)
     revalidatePath("/dashboard/manage-pets");
-
-    return {
-      success: result.deletedCount > 0,
-      message:
-        result.deletedCount > 0 ? "Pet deleted successfully" : "Pet not found",
-    };
+    return { success: true, message: "Pet deleted successfully" };
   } catch (error) {
     return { success: false, message: error.message };
   }
 };
 
 export const updatePet = async (id, updatedData) => {
-  try {
-    await verifyAdmin();
-  } catch (error) {
-    return { success: false, message: "Unauthorized access! Admin only." };
-  }
-  if (!id || id.length !== 24) {
-    return { success: false, message: "Invalid Pet ID format." };
-  }
-
+  try { await verifyAdmin(); } catch (error) { return { success: false, message: "Unauthorized!" }; }
   try {
     const Petcollection = await petCollectionPromise;
-
     const { _id, createdAt, ...dataToUpdate } = updatedData;
-
-    const result = await Petcollection.updateOne(
+    await Petcollection.updateOne(
       { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...dataToUpdate,
-          updatedAt: new Date(),
-        },
-      },
+      { $set: { ...dataToUpdate, updatedAt: new Date() } }
     );
-
-    if (result.matchedCount === 0) {
-      return { success: false, message: "No pet found with this ID." };
-    }
-
-    if (result.modifiedCount > 0 || result.matchedCount > 0) {
-      revalidatePath("/dashboard/manage-pets");
-      revalidatePath(`/dashboard/manage-pets/petEdit/${id}`);
-
-      return {
-        success: true,
-        message: "Pet information updated successfully!",
-      };
-    }
-
-    return { success: true, message: "No changes were made." };
+    revalidatePath("/dashboard/manage-pets");
+    return { success: true, message: "Updated successfully!" };
   } catch (error) {
-    console.error("Error updating pet:", error);
-    return {
-      success: false,
-      message: "Internal Server Error. Please try again.",
-    };
+    return { success: false, message: "Error updating" };
   }
 };
 
-export const UpdatePetStatus = async (id) => {
+export const UpdatePetStatus = async (id, petName) => {
   let admin;
-  try {
-    admin = await verifyAdmin();
-  } catch (error) {
-    return { success: false, message: error.message };
-  }
-
-  const adminEmail = admin.email;
-
-  if (id?.length !== 24) {
-    return { success: false, message: "Invalid ID" };
-  }
-
+  try { admin = await verifyAdmin(); } catch (error) { return { success: false, message: error.message }; }
+  
   try {
     const PetCollection = await petCollectionPromise;
     const adoptionCollection = await adoptionCollectionPromise;
 
-    const petQuery = { _id: new ObjectId(id) };
+    const petData = await PetCollection.findOne({ _id: new ObjectId(id) });
+    if (!petData) return { success: false, message: "Pet not found" };
 
-    const petUpdate = {
-      $set: {
-        status: "adopted",
-        updatedBy: adminEmail,
-      },
-    };
+    const userEmail = petData.adoptedUserEmail;
 
     await adoptionCollection.updateOne(
       { petId: id },
-      {
-        $set: {
-          status: "approved",
-          updatedTime: new Date(),
-        },
-      },
+      { $set: { status: "approved", updatedTime: new Date() } }
     );
 
-    const result = await PetCollection.updateOne(petQuery, petUpdate);
+    const result = await PetCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: "adopted", updatedBy: admin.email } }
+    );
+
+    if (result.modifiedCount > 0 && userEmail) {
+      await createNotification({
+        title: "Adoption Approved! 🎉",
+        message: `Congratulations! Your request to adopt ${petName || petData.petName} has been approved.`,
+        type: "adoption",
+        receiverEmail: userEmail, 
+      });
+    }
 
     revalidatePath("/dashboard/manage-pets");
-    revalidatePath("/dashboard/my-adoptions");
-    revalidatePath("/dashboard/my-pets");
-
-    return {
-      success: result.modifiedCount > 0,
-      message:
-        result.modifiedCount > 0
-          ? "Pet adopted successfully"
-          : "Status was already updated or pet not found",
-    };
+    return { success: true, message: "Pet adopted successfully" };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-export const UpdatePetStatusReject = async (id, adoptionCode) => {
-  let admin;
-  try {
-    admin = await verifyAdmin();
-  } catch (error) {
-    return { success: false, message: error.message };
-  }
-
-  const adminEmail = admin.email;
-
-
-  if (id?.length !== 24) return { success: false, message: "Invalid ID" };
-
+export const UpdatePetStatusReject = async (id, adoptionCode, petName) => {
+  try { await verifyAdmin(); } catch (error) { return { success: false, message: error.message }; }
+  
   try {
     const PetCollection = await petCollectionPromise;
     const adoptionCollection = await adoptionCollectionPromise;
-    const query = { _id: new ObjectId(id) };
+    const petData = await PetCollection.findOne({ _id: new ObjectId(id) });
+    const userEmail = petData?.adoptedUserEmail;
 
-    const updateStatus = {
-      $set: {
-        status: "available",
-      },
-      $unset: {
-        adoptedUserEmail: "",
-        adoptionCode: "",
-        updatedBy: "",
-        adoptedUserTime: "",
-      },
-    };
+    const result = await PetCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { 
+        $set: { status: "available" },
+        $unset: { adoptedUserEmail: "", adoptionCode: "", updatedBy: "" }
+      }
+    );
 
-    const result = await PetCollection.updateOne(query, updateStatus);
+    if (result.modifiedCount > 0 && userEmail) {
+      await createNotification({
+        title: "Adoption Update",
+        message: `Your request for ${petName || petData.petName} was not approved at this time.`,
+        type: "system",
+        receiverEmail: userEmail,
+      });
+    }
+
     await adoptionCollection.deleteOne({ adoptionCode });
     revalidatePath("/dashboard/manage-pets");
-
-    return {
-      success: result.modifiedCount > 0,
-      message:
-        result.modifiedCount > 0
-          ? "Pet rejection successful, status reset"
-          : "Pet not found or already updated",
-    };
+    return { success: true, message: "Rejected successfully" };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-// for admin pet transfer preview to available
+
 export const ApprovePet = async (petId) => {
   const session = await getServerSession(authOptions);
   await verifyAdmin();
-
   try {
     const entryCollection = await EntryReqCollectionPromise;
     const petCollection = await petCollectionPromise;
-
-    const objectId = new ObjectId(petId);
-
-    const petData = await entryCollection.findOne({ _id: objectId });
-
-    if (!petData) {
-      throw new Error("Pet not found in Entry Requests");
-    }
-
-    const approvedPetData = {
-      ...petData,
+    const petData = await entryCollection.findOne({ _id: new ObjectId(petId) });
+    if (!petData) throw new Error("Pet not found");
+    const { _id, ...rest } = petData;
+    await petCollection.insertOne({
+      ...rest,
       status: "available",
       approvedBy: session.user.email,
       approvedAt: new Date(),
-    };
-
-    await petCollection.insertOne(approvedPetData);
-
-    await entryCollection.deleteOne({ _id: objectId });
-
+    });
+    await entryCollection.deleteOne({ _id: new ObjectId(petId) });
+    revalidatePath("/dashboard/manage-pets");
     return { success: true };
   } catch (error) {
-    console.error("Approve Pet Error:", error);
     return { success: false, error: error.message };
   }
 };
 
-// getPetRequest for admin
+
 export const getPetRequests = async () => {
   try {
-    // ✅ protect route (await must)
     await verifyAdmin();
-
     const entryCollection = await EntryReqCollectionPromise;
-
     const pets = await entryCollection.find({ status: "preview" }).toArray();
-
-    // ✅ serialize _id (IMPORTANT for client)
-    const formattedPets = pets.map((pet) => ({
-      ...pet,
-      _id: pet._id.toString(),
-    }));
-
-    return { success: true, data: formattedPets };
+    return { success: true, data: pets.map(p => ({ ...p, _id: p._id.toString() })) };
   } catch (error) {
-    return {
-      success: false,
-      message: error.message || "Failed to fetch pet requests",
-    };
+    return { success: false, message: error.message };
   }
 };
+
 
 export const RejectPet = async (petId) => {
   try {
     await verifyAdmin();
-
     const entryCollection = await EntryReqCollectionPromise;
-
-    await entryCollection.deleteOne({
-      _id: new ObjectId(petId),
-    });
-
+    await entryCollection.deleteOne({ _id: new ObjectId(petId) });
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-// shelter entry
+
 export const myEntryPets = async (email) => {
   try {
     const petCollection = await petCollectionPromise;
-    const pets = await petCollection
-      .find({ email: email })
-      .project({
-        images: { $slice: 1 },
-        ageYears: 1,
-        petName: 1,
-        _id: 1,
-      })
-      .toArray();
-    const serializedPets = pets.map((pet) => ({
-      ...pet,
-      _id: pet._id.toString(),
-    }));
-    return { success: true, pets: serializedPets };
+    const pets = await petCollection.find({ email: email }).toArray();
+    return { success: true, pets: pets.map(p => ({ ...p, _id: p._id.toString() })) };
   } catch (error) {
-    return { success: false, message: "Error fetching entry pets" };
+    return { success: false, message: "Error" };
   }
 };
