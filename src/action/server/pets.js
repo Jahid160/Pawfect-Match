@@ -89,14 +89,12 @@ export const updatePets = async (petId, updatedData, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
 
-    // ১. প্রথমে চেক করছি এই পেটটি এই ইউজারের কি না
     const existingPet = await Petcollection.findOne({ _id: new ObjectId(petId) });
 
     if (!existingPet) {
       return { success: false, message: "Pet not found" };
     }
 
-    // ২. ইমেইল ম্যাচিং (Security Gate)
     if (existingPet.email !== userEmail) {
       return { success: false, message: "You are not authorized to update this entry!" };
     }
@@ -127,7 +125,6 @@ export const deletePet = async (petId, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
 
-    // ডিলিট করার আগেও ইমেইল চেক করা হচ্ছে
     const result = await Petcollection.deleteOne({
       _id: new ObjectId(petId),
       email: userEmail

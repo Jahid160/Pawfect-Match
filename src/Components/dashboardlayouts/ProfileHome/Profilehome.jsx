@@ -7,6 +7,7 @@ import Loading from "../../Loading";
 
 import UserProfile from "../UserDashboard/UserProfile";
 import AdminProfile from "../AdminDashboard/AdminProfile";
+import DoctorProfile from "../DoctorDashboard/DoctorProfile";
 
 
 const Profilehome = () => {
@@ -26,9 +27,12 @@ const Profilehome = () => {
   if (userRole === "shelter") {
     return <Shelterprofile email={session?.user?.email}></Shelterprofile>;
   }
-  // else if (userRole === "doctor") {
-  //      return <UserDashboardHome></UserDashboardHome>
-  // }
+  else if (userRole === "doctor") {
+       return <DoctorProfile></DoctorProfile>
+  }
+  else{
+    return <div>you are not Authenticated</div>
+  }
 };
 
 export default Profilehome;

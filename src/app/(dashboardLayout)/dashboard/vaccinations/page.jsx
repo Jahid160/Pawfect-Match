@@ -1,10 +1,10 @@
 
-import { getAllOrders } from '@/action/server/orders';
+import { getAllOrders, getVaccineOrders } from '@/action/server/orders';
 import VaccinationManagement from '@/Components/dashboardlayouts/VaccinationManagement';
 import React from 'react';
 
 const page = async () => {
-    const orders = await getAllOrders();
+    const orders = await getVaccineOrders();
 
     return (
         <div>

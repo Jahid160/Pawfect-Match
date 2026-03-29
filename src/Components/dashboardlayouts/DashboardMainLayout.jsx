@@ -77,7 +77,7 @@ const DashboardMainLayout = () => {
   ];
 
   return (
-    <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
+    <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900 -mt-22.5 md:m-auto lg:m-auto">
       
       {/* --- HEADER --- */}
       <div className="flex lg:flex-row flex-col justify-between items-start lg:items-center gap-6 mb-12">
