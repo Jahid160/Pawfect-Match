@@ -131,24 +131,27 @@ export const getUserDashboardStats = async () => {
     const userId = user._id.toString();
     const adoptionCollection = await dbConnect(collections.ADOPTIONS);
     const petCollection = await dbConnect(collections.PETS);
+    const orderCollection = await dbConnect(collections.ORDERS);
 
     // 1. Fetch Approved and Pending counts from ADOPTIONS collection simultaneously
     const adoptions = await adoptionCollection
       .find({ email: user.email })
       .toArray();
-
+    const orders = await orderCollection.find({ userEmail: user.email }).toArray();
+console.log(orders);
     const approvedCount = adoptions.filter(
       (a) => a.status === "adopted",
     ).length;
     const pendingCount = adoptions.filter((a) => a.status === "pending").length;
 
+const pendingOrders = orders.filter(o => o.orderStatus === "pending").length;
+const processingOrders = orders.filter(o => o.orderStatus === "processing").length;
+const completedOrders = orders.filter(o => o.orderStatus === "completed").length;
+
     // 2. Fetch Favorite Pets count from PETS collection
     // Assuming 'savedBy' array in PETS collection contains user IDs
     const favoriteCount = await petCollection.countDocuments({
       savedBy: userId, // or user.email, depending on your schema
-    });
-    const availablePetsCount = await petCollection.countDocuments({
-      status: "available",
     });
     return {
       success: true,
@@ -156,7 +159,9 @@ export const getUserDashboardStats = async () => {
         adopted: approvedCount,
         pending: pendingCount,
         favorites: favoriteCount,
-        available: availablePetsCount,
+        pendingOrders: pendingOrders,
+        processingOrders: processingOrders,
+        completedOrders: completedOrders
       },
     };
   } catch (error) {

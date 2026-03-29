@@ -38,7 +38,7 @@ const PetProfile = ({ pet }) => {
     }
     return pet.images;
   }, [pet]);
-
+console.log(pet);
   const [activeImage, setActiveImage] = useState(gallery[0]);
 
 

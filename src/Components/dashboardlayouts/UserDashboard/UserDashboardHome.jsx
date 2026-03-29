@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Sparkles,
   ExternalLink,
+  Wheat,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -29,7 +30,7 @@ const UserDashboardHome = () => {
     approved: 0,
     pending: 0,
     favorites: 0,
-    available: 0,
+    pendingOrders: 0
   });
 
   // Fetch the count when the component mounts or session changes
@@ -55,18 +56,12 @@ const UserDashboardHome = () => {
   fetchPets();
 }, []);
 
-console.log(recommendedPets);
+console.log(stats);
 
   const overviewCards = [
     {
       title: "Adopted Pets",
       value: stats.adopted,
-      icon: PawPrint,
-      color: "bg-orange-500",
-    },
-    {
-      title: "Available Pets",
-      value: stats.available,
       icon: PawPrint,
       color: "bg-orange-500",
     },
@@ -81,6 +76,12 @@ console.log(recommendedPets);
       value: stats.pending,
       icon: Clock,
       color: "bg-amber-500",
+    },
+        {
+      title: "Pending Foods Order",
+      value: stats.pendingOrders,
+      icon: Wheat ,
+      color: "bg-rose-500",
     },
   ];
 
@@ -103,23 +104,6 @@ console.log(recommendedPets);
 
   return (
     <div className="p-6 lg:p-10 space-y-10 bg-[#FDFCFB] min-h-screen -mt-22.5 md:m-auto lg:m-auto">
-      {/* 1. Welcome Section - Modern Glassmorphism Look */}
-      {/* <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 lg:p-12 text-white shadow-2xl shadow-slate-200">
-        <div className="relative z-10">
-          <h1 className="text-3xl lg:text-4xl font-black tracking-tight">
-            Welcome back, <span className="text-orange-500">{session?.user?.name?.split(' ')[0] || "User"}</span> 👋
-          </h1>
-          <p className="text-slate-400 mt-2 font-medium max-w-md">
-            Your furry friends are waiting for some love! Here is what is happening today.
-          </p>
-          <div className="mt-6 flex gap-3">
-             <span className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
-               <Sparkles size={14} className="text-orange-400" /> Premium Member
-             </span>
-          </div>
-        </div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-      </div> */}
 
       {/* 2. Overview Cards - Floating Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
