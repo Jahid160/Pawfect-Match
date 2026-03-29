@@ -254,6 +254,11 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                               <ClipboardClock  size={16} /> Processing
                             </div>
                           )}
+                          {order.status === "Approving" || order.status === "DoctorAccepted" && (
+                            <div className="bg-red-200 text-red-700 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                              <ClipboardClock  size={16} /> TimeOut
+                            </div>
+                          )}
                         </div>
                       </td>
                     </motion.tr>
