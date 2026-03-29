@@ -2,28 +2,25 @@
 
 import { userVerifyAuth } from "@/lib/userVerifyAuth";
 import { ObjectId } from "mongodb";
+import { createNotification } from "@/action/server/notifications";
 
 const { dbConnect, collections } = require("@/lib/db");
 
 const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
-
 const petCollectionPromise = dbConnect(collections.PETS);
 
 const generateId = () => {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let id = "";
-
   for (let i = 0; i < 10; i++) {
     id += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-
   return id;
 };
 
 export const createAdoptionUser = async (data) => {
   try {
-    let user;
+    let user; 
     try {
       user = await userVerifyAuth();
     } catch (error) {
@@ -31,12 +28,12 @@ export const createAdoptionUser = async (data) => {
     }
 
     const userEmail = user.email;
-
+    const userId = user.id || user._id;
+    const userName = user.name || "A User";
 
     const adoptionCollection = await adoptionCollectionPromise;
     const petCollection = await petCollectionPromise;
 
-    // ✅ generate 10 character id
     const adoptionId = generateId();
 
     await petCollection.updateOne(
@@ -53,10 +50,27 @@ export const createAdoptionUser = async (data) => {
 
     const result = await adoptionCollection.insertOne({
       ...data,
+      userId: userId,
       adoptionCode: adoptionId,
       status: "pending",
       adoptedUserTime: new Date(),
     });
+
+    if (result.insertedId) {
+      await createNotification({
+        title: "New Adoption Request",
+        message: `${userName} sent a request for adoption (Code: ${adoptionId}).`,
+        type: "adoption",
+        receiverRole: "admin",
+      });
+
+      await createNotification({
+        title: "Adoption Request Pending",
+        message: `Your request for adoption (Code: ${adoptionId}) has been received. Please wait for approval.`,
+        type: "adoption",
+        receiverId: userId,
+      });
+    }
 
     return {
       success: true,
@@ -64,6 +78,7 @@ export const createAdoptionUser = async (data) => {
       adoptionCode: adoptionId,
     };
   } catch (error) {
+    console.error("Adoption Creation Error:", error);
     return { success: false, error: error.message };
   }
 };

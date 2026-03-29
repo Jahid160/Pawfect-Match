@@ -1,19 +1,41 @@
 "use client";
 import React from 'react';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  Mail, 
-  CalendarDays,
-  FileText,
-  History
+import {
+  Search, FileText, Activity, Calendar,
+  ExternalLink, Plus, History, ChevronRight
 } from 'lucide-react';
 
-const PetRecords = ({ appointments = [] }) => {
-  // শুধুমাত্র "Completed" স্ট্যাটাস ফিল্টার করা হচ্ছে
-  const completedRecords = appointments.filter(apt => apt.status === "Completed");
-  console.log(completedRecords);
+const PetRecords = () => {
+
+  const medicalRecords = [
+    {
+      id: "REC-2024-001",
+      petName: "Max",
+      owner: "MD SHAKIL",
+      lastVisit: "15 Mar 2024",
+      diagnosis: "Annual Vaccination & Deworming",
+      status: "Stable",
+      type: "Vaccination"
+    },
+    {
+      id: "REC-2024-002",
+      petName: "Luna",
+      owner: "Jahid Hasan",
+      lastVisit: "22 Mar 2024",
+      diagnosis: "Minor Skin Allergy Treatment",
+      status: "Recovering",
+      type: "Clinical"
+    },
+    {
+      id: "REC-2024-003",
+      petName: "Rocky",
+      owner: "Ariful Islam",
+      lastVisit: "10 Feb 2024",
+      diagnosis: "Fracture Recovery - Leg Surgery",
+      status: "Healthy",
+      type: "Surgery"
+    }
+  ];
 
   return (
     <div className="p-4 md:p-10 bg-base-200 min-h-screen font-sans">
@@ -30,34 +52,43 @@ const PetRecords = ({ appointments = [] }) => {
             </p>
           </div>
 
-          <div className="flex gap-3 w-full md:w-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral/30" size={18} />
-              <input
-                type="text"
-                placeholder="Search by pet or owner..."
-                className="input input-bordered bg-base-100 border-none rounded-2xl w-full md:w-80 font-medium shadow-sm focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <button className="btn btn-square bg-base-100 border-none hover:bg-base-300 shadow-sm">
-              <Filter size={20} className="text-neutral/60" />
-            </button>
+        <div className="flex gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search by Pet Name or Owner..."
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/10 font-medium text-sm"
+            />
           </div>
         </div>
 
-        {/* Desktop Table View */}
-        <div className="bg-base-100 rounded-[2.5rem] shadow-xl overflow-hidden border border-base-300">
-          <div className="overflow-x-auto">
-            <table className="table table-zebra w-full border-separate border-spacing-0">
-              <thead className="bg-base-200/50">
-                <tr className="text-neutral/40 border-b border-base-300">
-                  <th className="py-6 px-8 text-[10px] font-black uppercase tracking-widest">Pet & Owner Details</th>
-                  <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">Vaccine Type</th>
-                  <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">Completion Date</th>
-                  <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
-                  <th className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-right">Records</th>
-                </tr>
-              </thead>
+      {/* Main Content Area */}
+      <div className="grid grid-cols-1 gap-6">
+        {medicalRecords.map((record) => (
+          <div
+            key={record.id}
+            className="bg-white border border-slate-50 p-6 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+
+              {/* Pet Basic Info */}
+              <div className="flex items-center gap-5">
+                <div className="h-20 w-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-orange-500 border border-slate-100 group-hover:bg-orange-500 group-hover:text-white transition-colors duration-500">
+                  <FileText size={32} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="font-black text-slate-800 text-xl tracking-tight">{record.petName}</h3>
+                    <span className="bg-blue-50 text-blue-600 text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest">
+                      {record.id}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-400 flex items-center gap-1">
+                    <History size={14} className="text-orange-400" /> Owner: {record.owner}
+                  </p>
+                </div>
+              </div>
 
               <tbody className="text-neutral">
                 {completedRecords.map((record) => (
@@ -81,12 +112,17 @@ const PetRecords = ({ appointments = [] }) => {
                       </div>
                     </td>
 
-                    {/* Vaccine Info */}
-                    <td className="py-5 px-6 text-center">
-                      <div className="badge badge-outline border-base-300 font-bold text-[11px] px-4 py-3">
-                        {record.vaccineName}
-                      </div>
-                    </td>
+              {/* Meta Info & Actions */}
+              <div className="flex items-center justify-between lg:justify-end gap-10">
+                <div className="text-right">
+                  <p className="text-sm font-black text-slate-800 flex items-center gap-2 justify-end">
+                    <Calendar size={16} className="text-orange-500" /> {record.lastVisit}
+                  </p>
+                  <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${record.status === 'Stable' ? 'text-emerald-500' : 'text-orange-500'
+                    }`}>
+                    Condition: {record.status}
+                  </p>
+                </div>
 
                     {/* Completion Date */}
                     <td className="py-5 px-6 text-center">

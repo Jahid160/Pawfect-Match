@@ -8,14 +8,14 @@ export default function SupportButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([
-    { 
-      id: 1, 
+    {
+      id: 1,
       text: "🤖 I'm experiencing a problem. Contact our professional support team.",
-      sender: 'bot', 
+      sender: 'bot',
       time: new Date().toLocaleTimeString()
     }
   ]);
-  
+
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -34,14 +34,13 @@ export default function SupportButton() {
     setInputValue("");
 
     setTimeout(() => {
-      const botReply = { 
-        id: Date.now() + 1, 
-        // text: "ধন্যবাদ! Pawfect সাপোর্ট টিম শীঘ্রই আপনার সাথে যোগাযোগ করবে।", 
+      const botReply = {
+        id: Date.now() + 1,
         text: JSON.stringify(`🤖 I'm experiencing a problem. Contact our professional support team 
         01829972560(WhatsApp)
         ⏰ 24/7 support`),
-        sender: 'bot', 
-        time: currentTime 
+        sender: 'bot',
+        time: currentTime
       };
       setMessages(prev => [...prev, botReply]);
     }, 1000);
@@ -80,11 +79,10 @@ export default function SupportButton() {
             <div ref={scrollRef} className="h-[400px] overflow-y-auto p-4 bg-gray-50/50 flex flex-col gap-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${
-                    msg.sender === 'user' 
-                    ? 'bg-linear-to-br from-[#ff5b5b] to-[#d63384] text-white rounded-tr-none font-bold' 
-                    : 'bg-white text-gray-700 border border-gray-100 rounded-tl-none'
-                  }`}>
+                  <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${msg.sender === 'user'
+                      ? 'bg-linear-to-br from-[#ff5b5b] to-[#d63384] text-white rounded-tr-none font-bold'
+                      : 'bg-white text-gray-700 border border-gray-100 rounded-tl-none'
+                    }`}>
                     {msg.text}
                     {msg.sender === 'bot' && msg.id === 1 && (
                       <div className="mt-3 space-y-1 font-medium">
@@ -104,20 +102,20 @@ export default function SupportButton() {
             {/* Footer Input */}
             <div className="p-4 bg-white border-t border-gray-100">
               <form onSubmit={handleSendMessage} className="relative flex items-center gap-2">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="write your question... 💬" 
+                  placeholder="write your question... 💬"
                   className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:border-pink-400 text-gray-800"
                 />
-                <button type="submit" className={`shrink-0 w-12 h-12 ${!inputValue?"bg-linear-to-r from-[#ff9a9e] to-[#fecfef]": "bg-linear-to-r from-[#ff5b5b] via-[#d63384] to-[#b042ff]"} rounded-2xl flex items-center justify-center text-white shadow-md hover:opacity-90 transition-opacity`}>
+                <button type="submit" className={`shrink-0 w-12 h-12 ${!inputValue ? "bg-linear-to-r from-[#ff9a9e] to-[#fecfef]" : "bg-linear-to-r from-[#ff5b5b] via-[#d63384] to-[#b042ff]"} rounded-2xl flex items-center justify-center text-white shadow-md hover:opacity-90 transition-opacity`}>
                   <Send size={20} className="rotate-45 -translate-y-0.5" />
                 </button>
               </form>
               <div className="flex justify-center gap-4 mt-3 text-[10px] text-gray-400 font-medium uppercase tracking-tighter">
-                 <span>⚡ fast response</span>
-                 <span>🔒 sequere chat</span>
+                <span>⚡ fast response</span>
+                <span>🔒 sequere chat</span>
               </div>
             </div>
           </motion.div>
@@ -132,10 +130,9 @@ export default function SupportButton() {
         className="relative h-16 w-16 flex items-center justify-center rounded-2xl shadow-xl overflow-hidden"
       >
         {/* Animated Background */}
-        <div className={`absolute inset-0 transition-all duration-500 ${
-          isOpen ? 'bg-gray-800' : 'bg-linear-to-br from-[#ff5b5b] via-[#d63384] to-[#b042ff]'
-        }`} />
-        
+        <div className={`absolute inset-0 transition-all duration-500 ${isOpen ? 'bg-gray-800' : 'bg-linear-to-br from-[#ff5b5b] via-[#d63384] to-[#b042ff]'
+          }`} />
+
         {/* Pulse effect when closed */}
         {!isOpen && (
           <span className="absolute inset-0 rounded-2xl bg-white/20 animate-ping opacity-75" />
