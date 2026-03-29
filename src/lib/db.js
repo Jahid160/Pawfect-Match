@@ -15,6 +15,7 @@ export const collections = {
   ORDERS: "orders",
   CART: "cart",
   NOTIFICATIONS: "notifications",
+  VACCINES_ORDERS: "vaccine_orders"
 };
 
 const client = new MongoClient(uri, {

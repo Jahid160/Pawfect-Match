@@ -22,6 +22,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
 
   // --- হ্যান্ডলার: অ্যাডমিন একসেপ্ট ---
   const handleAdminAccept = async (id) => {
+    console.log(id);
     const previousOrders = [...orders];
     try {
       // Optimistic Update
