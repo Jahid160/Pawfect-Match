@@ -92,7 +92,7 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/appointments",
       icon: ClipboardCheck,
     },
-    { name: "Vaccinations", href: "/dashboard/vaccinations", icon: Syringe },
+    // { name: "Vaccinations", href: "/dashboard/vaccinations", icon: Syringe },
     {
       name: "Pet Medical Records",
       href: "/dashboard/pet-records",
