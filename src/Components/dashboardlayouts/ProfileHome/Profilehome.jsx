@@ -30,6 +30,9 @@ const Profilehome = () => {
   else if (userRole === "doctor") {
        return <DoctorProfile></DoctorProfile>
   }
+  else{
+    return <div>you are not Authenticated</div>
+  }
 };
 
 export default Profilehome;

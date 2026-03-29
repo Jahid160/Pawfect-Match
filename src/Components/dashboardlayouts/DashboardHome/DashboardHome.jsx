@@ -27,6 +27,9 @@ const DashboardHome = () => {
   } else if (userRole === "doctor") {
     return <DoctorDashboardHome></DoctorDashboardHome>;
   }
+  else{
+    return <div>you are not Authenticated</div>
+  }
 };
 
 export default DashboardHome;
