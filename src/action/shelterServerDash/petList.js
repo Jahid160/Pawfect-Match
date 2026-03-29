@@ -39,13 +39,13 @@ export const getShelterDashboardStats = async () => {
       favorites: 0,
     };
 
-    // ২. Preview Requests Count
+    //  Preview Requests Count
     const previewCount = await entryReqCollection.countDocuments({
       email: user.email,
       status: "preview",
     });
 
-    // ৩. Dynamic Monthly Adoption/Entry Data (Area Chart
+    //  Dynamic Monthly Adoption/Entry Data (Area Chart
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
     sixMonthsAgo.setDate(1);

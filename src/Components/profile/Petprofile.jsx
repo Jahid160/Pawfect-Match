@@ -38,15 +38,15 @@ const PetProfile = ({ pet }) => {
     }
     return pet.images;
   }, [pet]);
-
+console.log(pet);
   const [activeImage, setActiveImage] = useState(gallery[0]);
 
-  // নতুন রিয়েল-টাইম ডাটাবেস ভিত্তিক হুক
+
   const { isSaved, count, handleToggle } = useSavedState(pet, toggleSaveAction);
 
-  if (!pet || Object.keys(pet).length === 0) {
-    return <div className="p-10 text-center">Loading pet details...</div>;
-  }
+  if (!pet?._id) {
+  return <div className="p-10 text-center">Loading pet details...</div>;
+}
 
   const getStatIcon = (type) => {
     switch (type) {

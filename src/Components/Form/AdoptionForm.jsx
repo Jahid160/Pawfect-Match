@@ -35,7 +35,7 @@ const AdoptionForm = () => {
     residence: "",
     yard: "",
   });
-useEffect(() => {
+  useEffect(() => {
     if (userEmail) {
       setFormData((prev) => ({ ...prev, email: userEmail }));
     }
@@ -83,7 +83,7 @@ useEffect(() => {
     }
 
     try {
-      // formData এবং quizData কে একসাথে একটি অবজেক্টে নেওয়া হচ্ছে
+
       const finalData = {
         ...formData,
         ...quizData,
@@ -166,10 +166,10 @@ useEffect(() => {
                       </label>
                       <input
                         type="email"
-                        value={userEmail || ""} // সেশন থেকে আসা ইমেইল সরাসরি দেখাবে
-                        readOnly // ইউজার পরিবর্তন করতে পারবে না
+                        value={userEmail || ""}
+                        readOnly
                         placeholder="hello@trusted.com"
-                        // ডিজাইনে একটু পরিবর্তন যাতে বোঝা যায় এটি লক করা
+
                         className="input w-full bg-slate-100 border-gray-200 text-slate-500 cursor-not-allowed rounded-xl outline-none"
                       />
                     </div>

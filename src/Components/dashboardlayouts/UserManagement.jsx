@@ -14,7 +14,7 @@ import UserDetailsModal from "./AdminDashboard/UserDetailsModal/UserDetailsModal
 const UserManagement = ({ user = [] }) => {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null); // মডালের জন্য
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // --- Filter States ---
@@ -23,14 +23,14 @@ const UserManagement = ({ user = [] }) => {
 
   // --- Pagination States ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // প্রতি পেজে ৮ জন ইউজার দেখাবে
+  const itemsPerPage = 8;
 
   // --- Filter Logic ---
   const filteredUsers = useMemo(() => {
     return user.filter((u) => {
       const isRoleUser = u.role?.toLowerCase() === "user" || !u.role;
       const matchesSearch = u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            u.email?.toLowerCase().includes(searchQuery.toLowerCase());
+        u.email?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "All" || u.status === statusFilter;
       return isRoleUser && matchesSearch && matchesStatus;
     });
@@ -60,7 +60,7 @@ const UserManagement = ({ user = [] }) => {
 
   return (
     <div className="bg-base-200 p-4 lg:p-10 min-h-screen font-sans text-neutral">
-      {/* Header & Filters (আগের মতোই থাকবে) */}
+      {/* Header & Filters  */}
       <div className="flex md:flex-row flex-col justify-between items-start md:items-center gap-6 mb-12">
         <h1 className="font-black text-neutral text-5xl tracking-tight">User <span className="text-primary underline decoration-primary/10">Directory</span></h1>
         <button className="flex items-center gap-3 bg-neutral hover:bg-primary px-8 py-4 rounded-2xl font-bold text-white transition-all">
@@ -71,17 +71,17 @@ const UserManagement = ({ user = [] }) => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-10">
         <div className="md:col-span-8 relative">
           <Search className="top-1/2 left-5 absolute text-neutral/30 -translate-y-1/2" size={20} />
-          <input 
-            type="text" 
-            placeholder="Search users..." 
+          <input
+            type="text"
+            placeholder="Search users..."
             className="bg-base-100 py-4 pl-14 border border-base-300 rounded-2xl w-full outline-none focus:ring-4 focus:ring-primary/10"
-            onChange={(e) => {setSearchQuery(e.target.value); setCurrentPage(1);}}
+            onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
           />
         </div>
         <div className="md:col-span-4">
-          <select 
+          <select
             className="bg-base-100 px-6 py-4 border border-base-300 rounded-2xl w-full font-bold outline-none"
-            onChange={(e) => {setStatusFilter(e.target.value); setCurrentPage(1);}}
+            onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
           >
             <option value="All">All Status</option>
             <option value="active">Active</option>
@@ -142,7 +142,7 @@ const UserManagement = ({ user = [] }) => {
             Showing {paginatedUsers.length} of {filteredUsers.length} users
           </p>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="p-2 bg-base-100 border border-base-300 rounded-xl disabled:opacity-30 hover:bg-primary hover:text-white transition-all"
@@ -160,7 +160,7 @@ const UserManagement = ({ user = [] }) => {
                 </button>
               ))}
             </div>
-            <button 
+            <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="p-2 bg-base-100 border border-base-300 rounded-xl disabled:opacity-30 hover:bg-primary hover:text-white transition-all"
@@ -172,10 +172,10 @@ const UserManagement = ({ user = [] }) => {
       </div>
 
       {/* Details Modal */}
-      <UserDetailsModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        user={selectedUser} 
+      <UserDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        user={selectedUser}
       />
     </div>
   );

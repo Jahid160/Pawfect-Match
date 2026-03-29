@@ -192,7 +192,7 @@ const ShelterDashboardHome = () => {
           <div className="flex justify-between items-center mb-10">
             <div>
               <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                <TrendingUp className="text-orange-500" /> Adoption Trends
+                <TrendingUp className="text-orange-500" /> Pet Preview Count
               </h2>
               <p className="text-slate-400 text-xs font-bold mt-1">
                 Last 6 Months performance

@@ -14,8 +14,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
-// সার্ভার অ্যাকশন ইম্পোর্ট
-import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
+
+import { 
+  getAdminNotifications, 
+  getUserNotifications, 
+  markNotificationsAsRead 
+} from "@/action/server/notifications";
 import Image from "next/image";
 
 const DashboardNavbar = ({ isCollapsed }) => {
@@ -26,13 +30,21 @@ const DashboardNavbar = ({ isCollapsed }) => {
   const dropdownRef = useRef(null);
   const { data: session } = useSession();
 
+  const isAdmin = session?.user?.role === "admin";
+  const userEmail = session?.user?.email;
 
   useEffect(() => {
     setIsMounted(true);
 
     const fetchNotifications = async () => {
-      const res = await getAdminNotifications();
-      if (res.success) {
+      let res;
+      if (isAdmin) {
+        res = await getAdminNotifications();
+      } else if (userEmail) {
+        res = await getUserNotifications(userEmail);
+      }
+
+      if (res?.success) {
         setNotifications(res.notifications);
         setUnreadCount(res.unreadCount);
       }
@@ -40,17 +52,23 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
     fetchNotifications();
 
-    const interval = setInterval(fetchNotifications, 120000);
+    const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, []);
-
+  }, [isAdmin, userEmail]); 
 
   const handleNotificationClick = async () => {
     const nextState = !isOpen;
     setIsOpen(nextState);
+    
     if (nextState === true && unreadCount > 0) {
-      const res = await markNotificationsAsRead("admin");
-      if (res.success) {
+      let res;
+      if (isAdmin) {
+        res = await markNotificationsAsRead("admin", null);
+      } else if (userEmail) {
+        res = await markNotificationsAsRead(null, userEmail);
+      }
+
+      if (res?.success) {
         setUnreadCount(0);
       }
     }
@@ -71,7 +89,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
     }
   };
 
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -86,9 +103,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
     return (
       <nav className="top-0 z-50 sticky flex justify-between items-center bg-white shadow-sm px-6 border-gray-100 border-b w-full h-[70px]">
         <div className="flex items-center gap-4">
-          <h1 className="font-black text-slate-800 lg:text-xl italic uppercase tracking-tight">
-            Dashboard <span className="text-orange-500">Overview</span>
-          </h1>
+          <div className="bg-slate-100 rounded-md w-48 h-6 animate-pulse"></div>
         </div>
         <div className="flex items-center gap-5">
           <div className="p-2.5 text-slate-200"><Bell size={22} /></div>
@@ -103,13 +118,12 @@ const DashboardNavbar = ({ isCollapsed }) => {
       {/* LEFT SIDE: Title */}
       <div className="flex items-center gap-4">
         <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl italic uppercase tracking-tight transition-opacity">
-          Dashboard <span className="text-orange-500">Overview</span>
+          Dashboard <span className="text-orange-500">{isAdmin ? "Overview" : "User Portal"}</span>
         </h1>
       </div>
 
       {/* RIGHT SIDE: Notifications & Profile */}
       <div className="flex items-center gap-5">
-        {/* Notification Container */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationClick}
@@ -119,7 +133,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
               }`}
           >
             <Bell size={22} strokeWidth={2.5} />
-            {/* আনরিড থাকলে লাল ডট দেখাবে */}
             {unreadCount > 0 && (
               <span className="top-2.5 right-2.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">
                 {unreadCount}
@@ -127,7 +140,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
             )}
           </button>
 
-          {/* DROPDOWN MENU */}
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -137,7 +149,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="right-0 absolute bg-white shadow-2xl shadow-slate-200 mt-4 border border-slate-100 rounded-[2.5rem] w-80 md:w-96 overflow-hidden origin-top-right"
               >
-                {/* Dropdown Header */}
                 <div className="flex justify-between items-center bg-slate-50/50 p-6 border-slate-50 border-b">
                   <h3 className="font-black text-slate-800 text-sm italic uppercase tracking-widest">
                     Notifications
@@ -149,7 +160,6 @@ const DashboardNavbar = ({ isCollapsed }) => {
                   )}
                 </div>
 
-                {/* Notification List */}
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                   {notifications.length > 0 ? (
                     notifications.map((notif) => {
@@ -188,9 +198,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
                   )}
                 </div>
 
-                {/* View All Button */}
                 <Link
-                  href="/admin/notifications"
+                  href={isAdmin ? "/admin/notifications" : "/dashboard/notifications"}
                   onClick={() => setIsOpen(false)}
                   className="flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-5 border-slate-100 border-t font-black text-[10px] text-slate-500 hover:text-white text-center uppercase tracking-[0.2em] transition-all"
                 >
@@ -206,8 +215,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
           <button className="flex justify-center items-center bg-orange-100 shadow-sm border border-orange-200 rounded-2xl hover:ring-4 hover:ring-orange-50 w-10 h-10 overflow-hidden transition-all">
             {session?.user?.image ? (
               <Image
-                width={196}
-                height={196}
+                width={40}
+                height={40}
                 src={session.user.image}
                 alt="User Avatar"
                 className="w-full h-full object-cover"
@@ -219,10 +228,10 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
           <div className="hidden md:block">
             <p className="font-black text-slate-800 text-xs uppercase leading-none tracking-tight">
-              {session?.user?.name || "Admin"}
+              {session?.user?.name || "Guest"}
             </p>
             <p className="mt-1 font-bold text-[9px] text-slate-400 italic uppercase tracking-tighter">
-              {session?.user?.role || "Administrator"}
+              {session?.user?.role || "Member"}
             </p>
           </div>
         </div>

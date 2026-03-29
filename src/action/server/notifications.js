@@ -1,7 +1,8 @@
 "use server";
+
 import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
-
+import { revalidatePath } from "next/cache";
 
 export const getAdminNotifications = async () => {
   try {
@@ -10,7 +11,7 @@ export const getAdminNotifications = async () => {
     const notifications = await notificationCollection
       .find({ receiverRole: "admin" })
       .sort({ createdAt: -1 })
-      .limit(5)
+      .limit(10)
       .toArray();
 
     const unreadCount = await notificationCollection.countDocuments({ 
@@ -26,13 +27,44 @@ export const getAdminNotifications = async () => {
 
     return { success: true, notifications: formattedNotifications, unreadCount };
   } catch (error) {
-    console.error("Fetch Notifications Error:", error);
+    console.error("Fetch Admin Notifications Error:", error);
     return { success: false, message: error.message };
   }
 };
 
 
-export const createNotification = async ({ title, message, type, receiverRole }) => {
+export const getUserNotifications = async (userEmail) => {
+  try {
+    if (!userEmail) return { success: false, message: "User Email is required" };
+    
+    const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
+    
+    const notifications = await notificationCollection
+      .find({ receiverEmail: userEmail }) 
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
+
+    const unreadCount = await notificationCollection.countDocuments({ 
+      receiverEmail: userEmail, 
+      isRead: false 
+    });
+
+    const formattedNotifications = notifications.map(notif => ({
+        ...notif,
+        _id: notif._id.toString(),
+        time: formatNotificationTime(notif.createdAt) 
+    }));
+
+    return { success: true, notifications: formattedNotifications, unreadCount };
+  } catch (error) {
+    console.error("Fetch User Notifications Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+
+export const createNotification = async ({ title, message, type, receiverRole, receiverEmail }) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
     
@@ -40,12 +72,16 @@ export const createNotification = async ({ title, message, type, receiverRole })
       title,
       message,
       type,
-      receiverRole,
+      receiverRole: receiverRole || null, 
+      receiverEmail: receiverEmail || null, 
       isRead: false,
       createdAt: new Date(),
     };
     
     const result = await notificationCollection.insertOne(newNotification);
+    
+    revalidatePath("/dashboard");
+    
     return { success: true, id: result.insertedId.toString() };
   } catch (error) {
     console.error("Notification Creation Error:", error);
@@ -54,22 +90,31 @@ export const createNotification = async ({ title, message, type, receiverRole })
 };
 
 
-export const markNotificationsAsRead = async (role = "admin") => {
+export const markNotificationsAsRead = async (role = null, userEmail = null) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
     
+    let query = {};
+    if (role) {
+      query = { receiverRole: role, isRead: false };
+    } else if (userEmail) {
+      query = { receiverEmail: userEmail, isRead: false };
+    }
+
+    if (Object.keys(query).length === 0) return { success: false };
+
     await notificationCollection.updateMany(
-      { receiverRole: role, isRead: false },
+      query,
       { $set: { isRead: true } }
     );
     
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
     console.error("Mark as Read Error:", error);
     return { success: false, message: error.message };
   }
 };
-
 
 const formatNotificationTime = (date) => {
   const now = new Date();
@@ -78,5 +123,10 @@ const formatNotificationTime = (date) => {
   if (diffInSeconds < 60) return "Just now";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  return new Date(date).toLocaleDateString();
+  
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
 };
