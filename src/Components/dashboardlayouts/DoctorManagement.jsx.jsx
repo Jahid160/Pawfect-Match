@@ -12,12 +12,11 @@ import { useRouter } from "next/navigation";
 
 const DoctorManagement = ({ allOrders = [] }) => {
   const router = useRouter();
-  console.log(allOrders);
-  // ১. ডায়নামিক ফিল্টারিং
-  const pendingVaccinations = allOrders.filter(order => order.status === "Processing");
+
+  const pendingVaccinations = allOrders.filter(order => order.status === "Pending");
   const activeSchedules = allOrders.filter(order => order.status === "Processing" && !order.isCompleted);
   
-  // এই লিস্টটিই আপনি খুঁজছেন - যা যা শেষ হয়েছে
+
   const completedOrders = allOrders.filter(order => order.status === "Completed" || order.isCompleted);
 
   const doctors = [

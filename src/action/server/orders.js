@@ -61,7 +61,7 @@ export const adminAcceptOrder = async (orderId) => {
 
 // ৩. ডক্টর শিডিউল (এটিই আপনার ডক্টর পেজে ডাটা পাঠাবে)
 export const doctorScheduleOrder = async (orderId, days) => {
-  await verifyAdmin()
+  await verifyAdmin();
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const deadline = new Date();
@@ -113,7 +113,7 @@ export const getDoctorOrders = async () => {
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const orders = await orderCollection
-      .find({status: "Processing" })
+      .find({ status: { $in: ["Processing", "Completed", "Pending"] } })
       .sort({ createdAt: -1 })
       .toArray();
     return JSON.parse(JSON.stringify(orders));
@@ -122,13 +122,19 @@ export const getDoctorOrders = async () => {
   }
 };
 
-
 export const getVaccineOrders = async () => {
   await verifyAdmin();
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const orders = await orderCollection
-      .find({ })
+      .find(
+        {},
+        {
+          projection: { 
+            vaccineId: 0, 
+          },
+        },
+      )
       .sort({ createdAt: -1 })
       .toArray();
     return JSON.parse(JSON.stringify(orders));
