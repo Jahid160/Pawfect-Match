@@ -111,7 +111,7 @@ const ShelterDashboardHome = () => {
     return <div className="p-10 text-center">No dashboard data found.</div>;
 
   return (
-    <div className="p-6 space-y-10 bg-[#FDFCFB] min-h-screen">
+    <div className="p-6 space-y-10 bg-[#FDFCFB] min-h-screen -mt-22.5 md:m-auto lg:m-auto">
       {/* SECTION 1: Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {overviewCards.map((card, index) => (
