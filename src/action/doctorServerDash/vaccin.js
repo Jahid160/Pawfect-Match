@@ -44,11 +44,11 @@ export const completedOrder = async (orderId) => {
       },
     );
 
-    // if (result.modifiedCount > 0) {
-    //   revalidatePath("/dashboard/vaccinations");
-    //   revalidatePath("/dashboard/doctor");
-    //   return { success: true };
-    // }
+    if (result.modifiedCount > 0) {
+      revalidatePath("/dashboard/appointments");
+      revalidatePath("/dashboard/doctor");
+      return { success: true };
+    }
 
     return { success: false, message: "Update failed" };
   } catch (error) {
@@ -75,7 +75,7 @@ export const deleteOrder = async (id) => {
 
     if (result.deletedCount > 0) {
       // Revalidate to update the UI instantly
-      revalidatePath("/dashboard/vaccinations");
+      revalidatePath("/dashboard/appointments");
       revalidatePath("/dashboard/doctor");
       return { success: true, message: "Appointment rejected successfully" };
     }
