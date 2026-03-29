@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Plus, AlertCircle, Calendar, 
   CheckCircle2, Clock, FileText,
-  UserCheck, Stethoscope
+  UserCheck, Stethoscope,
+  CircleCheckBig
 } from 'lucide-react';
 import { adminAcceptOrder, doctorScheduleOrder } from "@/action/server/orders";
 import { toast } from "react-hot-toast";
@@ -151,7 +152,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                       <td className="px-8 py-5 text-right">
                         <div className="flex justify-end gap-2">
                           
-                          {/* ১. Accept Button: যদি স্ট্যাটাস Pending থাকে */}
+                          {/* 1. Accept Button*/}
                           {(order.status === "Pending" || !order.status) && (
                             <button 
                               onClick={() => handleAdminAccept(order._id)}
@@ -161,7 +162,7 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                             </button>
                           )}
 
-                          {/* ২. Schedule Buttons: যদি অ্যাডমিন একসেপ্ট করে থাকে */}
+                          {/* 2. Schedule Buttons */}
                           {order.status === "AdminAccepted" && (
                             <div className="flex gap-2">
                               <button 
@@ -178,13 +179,16 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                               </button>
                             </div>
                           )}
+                          
 
                           {/* ৩. Completed/Doctor Assigned Icon */}
-                          {(order.status === "DoctorAccepted" || order.status === "Completed") && (
-                             <div className="bg-emerald-50 text-emerald-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                          {(order.status === "DoctorAccepted" || order.status === "Completed" || order.status === "Completing")  ?  (
+                             <div className="bg-emerald-50 text-orange-300 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
                                <CheckCircle2 size={16} /> Assigned
                              </div>
-                          )}
+                          ) : <div className="bg-emerald-50 text-green-600 p-2 rounded-lg flex items-center gap-2 font-black text-[10px] uppercase">
+                               <CircleCheckBig  size={16} /> Completed
+                             </div>}
 
                         </div>
                       </td>

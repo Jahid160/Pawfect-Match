@@ -94,7 +94,7 @@ export const completeVaccination = async (orderId) => {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
-      { $set: { status: "Approving", isCompleted: true } },
+      { $set: { status: "Completing", isCompleted: true } },
     );
 
     revalidatePath("/dashboard/vaccinations");
