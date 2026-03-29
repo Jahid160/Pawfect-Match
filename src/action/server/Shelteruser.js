@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
+import { verifyAdmin } from "@/lib/adminAuth";
+
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -46,7 +48,7 @@ export const getShelterRequests = async (
   search = "",
   status = "All",
 ) => {
-  await shelterVerifyAuth()
+  await verifyAdmin()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
