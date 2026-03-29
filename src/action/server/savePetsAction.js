@@ -44,14 +44,14 @@ export async function toggleSaveAction(petId) {
     const userId = user._id.toString();
     const PetCollection = await dbConnect(collections.PETS);
 
-    // ১. চেক করা ইউজার কি অলরেডি এই পেটে হার্ট দিয়েছে?
+
     const pet = await PetCollection.findOne({ _id: new ObjectId(petId) });
     if (!pet) return { success: false, message: "Pet not found" };
 
     const isAlreadySaved = pet.savedBy?.includes(userId);
 
     if (isAlreadySaved) {
-      // ২. যদি থাকে, তবে রিমুভ (Unlike) করো এবং কাউন্ট ১ কমাও
+
       await PetCollection.updateOne(
         { _id: new ObjectId(petId) },
         {
@@ -60,7 +60,7 @@ export async function toggleSaveAction(petId) {
         },
       );
     } else {
-      // ৩. যদি না থাকে, তবে অ্যাড (Like) করো এবং কাউন্ট ১ বাড়াও
+
       await PetCollection.updateOne(
         { _id: new ObjectId(petId) },
         {
@@ -70,7 +70,7 @@ export async function toggleSaveAction(petId) {
       );
     }
 
-    // ৪. পেজগুলো রিভ্যালিডেট করা যাতে সাথে সাথে আপডেট দেখা যায়
+
     revalidatePath(`/pet-profile/${petId}`);
     revalidatePath("/all-pets");
     revalidatePath("/dashboard/saved-pets");
