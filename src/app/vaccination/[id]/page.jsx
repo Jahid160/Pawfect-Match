@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
+
 export default function VaccineDetails({ params }) {
   const [vaccine, setVaccine] = useState(null);
   const [loading, setLoading] = useState(true);
