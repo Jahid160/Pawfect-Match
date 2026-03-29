@@ -5,11 +5,24 @@ import { ObjectId } from "mongodb";
 const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
 
 export const getPending = async (email) => {
-     await shelterVerifyAuth()
+     await shelterVerifyAuth();
      try {
           const entryCollection = await EntryReqCollectionPromise;
           const query = { email: email };
-          const result = await entryCollection.find(query).toArray();
+          const result = await entryCollection
+               .find(query)
+               .project({
+                    petName: 1,
+                    species: 1,
+                    _id: 1,
+                    images: 1,
+                    breed: 1,
+                    status: 1,
+                    gender: 1,
+                    weight: 1,
+                    ageYears: 1
+               })
+               .toArray();
 
           return result.map((pet) => ({
                ...pet,
@@ -19,7 +32,7 @@ export const getPending = async (email) => {
           console.error("Error:", err);
           return [];
      }
-}
+};
 
 export const updateEntry = async (id, updatedData) => {
      await shelterVerifyAuth()

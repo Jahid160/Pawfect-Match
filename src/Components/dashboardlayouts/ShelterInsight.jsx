@@ -215,19 +215,28 @@ const ShelterInsight = ({ totalItems, requests = [], setRequests, currentPage, s
                                                             </span>
                                                        </td>
                                                        <td className="p-6 text-right">
-                                                            {/* Smooth Action Buttons */}
-                                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                                                            {/* Action Buttons Section */}
+                                                            <div className="flex justify-end gap-1 md:gap-2 
+       /* Mobile: Always visible, normal position */
+       opacity-100 translate-x-0 
+       /* Desktop: Hidden until hover, slides in */
+       md:opacity-0 md:group-hover:opacity-100 md:translate-x-2 md:group-hover:translate-x-0 
+       transition-all duration-300">
+
                                                                  <button
                                                                       onClick={() => handleEdit(item)}
-                                                                      className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-transparent cursor-pointer"
+                                                                      className="p-2 md:p-2.5 text-blue-600 md:text-slate-400 md:hover:text-blue-600 bg-blue-50 md:bg-transparent md:hover:bg-blue-50 rounded-xl transition-all cursor-pointer"
+                                                                      title="Edit"
                                                                  >
-                                                                      <Edit3 size={18} />
+                                                                      <Edit3 size={16} className="md:w-4.5 md:h-4.5" />
                                                                  </button>
+
                                                                  <button
                                                                       onClick={() => handleDelete(item._id, item.shelterName)}
-                                                                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent cursor-pointer"
+                                                                      className="p-2 md:p-2.5 text-red-600 md:text-slate-400 md:hover:text-red-600 bg-red-50 md:bg-transparent md:hover:bg-red-50 rounded-xl transition-all cursor-pointer"
+                                                                      title="Delete"
                                                                  >
-                                                                      <Trash2 size={18} />
+                                                                      <Trash2 size={16} className="md:w-4.5 md:h-4.5" />
                                                                  </button>
                                                             </div>
                                                        </td>
