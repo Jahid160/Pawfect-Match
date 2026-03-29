@@ -138,20 +138,19 @@ export const getSinglePets = async (id) => {
     const Petcollection = await petCollectionPromise;
     const pet = await Petcollection.findOne({ _id: new ObjectId(id) });
     if (!pet) return {};
+
     let userId = null;
     try {
       const user = await verifyAuth();
       userId = user._id.toString();
-    } catch (error) {}
+    } catch {}
+
     const savedBy = pet.savedBy || [];
     return {
+      ...pet, // 🔥 return everything
       _id: pet._id.toString(),
-      petName: pet.petName,
-      breed: pet.breed,
-      age: pet.age,
-      species: pet.species,
-      images: pet.images,
-      status: pet.status,
+
+      // keep save logic
       saveCount: savedBy.length,
       isSaved: userId ? savedBy.includes(userId) : false,
     };
