@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
+import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
+import { verifyAdmin } from "@/lib/adminAuth";
+
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
@@ -16,8 +19,10 @@ export const createShelterUser = async (data) => {
     return { success: false, message: "Unauthorized" };
   }
 
+  await shelterVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
+
 
     const finalDataToSave = {
       ...data,
@@ -43,6 +48,7 @@ export const getShelterRequests = async (
   search = "",
   status = "All",
 ) => {
+  await verifyAdmin()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
@@ -126,6 +132,7 @@ export const getShelterRequests = async (
 };
 
 export const updateShelterStatus = async (id, email, newStatus) => {
+  await shelterVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
     const userCollection = await userCollectionPromise;
@@ -165,6 +172,7 @@ export const updateShelterStatus = async (id, email, newStatus) => {
 };
 
 export const deleteShelterRequest = async (id) => {
+  await shelterVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
     const result = await shelterRequestsCollection.deleteOne({
@@ -181,6 +189,7 @@ export const deleteShelterRequest = async (id) => {
 };
 
 export const updateShelterData = async (id, updatedFields) => {
+  await shelterVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
     const result = await shelterRequestsCollection.updateOne(
@@ -199,6 +208,7 @@ export const updateShelterData = async (id, updatedFields) => {
 };
 
 export const getSingleShelter = async (email) => {
+  await shelterVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
@@ -246,32 +256,34 @@ export const getSingleShelter = async (email) => {
 };
 
 export const updateShelterCover = async (email, imageUrl) => {
-     try {
-          const shelterCollection = await shelterRequestsCollectionPromise;
-          const result = await shelterCollection.updateOne(
-               { email: email },
-               { $set: { shelterPhoto: imageUrl } }
-          );
+  await shelterVerifyAuth()
+  try {
+    const shelterCollection = await shelterRequestsCollectionPromise;
+    const result = await shelterCollection.updateOne(
+      { email: email },
+      { $set: { shelterPhoto: imageUrl } }
+    );
 
-          if (result.modifiedCount > 0) {
-               revalidatePath('/dashboard/profile')
-               return { success: true };
-          }
-          return { success: false };
-     } catch (error) {
-          return { success: false, message: error.message };
-     }
+    if (result.modifiedCount > 0) {
+      revalidatePath('/dashboard/profile')
+      return { success: true };
+    }
+    return { success: false };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 }
 
 export const SheltergetStatus = async (email) => {
-     const shelterCollection = await shelterRequestsCollectionPromise;
-     const result = await shelterCollection.findOne(
-          { email: email },
-          {
-               projection: {
-                    status: 1, _id: 0
-               }
-          }
-     );
-     return result ? result.status : null;
+  const shelterCollection = await shelterRequestsCollectionPromise;
+  await shelterVerifyAuth()
+  const result = await shelterCollection.findOne(
+    { email: email },
+    {
+      projection: {
+        status: 1, _id: 0
+      }
+    }
+  );
+  return result ? result.status : null;
 }

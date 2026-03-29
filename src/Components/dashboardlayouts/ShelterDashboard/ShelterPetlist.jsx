@@ -5,20 +5,45 @@ import Image from 'next/image';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Edit, Trash2, Search, ChevronLeft, ChevronRight, ChevronDown, Check, X } from 'lucide-react';
+import { Eye, Edit, Trash2, Search, ChevronLeft, ChevronRight, ChevronDown, Check, X, Mail, AlertTriangle } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 // Server Actions
 import { deletePet, updatePets } from '@/action/server/pets';
+import Loading from '@/components/Loading';
+import { SheltergetStatus } from '@/action/server/Shelteruser';
 
 const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
      const { data: session } = useSession();
      const userEmail = session?.user?.email;
-
      const router = useRouter();
+     const [shelterStatus, setShelterStatus] = useState(null);
      const pathname = usePathname();
+     const [isLoading, setIsLoading] = useState(true);
      const searchParams = useSearchParams();
      const dropdownRef = useRef(null);
+
+
+     useEffect(() => {
+          const checkShelterStatus = async () => {
+               const userEmail = session?.user?.email;
+
+               if (userEmail) {
+
+                    try {
+                         setIsLoading(true);
+                         const status = await SheltergetStatus(userEmail);
+                         setShelterStatus(status);
+                    } catch (error) {
+                         console.error("Status check failed:", error);
+                    } finally {
+                         setIsLoading(false);
+                    }
+               }
+          };
+
+          checkShelterStatus();
+     }, [session?.user?.email])
 
      // Modal States
      const [selectedPet, setSelectedPet] = useState(null);
@@ -101,6 +126,40 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                Swal.fire("Error!", res.message, "error");
           }
      };
+
+     if (shelterStatus === "Suspended") {
+          return (
+               <div className="card bg-base-100 shadow-2xl max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-error/20">
+                    <div className="p-12 text-center space-y-6">
+                         <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                              <AlertTriangle size={40} />
+                         </div>
+
+                         <div className="space-y-2">
+                              <h2 className="text-3xl font-black text-neutral tracking-tight">
+                                   Account Suspended
+                              </h2>
+                              <p className="text-base-content/70 font-medium px-4">
+                                   Your shelter account is currently suspended. You cannot list new pets at this moment.
+                              </p>
+                         </div>
+
+                         <div className="bg-base-200/50 p-6 rounded-2xl border border-base-300">
+                              <p className="text-sm text-neutral font-bold mb-3 flex items-center justify-center gap-2">
+                                   <Mail size={16} className="text-primary" /> How to resolve this?
+                              </p>
+                              <p className="text-sm text-base-content/60 ">
+                                   Please contact the system administrator to discuss the status of your account and request reactivation.
+                              </p>
+                         </div>
+                    </div>
+               </div>
+          );
+     }
+
+     if (isLoading) {
+          return <Loading />
+     }
 
      // --- Main Render ---
      return (
@@ -196,7 +255,17 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                                              </tr>
                                         )) : (
                                              <tr>
-                                                  <td colSpan="4" className="px-6 py-10 text-center text-slate-400 text-sm">No pets found matching your filters.</td>
+                                                  <td colSpan="4" className="px-6 py-20">
+                                                       <div className="flex flex-col items-center justify-center text-center">
+                                                            <div className="bg-slate-100 p-6 rounded-full mb-4">
+                                                                 <Search className="size-10 text-slate-400" />
+                                                            </div>
+                                                            <h3 className="text-lg font-bold text-slate-800 mb-1">No Pets Found</h3>
+                                                            <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
+                                                                 We couldn't find any pet entries .
+                                                            </p>
+                                                       </div>
+                                                  </td>
                                              </tr>
                                         )}
                                    </tbody>
@@ -204,19 +273,25 @@ const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {
                          </div>
 
                          {/* Pagination */}
-                         <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
-                              <div className="text-xs text-slate-500">
-                                   Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+
+                         {requests.length > 0 &&
+
+                              <div className="px-6 py-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+                                   <div className="text-xs text-slate-500">
+                                        Showing page <span className="font-bold text-slate-800">{currentPage}</span> of <span className="font-bold text-slate-800">{totalPages || 1}</span>
+                                   </div>
+                                   <div className="flex gap-2">
+                                        <button disabled={currentPage <= 1} onClick={() => updateQueryParams({ page: currentPage - 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
+                                             <ChevronLeft size={14} /> Previous
+                                        </button>
+                                        <button disabled={currentPage >= totalPages} onClick={() => updateQueryParams({ page: currentPage + 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
+                                             Next <ChevronRight size={14} />
+                                        </button>
+                                   </div>
                               </div>
-                              <div className="flex gap-2">
-                                   <button disabled={currentPage <= 1} onClick={() => updateQueryParams({ page: currentPage - 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
-                                        <ChevronLeft size={14} /> Previous
-                                   </button>
-                                   <button disabled={currentPage >= totalPages} onClick={() => updateQueryParams({ page: currentPage + 1 })} className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium hover:bg-slate-50 disabled:opacity-40 transition-all shadow-sm">
-                                        Next <ChevronRight size={14} />
-                                   </button>
-                              </div>
-                         </div>
+
+                         }
+
                     </div>
                </div>
 

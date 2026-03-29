@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { 
-  Stethoscope, Award, Phone, MoreVertical, Activity, 
+import {
+  Stethoscope, Award, Phone, MoreVertical, Activity,
   Syringe, CheckCircle2, Check, CalendarCheck, Clock8, Calendar,
   History, User, ArrowRight
 } from 'lucide-react';
@@ -12,12 +12,11 @@ import { useRouter } from "next/navigation";
 
 const DoctorManagement = ({ allOrders = [] }) => {
   const router = useRouter();
+
+  const pendingVaccinations = allOrders.filter(order => order.status === "Pending");
+  const activeSchedules = allOrders.filter(order => order.status === "Processing" && !order.isCompleted);
   
-  // ১. ডায়নামিক ফিল্টারিং
-  const pendingVaccinations = allOrders.filter(order => order.status === "AdminAccepted");
-  const activeSchedules = allOrders.filter(order => order.status === "DoctorAccepted" && !order.isCompleted);
-  
-  // এই লিস্টটিই আপনি খুঁজছেন - যা যা শেষ হয়েছে
+
   const completedOrders = allOrders.filter(order => order.status === "Completed" || order.isCompleted);
 
   const doctors = [
@@ -30,34 +29,34 @@ const DoctorManagement = ({ allOrders = [] }) => {
     const res = await completeVaccination(id);
     if (res.success) {
       toast.success("Done! Moved to Completed History.");
-      router.refresh(); // এটি ডাটাবেজ থেকে নতুন লিস্ট নিয়ে আসবে
+      router.refresh();
     }
   };
 
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900 pt-28">
-      
+
       {/* STATS OVERVIEW */}
       <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-        <StatMiniCard label="Total Doctors" value={doctors.length} icon={<Stethoscope size={20}/>} color="bg-blue-50 text-blue-600" />
-        <StatMiniCard label="Ongoing" value={activeSchedules.length} icon={<Activity size={20}/>} color="bg-emerald-50 text-emerald-600" />
-        <StatMiniCard label="Completed" value={completedOrders.length} icon={<CheckCircle2 size={20}/>} color="bg-orange-50 text-orange-600" />
-        <StatMiniCard label="New Requests" value={pendingVaccinations.length} icon={<Syringe size={20}/>} color="bg-purple-50 text-purple-600" />
+        <StatMiniCard label="Total Doctors" value={doctors.length} icon={<Stethoscope size={20} />} color="bg-blue-50 text-blue-600" />
+        <StatMiniCard label="Ongoing" value={activeSchedules.length} icon={<Activity size={20} />} color="bg-emerald-50 text-emerald-600" />
+        <StatMiniCard label="Completed" value={completedOrders.length} icon={<CheckCircle2 size={20} />} color="bg-orange-50 text-orange-600" />
+        <StatMiniCard label="New Requests" value={pendingVaccinations.length} icon={<Syringe size={20} />} color="bg-purple-50 text-purple-600" />
       </div>
 
       <div className="gap-8 grid grid-cols-1 lg:grid-cols-3">
-        
-        {/* বাম পাশ: ডক্টর এবং একটিভ টাস্ক (লিস্ট বড় হলে ২ কলাম নিবে) */}
+
+
         <div className="lg:col-span-2 space-y-8">
           <h2 className="text-2xl font-black flex items-center gap-2 px-2">
             <User className="text-blue-500" /> Medical Team & Active Tasks
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {doctors.map((doctor) => (
-              <DoctorCard 
-                key={doctor.id} 
-                doctor={doctor} 
-                pending={pendingVaccinations} 
+              <DoctorCard
+                key={doctor.id}
+                doctor={doctor}
+                pending={pendingVaccinations}
                 active={activeSchedules}
                 onComplete={handleComplete}
               />
@@ -65,7 +64,7 @@ const DoctorManagement = ({ allOrders = [] }) => {
           </div>
         </div>
 
-        {/* ডান পাশ: COMPLETED HISTORY (এখানেই আপনি সব দেখতে পাবেন) */}
+
         <div className="space-y-6">
           <h2 className="text-2xl font-black flex items-center gap-2 px-2">
             <History className="text-orange-500" /> Completed Tasks
@@ -78,11 +77,11 @@ const DoctorManagement = ({ allOrders = [] }) => {
                     <div>
                       <p className="font-black text-slate-800 text-sm">{order.vaccineName}</p>
                       <p className="text-[10px] font-bold text-emerald-600 uppercase flex items-center gap-1">
-                        <Check size={12}/> Successfully Vaccinated
+                        <Check size={12} /> Successfully Vaccinated
                       </p>
                     </div>
                     <div className="bg-white p-2 rounded-lg shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                      <ArrowRight size={14}/>
+                      <ArrowRight size={14} />
                     </div>
                   </div>
                 ))}
@@ -100,14 +99,14 @@ const DoctorManagement = ({ allOrders = [] }) => {
   );
 };
 
-// --- সাব-কম্পোনেন্ট: ডক্টর কার্ড ---
+
 const DoctorCard = ({ doctor, pending, active, onComplete }) => {
   const isVaccinator = doctor.specialty === "Vaccination Specialist";
-  
+
   return (
     <div className="bg-white shadow-sm p-6 border border-slate-100 rounded-[2.5rem] h-full">
       <div className="flex items-center gap-4 mb-6">
-        <div className="bg-blue-100 rounded-2xl p-4 text-blue-600"><Stethoscope size={24}/></div>
+        <div className="bg-blue-100 rounded-2xl p-4 text-blue-600"><Stethoscope size={24} /></div>
         <div>
           <h3 className="font-black text-slate-800 text-lg">{doctor.name}</h3>
           <p className="font-bold text-orange-500 text-[10px] uppercase tracking-widest">{doctor.specialty}</p>
@@ -120,7 +119,7 @@ const DoctorCard = ({ doctor, pending, active, onComplete }) => {
             <div key={order._id} className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 flex justify-between items-center">
               <p className="text-xs font-black text-blue-800">{order.vaccineName}</p>
               <button onClick={() => onComplete(order._id)} className="bg-emerald-500 text-white p-2 rounded-lg">
-                <Check size={16}/>
+                <Check size={16} />
               </button>
             </div>
           ))}

@@ -196,7 +196,7 @@ export default function PetAdoptionForm() {
     };
 
     checkShelterStatus();
-  }, [session?.user?.email]); // 
+  }, [session?.user?.email]);
 
 
   const toggleT = (t) =>

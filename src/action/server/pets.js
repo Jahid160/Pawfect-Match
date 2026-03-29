@@ -48,6 +48,15 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
     const skip = (parseInt(page) - 1) * limit;
     const totalCount = await Petcollection.countDocuments(query);
     const pets = await Petcollection.find(query)
+      .project({
+        images: 1,
+        petName: 1,
+        species: 1,
+        status: 1,
+        _id: 1,
+        weight: 1,
+        gender: 1
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

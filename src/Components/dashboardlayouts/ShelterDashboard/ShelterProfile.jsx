@@ -182,7 +182,7 @@ const ShelterProfile = ({ email }) => {
         text: error.message || "Something went wrong. Please try again.",
       });
     } finally {
-      setIsUploading(false); // আপলোড শেষ
+      setIsUploading(false);
     }
   };
 

@@ -4,26 +4,24 @@ import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 
-// ডাটাবেজ কানেকশন প্রমিজ
+
 const cartCollectionPromise = dbConnect(collections.CART);
 
-/**
- * ১. কার্টে আইটেম যোগ করা (Food/Accessory)
- */
+
 export const addToCart = async (payload) => {
   try {
-    const { 
-      userEmail, 
-      productId, // foodId এর বদলে productId ব্যবহার করা বেশি জেনেরিক
-      productName, 
-      image, 
-      price, 
-      stock = 0, 
-      brand, 
-      weight, 
-      weightUnit, 
-      productType = "food", // ডিফল্ট food, তবে accessory ও হতে পারে
-      inStock = true 
+    const {
+      userEmail,
+      productId,
+      productName,
+      image,
+      price,
+      stock = 0,
+      brand,
+      weight,
+      weightUnit,
+      productType = "food",
+      inStock = true
     } = payload;
 
     if (!userEmail || !productId) {
@@ -32,7 +30,7 @@ export const addToCart = async (payload) => {
 
     const cartCollection = await cartCollectionPromise;
 
-    // ১. চেক করুন এই ইউজারের কার্টে এই নির্দিষ্ট প্রোডাক্টটি এবং টাইপটি আছে কিনা
+
     const existingItem = await cartCollection.findOne({
       userEmail,
       productId: productId,
@@ -40,7 +38,7 @@ export const addToCart = async (payload) => {
     });
 
     if (existingItem) {
-      // ২. আইটেম থাকলে শুধু quantity আপডেট করুন এবং স্টক লিমিট চেক করুন
+
       const newQuantity = Math.min(
         Number(existingItem.quantity || 1) + 1,
         Number(stock || 999)
@@ -57,15 +55,15 @@ export const addToCart = async (payload) => {
           },
         }
       );
-      
+
       revalidatePath("/", "layout");
       return { success: true, message: "Cart updated" };
-    } 
+    }
 
-    // ৩. আইটেম না থাকলে নতুন ডকুমেন্ট তৈরি করুন
+
     const doc = {
       userEmail,
-      productId, // স্টোর করার সময়ও productId ব্যবহার করছি
+      productId,
       productName,
       image,
       price: Number(price) || 0,
@@ -73,7 +71,7 @@ export const addToCart = async (payload) => {
       brand: brand || "",
       weight: weight || "",
       weightUnit: weightUnit || "",
-      productType, // food or accessory
+      productType,
       inStock,
       quantity: 1,
       createdAt: new Date(),
@@ -81,8 +79,8 @@ export const addToCart = async (payload) => {
     };
 
     const result = await cartCollection.insertOne(doc);
-    
-    // লেআউট রিভ্যালিডেট করলে নেভবার এর কার্ট কাউন্ট আপডেট হবে
+
+
     revalidatePath("/", "layout");
 
     return {
@@ -96,9 +94,8 @@ export const addToCart = async (payload) => {
   }
 };
 
-/**
- * ২. ইউজারের কার্ট আইটেমগুলো নিয়ে আসা
- */
+
+
 export const getCartItems = async (userEmail) => {
   try {
     if (!userEmail) return [];
@@ -112,7 +109,6 @@ export const getCartItems = async (userEmail) => {
     return items.map((item) => ({
       ...item,
       _id: item._id.toString(),
-      // কার্ট পেজে ব্যবহারের জন্য productId নিশ্চিত করা
       productId: (item.productId || item.foodId || item._id).toString(),
       createdAt: item.createdAt?.toISOString?.() || item.createdAt,
       updatedAt: item.updatedAt?.toISOString?.() || item.updatedAt,
@@ -123,9 +119,7 @@ export const getCartItems = async (userEmail) => {
   }
 };
 
-/**
- * ৩. কার্টের কোয়ান্টিটি আপডেট করা
- */
+
 export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
   try {
     if (!cartId || !userEmail) return { success: false, message: "Authentication failed" };
@@ -151,9 +145,7 @@ export const updateCartQuantity = async ({ cartId, userEmail, quantity }) => {
   }
 };
 
-/**
- * ৪. কার্ট থেকে আইটেম রিমুভ করা
- */
+
 export const removeCartItem = async ({ cartId, userEmail }) => {
   try {
     if (!cartId || !userEmail) return { success: false, message: "Authentication failed" };
@@ -170,9 +162,6 @@ export const removeCartItem = async ({ cartId, userEmail }) => {
   }
 };
 
-/**
- * ৫. পুরো কার্ট ক্লিয়ার করা (অর্ডার সাকসেস হওয়ার পর দরকার হয়)
- */
 export const clearCart = async (userEmail) => {
   try {
     if (!userEmail) return { success: false, message: "Authentication failed" };

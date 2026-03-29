@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { collections, dbConnect } from "./db";
-import { headers } from "next/headers";
+
 
 export const authOptions = {
   providers: [
@@ -34,7 +34,7 @@ export const authOptions = {
       try {
         if (!user?.email) return false;
 
-        const headersList = await headers();
+
         const ip =
           // headersList.get("x-forwarded-for")?.split(",")[0] ||
           "103.205.69.67";
