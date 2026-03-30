@@ -270,10 +270,10 @@ const CheckoutPageClient = () => {
             <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-2"><h3 className="font-bold text-gray-400 text-xs uppercase tracking-[0.2em]">Contact Information</h3></div>
               
-              <div className="md:col-span-1">
+              {/* <div className="md:col-span-1">
                 <label className="block mb-2 font-bold text-gray-700 text-sm">Full Name</label>
                 <input type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="bg-gray-50 focus:bg-white px-5 py-4 border border-gray-100 focus:border-primary rounded-2xl outline-none w-full transition-all" placeholder="John Doe" required />
-              </div>
+              </div> */}
 
               <div className="md:col-span-1">
                 <label className="block mb-2 font-bold text-gray-700 text-sm">
