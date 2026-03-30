@@ -41,7 +41,7 @@ const navLinks = [
   },
   {
     name: "Forms",
-    href: "/forms",
+    href: "/",
     requiresAuth: true,
     subLinks: [
       { name: "Adoption Form", href: "/adoptionfrom", roles: ["user", "shelter", "admin"] },
