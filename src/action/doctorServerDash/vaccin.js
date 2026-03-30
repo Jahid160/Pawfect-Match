@@ -17,7 +17,7 @@ export const getCompletedOrdersHistory = async () => {
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const orders = await orderCollection
-      .find({doctorEmail: session.user.email, status: "Completed"})
+      .find({ doctorEmail: session.user.email, status: "Completed" })
       .sort({ createdAt: -1 })
       .toArray();
     return JSON.parse(JSON.stringify(orders));
@@ -104,5 +104,48 @@ export const deleteOrder = async (id) => {
   } catch (error) {
     console.error("Delete Error:", error);
     return { success: false, message: "Failed to delete from database" };
+  }
+};
+
+export const getDoctorDashboardStats = async () => {
+  await doctorAuth();
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return { success: false, message: "Doctor not authenticated" };
+  }
+  try {
+    const user = await doctorAuth();
+
+    const requestCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const completing = await requestCollection
+      .find({ status: "Completing", doctorEmail: user.email })
+      .sort({ createdAt: -1 })
+      .toArray();
+    const completed = await requestCollection
+      .find({ status: "Completed" })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const pendingOrders = completing.filter(
+      (o) => o.status === "Completing",
+    ).length;
+    const completedOrders = completed.filter(
+      (o) => o.status === "Completed",
+    ).length;
+
+    return {
+      success: true,
+      data: {
+        pendingOrders: pendingOrders,
+        completedOrders: completedOrders,
+      },
+    };
+  } catch (error) {
+    console.error("Dashboard stats error:", error);
+    return {
+      success: false,
+      data: { pendingOrders: 0, completedOrders: 0 },
+    };
   }
 };

@@ -1,19 +1,25 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   Filter, 
-  Eye, 
   Mail, 
-  CalendarDays,
   FileText,
   History
 } from 'lucide-react';
+import AppointmentModal from './Appointments/AppointmentModal';
 
 const PetRecords = ({ appointments = [] }) => {
+  const [selectedApt, setSelectedApt] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // শুধুমাত্র "Completed" স্ট্যাটাস ফিল্টার করা হচ্ছে
   const completedRecords = appointments.filter(apt => apt.status === "Completed");
-  console.log(completedRecords);
+
+  const handleViewDetails = (data) => {
+    setSelectedApt(data);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="p-4 md:p-10 bg-base-200 min-h-screen font-sans">
@@ -55,14 +61,13 @@ const PetRecords = ({ appointments = [] }) => {
                   <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">Vaccine Type</th>
                   <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">Completion Date</th>
                   <th className="py-6 px-6 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
-                  <th className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-right">Records</th>
+                  <th className="py-6 px-8 text-[10px] font-black uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
 
               <tbody className="text-neutral">
                 {completedRecords.map((record) => (
                   <tr key={record._id} className="hover:bg-primary/5 transition-colors group">
-                    {/* Pet & Owner Info */}
                     <td className="py-5 px-8">
                       <div className="flex items-center gap-4">
                         <div className="avatar">
@@ -81,44 +86,40 @@ const PetRecords = ({ appointments = [] }) => {
                       </div>
                     </td>
 
-                    {/* Vaccine Info */}
                     <td className="py-5 px-6 text-center">
                       <div className="badge badge-outline border-base-300 font-bold text-[11px] px-4 py-3">
                         {record.vaccineName}
                       </div>
                     </td>
 
-                    {/* Completion Date */}
                     <td className="py-5 px-6 text-center">
                       <div className="flex flex-col items-center">
                         <span className="text-xs font-black text-neutral/70">
-                          {new Date(record.updatedAt || record.deadlineDate).toLocaleDateString("en-GB", {
+                          {new Date(record.CompletedAtByDoctor || record.updatedAt).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                           })}
                         </span>
                         <span className="text-[9px] font-bold text-success uppercase tracking-tighter">
-                          Verified
+                          Verified By Doctor
                         </span>
                       </div>
                     </td>
 
-                    {/* Status */}
                     <td className="py-5 px-6 text-center">
                       <span className="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border bg-success/10 border-success text-success">
                         {record.status}
                       </span>
                     </td>
 
-                    {/* Actions */}
                     <td className="py-5 px-8">
-                      <div className="flex items-center justify-end gap-2">
-                        <button className="btn btn-sm btn-circle bg-base-200 border-none hover:bg-neutral hover:text-white">
-                          <Eye size={16} />
-                        </button>
-                        <button className="btn btn-sm bg-neutral text-white text-[9px] font-black uppercase rounded-xl px-4 hover:bg-primary border-none">
-                          View File
+                      <div className="flex items-center justify-end">
+                        <button 
+                          onClick={() => handleViewDetails(record)}
+                          className="btn btn-sm bg-neutral text-white text-[9px] font-black uppercase rounded-xl px-6 hover:bg-primary border-none shadow-md"
+                        >
+                          View Details
                         </button>
                       </div>
                     </td>
@@ -128,7 +129,6 @@ const PetRecords = ({ appointments = [] }) => {
             </table>
           </div>
 
-          {/* Empty State */}
           {completedRecords.length === 0 && (
             <div className="p-20 text-center bg-base-100">
               <FileText size={48} className="mx-auto text-base-300 mb-4" />
@@ -139,14 +139,31 @@ const PetRecords = ({ appointments = [] }) => {
           )}
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-8 flex items-center gap-3 px-4">
-          <History size={16} className="text-primary" />
-          <p className="text-[10px] font-black text-neutral/30 uppercase">
-            Showing {completedRecords.length} completed treatments
-          </p>
+        {/* Footer Info & Doctor Info */}
+        <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-4 px-4">
+          <div className="flex items-center gap-3">
+            <History size={16} className="text-primary" />
+            <p className="text-[10px] font-black text-neutral/30 uppercase">
+              Showing {completedRecords.length} completed treatments
+            </p>
+          </div>
+          
+          {/* Doctor Info Section */}
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-base-300">
+             <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+             <p className="text-[10px] font-black text-slate-500 uppercase">
+               Logged as: <span className="text-primary">{completedRecords[0]?.doctorEmail || "N/A"}</span>
+             </p>
+          </div>
         </div>
       </div>
+
+      {/* Modal Integration */}
+      <AppointmentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        data={selectedApt}
+      />
     </div>
   );
 };
