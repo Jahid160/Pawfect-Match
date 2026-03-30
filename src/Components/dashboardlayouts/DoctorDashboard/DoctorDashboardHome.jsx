@@ -1,30 +1,49 @@
 "use client";
-import React, { useEffect } from 'react';
-import { Clock, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Clock, CheckCircle2, AlertCircle, TrendingUp, CalendarDays, Mail } from 'lucide-react'; 
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
+import { useSession } from 'next-auth/react';
+import { getDoctorDashboardStats } from '@/action/doctorServerDash/vaccin';
 
-const DoctorDashboardHome = ({ stats }) => {
+const DoctorDashboardHome = () => {
+  const { data: session } = useSession();
   
+  // Initialize state with all necessary fields to avoid "undefined" errors
+  const [stats, setStats] = useState({
+    pendingOrders: 0,
+    completedOrders: 0,
+    overdueOrders: 0,
+    recentActivity: [] // Added this to store the table data
+  });
+
   useEffect(() => {
-    console.log("Stats received in Client:", stats);
-  }, [stats]);
+    const fetchAllStats = async () => {
+      const result = await getDoctorDashboardStats();
+      if (result.success) {
+        setStats(result.data);
+      }
+    };
 
-  // যদি stats না আসে তবে ০ সেট হবে
-  const pendingCount = stats?.pending || 0;
-  const completedCount = stats?.completed || 0;
-  const overdueCount = stats?.overdue || 0;
+    if (session?.user) {
+      fetchAllStats();
+    }
+  }, [session]);
 
+  // Map stats to chart data
   const chartData = [
-    { name: 'Pending', value: pendingCount, color: '#570df8' },
-    { name: 'Completed', value: completedCount, color: '#36d399' },
-    { name: 'Overdue', value: overdueCount, color: '#f87272' },
+    { name: 'Pending', value: stats.pendingOrders || 0, color: '#570df8' },
+    { name: 'Completed', value: stats.completedOrders || 0, color: '#36d399' },
+    { name: 'Overdue', value: stats.overdueOrders || 0, color: '#f87272' },
   ];
 
+  // Helper for the table (using recentActivity from your API or empty array)
+  const recentOrders = stats.recentActivity || [];
+
   return (
-    <div className="p-4 md:p-10 bg-base-200 min-h-screen">
+    <div className="p-4 md:p-10 bg-base-200 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
@@ -37,39 +56,37 @@ const DoctorDashboardHome = ({ stats }) => {
           </p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Pointed to stats object */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <StatCard 
             title="Pending Requests" 
-            value={pendingCount} 
+            value={stats.pendingOrders} 
             icon={<Clock size={24} />} 
             color="border-primary text-primary" 
           />
           <StatCard 
             title="Completed" 
-            value={completedCount} 
+            value={stats.completedOrders} 
             icon={<CheckCircle2 size={24} />} 
             color="border-success text-success" 
           />
           <StatCard 
             title="Overdue" 
-            value={overdueCount} 
+            value={stats.overdueOrders || 0} 
             icon={<AlertCircle size={24} />} 
             color="border-error text-error" 
           />
         </div>
 
         {/* Chart Section */}
-        <div className="bg-base-100 p-8 rounded-[2.5rem] shadow-xl border border-base-300">
+        <div className="bg-base-100 p-8 rounded-[2.5rem] shadow-xl border border-base-300 mb-10">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-3 bg-primary/10 rounded-2xl text-primary">
               <TrendingUp size={20} />
             </div>
-            <div>
-              <h2 className="text-xl font-black uppercase tracking-tight text-neutral">
-                Activity <span className="text-primary">Overview</span>
-              </h2>
-            </div>
+            <h2 className="text-xl font-black uppercase tracking-tight text-neutral">
+              Activity <span className="text-primary">Overview</span>
+            </h2>
           </div>
 
           <div className="h-[300px] w-full">
@@ -104,6 +121,68 @@ const DoctorDashboardHome = ({ stats }) => {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+
+        {/* Recent Activity Section */}
+        <div className="bg-base-100 rounded-[2.5rem] shadow-xl overflow-hidden border border-base-300">
+          <div className="p-8 border-b border-base-300">
+            <h2 className="text-2xl font-black uppercase tracking-tight text-neutral flex items-center gap-3">
+              <CalendarDays size={24} className="text-primary" />
+              Recent Activity
+            </h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead className="bg-base-200/50">
+                <tr className="text-neutral/40">
+                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest">Patient</th>
+                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center">Vaccine</th>
+                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-center">Date</th>
+                  <th className="py-4 px-8 text-[10px] font-black uppercase tracking-widest text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="text-neutral">
+                {recentOrders.slice(0, 6).map((order) => (
+                  <tr key={order._id} className="hover:bg-primary/5 transition-colors group">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="mask mask-squircle w-10 h-10 bg-base-200">
+                          <img src={order.userImage} alt="" />
+                        </div>
+                        <div>
+                          <p className="font-black text-sm">{order.userName}</p>
+                          <p className="text-[9px] font-bold text-neutral/40 flex items-center gap-1">
+                            <Mail size={10} /> {order.userEmail}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-center text-xs font-bold uppercase">
+                      {order.vaccineName}
+                    </td>
+                    <td className="py-4 px-6 text-center text-xs font-black text-neutral/70">
+                      {new Date(order.createdAt || order.CompletedAtByDoctor).toLocaleDateString("en-GB")}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                        order.status === "Completed" ? "bg-success/10 border-success text-success" : "bg-info/10 border-info text-info"
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {recentOrders.length === 0 && (
+            <div className="p-20 text-center bg-base-100">
+              <CalendarDays size={48} className="mx-auto text-base-300 mb-4" />
+              <p className="text-neutral/30 font-black uppercase tracking-widest text-sm">No Recent Activity</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
