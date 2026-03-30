@@ -11,6 +11,7 @@ import ShelterInsight from './ShelterInsight';
 import { useDebounce } from 'use-debounce';
 
 
+
 const ShelterManagement = () => {
   const [activeTab, setActiveTab] = useState("verification");
   const [requests, setRequests] = useState([]);
@@ -23,8 +24,8 @@ const ShelterManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [topShelter, setTopShelter] = useState(null);
-
   const [query] = useDebounce(searchTerm, 500);
+
 
   useEffect(() => {
     const SelterRequests = async () => {

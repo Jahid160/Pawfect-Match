@@ -10,11 +10,13 @@ import { FaUserSlash } from "react-icons/fa";
 import { updateShelterStatus } from '@/action/server/Shelteruser';
 import Swal from 'sweetalert2';
 import ShelterDetailsModal from './ShelterDetailsModal';
+import { useSession } from 'next-auth/react';
+
 
 const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages, statusFilter, setStatusFilter, setSearchTerm }) => {
      const [selectedRequest, setSelectedRequest] = useState(null);
      const [isOpen, setIsOpen] = useState(false);
-
+     const { data: session, update } = useSession()
 
 
      const options = [
@@ -45,6 +47,12 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                               setRequests((prev) =>
                                    prev.map((req) => (req._id === id ? { ...req, status: newStatus } : req))
                               );
+                              await update({
+                                   user: {
+                                        ...session?.user,
+                                        role: "shelter",
+                                   },
+                              });
                               Swal.fire({
                                    title: "Success!",
                                    text: "Status updated successfully.",
