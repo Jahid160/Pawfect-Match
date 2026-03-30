@@ -30,7 +30,7 @@ const heroSlides = [
     headline: 'Bring Home a <span class="text-orange-500 italic">Purr-fect</span> Soulmate.',
     description: "Elegant, independent, and full of love. Our rescue cats are waiting to fill your home with soft purrs and constant joy.",
     buttonText: "Meet Cats",
-    buttonLink: "/pets/cats",
+    buttonLink: "/all-pets",
     icon: <Cat size={24} />,
     stats: "900+ Happy Cats"
   },
@@ -41,7 +41,7 @@ const heroSlides = [
     headline: 'Fill Your Life with <span class="text-orange-500 italic">Vibrant</span> Chirps.',
     description: "From talkative parrots to sweet canaries, find a feathered friend that brings melody and color to your world.",
     buttonText: "View Birds",
-    buttonLink: "/pets/birds",
+    buttonLink: "/all-pets",
     icon: <Bird size={24} />,
     stats: "150+ Rare Birds"
   },
@@ -52,7 +52,7 @@ const heroSlides = [
     headline: 'Adorable <span class="text-orange-500 italic">Bunnies</span> for Little Smiles.',
     description: "Gentle and curious, our rabbits are perfect for families looking for a soft, quiet, and playful companion.",
     buttonText: "Meet Rabbits",
-    buttonLink: "/pets/rabbits",
+    buttonLink: "/all-pets",
     icon: <Rabbit size={24} />,
     stats: "300+ Bunnies"
   },
@@ -63,7 +63,7 @@ const heroSlides = [
     headline: 'Find Peace with <span class="text-orange-500 italic">Aquatic</span> Beauty.',
     description: "Create a tranquil underwater world. Explore our collection of exotic fish and bring serenity to your living space.",
     buttonText: "Explore Fish",
-    buttonLink: "/pets/fish",
+    buttonLink: "/all-pets",
     icon: <Fish size={24} />,
     stats: "1.2k+ Exotic Fish"
   }

@@ -27,6 +27,7 @@ import PetDetailsModal from "./PetDetailsModal";
 import PetProfileModal from "./AdminDashboard/PetMangeMent/PetProfileModal";
 import { getAdoptionUserByCode } from "@/action/server/Adoptionuser";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const ManagePets = ({ initialPets }) => {
   const [pets, setPets] = useState(initialPets);
@@ -209,13 +210,13 @@ const ManagePets = ({ initialPets }) => {
             Showing {filteredPets.length} pets from database.
           </p>
         </div>
-        <button className="group flex justify-center items-center gap-2 bg-orange-500 hover:bg-slate-900 shadow-lg px-8 py-4 rounded-2xl font-black text-white transition-all">
+        <Link href={'/dashboard/shelter-petsreq'} className="group flex justify-center items-center gap-2 bg-orange-500 hover:bg-slate-900 shadow-lg px-8 py-4 rounded-2xl font-black text-white transition-all">
           <Plus
             size={20}
             className="group-hover:rotate-90 transition-transform"
           />
           Add New Pet
-        </button>
+        </Link>
       </div>
 
       {/* TOOLBAR */}
