@@ -68,6 +68,11 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/pet-request",
       icon: PawPrint,
     },
+        {
+      name: "Pet Entry From",
+      href: "/dashboard/shelter-petsreq",
+      icon: LuUserPlus,
+    },
   ];
 
   const userNavItem = [
@@ -92,7 +97,6 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/appointments",
       icon: ClipboardCheck,
     },
-    // { name: "Vaccinations", href: "/dashboard/vaccinations", icon: Syringe },
     {
       name: "Pet Medical Records",
       href: "/dashboard/pet-records",
