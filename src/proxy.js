@@ -18,7 +18,19 @@ const ROLE_PERMISSIONS = {
     "/addAccessoryForm",
     "/vaccination/add",
     "/dashboard/pet-request",
+    "/dashboard/doctor",
+    "/dashboard/vaccinations",
+    "/dashboard/manage-pets",
+    "/dashboard/users",
+    "/dashboard/accessories-management",
+    "/dashboard/food",
+    "/dashboard/shelters",
+    "/dashboard/shelter-petsreq"
   ],
+  doctor: [
+    "/dashboard/appointments",
+    "/dashboard/pet-records"
+  ]
 };
 
 export async function proxy(req) {
@@ -65,5 +77,14 @@ export const config = {
     "/dashboard/shelter-pendings/:path*",
     "/dashboard/shelter-pets/:path*",
     "/dashboard/shelter-petsreq/:path*",
+    "/dashboard/appointments/:path*",
+    "/dashboard/pet-records/:path*",
+    "/dashboard/doctor/:path*",
+    "/dashboard/vaccinations/:path*",
+    "/dashboard/manage-pets/:path*",
+    "/dashboard/users/:path*",
+    "/dashboard/accessories-management/:path*",
+    "/dashboard/food/:path*",
+    "/dashboard/shelters/:path*"
   ],
 };

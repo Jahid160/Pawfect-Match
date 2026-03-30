@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
 import { verifyAdmin } from "@/lib/adminAuth";
-import { verifyAuth } from "@/lib/verifyAuth";
+import { adminShelterAuth } from "@/lib/adminShelterAuth";
 
 
 const { dbConnect, collections } = require("@/lib/db");
@@ -277,7 +277,7 @@ export const updateShelterCover = async (email, imageUrl) => {
 
 export const SheltergetStatus = async (email) => {
   const shelterCollection = await shelterRequestsCollectionPromise;
-  await shelterVerifyAuth()
+  await adminShelterAuth()
   const result = await shelterCollection.findOne(
     { email: email },
     {

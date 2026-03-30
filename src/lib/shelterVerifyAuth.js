@@ -14,8 +14,12 @@ export async function shelterVerifyAuth() {
     email: session.user.email,
   });
 
+  if (!dbUser) {
+    throw new Error("User record not found in the system.");
+  }
+
   if (dbUser.role !== "shelter") {
-    throw new Error("Shelter only");
+    throw new Error("Access Denied: Shelter privileges required.");
   }
 
   return dbUser;
