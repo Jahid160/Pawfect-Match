@@ -102,11 +102,11 @@ export const FoodCard = ({ food }) => {
               <FaTag size={8} /> {discountPercent}% Off
             </span>
           )}
-          {food.featured && (
+          {/* {food.featured && (
             <span className="flex items-center gap-1 bg-orange-500 shadow-lg px-3 py-1 rounded-full font-bold text-[10px] text-white uppercase tracking-wide">
               <Sparkle size={10} /> Featured
             </span>
-          )}
+          )} */}
         </div>
 
         {/* Out of stock overlay */}
