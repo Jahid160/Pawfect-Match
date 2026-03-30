@@ -161,7 +161,7 @@ export const updateShelterStatus = async (id, email, newStatus) => {
     if (result.matchedCount === 0 && shelterrole.matchedCount === 0) {
       return { success: false, message: "Request not found." };
     }
-
+    revalidatePath("/dashboard/shelters");
     return { success: true, message: "Status updated successfully." };
   } catch (error) {
     console.error("Database Error:", error);

@@ -95,6 +95,7 @@ export const authOptions = {
       if (trigger === "update" && session?.user) {
         if (session.user.image) token.picture = session.user.image;
         if (session.user.name) token.name = session.user.name;
+        if (session.user.role) token.role = session.user.role;
         return token;
       }
 
@@ -108,6 +109,16 @@ export const authOptions = {
           token.location = dbUser.location;
           token.picture = dbUser.image || user.image;
           token.name = dbUser.name || user.name;
+        }
+        else if (token?.email) {
+          const usersCollection = await dbConnect(collections.USERS);
+          const dbUser = await usersCollection.findOne(
+            { email: token.email },
+            { projection: { role: 1 } }
+          );
+          if (dbUser) {
+            token.role = dbUser.role;
+          }
         }
       }
 
