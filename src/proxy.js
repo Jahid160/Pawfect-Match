@@ -19,6 +19,10 @@ const ROLE_PERMISSIONS = {
     "/vaccination/add",
     "/dashboard/pet-request",
   ],
+  doctor: [
+    "/dashboard/appointments",
+    "/dashboard/pet-records"
+  ]
 };
 
 export async function proxy(req) {
@@ -65,5 +69,7 @@ export const config = {
     "/dashboard/shelter-pendings/:path*",
     "/dashboard/shelter-pets/:path*",
     "/dashboard/shelter-petsreq/:path*",
+    "/dashboard/appointments/:path*",
+    "/dashboard/pet-records/:path*"
   ],
 };

@@ -16,6 +16,7 @@ import {
 import { useRouter } from "next/navigation";
 import AppointmentModal from "./AppointmentModal";
 import { completedOrder, deleteOrder } from "@/action/doctorServerDash/vaccin";
+import Swal from "sweetalert2";
 
 const Appointments = ({ appointments = [] }) => {
   const [selectedApt, setSelectedApt] = useState(null);
@@ -24,54 +25,135 @@ const Appointments = ({ appointments = [] }) => {
   const [loadingId, setLoadingId] = useState(null);
   const displayData = appointments.length > 0 ? appointments : [];
 
-  const handleAccept = async (id) => {
-    // Set loading for the specific row being clicked
-    setLoadingId(id);
+const handleAccept = async (id) => {
+  // 1. Show Professional Confirmation Dialog (Similar to handleReject)
+  const result = await Swal.fire({
+    title: "Confirm Completion?",
+    text: "Are you sure you want to mark this appointment as completed?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "oklch(75% 0.15 150)", // Your Success/Green color
+    cancelButtonColor: "oklch(95% 0.02 60)",   // Your Base-300 color
+    confirmButtonText: "Yes, complete it!",
+    cancelButtonText: "No, go back",
+    background: "oklch(100% 0 0)",            // Your Base-100
+    color: "oklch(25% 0.02 60)",               // Your Neutral text
+  });
 
-    try {
-      // Direct call to your server action
-      const response = await completedOrder(id);
+  // If user cancels or clicks outside, stop execution
+  if (!result.isConfirmed) return;
 
-      if (response.success) {
-        // Force refresh to update UI based on revalidatePath in server action
-        router.refresh();
-        console.log("Status updated: Completed");
-      } else {
-        console.error("Update failed:", response.message);
-      }
-    } catch (error) {
-      console.error("Execution error:", error);
-    } finally {
-      // Clear loading state after process is done
-      setLoadingId(null);
+  // Set loading for the specific row being clicked
+  setLoadingId(id);
+
+  try {
+    // 2. Calling your server action
+    const response = await completedOrder(id);
+
+    if (response.success) {
+      // Sync UI with server-side data
+      router.refresh();
+      
+      // Success Alert with Auto-close
+      Swal.fire({
+        title: "Accepted!",
+        text: "The appointment has been marked as completed.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "oklch(100% 0 0)",
+        iconColor: "oklch(75% 0.15 150)", 
+      });
+
+      console.log("Status updated: Completed");
+    } else {
+      // Logic failure Alert
+      Swal.fire({
+        title: "Update Failed",
+        text: response.message || "Could not update the status.",
+        icon: "error",
+        confirmButtonColor: "oklch(70% 0.19 45)",
+      });
     }
-  };
+  } catch (error) {
+    // Network or Server error Alert
+    Swal.fire({
+      title: "Error!",
+      text: "Connection failed. Please check your internet.",
+      icon: "error",
+      confirmButtonColor: "oklch(70% 0.19 45)",
+    });
+    console.error("Execution error:", error);
+  } finally {
+    // Clear loading state
+    setLoadingId(null);
+  }
+};
   
-  const handleReject = async (id) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to reject this appointment?",
-    );
+const handleReject = async (id) => {
+  // 1. Show Professional Confirmation Dialog
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "This appointment will be permanently rejected!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "oklch(65% 0.22 25)", // Your Error/Red color
+    cancelButtonColor: "oklch(95% 0.02 60)",  // Your Base-300 color
+    confirmButtonText: "Yes, reject it!",
+    cancelButtonText: "No, keep it",
+    background: "oklch(100% 0 0)",           // Your Base-100
+    color: "oklch(25% 0.02 60)",              // Your Neutral text
+  });
 
-    if (!isConfirmed) return;
+  // If user cancels, stop execution
+  if (!result.isConfirmed) return;
 
-    setLoadingId(id);
+  setLoadingId(id); // Set loading state for the specific row
 
-    try {
-      const response = await deleteOrder(id);
+  try {
+    // 2. Call your server action
+    const response = await deleteOrder(id);
 
-      if (response.success) {
-        router.refresh(); // Sync UI with server data
-        console.log("Appointment rejected and deleted.");
-      } else {
-        alert(response.message || "Something went wrong.");
-      }
-    } catch (error) {
-      console.error("Execution error:", error);
-      alert("Connection failed. Could not reject the order.");
-    } finally {
-      setLoadingId(null);
+    if (response.success) {
+      // Sync UI with server data
+      router.refresh(); 
+      
+      // Success Alert
+      Swal.fire({
+        title: "Rejected!",
+        text: "The appointment has been removed.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "oklch(100% 0 0)",
+        iconColor: "oklch(75% 0.15 150)", // Your Success color
+      });
+      
+      console.log("Appointment rejected and deleted.");
+    } else {
+      // Failure Alert
+      Swal.fire({
+        title: "Failed!",
+        text: response.message || "Could not delete the order.",
+        icon: "error",
+        confirmButtonColor: "oklch(70% 0.19 45)",
+      });
     }
-  };
+  } catch (error) {
+    // Error Alert
+    Swal.fire({
+      title: "Error!",
+      text: "Connection failed. Please try again.",
+      icon: "error",
+      confirmButtonColor: "oklch(70% 0.19 45)",
+    });
+    console.error("Execution error:", error);
+  } finally {
+    setLoadingId(null); // Clear loading state
+  }
+};
+
+
   const handleEye = (data) => {
     setSelectedApt(data);
     setIsModalOpen(true);
