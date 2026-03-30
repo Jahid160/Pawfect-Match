@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
 import { verifyAdmin } from "@/lib/adminAuth";
 import { adminShelterAuth } from "@/lib/adminShelterAuth";
+import { userVerifyAuth } from "@/lib/userVerifyAuth";
 
 
 const { dbConnect, collections } = require("@/lib/db");
@@ -20,7 +21,7 @@ export const createShelterUser = async (data) => {
     return { success: false, message: "Unauthorized" };
   }
 
-  await verifyAuth()
+  await userVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
