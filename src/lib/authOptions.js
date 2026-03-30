@@ -92,6 +92,7 @@ export const authOptions = {
     },
 
     async jwt({ token, user, trigger, session }) {
+
       if (trigger === "update" && session?.user) {
         if (session.user.image) token.picture = session.user.image;
         if (session.user.name) token.name = session.user.name;
@@ -99,10 +100,10 @@ export const authOptions = {
         return token;
       }
 
+
       if (user) {
         const usersCollection = await dbConnect(collections.USERS);
         const dbUser = await usersCollection.findOne({ email: user.email });
-
         if (dbUser) {
           token.id = dbUser._id?.toString();
           token.role = dbUser.role;
@@ -110,15 +111,18 @@ export const authOptions = {
           token.picture = dbUser.image || user.image;
           token.name = dbUser.name || user.name;
         }
-        else if (token?.email) {
-          const usersCollection = await dbConnect(collections.USERS);
-          const dbUser = await usersCollection.findOne(
-            { email: token.email },
-            { projection: { role: 1 } }
-          );
-          if (dbUser) {
-            token.role = dbUser.role;
-          }
+        return token;
+      }
+
+
+      if (token?.email) {
+        const usersCollection = await dbConnect(collections.USERS);
+        const dbUser = await usersCollection.findOne(
+          { email: token.email },
+          { projection: { role: 1 } }
+        );
+        if (dbUser && dbUser.role !== token.role) {
+          token.role = dbUser.role;
         }
       }
 
