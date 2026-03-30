@@ -20,7 +20,7 @@ export const createShelterUser = async (data) => {
     return { success: false, message: "Unauthorized" };
   }
 
-  await shelterVerifyAuth()
+  await verifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
 
@@ -133,7 +133,7 @@ export const getShelterRequests = async (
 };
 
 export const updateShelterStatus = async (id, email, newStatus) => {
-  await shelterVerifyAuth()
+  await verifyAdmin()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
     const userCollection = await userCollectionPromise;
