@@ -15,8 +15,12 @@ export async function doctorAuth() {
     email: session.user.email
   });
 
+  if (!dbUser) {
+    throw new Error("User record not found in the system.");
+  }
+
   if (dbUser.role !== "doctor") {
-    throw new Error("doctor only");
+    throw new Error("Access Denied: Doctor privileges required.");
   }
 
   return dbUser;
