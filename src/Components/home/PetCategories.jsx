@@ -50,7 +50,7 @@ const PetCategories = () => {
             </div>
 
             <h2 className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]">
-              Find your <span className="text-orange-500 italic">perfect</span> <br />
+              Find your <span className="text-orange-500">perfect</span> <br />
               companion by category.
             </h2>
           </div>
