@@ -138,29 +138,29 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-white px-4 py-14 font-sans sm:px-8">
+    <div className="bg-gradient-to-b from-orange-50 via-white to-white px-4 sm:px-8 py-14 min-h-screen font-sans">
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mx-auto mb-12 max-w-7xl"
       >
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-orange-600">
+        <div className="inline-flex items-center gap-2 bg-orange-100 mb-6 px-4 py-2 rounded-full font-bold text-[10px] text-orange-600 uppercase tracking-[0.2em]">
           <Sparkles size={14} /> New Lifestyle Collection
         </div>
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex lg:flex-row flex-col lg:justify-between lg:items-end gap-4">
           <div className="max-w-2xl">
-            <h2 className="text-4xl font-black leading-[1.1] tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+            <h2 className="font-black text-gray-900 text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight">
               Complete <span className="text-orange-500">Gear</span> Pantry
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-7 text-gray-600">
+            <p className="mt-4 max-w-xl text-gray-600 text-base leading-7">
               Find everything your pet needs for a happy, safe, and active life.
               Quality accessories for every paw.
             </p>
           </div>
 
-          <div className="text-sm font-medium italic text-gray-500">
+          <div className="font-medium text-gray-500 text-sm italic">
             Found{" "}
             <span className="font-bold text-gray-900">
               {filteredAccessories.length}
@@ -174,18 +174,18 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mx-auto mb-12 max-w-7xl rounded-[2.5rem] border border-orange-100 bg-white p-5 shadow-xl shadow-orange-100/40"
+        className="bg-white shadow-orange-100/40 shadow-xl mx-auto mb-12 p-5 border border-orange-100 rounded-[2.5rem] max-w-7xl"
       >
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-center">
+        <div className="flex xl:flex-row flex-col xl:items-center gap-6">
           {/* Search Input */}
           <div className="relative flex-1">
-            <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" />
+            <FaSearch className="top-1/2 left-6 absolute text-gray-400 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search premium accessories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-2xl border border-gray-100 bg-gray-50 py-4 pl-14 pr-4 text-sm font-medium text-gray-700 outline-none transition-all focus:border-orange-400 focus:bg-white"
+              className="bg-gray-50 focus:bg-white py-4 pr-4 pl-14 border border-gray-100 focus:border-orange-400 rounded-2xl outline-none w-full font-medium text-gray-700 text-sm transition-all"
             />
           </div>
 
@@ -211,7 +211,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsSortOpen(!isSortOpen)}
-                className="flex items-center gap-3 rounded-2xl bg-gray-900 px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg shadow-gray-200 transition-all active:scale-95 hover:bg-orange-600"
+                className="flex items-center gap-3 bg-gray-900 hover:bg-orange-600 shadow-gray-200 shadow-lg px-5 py-3 rounded-2xl font-bold text-[10px] text-white uppercase tracking-widest active:scale-95 transition-all"
               >
                 <FaSortAmountDown className={isSortOpen ? "animate-pulse" : ""} />
                 <span>Sort: {sortBy}</span>
@@ -229,7 +229,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 z-50 mt-3 w-56 origin-top-right overflow-hidden rounded-2xl border border-orange-50 bg-white shadow-2xl"
+                    className="right-0 z-50 absolute bg-white shadow-2xl mt-3 border border-orange-50 rounded-2xl w-56 overflow-hidden origin-top-right"
                   >
                     <div className="p-2">
                       {sortOptions.map((opt) => (
@@ -258,8 +258,8 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
       </motion.div>
 
       {/* Result Count */}
-      {/* <div className="mx-auto mb-8 flex max-w-7xl items-center justify-between">
-        <p className="text-sm font-semibold text-gray-500">
+      {/* <div className="flex justify-between items-center mx-auto mb-8 max-w-7xl">
+        <p className="font-semibold text-gray-500 text-sm">
           Showing{" "}
           <span className="text-orange-500">{paginatedAccessories.length}</span>{" "}
           of{" "}
@@ -268,7 +268,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
         </p>
 
         {totalPages > 1 && (
-          <p className="text-sm font-semibold text-gray-500">
+          <p className="font-semibold text-gray-500 text-sm">
             Page <span className="text-gray-800">{currentPage}</span> of{" "}
             <span className="text-gray-800">{totalPages}</span>
           </p>
@@ -280,7 +280,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl"
       >
         <AnimatePresence mode="popLayout">
           {paginatedAccessories.length > 0 ? (
@@ -302,8 +302,8 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
               animate={{ opacity: 1 }}
               className="col-span-full py-24 text-center"
             >
-              <div className="mb-4 text-7xl opacity-20">🐾</div>
-              <p className="text-lg font-bold italic text-gray-400">
+              <div className="opacity-20 mb-4 text-7xl">🐾</div>
+              <p className="font-bold text-gray-400 text-lg italic">
                 No accessories found. Try another search or category!
               </p>
             </motion.div>
@@ -313,11 +313,11 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
 
       {/* Pagination */}
       {filteredAccessories.length > ACCESSORIES_PER_PAGE && (
-        <div className="mx-auto mt-14 flex max-w-7xl flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-wrap justify-center items-center gap-3 mx-auto mt-14 max-w-7xl">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-bold text-gray-600 shadow-sm transition hover:border-orange-200 hover:text-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 bg-white disabled:opacity-50 shadow-sm px-5 py-3 border border-gray-200 hover:border-orange-200 rounded-2xl font-bold text-gray-600 hover:text-orange-500 text-sm transition disabled:cursor-not-allowed"
           >
             <FaChevronLeft size={12} />
             Prev
@@ -327,7 +327,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
             page === "..." ? (
               <span
                 key={`dots-${index}`}
-                className="px-2 text-sm font-bold text-gray-400"
+                className="px-2 font-bold text-gray-400 text-sm"
               >
                 ...
               </span>
@@ -351,7 +351,7 @@ const AllPetAccessoriesList = ({ accessories = [] }) => {
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
-            className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-bold text-gray-600 shadow-sm transition hover:border-orange-200 hover:text-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 bg-white disabled:opacity-50 shadow-sm px-5 py-3 border border-gray-200 hover:border-orange-200 rounded-2xl font-bold text-gray-600 hover:text-orange-500 text-sm transition disabled:cursor-not-allowed"
           >
             Next
             <FaChevronRight size={12} />
