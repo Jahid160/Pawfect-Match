@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react";
 import {
   getAdminNotifications,
   getUserNotifications,
+  getShelterNotifications,
   markNotificationsAsRead
 } from "@/action/server/notifications";
 import Image from "next/image";
@@ -36,8 +37,10 @@ const DashboardNavbar = ({ isCollapsed }) => {
     setIsMounted(true);
     const fetchNotifications = async () => {
       let res;
-      if (isAdmin) {
+      if (session?.user?.role === "admin") {
         res = await getAdminNotifications();
+      } else if (session?.user?.role === "shelter") {
+        res = await getShelterNotifications(userEmail);
       } else if (userEmail) {
         res = await getUserNotifications(userEmail);
       }
@@ -49,10 +52,9 @@ const DashboardNavbar = ({ isCollapsed }) => {
     };
 
     fetchNotifications();
-
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, [isAdmin, userEmail]);
+  }, [session?.user?.role, userEmail]);
 
   const handleNotificationClick = async () => {
     const nextState = !isOpen;
@@ -60,15 +62,17 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
     if (nextState === true && unreadCount > 0) {
       let res;
-      if (isAdmin) {
+      const role = session?.user?.role;
+
+      if (role === "admin") {
         res = await markNotificationsAsRead("admin", null);
-      } else if (userEmail) {
+      } else if (role === "shelter") {
+        res = await markNotificationsAsRead("shelter", userEmail);
+      } else {
         res = await markNotificationsAsRead(null, userEmail);
       }
 
-      if (res?.success) {
-        setUnreadCount(0);
-      }
+      if (res?.success) setUnreadCount(0);
     }
   };
 
@@ -122,7 +126,9 @@ const DashboardNavbar = ({ isCollapsed }) => {
       {/* LEFT SIDE: Title */}
       <div className="flex items-center gap-4">
         <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl italic uppercase tracking-tight transition-opacity">
-          Dashboard <span className="text-orange-500">{isAdmin ? "Overview" : "User Portal"}</span>
+          Dashboard <span className="text-orange-500">
+            {isAdmin ? "Overview" : isShelter ? "Shelter Panel" : "User Portal"}
+          </span>
         </h1>
       </div>
 
