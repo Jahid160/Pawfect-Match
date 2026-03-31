@@ -7,7 +7,6 @@ const RecentPets = async () => {
   let pets = [];
   try {
     const allPets = await getPets();
-    // consistency maintain korar jonno amra prothom 8-ta pets-i show korchi
     pets = Array.isArray(allPets) ? allPets.slice(0, 8) : [];
   } catch (error) {
     console.error("Recent pets fetch error:", error);
@@ -32,7 +31,7 @@ const RecentPets = async () => {
             </div>
 
             <h2 className="font-black text-slate-900 text-5xl md:text-6xl leading-[0.95] tracking-[-0.04em]">
-              Recent <span className="text-orange-500 italic">Friends</span> <br />
+              Recent <span className="text-orange-500">Friends</span> <br />
               Waiting for Home
             </h2>
           </div>

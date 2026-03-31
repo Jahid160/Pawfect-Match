@@ -35,7 +35,7 @@ const WhyChooseUs = () => {
 
                     <h2 className="mb-6 lg:mb-8 font-black text-slate-900 lg:text-[80px] text-4xl md:text-7xl leading-[1.1] lg:leading-[0.95] tracking-[-0.04em]">
                         The standard of care <br className="hidden md:block" />
-                        <span className="text-orange-500 italic">they deserve.</span>
+                        <span className="text-orange-500">they deserve.</span>
                     </h2>
 
                     <p className="mx-auto max-w-2xl font-medium text-slate-500 text-sm md:text-lg leading-relaxed">
