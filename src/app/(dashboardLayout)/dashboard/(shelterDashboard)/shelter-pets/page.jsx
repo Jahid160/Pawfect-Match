@@ -1,5 +1,5 @@
 import { getEntriesPets } from '@/action/server/pets';
-import ShelterPetlist from '@/components/dashboardlayouts/ShelterDashboard/ShelterPetlist';
+import ShelterPetlist from '@/Components/dashboardlayouts/ShelterDashboard/ShelterPetlist';
 import { authOptions } from '@/lib/authOptions';
 import { getServerSession } from 'next-auth';
 import React from 'react';

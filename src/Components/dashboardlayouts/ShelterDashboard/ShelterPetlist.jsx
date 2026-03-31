@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 
 // Server Actions
 import { deletePet, updatePets } from '@/action/server/pets';
-import Loading from '@/components/Loading';
+import Loading from '@/Components/Loading';
 import { SheltergetStatus } from '@/action/server/Shelteruser';
 
 const ShelterPetlist = ({ requests = [], totalPages = 1 }) => {

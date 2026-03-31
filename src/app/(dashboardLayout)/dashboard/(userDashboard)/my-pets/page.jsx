@@ -1,7 +1,7 @@
 
 import { getUserApprovedPets } from "@/action/userServerDash/myPets";
 import MyPetsList from "./MyPetsList";
-
+export const dynamic = "force-dynamic";
 const MyPetsPage = async () => {
   const result = await getUserApprovedPets();
   const pets = result.success ? result.data : [];

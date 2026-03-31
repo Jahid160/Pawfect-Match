@@ -2,7 +2,7 @@ import { getUsers } from '@/action/server/users';
 import UserManagement from '@/Components/dashboardlayouts/UserManagement';
 import React from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
-
+export const dynamic = "force-dynamic";
 const page = async() => {
       let user = [];
   

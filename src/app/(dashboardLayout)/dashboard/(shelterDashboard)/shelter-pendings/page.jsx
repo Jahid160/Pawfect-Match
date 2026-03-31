@@ -1,5 +1,5 @@
 import { getPending } from '@/action/server/Entries';
-import ShelterPendinglist from '@/components/dashboardlayouts/ShelterDashboard/ShelterPendinglist';
+import ShelterPendinglist from '@/Components/dashboardlayouts/ShelterDashboard/ShelterPendinglist';
 import { authOptions } from '@/lib/authOptions';
 import { getServerSession } from 'next-auth';
 import React from 'react';

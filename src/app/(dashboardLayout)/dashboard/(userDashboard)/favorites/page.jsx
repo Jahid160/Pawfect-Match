@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Trash2, MapPin, ArrowRight, Sparkles, ExternalLink } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { getMySavedPets, removeFavoriteAction } from "@/action/userServerDash/savePetsAction";
-
+export const dynamic = "force-dynamic";
 const favorites = async() => {
 const result = await getMySavedPets();
   const pets = result.data || [];
