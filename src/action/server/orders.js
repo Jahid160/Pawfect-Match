@@ -15,14 +15,14 @@ export const placeVaccineOrder = async (data) => {
   try {
     const ordersCollection = await dbConnect(collections.VACCINES_ORDERS);
 
-const existingOrder = await ordersCollection.findOne({
-  vaccineId: data.vaccineId,
-  userEmail: session.user.email
-});
+    const existingOrder = await ordersCollection.findOne({
+      vaccineId: data.vaccineId,
+      userEmail: session.user.email,
+    });
 
-if (existingOrder) {
-  return { success: false, message: "Already ordered" };
-}
+    if (existingOrder) {
+      return { success: false, message: "Already ordered" };
+    }
 
     const newOrder = {
       vaccineId: data.vaccineId,
@@ -40,7 +40,6 @@ if (existingOrder) {
     };
     await ordersCollection.insertOne(newOrder);
 
-
     revalidatePath("/dashboard/vaccinations");
     revalidatePath("/dashboard/doctor");
     return { success: true };
@@ -48,7 +47,6 @@ if (existingOrder) {
     return { success: false, error: error.message };
   }
 };
-
 
 export const adminAcceptOrder = async (orderId) => {
   await verifyAdmin();
@@ -66,7 +64,6 @@ export const adminAcceptOrder = async (orderId) => {
     return { success: false };
   }
 };
-
 
 export const doctorScheduleOrder = async (orderId, days) => {
   await verifyAdmin();
@@ -86,7 +83,6 @@ export const doctorScheduleOrder = async (orderId, days) => {
       },
     );
 
-
     revalidatePath("/dashboard/vaccinations");
     revalidatePath("/dashboard/doctor");
 
@@ -96,6 +92,34 @@ export const doctorScheduleOrder = async (orderId, days) => {
   }
 };
 
+// admin only in vaccine management
+export const deleteVaccine = async (id) => {
+  await verifyAdmin();
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return { success: false, message: "Doctor not authenticated" };
+  }
+
+  try {
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+
+    const result = await orderCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    if (result.deletedCount > 0) {
+      // Revalidate to update the UI instantly
+      revalidatePath("/dashboard/vaccinations");
+      return { success: true, message: "Vaccine deleted successfully" };
+    }
+
+    return { success: false, message: "Order not found" };
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return { success: false, message: "Failed to delete from database" };
+  }
+};
 
 export const completeVaccination = async (orderId) => {
   try {
@@ -114,7 +138,6 @@ export const completeVaccination = async (orderId) => {
 };
 
 // end of vaccine
-
 
 export const getDoctorOrders = async () => {
   await verifyAdmin();
@@ -138,8 +161,8 @@ export const getVaccineOrders = async () => {
       .find(
         {},
         {
-          projection: { 
-            vaccineId: 0, 
+          projection: {
+            vaccineId: 0,
           },
         },
       )
