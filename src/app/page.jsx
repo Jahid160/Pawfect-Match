@@ -16,7 +16,7 @@ import NewsletterGame from "@/components/home/NewsletterGame";
 
 const mainPage = () => {
   return (
-    <div className="space-y-8 lg:space-y-24 pb-20">
+    <div className="space-y-10 lg:space-y-24">
       <Banner />
 
       <ImpactSection />
