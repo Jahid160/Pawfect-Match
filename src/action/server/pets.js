@@ -17,7 +17,7 @@ const adoptionCollectionPromise = dbConnect(collections.ADOPTIONS);
 export const getPets = async () => {
   try {
     const Petcollection = await petCollectionPromise;
-    const pets = await Petcollection.find().toArray();
+    const pets = await Petcollection.find().sort({ createdAt: -1 }).toArray();
     return pets.map((pet) => ({
       ...pet,
       _id: pet._id.toString(),
