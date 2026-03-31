@@ -125,7 +125,7 @@ const PetAccessoriesSection = () => {
               <div className="flex flex-col pr-6">
                 <p className="font-black text-[9px] text-orange-500 uppercase tracking-[0.25em]">{accessorySlides[currentIndex].name}</p>
                 <p className="font-black text-slate-900 text-xl leading-tight tracking-tight">{accessorySlides[currentIndex].title}</p>
-                <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase tracking-widest leading-none">{accessorySlides[currentIndex].tag}</p>
+                <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase leading-none tracking-widest">{accessorySlides[currentIndex].tag}</p>
               </div>
             </motion.div>
 
@@ -148,7 +148,7 @@ const PetAccessoriesSection = () => {
               className="inline-flex items-center gap-2 bg-orange-500/10 px-5 py-2 border border-orange-500/20 rounded-full"
             >
               <Sparkles size={14} className="fill-orange-600 text-orange-600" />
-              <span className="font-black text-orange-600 text-[10px] uppercase tracking-[0.2em]">Premium Collection</span>
+              <span className="font-black text-[10px] text-orange-600 uppercase tracking-[0.2em]">Premium Collection</span>
             </motion.div>
 
             <motion.h2 
@@ -157,7 +157,7 @@ const PetAccessoriesSection = () => {
               className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Pet Gear & <br />
-              <span className="text-orange-500 italic">Accessories</span>
+              <span className="text-orange-500">Accessories</span>
             </motion.h2>
 
             <motion.p 
@@ -196,7 +196,7 @@ const PetAccessoriesSection = () => {
             >
               <Link
                 href="/pet-accessories"
-                className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white text-[11px] uppercase tracking-[0.2em] transition-all duration-500"
+                className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
               >
                 <ShoppingBag size={20} className="z-10 relative" />
                 <span className="z-10 relative">Shop All Gear</span>
