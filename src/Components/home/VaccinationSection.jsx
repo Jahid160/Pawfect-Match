@@ -57,8 +57,7 @@ const VaccinationSection = () => {
 
   const handlePrev = () => {
     setCurrentIndex(
-      (prevIndex) =>
-        (prevIndex - 1 + vaccineSlides.length) % vaccineSlides.length,
+      (prevIndex) => (prevIndex - 1 + vaccineSlides.length) % vaccineSlides.length
     );
   };
 
@@ -68,11 +67,13 @@ const VaccinationSection = () => {
 
   return (
     <section className="relative bg-orange-50/30 mx-4 my-20 py-24 border border-orange-100 rounded-[4rem] overflow-hidden">
+      {/* Background Decor */}
       <div className="-top-24 -left-24 absolute bg-orange-200/20 blur-[100px] rounded-full w-96 h-96 pointer-events-none"></div>
       <div className="right-0 bottom-0 absolute bg-red-100/30 blur-[80px] rounded-full w-64 h-64 pointer-events-none"></div>
 
       <div className="z-10 relative mx-auto px-6 max-w-7xl">
         <div className="items-center gap-16 grid grid-cols-1 lg:grid-cols-2">
+          
           {/* Left Side: Text & Features */}
           <div className="space-y-8">
             <motion.div
@@ -91,8 +92,7 @@ const VaccinationSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
-              Essential <span className="text-orange-500 italic">Vaccines</span>{" "}
-              <br />
+              Essential <span className="text-orange-500">Vaccines</span> <br />
               For Your Pets
             </motion.h2>
 
@@ -154,9 +154,8 @@ const VaccinationSection = () => {
             </motion.div>
           </div>
 
-          {/* Right Side: Image Slider (Size Original Rakha Hoyeche) */}
+          {/* Right Side: Image Slider */}
           <div className="group relative">
-            {/* Main Image Container - ORIGINAL SIZE MAINTAINED */}
             <div className="z-20 relative bg-white shadow-2xl mx-auto border-[12px] border-white rounded-[3.5rem] w-full max-w-[450px] aspect-[4/5] overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -233,6 +232,8 @@ const VaccinationSection = () => {
               </div>
             </motion.div>
           </div>
+          {/* End of Right Side */}
+
         </div>
       </div>
     </section>

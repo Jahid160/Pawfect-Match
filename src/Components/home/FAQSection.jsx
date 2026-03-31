@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus, HelpCircle, MessageCircle, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const FAQSection = () => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -57,7 +58,7 @@ const FAQSection = () => {
                             
                             <h2 className="mb-6 font-black text-slate-900 text-5xl md:text-6xl leading-[0.95] tracking-[-0.04em]">
                                 Got Questions? <br />
-                                <span className="text-orange-500 italic">We Got Answers.</span>
+                                <span className="text-orange-500">We Got Answers.</span>
                             </h2>
                             
                             <p className="mb-10 font-medium text-slate-500 text-lg leading-relaxed">
@@ -72,10 +73,12 @@ const FAQSection = () => {
                                 <h4 className="mb-2 font-black text-2xl tracking-tight">Still need help?</h4>
                                 <p className="mb-8 font-medium text-slate-400 text-sm leading-relaxed">Our support experts are available for direct consultation regarding technical issues.</p>
                                 
-                                <button className="group/btn relative flex justify-center items-center gap-3 bg-orange-600 hover:bg-orange-500 shadow-orange-900/20 shadow-xl py-5 rounded-2xl w-full font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300">
-                                    <span>Contact Support</span>
-                                    <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                                </button>
+                                <Link href="/contact" className="block">
+                                    <button className="group/btn relative flex justify-center items-center gap-3 bg-orange-600 hover:bg-orange-500 shadow-orange-900/20 shadow-xl py-5 rounded-2xl w-full font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300">
+                                        <span>Contact Support</span>
+                                        <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
+                                    </button>
+                                </Link>
                             </div>
                         </motion.div>
                     </div>

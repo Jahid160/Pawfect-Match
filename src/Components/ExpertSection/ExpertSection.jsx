@@ -48,11 +48,11 @@ const ExpertSection = () => {
               Our Professional Team
             </div>
             <h2 className="font-black text-slate-900 text-5xl lg:text-7xl leading-[0.95] tracking-[-0.04em]">
-              Meet the <span className="text-orange-500 italic">Experts</span> <br /> Behind PawFact
+              Meet the <span className="text-orange-500">Experts</span> <br /> Behind PawFact
             </h2>
           </div>
           <div className="pl-6 border-orange-500 border-l-4 max-w-sm">
-             <p className="font-medium text-slate-500 text-lg italic leading-relaxed">
+             <p className="font-medium text-slate-500 text-lg leading-relaxed">
               Dedicated specialists working tirelessly to ensure every pet gets the love and care they deserve.
             </p>
           </div>

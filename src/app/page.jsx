@@ -12,10 +12,11 @@ import OurSponsor from "@/components/home/OurSponsor";
 import Newsletter from "@/components/home/Newsletter";
 import FAQSection from "@/components/home/FAQSection";
 import ImpactSection from "@/components/home/ImpactSection";
+import NewsletterGame from "@/components/home/NewsletterGame";
 
 const mainPage = () => {
   return (
-    <div className="space-y-10 lg:space-y-24 pb-20">
+    <div className="space-y-8 lg:space-y-24 pb-20">
       <Banner />
 
       <ImpactSection />
@@ -36,7 +37,8 @@ const mainPage = () => {
       <OurSponsor />
       <FAQSection />
 
-      <Newsletter />
+      {/* <Newsletter /> */}
+      <NewsletterGame />
     </div>
   );
 };
