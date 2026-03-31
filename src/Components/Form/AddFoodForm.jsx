@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Swal from "sweetalert2";
 import { createFood } from "@/action/server/foods";
+import Link from "next/link";
 
 const PET_CATEGORIES = [
   "Dog",
@@ -276,9 +277,9 @@ export default function AddFoodPage() {
             >
               Add Another
             </button>
-            <button className="btn btn-ghost rounded-xl px-6 border border-base-300">
+            <Link href={"/pet-food"} className="btn btn-ghost rounded-xl px-6 border border-base-300">
               View Products
-            </button>
+            </Link>
           </div>
         </div>
       </main>
