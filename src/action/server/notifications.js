@@ -32,6 +32,46 @@ export const getAdminNotifications = async () => {
 };
 
 
+
+// Shelter Notifications
+
+export const getShelterNotifications = async (userEmail) => {
+  try {
+    if (!userEmail) return { success: false, message: "Email is required" };
+
+    const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
+    const notifications = await notificationCollection
+      .find({
+        $or: [
+          { receiverEmail: userEmail },
+          { receiverRole: "shelter" }
+        ]
+      })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
+
+    const unreadCount = await notificationCollection.countDocuments({
+      $or: [
+        { receiverEmail: userEmail, isRead: false },
+        { receiverRole: "shelter", isRead: false }
+      ]
+    });
+
+    const formattedNotifications = notifications.map(notif => ({
+      ...notif,
+      _id: notif._id.toString(),
+      time: formatNotificationTime(notif.createdAt)
+    }));
+
+    return { success: true, notifications: formattedNotifications, unreadCount };
+  } catch (error) {
+    console.error("Fetch Shelter Notifications Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+
 export const getUserNotifications = async (userEmail) => {
   try {
     if (!userEmail) return { success: false, message: "User Email is required" };
@@ -66,7 +106,6 @@ export const getUserNotifications = async (userEmail) => {
 export const createNotification = async ({ title, message, type, receiverRole, receiverEmail }) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
-
     const newNotification = {
       title,
       message,

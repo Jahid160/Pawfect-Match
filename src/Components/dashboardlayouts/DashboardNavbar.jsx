@@ -21,7 +21,6 @@ import {
   markNotificationsAsRead
 } from "@/action/server/notifications";
 import Image from "next/image";
-
 const DashboardNavbar = ({ isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -29,13 +28,12 @@ const DashboardNavbar = ({ isCollapsed }) => {
   const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef(null);
   const { data: session } = useSession();
-
   const isAdmin = session?.user?.role === "admin";
   const userEmail = session?.user?.email;
+  const isShelter = session?.user?.role === "shelter";
 
   useEffect(() => {
     setIsMounted(true);
-
     const fetchNotifications = async () => {
       let res;
       if (isAdmin) {
@@ -76,6 +74,12 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
   const getIconDetails = (type) => {
     switch (type) {
+      case 'shelter_apply':
+        return { icon: <UserPlus size={16} className="text-purple-500" />, bg: "bg-purple-50" };
+      case 'shelter_approved':
+        return { icon: <Check size={16} className="text-emerald-500" />, bg: "bg-emerald-50" };
+      case 'adoption':
+        return { icon: <Heart size={16} className="text-rose-500" />, bg: "bg-rose-50" };
       case 'adoption':
         return { icon: <Heart size={16} className="text-rose-500" />, bg: "bg-rose-50" };
       case 'order':
