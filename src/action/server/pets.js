@@ -146,7 +146,7 @@ export const getSinglePets = async (id) => {
     try {
       const user = await verifyAuth();
       userId = user._id.toString();
-    } catch {}
+    } catch { }
 
     const savedBy = pet.savedBy || [];
     return {
@@ -162,6 +162,8 @@ export const getSinglePets = async (id) => {
   }
 };
 
+
+
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
   adminShelterAuth();
@@ -171,7 +173,16 @@ export const AddPets = async (petdata) => {
       ...petdata,
       status: "preview",
       email: session.user.email,
-    });
+    })
+    if (result.insertedId) {
+      await createNotification({
+        title: "New Pet Entry Request",
+        message: `${session.user.name} has submitted a new pet (${petdata.name}) for approval.`,
+        type: "petAdd_req",
+        receiverRole: "admin",
+        receiverEmail: null,
+      });
+    }
     return { success: Boolean(result.insertedId) };
   } catch (error) {
     return { success: false, error: error.message };
