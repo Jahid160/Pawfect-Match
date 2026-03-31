@@ -138,7 +138,7 @@ export const getUserDashboardStats = async () => {
       .find({ email: user.email })
       .toArray();
     const orders = await orderCollection.find({ userEmail: user.email }).toArray();
-console.log(orders);
+
     const approvedCount = adoptions.filter(
       (a) => a.status === "adopted",
     ).length;
