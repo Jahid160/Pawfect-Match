@@ -17,13 +17,17 @@ import {
   Eye,
   Trash2,
 } from "lucide-react";
-import { adminAcceptOrder, doctorScheduleOrder } from "@/action/server/orders";
+import { adminAcceptOrder, deleteVaccine, doctorScheduleOrder } from "@/action/server/orders";
 import { toast } from "react-hot-toast";
+import OrderDetailModal from "./AdminDashboard/VaccinManageModal/OrderDetailModal";
+import Swal from "sweetalert2";
 
 const VaccinationManagement = ({ initialOrders = [] }) => {
   const router = useRouter();
   const [orders, setOrders] = useState(initialOrders);
-
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingId, setLoadingId] = useState(null);
   // States
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -159,6 +163,64 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
       color: "bg-slate-100 text-slate-500",
       icon: <Clock size={12} />,
     };
+  };
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This order will be permanently deleted!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444", // Red-500
+      cancelButtonColor: "#64748b", // Slate-500
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      background: "#ffffff",
+      customClass: {
+        popup: "rounded-[2rem]",
+        confirmButton: "rounded-xl font-bold px-6 py-3",
+        cancelButton: "rounded-xl font-bold px-6 py-3",
+      },
+    });
+
+    if (!result.isConfirmed) return;
+
+    setLoadingId(id);
+
+    try {
+      const response = await deleteVaccine(id);
+
+      if (response.success) {
+        Swal.fire({
+          title: "Deleted!",
+          text: "The order has been removed.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+          background: "#ffffff",
+          customClass: { popup: "rounded-[2rem]" },
+        });
+
+        router.refresh();
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Failed!",
+        text: error.message || "Could not delete the order.",
+        icon: "error",
+        confirmButtonColor: "#ef4444",
+        customClass: { popup: "rounded-[2rem]" },
+      });
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleView = (order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
   };
 
   return (
@@ -332,11 +394,27 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
                       <td>
                         {/* Action Icons (Eye & Delete) */}
                         <div className="flex items-center gap-1 ml-2 border-l pl-3 border-slate-100">
-                          <button className="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-blue-50 rounded-lg">
+                          <button
+                            onClick={() => handleView(order)}
+                            className="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-blue-50 rounded-lg"
+                          >
                             <Eye size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-rose-500 transition-colors hover:bg-rose-50 rounded-lg">
-                            <Trash2 size={18} />
+                          <button
+                            disabled={loadingId === order._id}
+                            onClick={() => handleDelete(order._id)}
+                            className={`p-2 transition-colors rounded-lg ${
+                              loadingId === order._id
+                                ? "text-slate-200 animate-pulse"
+                                : "text-slate-400 hover:text-rose-500 hover:bg-rose-50"
+                            }`}
+                            title="Delete Order"
+                          >
+                            {loadingId === order._id ? (
+                              <div className="w-5 h-5 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 size={18} />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -348,7 +426,11 @@ const VaccinationManagement = ({ initialOrders = [] }) => {
           </table>
         </div>
       </div>
-
+      <OrderDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        order={selectedOrder}
+      />
       {/* PAGINATION UI */}
       {totalPages > 1 && (
         <div className="mt-8 flex justify-between items-center px-8">
