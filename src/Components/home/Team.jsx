@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Twitter, PawPrint, ExternalLink } from 'lucide-react';
+import { Github, Linkedin, PawPrint, } from 'lucide-react';
 
 const Team = () => {
     const teamMembers = [
@@ -12,60 +12,60 @@ const Team = () => {
             role: "Founder & Lead Designer",
             image: "https://i.ibb.co.com/S4tkcPfc/profile3.png",
             bio: "Visionary behind Pawfect Match. Designed the entire ecosystem including the Admin Dashboard and Notification systems.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/opunath26", linkedin: "https://www.linkedin.com/in/apu-nath-76a490392" }
         },
         {
             name: "Al Amin Hossain",
             role: "Chief Veterinary Officer",
-            image: "https://i.ibb.co.com/TxmtvmzJ/Screenshot-4.png", 
+            image: "https://i.ibb.co.com/TxmtvmzJ/Screenshot-4.png",
             bio: "Expert surgeon with 10+ years of experience. Leads the expert doctor panel and health verification process.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/alminsfd", linkedin: "linkedin.com/in/al-amin-hossain-tanvir-8b7391321", }
         },
         {
             name: "Md Zahid Hasan",
             role: "Lead Full-Stack Developer",
             image: "https://i.ibb.co.com/bMgLpTdq/Gemini-Generated-Image-bp8kycbp8kycbp8k-1.png",
             bio: "Specialist in scalable web architectures. Managed task allocation and user-friendly functional developments.",
-            social: { github: "https://github.com/Jahid160", linkedin: "https://www.linkedin.com/in/md-zahid-hasan12/", twitter: "#" }
+            social: { github: "https://github.com/Jahid160", linkedin: "https://www.linkedin.com/in/md-zahid-hasan12/" }
         },
         {
             name: "Forhad Redoy",
             role: "Lead Full-Stack Developer",
             image: "https://i.ibb.co.com/rGbqNPQL/Screenshot-5.png",
             bio: "Specialist in scalable web architectures. Managed task allocation and user-friendly functional developments.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/Forhad-Redoy", linkedin: "https://www.linkedin.com/in/forhad-redoy" }
         },
         {
             name: "MD SHAKIL",
             role: "Lead Full-Stack Developer",
             image: "https://i.ibb.co.com/jvCdxW94/Screenshot-1.png",
             bio: "Specialist in scalable web architectures. Managed task allocation and user-friendly functional developments.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/iamshakil01", linkedin: "https://www.linkedin.com/in/iamshakil01" }
         },
         {
             name: "Hasib Ahmed Shrabon",
             role: "Chief Veterinary Officer",
-            image: "https://i.ibb.co.com/pBwt20wQ/Screenshot-2.png", 
+            image: "https://i.ibb.co.com/pBwt20wQ/Screenshot-2.png",
             bio: "Expert surgeon with 10+ years of experience. Leads the expert doctor panel and health verification process.",
-            social: { github: "#", linkedin: "#", twitter: "#" }
+            social: { github: "https://github.com/hasib149", linkedin: "https://www.linkedin.com/in/hasib-shrabon" }
         },
     ];
 
     return (
         <section className="bg-white selection:bg-orange-100 py-32 min-h-screen">
             <div className="mx-auto px-6 container">
-                
+
                 {/* --- Header Section --- */}
                 <div className="flex lg:flex-row flex-col justify-between items-end gap-12 mb-24">
                     <div className="max-w-3xl">
-                        <motion.span 
+                        <motion.span
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             className="inline-block bg-orange-100 mb-6 px-5 py-2 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.2em]"
                         >
                             The Minds Behind Pawfect Match
                         </motion.span>
-                        <motion.h2 
+                        <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             className="font-black text-slate-900 text-5xl md:text-8xl leading-[0.9] tracking-tighter"
@@ -73,7 +73,7 @@ const Team = () => {
                             Meet Our <br /> <span className="text-orange-500 italic">Passionate</span> Team
                         </motion.h2>
                     </div>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         className="max-w-md font-medium text-slate-500 text-xl leading-relaxed"
@@ -85,7 +85,7 @@ const Team = () => {
                 {/* --- Team Grid --- */}
                 <div className="gap-x-8 gap-y-20 grid md:grid-cols-2 lg:grid-cols-3">
                     {teamMembers.map((member, i) => (
-                        <motion.div 
+                        <motion.div
                             key={i}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -95,16 +95,16 @@ const Team = () => {
                         >
                             {/* Premium Card Layout */}
                             <div className="relative bg-[#fffaf5] hover:bg-white shadow-2xl shadow-orange-100/30 p-2 rounded-[3.5rem] overflow-hidden transition-all duration-500">
-                                
+
                                 {/* Image Container with Floating Action */}
                                 <div className="relative rounded-[3rem] w-full aspect-[4/5] overflow-hidden">
-                                    <Image 
-                                        src={member.image} 
+                                    <Image
+                                        src={member.image}
                                         alt={member.name}
                                         fill
                                         className="grayscale group-hover:grayscale-0 object-cover group-hover:scale-105 transition-all duration-1000 ease-out"
                                     />
-                                    
+
                                     {/* Social Badge (Appears on Hover) */}
                                     <div className="right-6 bottom-6 absolute flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-20 group-hover:translate-x-0 duration-500">
                                         <a href={member.social.linkedin} className="bg-white hover:bg-orange-500 shadow-xl p-4 rounded-2xl text-slate-900 hover:text-white transition-all">
@@ -139,7 +139,7 @@ const Team = () => {
                 </div>
 
                 {/* --- Join Us Premium CTA --- */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     className="group relative bg-slate-900 mt-40 p-12 md:p-24 rounded-[4rem] overflow-hidden lg:text-left text-center"
@@ -149,11 +149,11 @@ const Team = () => {
                             <h4 className="mb-6 font-black text-white text-4xl md:text-6xl tracking-tighter">Want to be part of <br /> <span className="text-orange-500">our mission?</span></h4>
                             <p className="font-medium text-slate-400 text-lg leading-relaxed">We are always looking for passionate volunteers, veterinarians, and animal lovers to expand our community.</p>
                         </div>
-                        <button className="bg-orange-600 hover:bg-white shadow-2xl shadow-orange-600/20 px-12 py-6 rounded-2xl h-fit font-black text-[11px] text-white hover:text-slate-900 uppercase tracking-[0.2em] hover:scale-105 transition-all duration-500">
+                        <button onClick={() => window.location.href = "/contact"} className="bg-orange-600 hover:bg-white shadow-2xl shadow-orange-600/20 px-12 py-6 rounded-2xl h-fit font-black text-[11px] text-white hover:text-slate-900 uppercase tracking-[0.2em] hover:scale-105 transition-all duration-500">
                             Apply to join the team
                         </button>
                     </div>
-                    
+
                     {/* Decorative Background Elements */}
                     <div className="-top-24 -right-24 absolute bg-orange-500/10 blur-[100px] rounded-full w-96 h-96"></div>
                     <div className="-bottom-32 -left-32 absolute bg-white/5 blur-[80px] rounded-full w-80 h-80"></div>

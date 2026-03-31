@@ -21,11 +21,11 @@ import Logo from "./Logo";
 import Image from "next/image";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { useCartStore } from "@/lib/useCartStore";
-// ✅ getUserNotifications ইম্পোর্ট করা হলো
-import { 
-  getAdminNotifications, 
-  getUserNotifications, 
-  markNotificationsAsRead 
+//  getUserNotifications ইম্পোর্ট করা হলো
+import {
+  getAdminNotifications,
+  getUserNotifications,
+  markNotificationsAsRead
 } from "@/action/server/notifications";
 
 const navLinks = [
@@ -67,7 +67,7 @@ const Navbar = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  
+
   const [activeMobileSub, setActiveMobileSub] = useState(null);
   const profileRef = useRef(null);
   const notifRef = useRef(null);
@@ -111,7 +111,7 @@ const Navbar = () => {
       } else {
         res = await markNotificationsAsRead(null, userEmail);
       }
-      
+
       if (res?.success) setUnreadCount(0);
     }
   };
@@ -210,10 +210,10 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            
+
             {isLoggedIn && (
               <div className="hidden sm:block relative" ref={notifRef}>
-                <button 
+                <button
                   onClick={handleNotifClick}
                   className={`relative flex justify-center items-center rounded-full w-10 h-10 transition-all ${isNotifOpen ? "bg-orange-50 text-orange-500" : "bg-slate-50 text-slate-700 hover:bg-slate-100"}`}
                 >
@@ -228,11 +228,11 @@ const Navbar = () => {
                 <AnimatePresence>
                   {isNotifOpen && (
                     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 15 }} className="right-0 z-[120] absolute bg-white shadow-2xl mt-4 border border-slate-100 rounded-[2rem] w-80 overflow-hidden">
-                       <div className="flex justify-between p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">
+                      <div className="flex justify-between p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">
                         Recent Notifications
                         {unreadCount > 0 && <span className="text-[10px] text-orange-500">{unreadCount} New</span>}
-                       </div>
-                       <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                      </div>
+                      <div className="max-h-64 overflow-y-auto custom-scrollbar">
                         {notifications.length > 0 ? (
                           notifications.map(n => (
                             <div key={n._id} className={`hover:bg-slate-50 p-4 last:border-0 border-b transition-colors ${!n.isRead ? "bg-orange-50/20" : ""}`}>
@@ -244,14 +244,14 @@ const Navbar = () => {
                         ) : (
                           <div className="p-8 text-slate-400 text-xs text-center italic">No new notifications</div>
                         )}
-                       </div>
-                       <Link 
-                        href="/dashboard" 
-                        onClick={() => setIsNotifOpen(false)} 
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsNotifOpen(false)}
                         className="block bg-slate-50 hover:bg-orange-50 py-3 font-bold text-orange-500 text-xs text-center uppercase tracking-widest transition-colors"
-                       >
+                      >
                         View All Activities
-                       </Link>
+                      </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -289,7 +289,7 @@ const Navbar = () => {
                     <motion.div initial={{ opacity: 0, y: 15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 15, scale: 0.95 }} className="right-0 z-[120] absolute bg-white shadow-2xl mt-4 p-4 border border-slate-100 rounded-[2rem] w-64">
                       <div className="flex items-center gap-3 bg-slate-50 mb-3 p-3 rounded-[1.2rem]">
                         <div className="flex justify-center items-center bg-orange-500 shadow-sm border-2 border-white rounded-full w-10 h-10 font-bold text-white text-sm">
-                           {user?.name?.charAt(0)}
+                          {user?.name?.charAt(0)}
                         </div>
                         <div className="overflow-hidden">
                           <p className="font-bold text-slate-800 text-sm truncate">{user?.name}</p>
@@ -326,7 +326,7 @@ const Navbar = () => {
                   <Logo />
                   <button onClick={() => setIsMenuOpen(false)} className="bg-slate-100 p-2 rounded-full text-slate-600"><X size={20} /></button>
                 </div>
-                
+
                 <div className="flex-1 pr-2 overflow-y-auto custom-scrollbar">
                   {filteredNavLinks.map((link) => (
                     <div key={link.name} className="border-slate-50 last:border-0 border-b">
@@ -354,13 +354,13 @@ const Navbar = () => {
                 </div>
 
                 <div className="space-y-4 mt-auto pt-6 border-slate-100 border-t">
-                   <Link href="/cart" onClick={handleLinkClick} className="flex justify-between items-center bg-slate-50 px-5 py-4 rounded-2xl font-bold text-slate-700">
-                      <div className="flex items-center gap-3">
-                        <ShoppingCart size={20} className="text-orange-500" />
-                        <span>My Cart</span>
-                      </div>
-                      {cartCount > 0 && <span className="bg-orange-500 px-2.5 py-0.5 rounded-full text-white text-xs">{cartCount}</span>}
-                   </Link>
+                  <Link href="/cart" onClick={handleLinkClick} className="flex justify-between items-center bg-slate-50 px-5 py-4 rounded-2xl font-bold text-slate-700">
+                    <div className="flex items-center gap-3">
+                      <ShoppingCart size={20} className="text-orange-500" />
+                      <span>My Cart</span>
+                    </div>
+                    {cartCount > 0 && <span className="bg-orange-500 px-2.5 py-0.5 rounded-full text-white text-xs">{cartCount}</span>}
+                  </Link>
 
                   {isLoggedIn ? (
                     <Link href="/dashboard" onClick={handleLinkClick} className="flex justify-center items-center gap-2 bg-orange-500 shadow-lg py-4 rounded-2xl w-full font-black text-white">
