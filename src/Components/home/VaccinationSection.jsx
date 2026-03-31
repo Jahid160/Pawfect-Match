@@ -78,7 +78,7 @@ const VaccinationSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
                         >
-                            Essential <span className="text-orange-500 italic">Vaccines</span> <br />
+                            Essential <span className="text-orange-500">Vaccines</span> <br />
                             For Your Pets
                         </motion.h2>
 
