@@ -13,8 +13,17 @@ export const placeVaccineOrder = async (data) => {
   await verifyAuth();
   const session = await getServerSession(authOptions);
   try {
-    console.log(session.user);
-    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const ordersCollection = await dbConnect(collections.VACCINES_ORDERS);
+
+const existingOrder = await ordersCollection.findOne({
+  vaccineId: data.vaccineId,
+  userEmail: session.user.email
+});
+
+if (existingOrder) {
+  return { success: false, message: "Already ordered" };
+}
+
     const newOrder = {
       vaccineId: data.vaccineId,
       vaccineName: data.vaccineName,
@@ -29,7 +38,7 @@ export const placeVaccineOrder = async (data) => {
       location: session.user.location,
       createdAt: new Date(),
     };
-    await orderCollection.insertOne(newOrder);
+    await ordersCollection.insertOne(newOrder);
 
 
     revalidatePath("/dashboard/vaccinations");
