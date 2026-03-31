@@ -12,7 +12,8 @@ import OurSponsor from "@/components/home/OurSponsor";
 import Newsletter from "@/components/home/Newsletter";
 import FAQSection from "@/components/home/FAQSection";
 import ImpactSection from "@/components/home/ImpactSection";
-import NewsletterGame from "@/components/home/NewsletterGame";
+import NewsletterGame from "@/Components/home/NewsletterGame";
+// import NewsletterGame from "@/components/home/NewsletterGame";
 
 const mainPage = () => {
   return (

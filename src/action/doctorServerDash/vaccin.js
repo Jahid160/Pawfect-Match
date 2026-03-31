@@ -74,11 +74,10 @@ export const completedOrder = async (orderId) => {
       await createNotification({
         title: "Vaccination Completed",
         message: `Dr. ${session.user.name} has completed your ${order.vaccineName} vaccination.`,
-        type: "success",           
-        receiverRole: null,    
+        type: "success",
+        receiverRole: null,
         receiverEmail: order.userEmail,
       });
-
 
       revalidatePath("/dashboard/appointments");
       revalidatePath("/dashboard/doctor");
@@ -102,6 +101,11 @@ export const deleteOrder = async (id) => {
 
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const order = await orderCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!order) {
+      return { success: false, message: "Order not found" };
+    }
 
     // Fixed: Use 'id' which is passed as parameter
     const result = await orderCollection.deleteOne({
@@ -109,6 +113,13 @@ export const deleteOrder = async (id) => {
     });
 
     if (result.deletedCount > 0) {
+      await createNotification({
+        title: "Appointment Rejected",
+        message: `Your appointment for ${order.vaccineName} has been rejected by the doctor.`,
+        type: "alert",
+        receiverRole: null,
+        receiverEmail: order.userEmail, 
+      });
       // Revalidate to update the UI instantly
       revalidatePath("/dashboard/appointments");
       revalidatePath("/dashboard/doctor");
