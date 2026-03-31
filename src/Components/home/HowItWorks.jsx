@@ -47,7 +47,7 @@ const HowItWorks = () => {
           </div>
           
           <h2 className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]">
-            How It <span className="font-black text-orange-500 italic">Works</span>
+            How It <span className="font-black text-orange-500">Works</span>
           </h2>
           
           <div className="bg-orange-500 mx-auto mt-8 rounded-full w-20 h-1.5 animate-width-expand"></div>
