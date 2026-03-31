@@ -20,7 +20,7 @@ import AuthButtons from "../button/AuthButtons";
 import Logo from "./Logo";
 import Image from "next/image";
 import { useCartStore } from "@/lib/useCartStore";
-//  getUserNotifications ইম্পোর্ট করা হলো
+//  getUserNotifications 
 import {
   getAdminNotifications,
   getUserNotifications,
