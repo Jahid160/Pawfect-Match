@@ -15,11 +15,25 @@ import {
 import Logo from "../Header/Logo";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { totalAdopted } from "@/action/server/pets";
 
 export default function Footer() {
+  const [adoptedCount, setAdoptedCount] = useState(0);
   const pathname = usePathname();
-  if (pathname.startsWith("/dashboard")) return null;
 
+  useEffect(() => {
+    const fetchAdopted = async () => {
+      const res = await totalAdopted();
+
+      if (res.success) {
+        setAdoptedCount(res.data.adopted);
+      }
+    };
+
+    fetchAdopted();
+  }, []);
+    if (pathname.startsWith("/dashboard")) return null;
   const pawPositions = [
     { top: "10%", left: "5%", rotate: -15 },
     { top: "40%", left: "15%", rotate: 20 },
@@ -201,7 +215,10 @@ export default function Footer() {
                   </div>
                 </div>
 
-                <Link href={'/all-pets'} className="flex justify-center items-center gap-2 bg-orange-500 hover:bg-white shadow-orange-500/10 shadow-xl py-4 rounded-2xl w-full font-black text-white hover:text-orange-500 active:scale-[0.98] transition-all">
+                <Link
+                  href={"/all-pets"}
+                  className="flex justify-center items-center gap-2 bg-orange-500 hover:bg-white shadow-orange-500/10 shadow-xl py-4 rounded-2xl w-full font-black text-white hover:text-orange-500 active:scale-[0.98] transition-all"
+                >
                   Start Adoption <Heart className="fill-current w-5 h-5" />
                 </Link>
               </div>
@@ -214,25 +231,11 @@ export default function Footer() {
               <p className="uppercase tracking-widest">
                 © {new Date().getFullYear()} Pawfect Adoption
               </p>
-              <div className="flex gap-6 uppercase tracking-widest">
-                <Link
-                  href="#"
-                  className="hover:text-orange-500 transition-colors"
-                >
-                  Privacy
-                </Link>
-                <Link
-                  href="#"
-                  className="hover:text-orange-500 transition-colors"
-                >
-                  Terms
-                </Link>
-              </div>
             </div>
             <div className="flex items-center gap-3 bg-slate-900/80 shadow-inner px-5 py-2 border border-slate-800 rounded-full">
               <span className="bg-orange-500 rounded-full w-2 h-2 animate-ping"></span>
               <span className="text-slate-300 uppercase tracking-tighter">
-                12 Animals adopted today
+                {adoptedCount} Animals adopted
               </span>
             </div>
           </div>
