@@ -87,7 +87,7 @@ const ImpactSection = () => {
               className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Numbers that tell <br />
-              <span className="text-orange-500 italic">our story.</span>
+              <span className="text-orange-500">our story.</span>
             </motion.h2>
           </div>
 
