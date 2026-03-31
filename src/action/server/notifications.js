@@ -63,7 +63,7 @@ export const getUserNotifications = async (userEmail) => {
 };
 
 
-export const createNotification = async ({ title, message, type, receiverRole, receiverEmail }) => {
+export const createNotification = async ({ title, message, type, receiverRole, receiverEmail,userEmail }) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
 
@@ -73,6 +73,7 @@ export const createNotification = async ({ title, message, type, receiverRole, r
       type,
       receiverRole: receiverRole || null,
       receiverEmail: receiverEmail || null,
+      userEmail: userEmail || null ,
       isRead: false,
       createdAt: new Date(),
     };
