@@ -57,7 +57,7 @@ const FAQSection = () => {
                             
                             <h2 className="mb-6 font-black text-slate-900 text-5xl md:text-6xl leading-[0.95] tracking-[-0.04em]">
                                 Got Questions? <br />
-                                <span className="text-orange-500 italic">We Got Answers.</span>
+                                <span className="text-orange-500">We Got Answers.</span>
                             </h2>
                             
                             <p className="mb-10 font-medium text-slate-500 text-lg leading-relaxed">
