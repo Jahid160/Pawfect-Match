@@ -3,7 +3,16 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Syringe, ArrowRight, ShieldCheck, Activity, ChevronLeft, ChevronRight, Bell, HeartPulse } from "lucide-react";
+import {
+  Syringe,
+  ArrowRight,
+  ShieldCheck,
+  Activity,
+  ChevronLeft,
+  ChevronRight,
+  Bell,
+  HeartPulse,
+} from "lucide-react";
 import Link from "next/link";
 
 const VaccinationSection = () => {
@@ -188,9 +197,111 @@ const VaccinationSection = () => {
                     </div>
 
                 </div>
+              </div>
             </div>
-        </section>
-    );
+
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="pt-4"
+            >
+              <Link
+                href="/vaccination"
+                className="group inline-flex items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-10 py-5 rounded-2xl font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
+              >
+                <Syringe size={18} />
+                <span>See All Vaccines</span>
+                <ArrowRight
+                  size={18}
+                  className="transition-transform group-hover:translate-x-2"
+                />
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Right Side: Image Slider (Size Original Rakha Hoyeche) */}
+          <div className="group relative">
+            {/* Main Image Container - ORIGINAL SIZE MAINTAINED */}
+            <div className="z-20 relative bg-white shadow-2xl mx-auto border-[12px] border-white rounded-[3.5rem] w-full max-w-[450px] aspect-[4/5] overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={vaccineSlides[currentIndex].id}
+                  initial={{ opacity: 0, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, filter: "blur(10px)" }}
+                  transition={{ duration: 0.5 }}
+                  className="relative w-full h-full"
+                >
+                  <Image
+                    src={vaccineSlides[currentIndex].image}
+                    alt={vaccineSlides[currentIndex].vaccineName}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={handlePrev}
+              className="top-1/2 -left-6 z-30 absolute bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 shadow-xl p-4 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={handleNext}
+              className="top-1/2 -right-6 z-30 absolute bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 shadow-xl p-4 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
+            >
+              <ChevronRight size={24} />
+            </button>
+
+            {/* Floating Info Box */}
+            <motion.div
+              key={`info-${vaccineSlides[currentIndex].id}`}
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="right-0 -bottom-8 z-30 absolute flex items-center gap-5 bg-white shadow-2xl p-6 border border-orange-50 rounded-[2.5rem] min-w-[300px]"
+            >
+              <div className="bg-orange-500 p-4 rounded-2xl text-white">
+                <Activity size={24} />
+              </div>
+              <div className="flex flex-col">
+                <p className="font-black text-[9px] text-orange-500 uppercase tracking-[0.2em]">
+                  {vaccineSlides[currentIndex].targetAudience}
+                </p>
+                <p className="font-black text-slate-900 text-xl leading-tight tracking-tight">
+                  {vaccineSlides[currentIndex].vaccineName}
+                </p>
+                <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase line-clamp-1 tracking-wider">
+                  {vaccineSlides[currentIndex].description}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Status Badge */}
+            <motion.div
+              initial={{ scale: 0, rotate: 15 }}
+              animate={{ scale: 1, rotate: -12 }}
+              className="top-10 -left-10 z-40 absolute flex flex-col justify-center items-center bg-red-600 shadow-2xl border-4 border-white rounded-full w-28 h-28 text-white text-center"
+            >
+              <span className="opacity-80 mb-1 font-black text-[8px] uppercase tracking-widest">
+                Status
+              </span>
+              <span className="font-black text-[11px] uppercase leading-tight tracking-tighter">
+                {vaccineSlides[currentIndex].status}
+              </span>
+              <div className="bg-white/20 mt-1 px-2 py-0.5 rounded font-black text-[10px]">
+                {vaccineSlides[currentIndex].price}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default VaccinationSection;

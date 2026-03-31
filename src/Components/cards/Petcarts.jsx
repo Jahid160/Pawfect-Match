@@ -209,7 +209,7 @@ const Petcarts = ({ pets = [] }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 font-sans">
+    <div id="petCat" className="min-h-screen bg-gray-50/50 font-sans">
       <div className="bg-gradient-to-b from-orange-50/50 to-transparent px-4 py-20 sm:px-8">
         {/* Header section */}
         <div className="mx-auto mb-16 flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-end">

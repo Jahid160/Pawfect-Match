@@ -15,10 +15,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 
-import { 
-  getAdminNotifications, 
-  getUserNotifications, 
-  markNotificationsAsRead 
+import {
+  getAdminNotifications,
+  getUserNotifications,
+  markNotificationsAsRead
 } from "@/action/server/notifications";
 import Image from "next/image";
 
@@ -54,12 +54,12 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, [isAdmin, userEmail]); 
+  }, [isAdmin, userEmail]);
 
   const handleNotificationClick = async () => {
     const nextState = !isOpen;
     setIsOpen(nextState);
-    
+
     if (nextState === true && unreadCount > 0) {
       let res;
       if (isAdmin) {
