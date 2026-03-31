@@ -77,12 +77,13 @@ export default function SuccessStories() {
         </div>
 
         {/* CTA - Consistent Button Style */}
-        <div className="mt-20 text-center">
+        
+        {/* <div className="mt-20 text-center">
             <button className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500">
                 <span className="z-10 relative">READ ALL STORIES</span>
                 <div className="top-0 -left-full group-hover:left-full absolute bg-gradient-to-r from-transparent via-white/10 to-transparent w-full h-full transition-all duration-1000"></div>
             </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

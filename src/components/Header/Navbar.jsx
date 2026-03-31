@@ -21,7 +21,6 @@ import Logo from "./Logo";
 import Image from "next/image";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { useCartStore } from "@/lib/useCartStore";
-//  getUserNotifications ইম্পোর্ট করা হলো
 import {
   getAdminNotifications,
   getUserNotifications,
