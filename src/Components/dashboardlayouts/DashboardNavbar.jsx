@@ -17,8 +17,9 @@ import { useSession } from "next-auth/react";
 
 import {
   getAdminNotifications,
+  getDoctorNotifications,
   getUserNotifications,
-  markNotificationsAsRead
+  markNotificationsAsRead,
 } from "@/action/server/notifications";
 import Image from "next/image";
 
@@ -32,7 +33,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
   const isAdmin = session?.user?.role === "admin";
   const userEmail = session?.user?.email;
-
+  const isDoctor = session?.user?.role === "doctor";
   useEffect(() => {
     setIsMounted(true);
 
@@ -40,6 +41,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
       let res;
       if (isAdmin) {
         res = await getAdminNotifications();
+      } else if (isDoctor) {
+        res = await getDoctorNotifications();
       } else if (userEmail) {
         res = await getUserNotifications(userEmail);
       }
@@ -54,7 +57,7 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, [isAdmin, userEmail]);
+  }, [isAdmin, userEmail, isDoctor]);
 
   const handleNotificationClick = async () => {
     const nextState = !isOpen;
@@ -64,6 +67,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
       let res;
       if (isAdmin) {
         res = await markNotificationsAsRead("admin", null);
+      } else if (isDoctor) {
+        res = await markNotificationsAsRead("doctor", null);
       } else if (userEmail) {
         res = await markNotificationsAsRead(null, userEmail);
       }
@@ -76,16 +81,31 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
   const getIconDetails = (type) => {
     switch (type) {
-      case 'adoption':
-        return { icon: <Heart size={16} className="text-rose-500" />, bg: "bg-rose-50" };
-      case 'order':
-        return { icon: <Package size={16} className="text-orange-500" />, bg: "bg-orange-50" };
-      case 'user_reg':
-        return { icon: <UserPlus size={16} className="text-blue-500" />, bg: "bg-blue-50" };
-      case 'alert':
-        return { icon: <AlertCircle size={16} className="text-amber-500" />, bg: "bg-amber-50" };
+      case "adoption":
+        return {
+          icon: <Heart size={16} className="text-rose-500" />,
+          bg: "bg-rose-50",
+        };
+      case "order":
+        return {
+          icon: <Package size={16} className="text-orange-500" />,
+          bg: "bg-orange-50",
+        };
+      case "user_reg":
+        return {
+          icon: <UserPlus size={16} className="text-blue-500" />,
+          bg: "bg-blue-50",
+        };
+      case "alert":
+        return {
+          icon: <AlertCircle size={16} className="text-amber-500" />,
+          bg: "bg-amber-50",
+        };
       default:
-        return { icon: <Check size={16} className="text-emerald-500" />, bg: "bg-emerald-50" };
+        return {
+          icon: <Check size={16} className="text-emerald-500" />,
+          bg: "bg-emerald-50",
+        };
     }
   };
 
@@ -106,7 +126,9 @@ const DashboardNavbar = ({ isCollapsed }) => {
           <div className="bg-slate-100 rounded-md w-48 h-6 animate-pulse"></div>
         </div>
         <div className="flex items-center gap-5">
-          <div className="p-2.5 text-slate-200"><Bell size={22} /></div>
+          <div className="p-2.5 text-slate-200">
+            <Bell size={22} />
+          </div>
           <div className="bg-slate-50 rounded-2xl w-10 h-10 animate-pulse"></div>
         </div>
       </nav>
@@ -118,7 +140,10 @@ const DashboardNavbar = ({ isCollapsed }) => {
       {/* LEFT SIDE: Title */}
       <div className="flex items-center gap-4">
         <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl italic uppercase tracking-tight transition-opacity">
-          Dashboard <span className="text-orange-500">{isAdmin ? "Overview" : "User Portal"}</span>
+          Dashboard{" "}
+          <span className="text-orange-500">
+            {isAdmin ? "Overview" : isDoctor? "Doctor Portal": "User Portal  "}
+          </span>
         </h1>
       </div>
 
@@ -127,10 +152,11 @@ const DashboardNavbar = ({ isCollapsed }) => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationClick}
-            className={`relative rounded-2xl p-2.5 transition-all duration-300 ${isOpen
-              ? "bg-orange-50 text-orange-600 shadow-inner"
-              : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
-              }`}
+            className={`relative rounded-2xl p-2.5 transition-all duration-300 ${
+              isOpen
+                ? "bg-orange-50 text-orange-600 shadow-inner"
+                : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
+            }`}
           >
             <Bell size={22} strokeWidth={2.5} />
             {unreadCount > 0 && (
@@ -169,7 +195,9 @@ const DashboardNavbar = ({ isCollapsed }) => {
                           key={notif._id}
                           className={`relative flex cursor-pointer gap-4 border-b border-slate-50 p-5 transition-colors hover:bg-slate-50 last:border-0 ${!notif.isRead ? "bg-orange-50/10" : ""}`}
                         >
-                          <div className={`${bg} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm`}>
+                          <div
+                            className={`${bg} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm`}
+                          >
                             {icon}
                           </div>
                           <div className="flex-1">
@@ -193,13 +221,19 @@ const DashboardNavbar = ({ isCollapsed }) => {
                     })
                   ) : (
                     <div className="py-12 text-center">
-                      <p className="font-bold text-[10px] text-slate-400 italic uppercase tracking-[0.2em]">All caught up!</p>
+                      <p className="font-bold text-[10px] text-slate-400 italic uppercase tracking-[0.2em]">
+                        All caught up!
+                      </p>
                     </div>
                   )}
                 </div>
 
                 <Link
-                  href={isAdmin ? "/admin/notifications" : "/dashboard/notifications"}
+                  href={
+                    isAdmin
+                      ? "/admin/notifications"
+                      : "/dashboard/notifications"
+                  }
                   onClick={() => setIsOpen(false)}
                   className="flex justify-center items-center gap-2 bg-slate-50 hover:bg-orange-500 p-5 border-slate-100 border-t font-black text-[10px] text-slate-500 hover:text-white text-center uppercase tracking-[0.2em] transition-all"
                 >
