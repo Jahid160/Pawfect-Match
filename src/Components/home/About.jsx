@@ -8,6 +8,7 @@ import {
     ShoppingBag, Award, Target, Globe, CheckCircle2, Activity, ArrowRight
 } from 'lucide-react';
 import Newsletter from './Newsletter';
+import Link from 'next/link';
 
 const About = () => {
     const [mounted, setMounted] = useState(false);
@@ -50,13 +51,17 @@ const About = () => {
                                     whileTap={{ scale: 0.95 }}
                                     className="bg-orange-600 hover:bg-orange-500 shadow-2xl shadow-orange-600/20 px-12 py-6 rounded-[2rem] font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all"
                                 >
-                                    Start Your Journey
+                                    <Link className="text-white cursor-pointer " href="all-pets">
+                                        Start Your Journey
+                                    </Link>
                                 </motion.button>
                                 <motion.button
                                     whileHover={{ scale: 1.05, y: -5 }}
                                     className="bg-white shadow-sm px-12 py-6 border-2 border-slate-200 hover:border-orange-500 rounded-[2rem] font-black text-[11px] text-slate-700 uppercase tracking-[0.2em] transition-all"
                                 >
-                                    Contact Support
+                                    <Link className="text-slate-700 cursor-pointer" href="/contact">
+                                        Contact Support
+                                    </Link>
                                 </motion.button>
                             </div>
                         </motion.div>
@@ -172,7 +177,7 @@ const About = () => {
                             </div>
                             <h3 className="mb-6 font-black text-3xl tracking-tight transition-colors">{item.title}</h3>
                             <p className="font-medium text-slate-500 text-lg leading-relaxed">{item.desc}</p>
-                            
+
                             <div className="opacity-0 group-hover:opacity-100 mt-10 transition-opacity">
                                 <span className="inline-flex items-center gap-2 font-black text-[10px] text-orange-600 uppercase tracking-widest">
                                     Explore more <ArrowRight size={14} />
@@ -239,7 +244,7 @@ const About = () => {
                             {
                                 title: "Smart Management",
                                 desc: "Advanced Admin Dashboard for tracking health records and adoption status.",
-                                icon: <Activity className="w-9 h-9" />, 
+                                icon: <Activity className="w-9 h-9" />,
                                 color: "bg-emerald-50 text-emerald-600"
                             },
                             {

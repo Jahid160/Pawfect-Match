@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaQuestionCircle, FaDog, FaShieldAlt, FaHandHoldingHeart, FaPlus, FaMinus, FaSearch } from 'react-icons/fa';
 
@@ -8,7 +9,7 @@ const faqs = [
   {
     category: "Adoption Process",
     icon: <FaHandHoldingHeart />,
-    cardBg: "bg-secondary/20", 
+    cardBg: "bg-secondary/20",
     iconColor: "text-primary",
     questions: [
       { q: "How does the matching process work?", a: "We use a personality-driven algorithm that considers your lifestyle, activity level, and home environment." },
@@ -49,19 +50,19 @@ const FAQPage = () => {
   return (
     <section className="bg-base-100 selection:bg-primary/20 py-32 min-h-screen overflow-hidden">
       <div className="mx-auto px-6 max-w-7xl">
-        
+
         {/* Header & Search */}
         <div className="flex lg:flex-row flex-col justify-between items-start gap-12 mb-24">
           <div className="max-w-3xl">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="inline-flex items-center gap-2 bg-primary/10 mb-8 px-5 py-2.5 rounded-full font-black text-[10px] text-primary tracking-[0.2em]"
             >
               <FaQuestionCircle /> HELP CENTER
             </motion.div>
-            
-            <motion.h2 
+
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-8 font-black text-neutral text-5xl md:text-7xl leading-[0.95] tracking-tighter"
@@ -74,16 +75,6 @@ const FAQPage = () => {
               Adopting a pet is a big decision. We've laid out everything you need to know to make the transition smooth.
             </p>
           </div>
-
-          {/* Quick Search Support */}
-          <div className="group relative w-full lg:w-96">
-            <input 
-              type="text" 
-              placeholder="Search help topics..."
-              className="bg-base-200 focus:bg-white shadow-neutral/5 shadow-xl py-5 pr-6 pl-14 border-2 border-transparent focus:border-primary rounded-3xl focus:outline-none w-full font-bold transition-all"
-            />
-            <FaSearch className="top-1/2 left-6 absolute text-neutral/30 -translate-y-1/2" />
-          </div>
         </div>
 
         {/* FAQ Categories & Accordions */}
@@ -92,7 +83,7 @@ const FAQPage = () => {
             <div key={groupIdx} className="flex flex-col">
               <div className={`flex items-center gap-5 mb-10 p-6 rounded-[2.5rem] ${group.cardBg}`}>
                 <span className={`bg-base-100 shadow-xl p-4 rounded-2xl text-3xl ${group.iconColor}`}>
-                    {group.icon}
+                  {group.icon}
                 </span>
                 <h3 className="font-black text-neutral/90 text-xl uppercase tracking-tighter">
                   {group.category}
@@ -103,10 +94,10 @@ const FAQPage = () => {
                 {group.questions.map((item, i) => {
                   const id = `${groupIdx}-${i}`;
                   const isOpen = activeId === id;
-                  
+
                   return (
                     <div key={i} className={`group border-b border-neutral/5 transition-all ${isOpen ? 'pb-6' : 'pb-4'}`}>
-                      <button 
+                      <button
                         onClick={() => toggleAccordion(id)}
                         className="flex justify-between items-center gap-4 w-full text-left"
                       >
@@ -117,7 +108,7 @@ const FAQPage = () => {
                           {isOpen ? <FaMinus size={10} /> : <FaPlus size={10} />}
                         </span>
                       </button>
-                      
+
                       <AnimatePresence>
                         {isOpen && (
                           <motion.div
@@ -141,7 +132,7 @@ const FAQPage = () => {
         </div>
 
         {/* Final CTA Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -149,7 +140,7 @@ const FAQPage = () => {
         >
           {/* Animated Glow */}
           <div className="top-0 right-0 absolute bg-primary/20 group-hover:bg-primary/30 blur-[120px] rounded-full w-[500px] h-[500px] transition-colors -translate-y-1/2 translate-x-1/2 duration-700" />
-          
+
           <div className="z-10 relative flex lg:flex-row flex-col justify-between items-center gap-16">
             <div className="lg:text-left text-center">
               <h3 className="mb-6 font-black text-white text-5xl md:text-7xl leading-none tracking-tighter">Still curious?</h3>
@@ -158,12 +149,9 @@ const FAQPage = () => {
               </p>
             </div>
             <div className="flex sm:flex-row flex-col gap-4">
-                <button className="bg-primary hover:bg-white shadow-2xl shadow-primary/20 px-12 border-none rounded-[2rem] h-20 font-black text-white hover:text-neutral active:scale-95 transition-all btn-lg">
-                    CHAT WITH AN EXPERT
-                </button>
-                <button className="bg-white/5 hover:bg-white/10 px-10 border border-white/10 rounded-[2rem] h-20 font-black text-white active:scale-95 transition-all">
-                    EMAIL SUPPORT
-                </button>
+              <button onClick={() => window.location.href = "/contact"} className="bg-white/5 hover:bg-white/10 px-10 border border-white/10 rounded-[2rem] h-20 font-black text-white active:scale-95 transition-all">
+                EMAIL SUPPORT
+              </button>
             </div>
           </div>
         </motion.div>

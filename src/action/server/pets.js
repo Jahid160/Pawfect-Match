@@ -8,7 +8,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { verifyAuth } from "@/lib/verifyAuth";
 import { adminShelterAuth } from "@/lib/adminShelterAuth";
-import { createNotification } from "@/action/server/notifications"; 
+import { createNotification } from "@/action/server/notifications";
 
 const petCollectionPromise = dbConnect(collections.PETS);
 const EntryReqCollectionPromise = dbConnect(collections.ENTRYREQ);
@@ -55,7 +55,7 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
         status: 1,
         _id: 1,
         weight: 1,
-        gender: 1
+        gender: 1,
       })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -75,14 +75,17 @@ export const getEntriesPets = async ({ search, species, page, email }) => {
 export const updatePets = async (petId, updatedData, userEmail) => {
   try {
     const Petcollection = await petCollectionPromise;
-    const existingPet = await Petcollection.findOne({ _id: new ObjectId(petId) });
+    const existingPet = await Petcollection.findOne({
+      _id: new ObjectId(petId),
+    });
     if (!existingPet) return { success: false, message: "Pet not found" };
-    if (existingPet.email !== userEmail) return { success: false, message: "Unauthorized!" };
+    if (existingPet.email !== userEmail)
+      return { success: false, message: "Unauthorized!" };
 
     const { _id, ...dataToUpdate } = updatedData;
     const result = await Petcollection.updateOne(
       { _id: new ObjectId(petId) },
-      { $set: dataToUpdate }
+      { $set: dataToUpdate },
     );
     if (result.modifiedCount > 0) {
       revalidatePath("/");
@@ -99,7 +102,7 @@ export const deletePet = async (petId, userEmail) => {
     const Petcollection = await petCollectionPromise;
     const result = await Petcollection.deleteOne({
       _id: new ObjectId(petId),
-      email: userEmail
+      email: userEmail,
     });
     if (result.deletedCount > 0) {
       revalidatePath("/");
@@ -124,13 +127,13 @@ export const getAllPetsAction = async () => {
       image: pet.images[0],
       status: pet.status || "Available",
       adoptionCode: pet.adoptionCode,
-      adoptedUserEmail: pet.adoptedUserEmail, 
+      adoptedUserEmail: pet.adoptedUserEmail,
     }));
     return { success: true, data: formattedPets };
   } catch (error) {
     return { success: false, message: "Failed to fetch pets data.", data: [] };
   }
-}
+};
 
 export const getSinglePets = async (id) => {
   if (id?.length !== 24) return {};
@@ -189,13 +192,17 @@ export const DeletePets = async (id) => {
 };
 
 export const updatePet = async (id, updatedData) => {
-  try { await verifyAdmin(); } catch (error) { return { success: false, message: "Unauthorized!" }; }
+  try {
+    await verifyAdmin();
+  } catch (error) {
+    return { success: false, message: "Unauthorized!" };
+  }
   try {
     const Petcollection = await petCollectionPromise;
     const { _id, createdAt, ...dataToUpdate } = updatedData;
     await Petcollection.updateOne(
       { _id: new ObjectId(id) },
-      { $set: { ...dataToUpdate, updatedAt: new Date() } }
+      { $set: { ...dataToUpdate, updatedAt: new Date() } },
     );
     revalidatePath("/dashboard/manage-pets");
     return { success: true, message: "Updated successfully!" };
@@ -206,8 +213,12 @@ export const updatePet = async (id, updatedData) => {
 
 export const UpdatePetStatus = async (id, petName) => {
   let admin;
-  try { admin = await verifyAdmin(); } catch (error) { return { success: false, message: error.message }; }
-  
+  try {
+    admin = await verifyAdmin();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+
   try {
     const PetCollection = await petCollectionPromise;
     const adoptionCollection = await adoptionCollectionPromise;
@@ -219,12 +230,12 @@ export const UpdatePetStatus = async (id, petName) => {
 
     await adoptionCollection.updateOne(
       { petId: id },
-      { $set: { status: "approved", updatedTime: new Date() } }
+      { $set: { status: "approved", updatedTime: new Date() } },
     );
 
     const result = await PetCollection.updateOne(
       { _id: new ObjectId(id) },
-      { $set: { status: "adopted", updatedBy: admin.email } }
+      { $set: { status: "adopted", updatedBy: admin.email } },
     );
 
     if (result.modifiedCount > 0 && userEmail) {
@@ -232,7 +243,7 @@ export const UpdatePetStatus = async (id, petName) => {
         title: "Adoption Approved! 🎉",
         message: `Congratulations! Your request to adopt ${petName || petData.petName} has been approved.`,
         type: "adoption",
-        receiverEmail: userEmail, 
+        receiverEmail: userEmail,
       });
     }
 
@@ -244,8 +255,12 @@ export const UpdatePetStatus = async (id, petName) => {
 };
 
 export const UpdatePetStatusReject = async (id, adoptionCode, petName) => {
-  try { await verifyAdmin(); } catch (error) { return { success: false, message: error.message }; }
-  
+  try {
+    await verifyAdmin();
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+
   try {
     const PetCollection = await petCollectionPromise;
     const adoptionCollection = await adoptionCollectionPromise;
@@ -254,10 +269,10 @@ export const UpdatePetStatusReject = async (id, adoptionCode, petName) => {
 
     const result = await PetCollection.updateOne(
       { _id: new ObjectId(id) },
-      { 
+      {
         $set: { status: "available" },
-        $unset: { adoptedUserEmail: "", adoptionCode: "", updatedBy: "" }
-      }
+        $unset: { adoptedUserEmail: "", adoptionCode: "", updatedBy: "" },
+      },
     );
 
     if (result.modifiedCount > 0 && userEmail) {
@@ -276,7 +291,6 @@ export const UpdatePetStatusReject = async (id, adoptionCode, petName) => {
     return { success: false, error: error.message };
   }
 };
-
 
 export const ApprovePet = async (petId) => {
   const session = await getServerSession(authOptions);
@@ -301,18 +315,19 @@ export const ApprovePet = async (petId) => {
   }
 };
 
-
 export const getPetRequests = async () => {
   try {
     await verifyAdmin();
     const entryCollection = await EntryReqCollectionPromise;
     const pets = await entryCollection.find({ status: "preview" }).toArray();
-    return { success: true, data: pets.map(p => ({ ...p, _id: p._id.toString() })) };
+    return {
+      success: true,
+      data: pets.map((p) => ({ ...p, _id: p._id.toString() })),
+    };
   } catch (error) {
     return { success: false, message: error.message };
   }
 };
-
 
 export const RejectPet = async (petId) => {
   try {
@@ -325,13 +340,41 @@ export const RejectPet = async (petId) => {
   }
 };
 
-
 export const myEntryPets = async (email) => {
   try {
     const petCollection = await petCollectionPromise;
     const pets = await petCollection.find({ email: email }).toArray();
-    return { success: true, pets: pets.map(p => ({ ...p, _id: p._id.toString() })) };
+    return {
+      success: true,
+      pets: pets.map((p) => ({ ...p, _id: p._id.toString() })),
+    };
   } catch (error) {
     return { success: false, message: "Error" };
+  }
+};
+
+export const totalAdopted = async () => {
+  try {
+    const petCollection = await dbConnect(collections.PETS);
+
+    const adoptedCount = await petCollection.countDocuments({
+      status: "adopted",
+    });
+
+    return {
+      success: true,
+      data: {
+        adopted: adoptedCount,
+      },
+    };
+  } catch (error) {
+    console.error("stats error:", error);
+
+    return {
+      success: false,
+      data: {
+        adopted: 0,
+      },
+    };
   }
 };

@@ -1,28 +1,27 @@
 "use server";
 
 import { collections, dbConnect } from "@/lib/db";
-import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 
 export const getAdminNotifications = async () => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
-    
+
     const notifications = await notificationCollection
       .find({ receiverRole: "admin" })
       .sort({ createdAt: -1 })
       .limit(10)
       .toArray();
 
-    const unreadCount = await notificationCollection.countDocuments({ 
-      receiverRole: "admin", 
-      isRead: false 
+    const unreadCount = await notificationCollection.countDocuments({
+      receiverRole: "admin",
+      isRead: false
     });
 
     const formattedNotifications = notifications.map(notif => ({
-        ...notif,
-        _id: notif._id.toString(),
-        time: formatNotificationTime(notif.createdAt) 
+      ...notif,
+      _id: notif._id.toString(),
+      time: formatNotificationTime(notif.createdAt)
     }));
 
     return { success: true, notifications: formattedNotifications, unreadCount };
@@ -36,24 +35,24 @@ export const getAdminNotifications = async () => {
 export const getUserNotifications = async (userEmail) => {
   try {
     if (!userEmail) return { success: false, message: "User Email is required" };
-    
+
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
-    
+
     const notifications = await notificationCollection
-      .find({ receiverEmail: userEmail }) 
+      .find({ receiverEmail: userEmail })
       .sort({ createdAt: -1 })
       .limit(10)
       .toArray();
 
-    const unreadCount = await notificationCollection.countDocuments({ 
-      receiverEmail: userEmail, 
-      isRead: false 
+    const unreadCount = await notificationCollection.countDocuments({
+      receiverEmail: userEmail,
+      isRead: false
     });
 
     const formattedNotifications = notifications.map(notif => ({
-        ...notif,
-        _id: notif._id.toString(),
-        time: formatNotificationTime(notif.createdAt) 
+      ...notif,
+      _id: notif._id.toString(),
+      time: formatNotificationTime(notif.createdAt)
     }));
 
     return { success: true, notifications: formattedNotifications, unreadCount };
@@ -67,21 +66,21 @@ export const getUserNotifications = async (userEmail) => {
 export const createNotification = async ({ title, message, type, receiverRole, receiverEmail }) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
-    
+
     const newNotification = {
       title,
       message,
       type,
-      receiverRole: receiverRole || null, 
-      receiverEmail: receiverEmail || null, 
+      receiverRole: receiverRole || null,
+      receiverEmail: receiverEmail || null,
       isRead: false,
       createdAt: new Date(),
     };
-    
+
     const result = await notificationCollection.insertOne(newNotification);
-    
+
     revalidatePath("/dashboard");
-    
+
     return { success: true, id: result.insertedId.toString() };
   } catch (error) {
     console.error("Notification Creation Error:", error);
@@ -93,7 +92,7 @@ export const createNotification = async ({ title, message, type, receiverRole, r
 export const markNotificationsAsRead = async (role = null, userEmail = null) => {
   try {
     const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
-    
+
     let query = {};
     if (role) {
       query = { receiverRole: role, isRead: false };
@@ -107,7 +106,7 @@ export const markNotificationsAsRead = async (role = null, userEmail = null) => 
       query,
       { $set: { isRead: true } }
     );
-    
+
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
@@ -123,7 +122,7 @@ const formatNotificationTime = (date) => {
   if (diffInSeconds < 60) return "Just now";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  
+
   return new Date(date).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
