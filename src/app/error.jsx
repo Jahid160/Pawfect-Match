@@ -7,7 +7,6 @@ import { AlertCircle, ArrowLeft, RefreshCw, ShieldAlert } from "lucide-react";
 
 export default function Error({ error, reset }) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error("System Error Context:", error);
   }, [error]);
 
