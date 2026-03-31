@@ -66,7 +66,7 @@ export default function VaccineDetails({ params }) {
 
   if (loading)
     return (
-      <div className="h-screen flex items-center justify-center bg-[#FDF8F4]">
+      <div  id="vaccination" className="h-screen flex items-center justify-center bg-[#FDF8F4]">
         <div className="flex flex-col items-center gap-2">
           <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
