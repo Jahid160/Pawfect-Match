@@ -21,7 +21,7 @@ const PetAccessoriesPage = async () => {
 
   if (errorOccurred) {
     return (
-      <div className="flex flex-col justify-center items-center gap-4 bg-gray-50 min-h-screen">
+      <div id="accessories" className="flex flex-col justify-center items-center gap-4 bg-gray-50 min-h-screen">
         <div className="bg-red-100 p-6 rounded-full animate-bounce">
           <FaExclamationTriangle className="text-red-500 text-3xl" />
         </div>
