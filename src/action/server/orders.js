@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { verifyAdmin } from "@/lib/adminAuth";
 import { verifyAuth } from "@/lib/verifyAuth";
+import { createNotification } from "./notifications";
 
 // start of vaccine
 
@@ -40,8 +41,19 @@ export const placeVaccineOrder = async (data) => {
     };
     await ordersCollection.insertOne(newOrder);
 
+    // ! Create a notification for the Admin
+    await createNotification({
+      title: "New Vaccine Order",
+      message: `${session.user.name} has placed an order for ${data.vaccineName}.`,
+      type: "order",
+      receiverRole: "admin", // Targeted specifically for admin users
+      receiverEmail: null,
+    });
+
     revalidatePath("/dashboard/vaccinations");
     revalidatePath("/dashboard/doctor");
+    revalidatePath("/", "layout");
+
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -122,12 +134,27 @@ export const deleteVaccine = async (id) => {
 };
 
 export const completeVaccination = async (orderId) => {
+  await verifyAdmin();
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const order = await orderCollection.findOne({ _id: new ObjectId(orderId) });
+    if (!order) {
+      return { success: false, message: "Order not found" };
+    }
+
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
       { $set: { status: "Completing", isCompleted: true } },
     );
+
+    await createNotification({
+      title: "Vaccination Completed",
+      message: `Congratulations! Your vaccination for ${order.vaccineName} is now marked as completing.`,
+      type: "success",
+      receiverRole: "doctor",      
+      receiverEmail: null,
+      userEmail: order.userEmail,
+    });
 
     revalidatePath("/dashboard/vaccinations");
     revalidatePath("/dashboard/doctor");
