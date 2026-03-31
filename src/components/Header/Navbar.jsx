@@ -21,7 +21,12 @@ import Logo from "./Logo";
 import Image from "next/image";
 import { useAuthModal } from "@/provider/AuthModalProvider";
 import { useCartStore } from "@/lib/useCartStore";
-import { getAdminNotifications, markNotificationsAsRead } from "@/action/server/notifications";
+// ✅ getUserNotifications ইম্পোর্ট করা হলো
+import { 
+  getAdminNotifications, 
+  getUserNotifications, 
+  markNotificationsAsRead 
+} from "@/action/server/notifications";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -70,31 +75,44 @@ const Navbar = () => {
   const { data: session, status } = useSession();
   const user = session?.user;
   const isLoggedIn = status === "authenticated";
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const { openLoginModal } = useAuthModal();
   const userRole = user?.role;
+  const userEmail = user?.email;
 
   const cartCount = useCartStore((state) => state.cartCount);
 
   useEffect(() => {
-    if (isLoggedIn && userRole === "admin") {
+    if (isLoggedIn) {
       const fetchNotifs = async () => {
-        const res = await getAdminNotifications();
-        if (res.success) {
+        let res;
+        if (userRole === "admin") {
+          res = await getAdminNotifications();
+        } else if (userEmail) {
+          res = await getUserNotifications(userEmail);
+        }
+
+        if (res?.success) {
           setNotifications(res.notifications);
           setUnreadCount(res.unreadCount);
         }
       };
+
       fetchNotifs();
+      const interval = setInterval(fetchNotifs, 60000);
+      return () => clearInterval(interval);
     }
-  }, [isLoggedIn, userRole]);
+  }, [isLoggedIn, userRole, userEmail]);
 
   const handleNotifClick = async () => {
     setIsNotifOpen(!isNotifOpen);
     if (!isNotifOpen && unreadCount > 0) {
-      const res = await markNotificationsAsRead("admin");
-      if (res.success) setUnreadCount(0);
+      let res;
+      if (userRole === "admin") {
+        res = await markNotificationsAsRead("admin", null);
+      } else {
+        res = await markNotificationsAsRead(null, userEmail);
+      }
+      
+      if (res?.success) setUnreadCount(0);
     }
   };
 
@@ -122,7 +140,6 @@ const Navbar = () => {
       .filter((link) => !(link.subLinks === null && link.name === "Forms"));
   }, [isLoggedIn, userRole]);
 
-  // Effects
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -163,7 +180,6 @@ const Navbar = () => {
             <Logo />
           </div>
 
-          {/* Desktop Links */}
           <div className="hidden lg:flex items-center gap-1 h-full">
             {filteredNavLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -195,8 +211,7 @@ const Navbar = () => {
 
           <div className="flex items-center gap-2 sm:gap-4">
             
-            {/* --- Notification Icon (Desktop) --- */}
-            {isLoggedIn && userRole === "admin" && (
+            {isLoggedIn && (
               <div className="hidden sm:block relative" ref={notifRef}>
                 <button 
                   onClick={handleNotifClick}
@@ -213,38 +228,41 @@ const Navbar = () => {
                 <AnimatePresence>
                   {isNotifOpen && (
                     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 15 }} className="right-0 z-[120] absolute bg-white shadow-2xl mt-4 border border-slate-100 rounded-[2rem] w-80 overflow-hidden">
-                       <div className="p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">Recent Notifications</div>
-                       <div className="max-h-64 overflow-y-auto">
+                       <div className="flex justify-between p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">
+                        Recent Notifications
+                        {unreadCount > 0 && <span className="text-[10px] text-orange-500">{unreadCount} New</span>}
+                       </div>
+                       <div className="max-h-64 overflow-y-auto custom-scrollbar">
                         {notifications.length > 0 ? (
                           notifications.map(n => (
-                            <div key={n._id} className="hover:bg-slate-50 p-4 last:border-0 border-b transition-colors">
+                            <div key={n._id} className={`hover:bg-slate-50 p-4 last:border-0 border-b transition-colors ${!n.isRead ? "bg-orange-50/20" : ""}`}>
                               <p className="font-bold text-slate-800 text-xs">{n.title}</p>
-                              <p className="text-[10px] text-slate-500 line-clamp-1">{n.message}</p>
+                              <p className="text-[10px] text-slate-500 line-clamp-2">{n.message}</p>
+                              <p className="mt-1 font-bold text-[8px] text-slate-400 uppercase tracking-tighter">{n.time || "Recently"}</p>
                             </div>
                           ))
                         ) : (
                           <div className="p-8 text-slate-400 text-xs text-center italic">No new notifications</div>
                         )}
                        </div>
-                       <Link href="/dashboard" onClick={() => setIsNotifOpen(false)} className="block bg-slate-50 py-3 font-bold text-orange-500 text-xs text-center hover:underline">View Dashboard</Link>
+                       <Link 
+                        href="/dashboard" 
+                        onClick={() => setIsNotifOpen(false)} 
+                        className="block bg-slate-50 hover:bg-orange-50 py-3 font-bold text-orange-500 text-xs text-center uppercase tracking-widest transition-colors"
+                       >
+                        View All Activities
+                       </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             )}
 
-            {/* --- Cart Icon --- */}
             <Link href="/cart" className="relative flex justify-center items-center bg-slate-50 hover:bg-orange-50 border border-slate-100 rounded-full w-10 h-10 text-slate-700 transition-all">
               <ShoppingCart size={18} />
               <AnimatePresence>
                 {cartCount > 0 && (
-                  <motion.span
-                    key={cartCount}
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.5, opacity: 0 }}
-                    className="top-0 -right-1 absolute flex justify-center items-center bg-orange-500 px-1 border-2 border-white rounded-full min-w-[18px] h-[18px] font-black text-[10px] text-white"
-                  >
+                  <motion.span key={cartCount} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} className="top-0 -right-1 absolute flex justify-center items-center bg-orange-500 px-1 border-2 border-white rounded-full min-w-[18px] h-[18px] font-black text-[10px] text-white">
                     {cartCount}
                   </motion.span>
                 )}
@@ -298,7 +316,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* --- Mobile Sidebar --- */}
+        {/* Mobile Sidebar */}
         <AnimatePresence>
           {isMenuOpen && (
             <>
@@ -336,7 +354,6 @@ const Navbar = () => {
                 </div>
 
                 <div className="space-y-4 mt-auto pt-6 border-slate-100 border-t">
-                   {/* Mobile Cart Option */}
                    <Link href="/cart" onClick={handleLinkClick} className="flex justify-between items-center bg-slate-50 px-5 py-4 rounded-2xl font-bold text-slate-700">
                       <div className="flex items-center gap-3">
                         <ShoppingCart size={20} className="text-orange-500" />
