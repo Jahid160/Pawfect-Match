@@ -42,7 +42,7 @@ const Newsletter = () => {
                 </div>
                 <h2 className="mb-8 font-black text-white text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]">
                   Every tail has a <br />
-                  <span className="text-orange-200 italic">Success Story.</span>
+                  <span className="text-orange-200">Success Story.</span>
                 </h2>
                 <p className="opacity-90 max-w-lg font-medium text-orange-50 text-xl leading-relaxed">
                   Be the first to know about new rescues, expert pet care tips, and exclusive adoption events.

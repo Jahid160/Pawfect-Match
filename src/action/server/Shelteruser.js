@@ -8,19 +8,17 @@ import { shelterVerifyAuth } from "@/lib/shelterVerifyAuth";
 import { verifyAdmin } from "@/lib/adminAuth";
 import { adminShelterAuth } from "@/lib/adminShelterAuth";
 import { userVerifyAuth } from "@/lib/userVerifyAuth";
+import { createNotification } from "./notifications";
 
 
 const { dbConnect, collections } = require("@/lib/db");
 const shelterRequestsCollectionPromise = dbConnect(collections.SHELTER);
 const userCollectionPromise = dbConnect(collections.USERS);
-
 export const createShelterUser = async (data) => {
   const session = await getServerSession(authOptions);
-
   if (!session || !session.user) {
     return { success: false, message: "Unauthorized" };
   }
-
   await userVerifyAuth()
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
@@ -32,6 +30,13 @@ export const createShelterUser = async (data) => {
     };
 
     const result = await shelterRequestsCollection.insertOne(finalDataToSave);
+
+    await createNotification({
+      title: "New Shelter Application",
+      message: `${data.shelterName || "A user"} has applied for a shelter account.`,
+      type: "shelter_apply",
+      receiverRole: "admin",
+    });
 
     return {
       success: true,
@@ -70,7 +75,6 @@ export const getShelterRequests = async (
     }
 
     const totalItems = await shelterRequestsCollection.countDocuments(query);
-
     const mvpResult = await shelterRequestsCollection
       .aggregate([
         {
@@ -138,7 +142,6 @@ export const updateShelterStatus = async (id, email, newStatus) => {
   try {
     const shelterRequestsCollection = await shelterRequestsCollectionPromise;
     const userCollection = await userCollectionPromise;
-
     const result = await shelterRequestsCollection.updateOne(
       { _id: new ObjectId(id) },
       {
@@ -158,6 +161,14 @@ export const updateShelterStatus = async (id, email, newStatus) => {
         },
       },
     );
+
+    await createNotification({
+      title: "Shelter Status Updated",
+      message: `Your shelter application status is now: ${newStatus}.`,
+      type: "shelter_approved",
+      receiverEmail: email,
+      receiverRole: "shelter",
+    });
 
     if (result.matchedCount === 0 && shelterrole.matchedCount === 0) {
       return { success: false, message: "Request not found." };

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   ChevronDown,
@@ -19,12 +19,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import AuthButtons from "../button/AuthButtons";
 import Logo from "./Logo";
 import Image from "next/image";
-import { useAuthModal } from "@/provider/AuthModalProvider";
 import { useCartStore } from "@/lib/useCartStore";
-//  getUserNotifications ইম্পোর্ট করা হলো
+//  getUserNotifications 
 import {
   getAdminNotifications,
   getUserNotifications,
+  getShelterNotifications,
   markNotificationsAsRead
 } from "@/action/server/notifications";
 
@@ -86,6 +86,8 @@ const Navbar = () => {
         let res;
         if (userRole === "admin") {
           res = await getAdminNotifications();
+        } else if (userRole === "shelter") {
+          res = await getShelterNotifications(userEmail);
         } else if (userEmail) {
           res = await getUserNotifications(userEmail);
         }
@@ -104,10 +106,13 @@ const Navbar = () => {
 
   const handleNotifClick = async () => {
     setIsNotifOpen(!isNotifOpen);
+
     if (!isNotifOpen && unreadCount > 0) {
       let res;
       if (userRole === "admin") {
         res = await markNotificationsAsRead("admin", null);
+      } else if (userRole === "shelter") {
+        res = await markNotificationsAsRead("shelter", userEmail);
       } else {
         res = await markNotificationsAsRead(null, userEmail);
       }

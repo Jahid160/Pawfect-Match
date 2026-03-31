@@ -146,7 +146,7 @@ export const getSinglePets = async (id) => {
     try {
       const user = await verifyAuth();
       userId = user._id.toString();
-    } catch {}
+    } catch { }
 
     const savedBy = pet.savedBy || [];
     return {
@@ -162,6 +162,8 @@ export const getSinglePets = async (id) => {
   }
 };
 
+
+
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
   adminShelterAuth();
@@ -171,7 +173,16 @@ export const AddPets = async (petdata) => {
       ...petdata,
       status: "preview",
       email: session.user.email,
-    });
+    })
+    if (result.insertedId) {
+      await createNotification({
+        title: "New Pet Entry Request",
+        message: `${session.user.name} has submitted a new pet (${petdata.petName}) for approval.`,
+        type: "petAdd_req",
+        receiverRole: "admin",
+        receiverEmail: null,
+      });
+    }
     return { success: Boolean(result.insertedId) };
   } catch (error) {
     return { success: false, error: error.message };
@@ -295,22 +306,33 @@ export const UpdatePetStatusReject = async (id, adoptionCode, petName) => {
 export const ApprovePet = async (petId) => {
   const session = await getServerSession(authOptions);
   await verifyAdmin();
+
   try {
     const entryCollection = await EntryReqCollectionPromise;
     const petCollection = await petCollectionPromise;
     const petData = await entryCollection.findOne({ _id: new ObjectId(petId) });
     if (!petData) throw new Error("Pet not found");
     const { _id, ...rest } = petData;
-    await petCollection.insertOne({
+    const result = await petCollection.insertOne({
       ...rest,
       status: "available",
       approvedBy: session.user.email,
       approvedAt: new Date(),
     });
+    if (result.insertedId) {
+      await createNotification({
+        title: "Pet Approved! 🐾",
+        message: `Great news! Your pet entry "${petData.petName}" has been approved and is now live.`,
+        type: "Pet_approved",
+        receiverRole: "shelter",
+        receiverEmail: petData.email,
+      });
+    }
     await entryCollection.deleteOne({ _id: new ObjectId(petId) });
     revalidatePath("/dashboard/manage-pets");
     return { success: true };
   } catch (error) {
+    console.error("Approve Pet Error:", error);
     return { success: false, error: error.message };
   }
 };
