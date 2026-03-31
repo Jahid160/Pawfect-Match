@@ -139,7 +139,7 @@ const DoctorProfile = () => {
   );
 };
 
-// সাব-কম্পোনেন্ট: ইনফো আইটেম
+
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-4 group">
     <div className="bg-slate-50 p-4 rounded-2xl text-slate-400 group-hover:bg-orange-50 group-hover:text-orange-500 transition-all duration-300">
