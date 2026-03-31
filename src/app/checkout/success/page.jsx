@@ -66,11 +66,11 @@ const CheckoutSuccessPage = async ({ searchParams }) => {
 
         <div className="flex md:flex-row flex-col justify-center items-center gap-4">
           <Link
-            href="/pet-food"
+            href="/"
             className="inline-flex justify-center items-center gap-3 bg-primary hover:bg-orange-600 shadow-orange-100 shadow-xl px-8 py-5 rounded-2xl w-full md:w-auto font-black text-white active:scale-95 transition-all"
           >
             <FaShoppingBag />
-            Continue Shopping
+            Back Home
           </Link>
           
           <Link
