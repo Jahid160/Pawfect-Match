@@ -25,7 +25,7 @@ export default function SuccessStories() {
           </div>
           <h2 className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]">
             Stories that make <br />
-            <span className="text-orange-500 italic">us wag our tails.</span>
+            <span className="text-orange-500">us wag our tails.</span>
           </h2>
         </div>
 

@@ -148,6 +148,14 @@ export const completeVaccination = async (orderId) => {
     );
 
     await createNotification({
+        title: "Order Accepted",
+        message: `Your order for ${order.vaccineName} has been accepted.`,
+        type: "success",
+        receiverRole: null,
+        receiverEmail: order.userEmail, 
+      });
+
+    await createNotification({
       title: "Vaccination Completed",
       message: `Congratulations! Your vaccination for ${order.vaccineName} is now marked as completing.`,
       type: "success",

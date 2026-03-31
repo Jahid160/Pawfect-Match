@@ -5,6 +5,7 @@ import { doctorAuth } from "@/lib/doctorAuth";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
+import { createNotification } from "../server/notifications";
 
 export const getCompletedOrdersHistory = async () => {
   await doctorAuth();
@@ -51,7 +52,11 @@ export const completedOrder = async (orderId) => {
 
   try {
     const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const order = await orderCollection.findOne({ _id: new ObjectId(orderId) });
 
+    if (!order) {
+      return { success: false, message: "Order not found" };
+    }
     const result = await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
       {
@@ -65,6 +70,16 @@ export const completedOrder = async (orderId) => {
     );
 
     if (result.modifiedCount > 0) {
+      //  Create a notification for the specific User
+      await createNotification({
+        title: "Vaccination Completed",
+        message: `Dr. ${session.user.name} has completed your ${order.vaccineName} vaccination.`,
+        type: "success",           
+        receiverRole: null,    
+        receiverEmail: order.userEmail,
+      });
+
+
       revalidatePath("/dashboard/appointments");
       revalidatePath("/dashboard/doctor");
       return { success: true };

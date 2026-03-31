@@ -62,6 +62,30 @@ export const getUserNotifications = async (userEmail) => {
   }
 };
 
+export const getDoctorNotifications = async () => {
+  try {
+    const notificationCollection = await dbConnect(collections.NOTIFICATIONS);
+
+    const notifications = await notificationCollection
+      .find({ receiverRole: "doctor" })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
+
+    const unreadCount = await notificationCollection.countDocuments({
+      receiverRole: "doctor",
+      isRead: false
+    });
+
+    return { 
+      success: true, 
+      notifications: notifications.map(n => ({ ...n, _id: n._id.toString(), time: formatNotificationTime(n.createdAt) })), 
+      unreadCount 
+    };
+  } catch (error) {
+    return { success: false };
+  }
+};
 
 export const createNotification = async ({ title, message, type, receiverRole, receiverEmail,userEmail }) => {
   try {
