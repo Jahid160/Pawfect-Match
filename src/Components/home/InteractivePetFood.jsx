@@ -88,7 +88,7 @@ const InteractivePetFood = () => {
               className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Premium Food <br />
-              <span className="text-orange-500 italic">For All Pets</span>
+              <span className="text-orange-500">For All Pets</span>
             </motion.h2>
 
             <motion.p 
