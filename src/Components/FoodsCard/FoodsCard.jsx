@@ -12,10 +12,10 @@ import {
   FaStar,
   FaTag,
   FaWeightHanging,
-  FaLeaf,
   FaSearch,
   FaFilter,
   FaChevronLeft,
+  FaLeaf,
 } from "react-icons/fa";
 import { ChevronDown } from "lucide-react";
 import { addToCart } from "@/action/server/cart";
@@ -55,7 +55,6 @@ export const FoodCard = ({ food }) => {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-
     if (!session?.user?.email) {
       openLoginModal();
       return;
@@ -88,9 +87,9 @@ export const FoodCard = ({ food }) => {
     <motion.div
       variants={cardVariants}
       layout
-      className="group relative flex flex-col bg-white shadow-sm hover:shadow-2xl border border-gray-200 rounded-3xl overflow-hidden transition-all hover:-translate-y-1 duration-300"
+      className="group relative flex flex-col bg-white shadow-sm hover:shadow-2xl border border-gray-100 rounded-3xl overflow-hidden transition-all duration-300"
     >
-      <div className="relative bg-gradient-to-br from-orange-50 via-white to-yellow-50 w-full h-64 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-orange-50 via-white to-yellow-50 w-full h-56 sm:h-64 overflow-hidden">
         <Image
           src={food.image || "https://placehold.co/600x400?text=Pet+Food"}
           alt={food.productName || "Product"}
@@ -101,16 +100,16 @@ export const FoodCard = ({ food }) => {
           }`}
         />
 
-        <div className="top-4 left-4 z-10 absolute flex flex-col gap-2">
+        <div className="top-3 sm:top-4 left-3 sm:left-4 z-10 absolute flex flex-col gap-2">
           {hasDiscount && (
-            <span className="flex items-center gap-1 bg-red-500 shadow-lg px-3 py-1 rounded-full font-bold text-[10px] text-white uppercase tracking-wide">
+            <span className="flex items-center gap-1 bg-red-500 shadow-lg px-2 sm:px-3 py-1 rounded-full font-bold text-[9px] text-white sm:text-[10px] uppercase tracking-wide">
               <FaTag size={8} /> {discountPercent}% Off
             </span>
           )}
         </div>
 
         {isOutOfStock && (
-          <div className="z-10 absolute inset-0 flex justify-center items-center bg-black/15 backdrop-blur-[2px]">
+          <div className="z-10 absolute inset-0 flex justify-center items-center bg-black/10 backdrop-blur-[1px]">
             <span className="flex items-center gap-2 bg-black/80 px-4 py-2 rounded-xl font-bold text-[10px] text-white uppercase tracking-wider">
               <FaBan /> Out of Stock
             </span>
@@ -121,39 +120,38 @@ export const FoodCard = ({ food }) => {
           <button
             onClick={handleAddToCart}
             disabled={isPending}
-            className="right-4 bottom-4 z-20 absolute flex justify-center items-center bg-orange-500 hover:bg-gray-900 opacity-0 disabled:opacity-50 group-hover:opacity-100 shadow-lg rounded-full w-12 h-12 text-white hover:scale-110 transition-all translate-y-3 group-hover:translate-y-0 duration-300"
+            className="right-4 bottom-4 z-20 absolute flex justify-center items-center bg-orange-500 hover:bg-gray-900 md:group-hover:opacity-100 md:opacity-0 disabled:opacity-50 shadow-lg rounded-full w-10 sm:w-12 h-10 sm:h-12 text-white hover:scale-110 transition-all md:group-hover:translate-y-0 md:translate-y-3 duration-300"
           >
             {isPending ? (
               <span className="loading loading-spinner loading-xs"></span>
             ) : (
-              <FaShoppingCart size={18} />
+              <FaShoppingCart size={16} />
             )}
           </button>
         )}
       </div>
 
-      <div className="flex flex-col flex-1 p-5">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-[10px] text-orange-500 uppercase tracking-[0.2em]">
+      <div className="flex flex-col flex-1 p-4 sm:p-5">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="font-bold text-[9px] text-orange-500 sm:text-[10px] uppercase tracking-[0.15em]">
             {food.brand || "Premium Food"}
           </span>
-          <div className="flex items-center gap-1 text-amber-500 text-xs">
+          <div className="flex items-center gap-1 text-[10px] text-amber-500 sm:text-xs">
             <FaStar />
             <span className="font-semibold text-gray-700">4.8</span>
           </div>
         </div>
 
         <Link href={`/pet-food/${foodId}`}>
-          <h3 className="mb-2 min-h-[48px] font-extrabold text-gray-900 hover:text-orange-500 text-lg line-clamp-2 leading-tight transition-colors cursor-pointer">
+          <h3 className="mb-2 min-h-[40px] sm:min-h-[48px] font-extrabold text-gray-900 hover:text-orange-500 text-base sm:text-lg line-clamp-2 leading-tight transition-colors">
             {food.productName}
           </h3>
         </Link>
 
-        <div className="flex items-center gap-3 mb-4 font-bold text-[11px] text-gray-500 uppercase tracking-wider">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 font-bold text-[10px] text-gray-500 sm:text-[11px] uppercase tracking-wider">
           <span className="flex items-center gap-1">
             <FaWeightHanging className="text-orange-400" />
-            {food.weight}
-            {food.weightUnit}
+            {food.weight}{food.weightUnit}
           </span>
           <span className="bg-gray-300 rounded-full w-1 h-1"></span>
           <span className="flex items-center gap-1 uppercase">
@@ -161,19 +159,19 @@ export const FoodCard = ({ food }) => {
           </span>
         </div>
 
-        <div className="flex justify-between items-end gap-3 mt-auto pt-4 border-gray-100 border-t">
+        <div className="flex justify-between items-end gap-2 mt-auto pt-4 border-gray-100 border-t">
           <div className="flex flex-col">
             {hasDiscount ? (
               <>
-                <span className="font-medium text-[10px] text-gray-400 line-through">
+                <span className="font-medium text-[9px] text-gray-400 sm:text-[10px] line-through">
                   ${food.price}
                 </span>
-                <span className="font-black text-red-500 text-xl leading-none tracking-tight">
+                <span className="font-black text-red-500 text-lg sm:text-xl leading-none">
                   ${food.discountPrice}
                 </span>
               </>
             ) : (
-              <span className="font-black text-gray-900 text-xl leading-none tracking-tight">
+              <span className="font-black text-gray-900 text-lg sm:text-xl leading-none">
                 ${food.price || 0}
               </span>
             )}
@@ -181,7 +179,7 @@ export const FoodCard = ({ food }) => {
 
           <Link
             href={`/pet-food/${foodId}`}
-            className="inline-flex items-center gap-2 bg-gray-100 hover:bg-orange-500 px-4 py-2.5 rounded-xl font-bold text-[10px] text-gray-600 hover:text-white uppercase tracking-wider transition-all"
+            className="inline-flex items-center gap-1 sm:gap-2 bg-gray-100 hover:bg-orange-500 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-[9px] text-gray-600 sm:text-[10px] hover:text-white uppercase tracking-wider transition-all"
           >
             Details <FaChevronRight size={8} />
           </Link>
@@ -200,318 +198,154 @@ const PetFoods = ({ foods = [] }) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
 
   const dropdownRef = useRef(null);
-
   const FOODS_PER_PAGE = 12;
   const categories = ["All", "Dry Food", "Wet Food", "Treats", "Supplements"];
-  const sortOptions = [
-    "Recommended",
-    "Price: Low to High",
-    "Price: High to Low",
-    "Newest",
-  ];
+  const sortOptions = ["Recommended", "Price: Low to High", "Price: High to Low", "Newest"];
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsSortOpen(false);
-      }
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsSortOpen(false);
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const filteredFoods = useMemo(() => {
     let result = Array.isArray(foods) ? [...foods] : [];
-
     if (searchQuery) {
-      result = result.filter(
-        (item) =>
-          item.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.brand?.toLowerCase().includes(searchQuery.toLowerCase())
+      result = result.filter(f => 
+        f.productName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        f.brand?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-
     if (selectedCategory !== "All") {
-      result = result.filter(
-        (item) =>
-          item.foodType?.toLowerCase() === selectedCategory.toLowerCase()
-      );
+      result = result.filter(f => f.foodType?.toLowerCase() === selectedCategory.toLowerCase());
     }
-
-    if (sortBy === "Price: Low to High") {
-      result.sort(
-        (a, b) =>
-          Number(a.discountPrice || a.price || 0) -
-          Number(b.discountPrice || b.price || 0)
-      );
-    } else if (sortBy === "Price: High to Low") {
-      result.sort(
-        (a, b) =>
-          Number(b.discountPrice || b.price || 0) -
-          Number(a.discountPrice || a.price || 0)
-      );
-    } else if (sortBy === "Newest") {
-      result.reverse();
-    }
-
+    if (sortBy === "Price: Low to High") result.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+    else if (sortBy === "Price: High to Low") result.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+    else if (sortBy === "Newest") result.reverse();
     return result;
   }, [foods, searchQuery, selectedCategory, sortBy]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedCategory, sortBy]);
-
   const totalPages = Math.ceil(filteredFoods.length / FOODS_PER_PAGE);
-
-  const paginatedFoods = useMemo(() => {
-    const startIndex = (currentPage - 1) * FOODS_PER_PAGE;
-    const endIndex = startIndex + FOODS_PER_PAGE;
-    return filteredFoods.slice(startIndex, endIndex);
-  }, [filteredFoods, currentPage]);
-
-  const getPageNumbers = () => {
-    const pages = [];
-
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, "...", totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(
-          1,
-          "...",
-          totalPages - 3,
-          totalPages - 2,
-          totalPages - 1,
-          totalPages
-        );
-      } else {
-        pages.push(
-          1,
-          "...",
-          currentPage - 1,
-          currentPage,
-          currentPage + 1,
-          "...",
-          totalPages
-        );
-      }
-    }
-
-    return pages;
-  };
+  const paginatedFoods = filteredFoods.slice((currentPage - 1) * FOODS_PER_PAGE, currentPage * FOODS_PER_PAGE);
 
   return (
-    <section className="bg-gradient-to-b from-orange-50 via-white to-white px-4 sm:px-8 py-14 min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mx-auto mb-12 max-w-7xl"
-      >
-        <div className="inline-flex items-center gap-2 bg-orange-100 mb-6 px-4 py-2 rounded-full font-bold text-orange-600 text-xs uppercase tracking-[0.2em]">
-          <FaLeaf />
-          Premium Pet Nutrition
-        </div>
-
-        <div className="flex lg:flex-row flex-col lg:justify-between lg:items-end gap-4">
-          <div className="max-w-2xl">
-            <h2 className="font-black text-gray-900 text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight">
-              Shop <span className="text-orange-500">Healthy Food</span>  <br />
-              for Your Pets
-            </h2>
-            <p className="mt-4 max-w-xl text-gray-600 text-base leading-7">
-              Explore quality nutrition made to support your pet’s daily health.
-            </p>
+    <section className="bg-gradient-to-b from-orange-50 via-white to-white px-4 sm:px-6 lg:px-12 py-10 sm:py-20 min-h-screen">
+      <div className="mx-auto max-w-7xl">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 bg-orange-100 mb-4 sm:mb-6 px-4 py-2 rounded-full font-bold text-[10px] text-orange-600 sm:text-xs uppercase tracking-widest">
+            <FaLeaf /> Premium Pet Nutrition
           </div>
+          <h2 className="font-black text-gray-900 text-3xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight">
+            Shop <span className="text-orange-500">Healthy Food</span> <br className="hidden sm:block" /> for Your Pets
+          </h2>
+          <p className="mt-4 max-w-xl text-gray-600 text-sm sm:text-base leading-relaxed">
+            Explore quality nutrition made to support your pet’s daily health and vitality.
+          </p>
+        </motion.div>
 
-          {/* <div className="font-medium text-gray-500 text-sm">
-            Showing{" "}
-            <span className="font-bold text-gray-900">{filteredFoods.length}</span>{" "}
-            healthy options
-          </div> */}
-        </div>
-      </motion.div>
+        {/* Filters Wrapper */}
+        <div className="bg-white shadow-orange-100/30 shadow-xl mb-10 p-4 sm:p-6 border border-orange-50 rounded-3xl">
+          <div className="flex lg:flex-row flex-col gap-4">
+            <div className="relative flex-1">
+              <FaSearch className="top-1/2 left-4 absolute text-gray-400 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search food..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-gray-50 focus:bg-white py-3 sm:py-4 pr-4 pl-11 border border-gray-100 focus:border-orange-300 rounded-2xl outline-none w-full font-medium text-gray-700 text-xs sm:text-sm transition"
+              />
+            </div>
 
-      {/* Filters */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-white shadow-lg shadow-orange-100/40 mx-auto mb-12 p-5 border border-orange-100 rounded-3xl max-w-7xl"
-      >
-        <div className="flex xl:flex-row flex-col xl:justify-between xl:items-center gap-4">
-          <div className="relative w-full xl:max-w-md">
-            <FaSearch className="top-1/2 left-5 absolute text-gray-400 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search pet food..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-gray-50 focus:bg-white py-4 pr-4 pl-12 border border-gray-100 focus:border-orange-400 rounded-2xl outline-none w-full font-medium text-gray-700 text-sm transition"
-            />
-          </div>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`rounded-xl sm:rounded-full px-4 sm:px-5 py-2.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition ${
+                    selectedCategory === cat ? "bg-orange-500 text-white shadow-lg" : "bg-gray-100 text-gray-500 hover:bg-orange-50"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
+            <div className="relative" ref={dropdownRef}>
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`rounded-full px-5 py-3 text-[10px] font-bold uppercase tracking-wider transition ${
-                  selectedCategory === cat
-                    ? "bg-orange-500 text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-orange-100 hover:text-orange-600"
-                }`}
+                onClick={() => setIsSortOpen(!isSortOpen)}
+                className="flex justify-between items-center gap-3 bg-gray-900 px-5 py-3 rounded-2xl w-full lg:w-auto font-bold text-[10px] text-white uppercase tracking-widest transition-all"
               >
-                {cat}
+                <div className="flex items-center gap-2"><FaFilter size={10} /> {sortBy}</div>
+                <ChevronDown size={14} className={isSortOpen ? "rotate-180" : ""} />
+              </button>
+              <AnimatePresence>
+                {isSortOpen && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="right-0 z-50 absolute bg-white shadow-2xl mt-2 border border-gray-100 rounded-2xl w-full sm:w-52 overflow-hidden">
+                    {sortOptions.map(opt => (
+                      <button key={opt} onClick={() => { setSortBy(opt); setIsSortOpen(false); }} className="block hover:bg-orange-50 p-4 w-full font-bold text-gray-600 text-xs text-left uppercase transition-colors">{opt}</button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
+           <p className="font-bold text-[10px] text-gray-400 sm:text-xs uppercase tracking-widest">
+             Results: <span className="text-gray-900">{filteredFoods.length} items</span>
+           </p>
+        </div>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="gap-4 sm:gap-6 lg:gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
+          <AnimatePresence mode="popLayout">
+            {paginatedFoods.length > 0 ? (
+              paginatedFoods.map((food) => <FoodCard key={food._id} food={food} />)
+            ) : (
+              <motion.div className="col-span-full py-20 text-center">
+                <h3 className="font-bold text-gray-400 text-xl italic tracking-tighter">No items found matching your search.</h3>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-16">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="bg-white disabled:opacity-30 shadow-sm p-3 border border-gray-200 rounded-xl"
+            >
+              <FaChevronLeft size={12} />
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`h-10 w-10 rounded-xl font-bold text-xs transition ${currentPage === i + 1 ? "bg-orange-500 text-white" : "bg-white text-gray-500 border border-gray-200"}`}
+              >
+                {i + 1}
               </button>
             ))}
-          </div>
-
-          {/* Custom Sort Dropdown */}
-          <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center gap-3 bg-gray-900 hover:bg-orange-600 shadow-gray-200 shadow-lg px-5 py-3 rounded-2xl font-bold text-[10px] text-white uppercase tracking-widest active:scale-95 transition-all"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="bg-white disabled:opacity-30 shadow-sm p-3 border border-gray-200 rounded-xl"
             >
-              <FaFilter className={isSortOpen ? "animate-pulse" : ""} />
-              <span>Sort: {sortBy}</span>
-              <ChevronDown
-                size={14}
-                className={`transition-transform duration-300 ${
-                  isSortOpen ? "rotate-180" : ""
-                }`}
-              />
+              <FaChevronRight size={12} />
             </button>
-
-            <AnimatePresence>
-              {isSortOpen && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className="right-0 z-50 absolute bg-white shadow-2xl mt-3 border border-orange-50 rounded-2xl w-56 overflow-hidden origin-top-right"
-                >
-                  <div className="p-2">
-                    {sortOptions.map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => {
-                          setSortBy(opt);
-                          setIsSortOpen(false);
-                        }}
-                        className={`w-full rounded-xl px-4 py-3 text-left text-xs font-bold transition-all ${
-                          sortBy === opt
-                            ? "bg-orange-50 text-orange-600"
-                            : "text-gray-600 hover:bg-orange-50/50 hover:text-orange-500"
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
-        </div>
-      </motion.div>
-
-      <div className="flex justify-between items-center mx-auto mb-8 max-w-7xl">
-        <p className="font-semibold text-gray-500 text-sm">
-          Showing <span className="text-orange-500">{paginatedFoods.length}</span>{" "}
-          of <span className="text-gray-800">{filteredFoods.length}</span> food
-          items
-        </p>
-        {totalPages > 1 && (
-          <p className="font-semibold text-gray-500 text-sm">
-            Page <span className="text-gray-800">{currentPage}</span> of{" "}
-            <span className="text-gray-800">{totalPages}</span>
-          </p>
         )}
       </div>
-
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto max-w-7xl"
-      >
-        <AnimatePresence mode="popLayout">
-          {paginatedFoods.length > 0 ? (
-            paginatedFoods.map((food, index) => (
-              <FoodCard
-                key={food._id?.toString() || food.id || `food-${index}`}
-                food={food}
-              />
-            ))
-          ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="col-span-full bg-white py-20 border border-gray-300 border-dashed rounded-3xl text-center"
-            >
-              <h3 className="font-bold text-gray-800 text-xl">
-                No food items found
-              </h3>
-              <p className="mt-2 text-gray-500 text-sm">
-                Try adjusting your filters.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {filteredFoods.length > FOODS_PER_PAGE && (
-        <div className="flex flex-wrap justify-center items-center gap-3 mx-auto mt-14 max-w-7xl">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="flex items-center gap-2 bg-white disabled:opacity-50 shadow-sm px-5 py-3 border border-gray-200 hover:border-orange-200 rounded-2xl font-bold text-gray-600 hover:text-orange-500 text-sm transition disabled:cursor-not-allowed"
-          >
-            <FaChevronLeft size={12} />
-            Prev
-          </button>
-
-          {getPageNumbers().map((page, index) =>
-            page === "..." ? (
-              <span
-                key={`dots-${index}`}
-                className="px-2 font-bold text-gray-400 text-sm"
-              >
-                ...
-              </span>
-            ) : (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`h-11 min-w-[44px] rounded-2xl px-4 text-sm font-bold transition ${
-                  currentPage === page
-                    ? "bg-orange-500 text-white shadow-lg"
-                    : "border border-gray-200 bg-white text-gray-600 hover:border-orange-200 hover:text-orange-500"
-                }`}
-              >
-                {page}
-              </button>
-            )
-          )}
-
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-2 bg-white disabled:opacity-50 shadow-sm px-5 py-3 border border-gray-200 hover:border-orange-200 rounded-2xl font-bold text-gray-600 hover:text-orange-500 text-sm transition disabled:cursor-not-allowed"
-          >
-            Next
-            <FaChevronRight size={12} />
-          </button>
-        </div>
-      )}
     </section>
   );
 };
