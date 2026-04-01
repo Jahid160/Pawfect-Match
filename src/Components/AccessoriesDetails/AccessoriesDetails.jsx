@@ -185,7 +185,7 @@ const AccessoriesDetails = ({ item }) => {
                     </span>
                   )}
                   <div className="flex items-baseline gap-1">
-                    <span className="font-black text-gray-900 text-5xl tracking-tighter">${finalPrice}</span>
+                    <span className="font-black text-orange-500 text-5xl tracking-tighter">${finalPrice}</span>
                     <span className="font-bold text-gray-400 text-sm">USD</span>
                   </div>
                 </div>
