@@ -65,7 +65,7 @@ const FoodDetails = ({ food }) => {
     startTransition(async () => {
       const result = await addToCart({
         userEmail: session.user.email,
-        productId: food._id.toString(), // Unified key
+        productId: food._id.toString(),
         productName: food.productName,
         image: food.image,
         price: finalPrice,
@@ -73,7 +73,7 @@ const FoodDetails = ({ food }) => {
         brand: food.brand,
         weight: food.weight,
         weightUnit: food.weightUnit,
-        productType: "food", // Identified as food
+        productType: "food",
         inStock: !isOutOfStock,
       });
 
@@ -159,7 +159,7 @@ const FoodDetails = ({ food }) => {
                   <span className="font-bold text-gray-400 text-xl line-through">${food.price}</span>
                 </div>
               ) : (
-                <span className="font-black text-gray-900 text-5xl tracking-tighter">${food.price}</span>
+                <span className="font-black text-orange-500 text-5xl tracking-tighter">${food.price}</span>
               )}
             </div>
 
