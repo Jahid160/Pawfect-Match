@@ -39,7 +39,7 @@ const categories = [
 
 const PetCategories = () => {
   return (
-    <section className="bg-[#FDFCFB] py-32 overflow-hidden">
+    <section className="bg-[#FDFCFB] py-20 overflow-hidden">
       <div className="z-10 relative mx-auto px-6 lg:px-8 max-w-7xl">
 
         {/* --- SECTION HEADER --- */}

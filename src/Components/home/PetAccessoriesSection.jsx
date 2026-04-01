@@ -63,7 +63,7 @@ const PetAccessoriesSection = () => {
   };
 
   return (
-    <section className="relative bg-orange-50/30 mx-4 my-10 py-28 border border-orange-100 rounded-[4rem] overflow-hidden">
+    <section className="relative bg-orange-50/30 mx-4 my-20 py-24 border border-orange-100 rounded-[4rem] overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="-top-24 -right-24 absolute bg-orange-200/20 blur-[100px] rounded-full w-96 h-96 pointer-events-none"></div>
       <div className="bottom-0 left-0 absolute bg-orange-300/10 blur-[80px] rounded-full w-64 h-64 pointer-events-none"></div>

@@ -71,7 +71,7 @@ const heroSlides = [
 
 const Banner = () => {
   return (
-    <section className="relative bg-white w-full lg:h-[95vh] min-h-screen overflow-hidden">
+    <section className="relative bg-white py-16 lg:py-24 w-full lg:h-auto min-h-screen overflow-hidden">
       
       <Swiper
         spaceBetween={0}
@@ -89,7 +89,7 @@ const Banner = () => {
       >
         {heroSlides.map((slide) => (
           <SwiperSlide key={slide.id}>
-            <div className="flex lg:flex-row flex-col-reverse items-center gap-10 lg:gap-0 mx-auto px-6 lg:px-12 py-16 lg:py-0 w-full max-w-7xl h-full">
+            <div className="flex lg:flex-row flex-col-reverse items-center gap-10 lg:gap-16 mx-auto px-6 lg:px-12 w-full max-w-7xl h-full">
               
               {/* --- LEFT CONTENT --- */}
               <div className="z-20 flex flex-col flex-1 justify-center text-center lg:text-start">
@@ -102,7 +102,7 @@ const Banner = () => {
                 </div>
                 
                 <h1 
-                  className="mb-6 lg:mb-8 font-black text-slate-900 lg:text-[85px] text-4xl md:text-6xl leading-[1.1] lg:leading-[0.95] tracking-[-0.04em]"
+                  className="mb-6 lg:mb-8 font-black text-slate-900 lg:text-[80px] text-4xl md:text-6xl leading-[1.1] lg:leading-[0.95] tracking-[-0.04em]"
                   dangerouslySetInnerHTML={{ __html: slide.headline }}
                 />
                 
@@ -127,10 +127,10 @@ const Banner = () => {
                 </div>
               </div>
 
-              {/* --- RIGHT IMAGE (MOBILE OPTIMIZED) --- */}
-              <div className="relative flex flex-1 justify-center items-center w-full min-h-[320px] lg:min-h-[600px]">
-                <div className="group relative w-full max-w-[450px] lg:max-w-none lg:h-[600px] aspect-square">
-                    <div className="relative bg-white shadow-2xl border-[6px] border-slate-50 lg:border-[10px] rounded-[3rem] lg:rounded-[4.5rem] w-full h-full overflow-hidden">
+              {/* --- RIGHT IMAGE --- */}
+              <div className="relative flex flex-1 justify-center items-center w-full min-h-[350px] lg:min-h-[550px]">
+                <div className="group relative w-full max-w-[450px] lg:max-w-[550px] aspect-square">
+                    <div className="relative bg-white shadow-2xl border-[6px] border-slate-50 lg:border-[10px] rounded-[3.5rem] lg:rounded-[4.5rem] w-full h-full overflow-hidden">
                       <Image
                           src={slide.image}
                           alt="Pet"
@@ -145,7 +145,7 @@ const Banner = () => {
                         <div className="bg-orange-100 p-2 rounded-xl text-orange-600">
                           <Sparkles size={18} />
                         </div>
-                        <div>
+                        <div className="text-left">
                             <p className="font-black text-slate-900 text-xs lg:text-sm leading-none tracking-tight">{slide.stats}</p>
                             <p className="mt-1 font-bold text-[8px] text-slate-400 lg:text-[9px] uppercase tracking-[0.1em]">Happy Homes</p>
                         </div>
@@ -156,7 +156,7 @@ const Banner = () => {
                         <div className="bg-slate-900 shadow-lg p-2.5 lg:p-3.5 rounded-xl lg:rounded-2xl text-white">
                             {slide.icon}
                         </div>
-                        <div>
+                        <div className="text-left">
                             <p className="font-black text-slate-900 text-sm lg:text-base leading-none tracking-tight">Verified</p>
                             <p className="mt-1 font-bold text-[9px] text-orange-500 lg:text-[10px] uppercase tracking-[0.2em]">100% Healthy</p>
                         </div>
@@ -170,7 +170,7 @@ const Banner = () => {
       </Swiper>
 
       {/* Custom Pagination */}
-      <div className="right-0 bottom-6 lg:bottom-10 left-0 z-50 absolute flex justify-center items-center gap-2 pointer-events-none custom-pagination"></div>
+      <div className="right-0 bottom-4 lg:bottom-8 left-0 z-50 absolute flex justify-center items-center gap-2 pointer-events-none custom-pagination"></div>
 
       <style jsx global>{`
         .custom-pagination { pointer-events: auto; }

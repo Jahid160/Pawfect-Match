@@ -20,7 +20,6 @@ import AuthButtons from "../button/AuthButtons";
 import Logo from "./Logo";
 import Image from "next/image";
 import { useCartStore } from "@/lib/useCartStore";
-//  getUserNotifications 
 import {
   getAdminNotifications,
   getUserNotifications,
@@ -46,7 +45,7 @@ const navLinks = [
   },
   {
     name: "Forms",
-    href: "/",
+    href: "#",
     requiresAuth: true,
     subLinks: [
       { name: "Adoption Form", href: "/adoptionfrom", roles: ["user", "shelter", "admin"] },
@@ -106,7 +105,6 @@ const Navbar = () => {
 
   const handleNotifClick = async () => {
     setIsNotifOpen(!isNotifOpen);
-
     if (!isNotifOpen && unreadCount > 0) {
       let res;
       if (userRole === "admin") {
@@ -116,7 +114,6 @@ const Navbar = () => {
       } else {
         res = await markNotificationsAsRead(null, userEmail);
       }
-
       if (res?.success) setUnreadCount(0);
     }
   };
@@ -147,19 +144,15 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setIsNotifOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) setIsProfileOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target)) setIsNotifOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 0);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
     return () => {
@@ -187,7 +180,9 @@ const Navbar = () => {
 
           <div className="hidden lg:flex items-center gap-1 h-full">
             {filteredNavLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isSubActive = link.subLinks?.some(sub => pathname === sub.href);
+              const isActive = link.name === "Forms" ? isSubActive : pathname === link.href;
+
               return (
                 <div key={link.name} className="group relative flex items-center px-3 h-full">
                   {link.subLinks ? (
@@ -195,10 +190,10 @@ const Navbar = () => {
                       <div tabIndex={0} role="button" className={`flex items-center gap-1 text-sm font-bold hover:text-orange-500 transition-colors ${isActive ? "text-orange-500" : "text-slate-700"}`}>
                         {link.name} <ChevronDown size={14} className="group-hover:rotate-180 transition-transform" />
                       </div>
-                      <ul tabIndex={0} className="z-[110] bg-white shadow-2xl p-3 border border-slate-50 rounded-2xl w-52 dropdown-content menu">
+                      <ul tabIndex={0} className="z-[110] bg-white shadow-2xl p-3 border border-slate-50 rounded-2xl dropdown-content menu">
                         {link.subLinks.map((sub) => (
                           <li key={sub.name}>
-                            <Link href={sub.href} className="hover:bg-orange-50 py-2 rounded-xl font-medium hover:text-orange-600">{sub.name}</Link>
+                            <Link href={sub.href} className={`hover:bg-orange-50 py-2 rounded-xl font-medium ${pathname === sub.href ? "text-orange-600 bg-orange-50" : "text-slate-700 hover:text-orange-600"}`}>{sub.name}</Link>
                           </li>
                         ))}
                       </ul>
@@ -215,48 +210,26 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-
             {isLoggedIn && (
               <div className="hidden sm:block relative" ref={notifRef}>
-                <button
-                  onClick={handleNotifClick}
-                  className={`relative flex justify-center items-center rounded-full w-10 h-10 transition-all ${isNotifOpen ? "bg-orange-50 text-orange-500" : "bg-slate-50 text-slate-700 hover:bg-slate-100"}`}
-                >
+                <button onClick={handleNotifClick} className={`relative flex justify-center items-center rounded-full w-10 h-10 transition-all ${isNotifOpen ? "bg-orange-50 text-orange-500" : "bg-slate-50 text-slate-700 hover:bg-slate-100"}`}>
                   <Bell size={18} />
-                  {unreadCount > 0 && (
-                    <span className="top-0 -right-0.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">
-                      {unreadCount}
-                    </span>
-                  )}
+                  {unreadCount > 0 && <span className="top-0 -right-0.5 absolute flex justify-center items-center bg-rose-500 border-2 border-white rounded-full w-3.5 h-3.5 font-bold text-[8px] text-white">{unreadCount}</span>}
                 </button>
-
                 <AnimatePresence>
                   {isNotifOpen && (
                     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 15 }} className="right-0 z-[120] absolute bg-white shadow-2xl mt-4 border border-slate-100 rounded-[2rem] w-80 overflow-hidden">
-                      <div className="flex justify-between p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">
-                        Recent Notifications
-                        {unreadCount > 0 && <span className="text-[10px] text-orange-500">{unreadCount} New</span>}
-                      </div>
+                      <div className="flex justify-between p-4 border-b font-black text-slate-800 text-xs uppercase tracking-widest">Recent Notifications {unreadCount > 0 && <span className="text-[10px] text-orange-500">{unreadCount} New</span>}</div>
                       <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                        {notifications.length > 0 ? (
-                          notifications.map(n => (
-                            <div key={n._id} className={`hover:bg-slate-50 p-4 last:border-0 border-b transition-colors ${!n.isRead ? "bg-orange-50/20" : ""}`}>
-                              <p className="font-bold text-slate-800 text-xs">{n.title}</p>
-                              <p className="text-[10px] text-slate-500 line-clamp-2">{n.message}</p>
-                              <p className="mt-1 font-bold text-[8px] text-slate-400 uppercase tracking-tighter">{n.time || "Recently"}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-8 text-slate-400 text-xs text-center italic">No new notifications</div>
-                        )}
+                        {notifications.length > 0 ? notifications.map(n => (
+                          <div key={n._id} className={`hover:bg-slate-50 p-4 last:border-0 border-b transition-colors ${!n.isRead ? "bg-orange-50/20" : ""}`}>
+                            <p className="font-bold text-slate-800 text-xs">{n.title}</p>
+                            <p className="text-[10px] text-slate-500 line-clamp-2">{n.message}</p>
+                            <p className="mt-1 font-bold text-[8px] text-slate-400 uppercase tracking-tighter">{n.time || "Recently"}</p>
+                          </div>
+                        )) : <div className="p-8 text-slate-400 text-xs text-center italic">No new notifications</div>}
                       </div>
-                      <Link
-                        href="/dashboard"
-                        onClick={() => setIsNotifOpen(false)}
-                        className="block bg-slate-50 hover:bg-orange-50 py-3 font-bold text-orange-500 text-xs text-center uppercase tracking-widest transition-colors"
-                      >
-                        View All Activities
-                      </Link>
+                      <Link href="/dashboard" onClick={() => setIsNotifOpen(false)} className="block bg-slate-50 hover:bg-orange-50 py-3 font-bold text-orange-500 text-xs text-center uppercase tracking-widest transition-colors">View All Activities</Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -265,13 +238,7 @@ const Navbar = () => {
 
             <Link href="/cart" className="relative flex justify-center items-center bg-slate-50 hover:bg-orange-50 border border-slate-100 rounded-full w-10 h-10 text-slate-700 transition-all">
               <ShoppingCart size={18} />
-              <AnimatePresence>
-                {cartCount > 0 && (
-                  <motion.span key={cartCount} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} className="top-0 -right-1 absolute flex justify-center items-center bg-orange-500 px-1 border-2 border-white rounded-full min-w-[18px] h-[18px] font-black text-[10px] text-white">
-                    {cartCount}
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              <AnimatePresence>{cartCount > 0 && <motion.span key={cartCount} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} className="top-0 -right-1 absolute flex justify-center items-center bg-orange-500 px-1 border-2 border-white rounded-full min-w-[18px] h-[18px] font-black text-[10px] text-white">{cartCount}</motion.span>}</AnimatePresence>
             </Link>
 
             {isLoggedIn ? (
@@ -288,14 +255,11 @@ const Navbar = () => {
                     <p className="font-bold text-[9px] text-green-500 uppercase tracking-tighter">Active</p>
                   </div>
                 </button>
-
                 <AnimatePresence>
                   {isProfileOpen && (
                     <motion.div initial={{ opacity: 0, y: 15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 15, scale: 0.95 }} className="right-0 z-[120] absolute bg-white shadow-2xl mt-4 p-4 border border-slate-100 rounded-[2rem] w-64">
                       <div className="flex items-center gap-3 bg-slate-50 mb-3 p-3 rounded-[1.2rem]">
-                        <div className="flex justify-center items-center bg-orange-500 shadow-sm border-2 border-white rounded-full w-10 h-10 font-bold text-white text-sm">
-                          {user?.name?.charAt(0)}
-                        </div>
+                        <div className="flex justify-center items-center bg-orange-500 shadow-sm border-2 border-white rounded-full w-10 h-10 font-bold text-white text-sm">{user?.name?.charAt(0)}</div>
                         <div className="overflow-hidden">
                           <p className="font-bold text-slate-800 text-sm truncate">{user?.name}</p>
                           <p className="font-medium text-[10px] text-slate-400 truncate">{user?.email}</p>
@@ -311,9 +275,7 @@ const Navbar = () => {
                   )}
                 </AnimatePresence>
               </div>
-            ) : (
-              <AuthButtons />
-            )}
+            ) : <AuthButtons />}
 
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden bg-slate-900 p-2.5 rounded-xl text-white active:scale-95 transition-all">
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -331,7 +293,6 @@ const Navbar = () => {
                   <Logo />
                   <button onClick={() => setIsMenuOpen(false)} className="bg-slate-100 p-2 rounded-full text-slate-600"><X size={20} /></button>
                 </div>
-
                 <div className="flex-1 pr-2 overflow-y-auto custom-scrollbar">
                   {filteredNavLinks.map((link) => (
                     <div key={link.name} className="border-slate-50 last:border-0 border-b">
@@ -357,7 +318,6 @@ const Navbar = () => {
                     </div>
                   ))}
                 </div>
-
                 <div className="space-y-4 mt-auto pt-6 border-slate-100 border-t">
                   <Link href="/cart" onClick={handleLinkClick} className="flex justify-between items-center bg-slate-50 px-5 py-4 rounded-2xl font-bold text-slate-700">
                     <div className="flex items-center gap-3">
@@ -366,22 +326,18 @@ const Navbar = () => {
                     </div>
                     {cartCount > 0 && <span className="bg-orange-500 px-2.5 py-0.5 rounded-full text-white text-xs">{cartCount}</span>}
                   </Link>
-
                   {isLoggedIn ? (
-                    <Link href="/dashboard" onClick={handleLinkClick} className="flex justify-center items-center gap-2 bg-orange-500 shadow-lg py-4 rounded-2xl w-full font-black text-white">
-                      <LayoutDashboard size={18} /> Dashboard
-                    </Link>
-                  ) : (
-                    <div onClick={handleLinkClick} className="w-full"><AuthButtons /></div>
-                  )}
+                    <Link href="/dashboard" onClick={handleLinkClick} className="flex justify-center items-center gap-2 bg-orange-500 shadow-lg py-4 rounded-2xl w-full font-black text-white"><LayoutDashboard size={18} /> Dashboard</Link>
+                  ) : <div onClick={handleLinkClick} className="w-full"><AuthButtons /></div>}
                 </div>
               </motion.div>
             </>
           )}
         </AnimatePresence>
       </nav>
-
-      <div className={`${isScrolled ? "h-16" : "h-20"} transition-all duration-500 lg:block hidden`} />
+      
+      {/* Navbar placeholder for spacing - adjusted to prevent extra gap */}
+      <div className="" />
     </>
   );
 };

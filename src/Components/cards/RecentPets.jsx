@@ -15,7 +15,7 @@ const RecentPets = async () => {
   if (pets.length === 0) return null;
 
   return (
-    <section className="relative bg-white py-32 overflow-hidden">
+    <section className="relative bg-white py-20 overflow-hidden">
       <div className="z-10 relative mx-auto px-6 lg:px-8 max-w-7xl">
         
         {/* --- SECTION HEADER --- */}

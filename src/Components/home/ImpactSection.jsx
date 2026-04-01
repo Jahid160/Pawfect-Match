@@ -58,12 +58,12 @@ const ImpactSection = () => {
   ];
 
   return (
-    <section className="relative bg-[#FDFDFD] py-32 overflow-hidden">
+    <section className="relative bg-[#FDFDFD] py-20 overflow-hidden">
       
       {/* --- ELITE BACKGROUND ELEMENTS --- */}
       <div className="top-0 left-0 absolute w-full h-full pointer-events-none">
-        <div className="top-[-10%] left-[-5%] absolute bg-orange-50/50 blur-[120px] rounded-full w-[500px] h-[500px]" />
-        <div className="right-[-5%] bottom-[-10%] absolute bg-slate-100 blur-[100px] rounded-full w-[400px] h-[400px]" />
+        <div className="top-[-10%] left-[-5%] absolute blur-[120px] rounded-full w-[500px] h-[500px]" />
+        <div className="right-[-5%] bottom-[-10%] absolute blur-[100px] rounded-full w-[400px] h-[400px]" />
       </div>
 
       <div className="z-10 relative mx-auto px-6 max-w-7xl">
