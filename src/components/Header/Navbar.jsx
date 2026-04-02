@@ -318,7 +318,8 @@ const Navbar = () => {
                     </div>
                   ))}
                 </div>
-                <div className="space-y-4 mt-auto pt-6 border-slate-100 border-t">
+                {/* Fixed bottom spacing for mobile dashboard button */}
+                <div className="space-y-4 mt-auto pt-6 pb-8 border-slate-100 border-t">
                   <Link href="/cart" onClick={handleLinkClick} className="flex justify-between items-center bg-slate-50 px-5 py-4 rounded-2xl font-bold text-slate-700">
                     <div className="flex items-center gap-3">
                       <ShoppingCart size={20} className="text-orange-500" />
@@ -327,8 +328,8 @@ const Navbar = () => {
                     {cartCount > 0 && <span className="bg-orange-500 px-2.5 py-0.5 rounded-full text-white text-xs">{cartCount}</span>}
                   </Link>
                   {isLoggedIn ? (
-                    <Link href="/dashboard" onClick={handleLinkClick} className="flex justify-center items-center gap-2 bg-orange-500 shadow-lg py-4 rounded-2xl w-full font-black text-white"><LayoutDashboard size={18} /> Dashboard</Link>
-                  ) : <div onClick={handleLinkClick} className="w-full"><AuthButtons /></div>}
+                    <Link href="/dashboard" onClick={handleLinkClick} className="flex justify-center items-center gap-2 bg-orange-500 shadow-lg py-4 rounded-2xl w-full font-black text-white active:scale-95 transition-transform"><LayoutDashboard size={18} /> Dashboard</Link>
+                  ) : <div onClick={handleLinkClick} className="pb-4 w-full"><AuthButtons /></div>}
                 </div>
               </motion.div>
             </>
@@ -336,7 +337,6 @@ const Navbar = () => {
         </AnimatePresence>
       </nav>
       
-      {/* Navbar placeholder for spacing - adjusted to prevent extra gap */}
       <div className="" />
     </>
   );
