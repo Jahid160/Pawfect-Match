@@ -28,10 +28,13 @@ import {
   Sparkles,
   RotateCcw,
   CircleCheck,
+  AlertTriangle,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { AddPets } from "@/action/server/pets";
 import { useSession } from "next-auth/react";
+import { SheltergetStatus } from "@/action/server/Shelteruser";
+import Loading from "../Loading";
 
 const steps = [
   { id: 1, label: "Basic Info", icon: PawPrint },
@@ -124,6 +127,8 @@ export default function PetAdoptionForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const { data: session } = useSession()
   const [submitted, setSubmitted] = useState(false);
+  const [shelterStatus, setShelterStatus] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemperaments, setSelectedTemperaments] = useState([]);
@@ -168,11 +173,30 @@ export default function PetAdoptionForm() {
 
 
   useEffect(() => {
-    if (session?.user?.email) {
-      update("email", session.user.email);
-    }
-  }, [session]);
+    const checkShelterStatus = async () => {
+      const userEmail = session?.user?.email;
 
+      if (userEmail) {
+        setForm((prev) => {
+          if (prev.email !== userEmail) {
+            return { ...prev, email: userEmail };
+          }
+          return prev;
+        });
+        try {
+          setIsLoading(true);
+          const status = await SheltergetStatus(userEmail);
+          setShelterStatus(status);
+        } catch (error) {
+          console.error("Status check failed:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkShelterStatus();
+  }, [session?.user?.email]);
 
 
   const toggleT = (t) =>
@@ -340,17 +364,51 @@ export default function PetAdoptionForm() {
 
   const StepIcon = steps[currentStep - 1].icon;
 
+  if (isLoading) {
+    return <Loading></Loading>
+  }
+
+  if (shelterStatus === "Suspended") {
+    return (
+      <div className="card bg-base-100 shadow-2xl max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-error/20">
+        <div className="p-12 text-center space-y-6">
+          <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <AlertTriangle size={40} />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black text-neutral tracking-tight">
+              Account Suspended
+            </h2>
+            <p className="text-base-content/70 font-medium px-4">
+              Your shelter account is currently suspended. You cannot list new pets at this moment.
+            </p>
+          </div>
+
+          <div className="bg-base-200/50 p-6 rounded-2xl border border-base-300">
+            <p className="text-sm text-neutral font-bold mb-3 flex items-center justify-center gap-2">
+              <Mail size={16} className="text-primary" /> How to resolve this?
+            </p>
+            <p className="text-sm text-base-content/60 ">
+              Please contact the system administrator to discuss the status of your account and request reactivation.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-base-200 py-12 px-4">
       {/* Page Header */}
       <div className="max-w-2xl mx-auto text-center mb-10">
         <div className="badge badge-primary badge-outline gap-1.5 mb-4 font-semibold tracking-widest text-[11px] uppercase px-4 py-3">
-          <PawPrint size={11} /> PawFind Adoption Portal
+          <PawPrint size={11} /> PawFind Entries Portal
         </div>
         <h1 className="text-4xl sm:text-5xl font-black text-neutral tracking-tight leading-[1.1] mb-3">
           List Pets
           <br />
-          <span className="text-primary">for Adoption</span>
+          <span className="text-primary">for Entries</span>
         </h1>
         <p className="text-base-content/50 text-base">
           Help your furry companion find their perfect forever home.

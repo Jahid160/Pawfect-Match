@@ -1,6 +1,6 @@
 "use server";
 
-import { collections, dbConnect } from "@/lib/db"; // আপনার db.js এর পাথ দিন
+import { collections, dbConnect } from "@/lib/db"; 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
@@ -14,13 +14,13 @@ export async function updateProfile(formData) {
     const imageFile = formData.get("image");
     let imageUrl = formData.get("currentImage");
 
-    // যদি নতুন ইমেজ থাকে তবে ImgBB-তে আপলোড হবে
+    
     if (imageFile && imageFile.size > 0) {
       const buffer = await imageFile.arrayBuffer();
       const base64Image = Buffer.from(buffer).toString("base64");
 
       const imgbbRes = await fetch(
-        `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
         {
           method: "POST",
           body: new URLSearchParams({ image: base64Image }),
@@ -33,7 +33,7 @@ export async function updateProfile(formData) {
       }
     }
 
-    // MongoDB আপডেট
+
     const usersCollection = await dbConnect(collections.USERS);
     await usersCollection.updateOne(
       { email: session.user.email },

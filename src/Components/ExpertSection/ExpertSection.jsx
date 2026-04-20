@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaLinkedinIn, FaTwitter, FaEnvelope, FaArrowRight } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const experts = [
   {
@@ -39,44 +40,52 @@ const ExpertSection = () => {
   return (
     <section className="bg-white px-4 sm:px-8 py-24">
       <div className="mx-auto max-w-7xl">
+        
         {/* Header Section */}
-        <div className="flex md:flex-row flex-col justify-between items-end gap-6 mb-16">
-          <div className="max-w-xl">
-            <div className="inline-block bg-orange-100 mb-4 px-4 py-1.5 rounded-full font-bold text-orange-600 text-xs uppercase tracking-widest">
-              Our Professionals
+        <div className="flex md:flex-row flex-col justify-between items-end gap-8 mb-20">
+          <div className="max-w-2xl">
+            <div className="inline-block bg-orange-500/10 mb-5 px-5 py-2 border border-orange-500/20 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.2em]">
+              Our Professional Team
             </div>
-            <h2 className="font-extrabold text-gray-900 text-4xl lg:text-6xl leading-tight">
-              Meet the <span className="text-orange-500">Experts</span> Behind PawFact
+            <h2 className="font-black text-slate-900 text-5xl lg:text-7xl leading-[0.95] tracking-[-0.04em]">
+              Meet the <span className="text-orange-500">Experts</span> <br /> Behind PawFact
             </h2>
           </div>
-          <p className="pl-4 border-orange-500 border-l-4 max-w-sm text-gray-500 text-lg italic">
-            Dedicated specialists working tirelessly to ensure every pet gets the love and care they deserve.
-          </p>
+          <div className="pl-6 border-orange-500 border-l-4 max-w-sm">
+             <p className="font-medium text-slate-500 text-lg leading-relaxed">
+              Dedicated specialists working tirelessly to ensure every pet gets the love and care they deserve.
+            </p>
+          </div>
         </div>
 
         {/* Experts Grid */}
-        <div className="gap-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-16">
+        <div className="gap-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-20">
           {experts.map((expert) => (
-            <div key={expert.id} className="group relative">
+            <motion.div 
+              key={expert.id} 
+              whileHover={{ y: -10 }}
+              className="group relative"
+            >
               {/* Image Container */}
-              <div className="relative shadow-lg border-2 border-transparent group-hover:border-orange-500 rounded-3xl w-full h-[400px] overflow-hidden transition-all duration-500">
+              <div className="relative shadow-2xl rounded-[2.5rem] w-full h-[450px] overflow-hidden transition-all duration-500">
                 <Image
                   src={expert.image}
                   alt={expert.name}
                   fill
                   className="grayscale group-hover:grayscale-0 object-cover group-hover:scale-110 transition-all duration-700"
+                  priority
                 />
                 
                 {/* Social Overlay */}
-                <div className="absolute inset-0 flex justify-center items-end bg-gradient-to-t from-orange-600/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 pb-8 transition-all duration-500">
+                <div className="absolute inset-0 flex justify-center items-end bg-gradient-to-t from-slate-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 pb-10 transition-all duration-500">
                   <div className="flex gap-4">
-                    <button className="bg-white hover:bg-orange-100 shadow-xl p-3 rounded-full text-orange-600 transition-colors">
+                    <button className="bg-white hover:bg-orange-500 shadow-xl p-4 rounded-2xl text-slate-900 hover:text-white transition-all duration-300">
                       <FaLinkedinIn size={18} />
                     </button>
-                    <button className="bg-white hover:bg-orange-100 shadow-xl p-3 rounded-full text-orange-600 transition-colors">
+                    <button className="bg-white hover:bg-orange-500 shadow-xl p-4 rounded-2xl text-slate-900 hover:text-white transition-all duration-300">
                       <FaTwitter size={18} />
                     </button>
-                    <button className="bg-white hover:bg-orange-100 shadow-xl p-3 rounded-full text-orange-600 transition-colors">
+                    <button className="bg-white hover:bg-orange-500 shadow-xl p-4 rounded-2xl text-slate-900 hover:text-white transition-all duration-300">
                       <FaEnvelope size={18} />
                     </button>
                   </div>
@@ -84,31 +93,30 @@ const ExpertSection = () => {
               </div>
 
               {/* Info Content */}
-              <div className="mt-6 text-center">
-                <h3 className="font-bold text-gray-900 group-hover:text-orange-600 text-xl transition-colors">
+              <div className="mt-8 px-2 text-center">
+                <h3 className="font-black text-slate-900 text-2xl tracking-tight transition-colors">
                   {expert.name}
                 </h3>
-                <p className="mb-1 font-semibold text-orange-500 text-sm uppercase tracking-wider">
+                <p className="mt-1 font-black text-[11px] text-orange-500 uppercase tracking-[0.15em]">
                   {expert.role}
                 </p>
-                <p className="font-medium text-gray-400 text-xs italic">
-                  Specialist in {expert.speciality}
-                </p>
+                <div className="inline-block bg-slate-50 mt-3 px-4 py-1 border border-slate-100 rounded-full font-bold text-[10px] text-slate-400 uppercase tracking-widest">
+                  {expert.speciality}
+                </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* View All Button */}
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-4">
           <Link 
             href="/experts" 
-            className="group inline-flex relative items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-[0_20px_40px_-15px_rgba(249,115,22,0.4)] hover:shadow-2xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white uppercase tracking-wider transition-all duration-500"
+            className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
           >
             <span className="z-10 relative">View All Our Experts</span>
             <FaArrowRight className="z-10 relative transition-transform group-hover:translate-x-2 duration-300" />
-            
-            <div className="top-0 -left-full group-hover:left-full absolute bg-gradient-to-r from-transparent via-white/20 to-transparent w-full h-full transition-all duration-1000 ease-in-out"></div>
+            <div className="top-0 -left-full group-hover:left-full absolute bg-gradient-to-r from-transparent via-white/10 to-transparent w-full h-full transition-all duration-1000"></div>
           </Link>
         </div>
       </div>

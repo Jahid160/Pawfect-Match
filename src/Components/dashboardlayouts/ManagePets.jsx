@@ -27,6 +27,7 @@ import PetDetailsModal from "./PetDetailsModal";
 import PetProfileModal from "./AdminDashboard/PetMangeMent/PetProfileModal";
 import { getAdoptionUserByCode } from "@/action/server/Adoptionuser";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const ManagePets = ({ initialPets }) => {
   const [pets, setPets] = useState(initialPets);
@@ -66,43 +67,87 @@ const ManagePets = ({ initialPets }) => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredPets.slice(indexOfFirstItem, indexOfLastItem);
-  // console.log(currentItems);
+
   const handleFilterChange = (setter, value) => {
     setter(value);
     setCurrentPage(1);
   };
+
   const router = useRouter();
-  const handleApprove = async (id) => {
-    // 1️⃣ Update UI immediately
+
+  //  Approve Logic Updated to notify user
+  const handleApprove = async (pet) => {
+    const id = pet._id;
+    const petName = pet.name;
+
+    // 1️⃣ Update UI immediately (Optimistic Update)
     setPets((prev) =>
-      prev.map((pet) => (pet._id === id ? { ...pet, status: "Adopted" } : pet)),
+      prev.map((item) => (item._id === id ? { ...item, status: "Adopted" } : item)),
     );
 
-    // 2️⃣ Call server action
-    const result = await UpdatePetStatus(id);
+    // 2️⃣ Call server action with pet details for notification
+    const result = await UpdatePetStatus(id, petName);
 
     if (!result.success) {
       // rollback if server fails
       setPets((prev) =>
-        prev.map((pet) =>
-          pet._id === id ? { ...pet, status: "Pending" } : pet,
+        prev.map((item) =>
+          item._id === id ? { ...item, status: "pending" } : item,
         ),
       );
-      alert("Failed to update status");
-    }
-  };
-  const handleReject = async (pet) => {
-    const result = await UpdatePetStatusReject(pet._id,pet.adoptionCode);
-    console.log(pet._id,pet.adoptionCode);
-    if (result.success) {
-      alert("Pet adopted successfully");
+      Swal.fire("Error", result.message || "Failed to approve request", "error");
     } else {
-      alert("something went wrong");
+      Swal.fire({
+        icon: "success",
+        title: "Approved!",
+        text: `${petName} has been officially adopted. User notified!`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
     }
   };
+
+  //  Reject Logic Updated to notify user
+  const handleReject = async (pet) => {
+    const id = pet._id;
+    const code = pet.adoptionCode;
+    const petName = pet.name;
+
+    const confirm = await Swal.fire({
+      title: "Reject Request?",
+      text: "This will make the pet available again and notify the user.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      confirmButtonText: "Yes, Reject",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    setPets((prev) =>
+      prev.map((item) =>
+        item._id === id ? { ...item, status: "Available" } : item,
+      ),
+    );
+
+    const result = await UpdatePetStatusReject(id, code, petName);
+
+    if (!result.success) {
+      setPets((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, status: "pending" } : item,
+        ),
+      );
+      Swal.fire("Error", result.message || "Something went wrong", "error");
+    } else {
+      Swal.fire("Rejected", "Request rejected and user notified.", "success");
+    }
+  };
+
   const handleEdit = (id) => {
     router.push(`/dashboard/manage-pets/petEdit/${id}`);
   };
+
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
       title: "Are you sure?",
@@ -116,17 +161,13 @@ const ManagePets = ({ initialPets }) => {
 
     if (!confirm.isConfirmed) return;
 
-    // 1️⃣ Optimistic UI update
     const originalPets = [...pets];
     setPets((prev) => prev.filter((pet) => pet._id !== id));
 
-    // 2️⃣ Call server action
     const result = await DeletePets(id);
 
-    // 3️⃣ Handle result
     if (!result.success) {
       setPets(originalPets);
-
       Swal.fire({
         icon: "error",
         title: "Failed!",
@@ -142,19 +183,18 @@ const ManagePets = ({ initialPets }) => {
       });
     }
   };
+
   const handleApproveEye = async (pet) => {
-    // console.log(pet.adoptionCode);
     const userData = await getAdoptionUserByCode(pet.adoptionCode);
-    console.log(userData.data);
     setSelectedPet(userData.data);
     setIsModalOpen(true);
   };
+
   const handleAvailableEye = (pet) => {
-    // console.log(pet);
     setSelectedProfilePet(pet);
     setIsProfileModalOpen(true);
   };
-  // pihyl@mailinator.com
+
   return (
     <div className="bg-[#F8FAFC] p-6 lg:p-10 min-h-screen font-sans text-slate-900">
       {/* HEADER */}
@@ -162,7 +202,7 @@ const ManagePets = ({ initialPets }) => {
         <div>
           <h1 className="flex items-center gap-3 font-black text-slate-900 text-4xl tracking-tight">
             Manage{" "}
-            <span className="text-orange-500 underline decoration-8 decoration-orange-100 underline-offset-[-2px]">
+            <span className="text-orange-500 decoration-8 decoration-orange-100 underline underline-offset-[-2px]">
               Pets
             </span>
           </h1>
@@ -170,13 +210,13 @@ const ManagePets = ({ initialPets }) => {
             Showing {filteredPets.length} pets from database.
           </p>
         </div>
-        <button className="group flex justify-center items-center gap-2 bg-orange-500 hover:bg-slate-900 shadow-lg px-8 py-4 rounded-2xl font-black text-white transition-all">
+        <Link href={'/dashboard/shelter-petsreq'} className="group flex justify-center items-center gap-2 bg-orange-500 hover:bg-slate-900 shadow-lg px-8 py-4 rounded-2xl font-black text-white transition-all">
           <Plus
             size={20}
             className="group-hover:rotate-90 transition-transform"
           />
           Add New Pet
-        </button>
+        </Link>
       </div>
 
       {/* TOOLBAR */}
@@ -191,7 +231,7 @@ const ManagePets = ({ initialPets }) => {
             value={searchTerm}
             onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
             placeholder="Search by name, ID, or breed..."
-            className="bg-white shadow-sm py-4 pr-4 pl-12 border border-slate-200 rounded-2xl outline-none w-full font-medium transition-all focus:ring-4 focus:ring-orange-500/10"
+            className="bg-white shadow-sm py-4 pr-4 pl-12 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10 w-full font-medium transition-all"
           />
         </div>
 
@@ -205,7 +245,7 @@ const ManagePets = ({ initialPets }) => {
             onChange={(e) =>
               handleFilterChange(setFilterStatus, e.target.value)
             }
-            className="bg-white shadow-sm py-4 pr-8 pl-11 border border-slate-200 rounded-2xl font-bold text-slate-600 text-xs outline-none cursor-pointer appearance-none"
+            className="bg-white shadow-sm py-4 pr-8 pl-11 border border-slate-200 rounded-2xl outline-none font-bold text-slate-600 text-xs appearance-none cursor-pointer"
           >
             <option value="All Status">All Status</option>
             <option value="Available">Available</option>
@@ -219,11 +259,10 @@ const ManagePets = ({ initialPets }) => {
             <button
               key={type}
               onClick={() => handleFilterChange(setFilterType, type)}
-              className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${
-                filterType === type
-                  ? "bg-slate-900 text-white shadow-md"
-                  : "text-slate-400 hover:text-slate-600"
-              }`}
+              className={`px-6 py-2 rounded-xl font-bold text-xs transition-all ${filterType === type
+                ? "bg-slate-900 text-white shadow-md"
+                : "text-slate-400 hover:text-slate-600"
+                }`}
             >
               {type === "All" ? "All" : `${type}s`}
             </button>
@@ -236,7 +275,7 @@ const ManagePets = ({ initialPets }) => {
         <div className="p-4 overflow-x-auto">
           <table className="w-full text-left border-separate border-spacing-y-2">
             <thead>
-              <tr className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
+              <tr className="font-black text-[10px] text-slate-400 uppercase tracking-[0.2em]">
                 <th className="px-8 py-4">Pet Profile</th>
                 <th className="px-6 py-4">Type & Breed</th>
                 <th className="px-6 py-4">Status</th>
@@ -254,15 +293,15 @@ const ManagePets = ({ initialPets }) => {
                     <td className="px-8 py-4 rounded-l-2xl">
                       <div className="flex items-center gap-4">
                         <Image
-                          width={12}
-                          height={12}
+                          width={48}
+                          height={48}
                           src={pet?.image}
-                          className="w-12 h-12 rounded-xl object-cover ring-2 ring-white shadow-sm"
-                          alt=""
+                          className="shadow-sm rounded-xl ring-2 ring-white w-12 h-12 object-cover"
+                          alt={pet.name}
                         />
                         <div>
                           <p className="font-bold text-sm">{pet.name}</p>
-                          <p className="text-[10px] text-orange-500 font-black tracking-tighter">
+                          <p className="font-black text-[10px] text-orange-500 tracking-tighter">
                             {pet._id?.slice(-6)}
                           </p>
                         </div>
@@ -271,22 +310,21 @@ const ManagePets = ({ initialPets }) => {
 
                     <td className="px-6 py-4">
                       <p className="font-bold text-sm">{pet.breed}</p>
-                      <p className="text-[10px] text-slate-400 uppercase font-black">
+                      <p className="font-black text-[10px] text-slate-400 uppercase">
                         {pet.type}
                       </p>
                     </td>
 
                     <td className="px-6 py-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${
-                          pet.status === "Available"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : pet.status === "adopted"
-                              ? "bg-blue-50 text-blue-600"
-                              : "bg-amber-50 text-amber-600"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1.5 w-fit ${pet.status.toLowerCase() === "available"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : pet.status.toLowerCase() === "adopted"
+                            ? "bg-blue-50 text-blue-600"
+                            : "bg-amber-50 text-amber-600"
+                          }`}
                       >
-                        {pet.status === "Available" ? (
+                        {pet.status.toLowerCase() === "available" ? (
                           <CheckCircle size={10} />
                         ) : (
                           <Clock size={10} />
@@ -295,31 +333,27 @@ const ManagePets = ({ initialPets }) => {
                       </span>
                     </td>
 
-                    {/* ACTION BUTTONS WITH DYNAMIC LOGIC */}
-                    <td className="px-8 py-4 text-right rounded-r-2xl">
+                    <td className="px-8 py-4 rounded-r-2xl text-right">
                       <div className="flex justify-end gap-1">
                         {pet.status.toLowerCase() === "pending" && (
                           <>
-                            {/* Approve (Pending -> Adopted) */}
                             <button
-                              onClick={() => handleApprove(pet._id)}
+                              onClick={() => handleApprove(pet)}
                               title="Approve"
-                              className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-all"
+                              className="hover:bg-emerald-50 p-2 rounded-lg text-emerald-500 transition-all"
                             >
                               <Check size={16} />
                             </button>
-
-                            {/* Reject (Pending -> Available) */}
                             <button
                               onClick={() => handleReject(pet)}
                               title="Reject"
-                              className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                              className="hover:bg-rose-50 p-2 rounded-lg text-rose-500 transition-all"
                             >
                               <X size={16} />
                             </button>
                             <button
                               onClick={() => handleApproveEye(pet)}
-                              className="p-2 "
+                              className="p-2 text-slate-400 hover:text-slate-900"
                             >
                               <Eye size={16} />
                             </button>
@@ -328,7 +362,6 @@ const ManagePets = ({ initialPets }) => {
 
                         {pet.status.toLowerCase() === "available" && (
                           <>
-                            {/* Edit */}
                             <button
                               onClick={() => handleEdit(pet._id)}
                               title="Edit"
@@ -336,8 +369,6 @@ const ManagePets = ({ initialPets }) => {
                             >
                               <Edit3 size={16} />
                             </button>
-
-                            {/* Delete */}
                             <button
                               onClick={() => handleDelete(pet._id)}
                               title="Delete"
@@ -345,37 +376,34 @@ const ManagePets = ({ initialPets }) => {
                             >
                               <Trash2 size={16} />
                             </button>
-                            <button className="p-2 ">
-                              <Eye
-                                onClick={() => handleAvailableEye(pet)}
-                                size={16}
-                              />
+                            <button 
+                              onClick={() => handleAvailableEye(pet)}
+                              className="p-2 text-slate-400 hover:text-slate-900"
+                            >
+                              <Eye size={16} />
                             </button>
                           </>
                         )}
 
                         {pet.status.toLowerCase() === "adopted" && (
                           <>
-                            {/* Edit Disabled */}
                             <button
                               disabled
                               title="Adopted pets cannot be edited"
-                              className="p-2 text-slate-200 cursor-not-allowed transition-all"
+                              className="p-2 text-slate-200 cursor-not-allowed"
                             >
                               <Edit3 size={16} />
                             </button>
-
-                            {/* Delete Disabled */}
                             <button
-                              disabled
-                              title="Adopted pets cannot be deleted"
-                              className="p-2 text-slate-200 cursor-not-allowed transition-all"
+                              onClick={() => handleReject(pet)}
+                              title="Reset to Available"
+                              className="hover:bg-rose-50 p-2 rounded-lg text-rose-500 transition-all"
                             >
                               <Trash2 size={16} />
                             </button>
                             <button
                               onClick={() => handleApproveEye(pet)}
-                              className="p-2 "
+                              className="p-2 text-slate-400 hover:text-slate-900"
                             >
                               <Eye size={16} />
                             </button>
@@ -400,17 +428,18 @@ const ManagePets = ({ initialPets }) => {
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 shadow-sm transition-all"
+              className="flex items-center gap-2 bg-white hover:bg-slate-50 disabled:opacity-50 shadow-sm px-5 py-2.5 border border-slate-200 rounded-xl font-bold text-slate-700 text-xs transition-all"
             >
               <ChevronLeft size={16} /> Previous
             </button>
             <button
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage((p) => p + 1)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-orange-500 disabled:bg-slate-200 shadow-md transition-all"
+              className="flex items-center gap-2 bg-slate-900 hover:bg-orange-500 disabled:bg-slate-200 shadow-md px-5 py-2.5 rounded-xl font-bold text-white text-xs transition-all"
             >
               Next <ChevronRight size={16} />
             </button>
+            
             <PetDetailsModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}

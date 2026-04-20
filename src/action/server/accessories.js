@@ -4,26 +4,28 @@ import { collections, dbConnect } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 
+//  Create Accessory
 export const createAccessory = async (data) => {
   try {
     const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
+    const stockCount = Number(data.stock) || 0;
 
     const newAccessory = {
-      title: data.title,
+      title: data.title?.trim(),
       category: data.category,
-      sku: data.sku,
-      tags: data.tags,
-      brand: data.brand,
-      targetPet: data.targetPet,
-      stock: Number(data.stock) || 0,
-      inStock: Number(data.stock) > 0,
+      sku: data.sku?.toUpperCase()?.trim(),
+      tags: data.tags ? data.tags.split(",").map((tag) => tag.trim()) : [],
+      brand: data.brand?.trim(),
+      targetPet: data.targetPet || "All Pets",
+      stock: stockCount,
+      inStock: stockCount > 0,
       price: Number(data.price) || 0,
       discountPrice: data.discountPrice ? Number(data.discountPrice) : 0,
-      weight: data.weight,
-      size: data.size,
+      weight: data.weight?.trim(),
+      size: data.size?.trim(),
       image: data.image,
-      description: data.description,
-      material: data.material,
+      description: data.description?.trim(),
+      material: data.material?.trim(),
       warranty: data.warranty,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -45,11 +47,10 @@ export const createAccessory = async (data) => {
   }
 };
 
-// (Get All Accessories)
+//  Get All Accessories
 export const getPetAccessories = async () => {
   try {
     const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
-
     const items = await accessoriesCollection
       .find({})
       .sort({ createdAt: -1 })
@@ -67,7 +68,7 @@ export const getPetAccessories = async () => {
   }
 };
 
-// (Get Single Accessory)
+//  Get Single Accessory
 export const getSingleAccessory = async (id) => {
   try {
     if (!id || !ObjectId.isValid(id)) return null;
@@ -81,6 +82,7 @@ export const getSingleAccessory = async (id) => {
       ...item,
       _id: item._id.toString(),
       createdAt: item.createdAt?.toISOString?.() || item.createdAt,
+      updatedAt: item.updatedAt?.toISOString?.() || item.updatedAt,
     };
   } catch (error) {
     console.error("getSingleAccessory error:", error);
@@ -88,15 +90,83 @@ export const getSingleAccessory = async (id) => {
   }
 };
 
-// (Delete Accessory)
+// Get Sales Statistics
+export const getSalesStats = async () => {
+  try {
+    const ordersCollection = await dbConnect(collections.ORDERS || "orders");
+
+    const orders = await ordersCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
+    const totalUnits = orders.length;
+
+    return {
+      success: true,
+      totalRevenue,
+      totalUnits,
+      recentOrders: orders.map(order => ({
+        ...order,
+        _id: order._id.toString(),
+        createdAt: order.createdAt?.toISOString?.() || order.createdAt
+      }))
+    };
+  } catch (error) {
+    console.error("getSalesStats error:", error);
+    return { success: false, totalRevenue: 0, totalUnits: 0, recentOrders: [] };
+  }
+};
+
+export const updateAccessory = async (id, data) => {
+  try {
+    if (!id || !ObjectId.isValid(id)) return { success: false, error: "Invalid ID" };
+
+    const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
+    const stockCount = Number(data.stock) || 0;
+
+    const updatedData = {
+      title: data.title?.trim(),
+      category: data.category,
+      price: Number(data.price) || 0,
+      stock: stockCount,
+      inStock: stockCount > 0,
+      description: data.description?.trim(),
+      updatedAt: new Date(),
+    };
+
+    if (data.image) updatedData.image = data.image;
+
+    const result = await accessoriesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedData }
+    );
+
+    revalidatePath("/pet-accessories");
+    revalidatePath("/dashboard/accessories-management");
+
+    return {
+      success: result.modifiedCount > 0 || result.matchedCount > 0,
+      message: "Updated successfully"
+    };
+  } catch (error) {
+    console.error("updateAccessory error:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Delete Accessory
 export const deleteAccessory = async (id) => {
   try {
-    if (!ObjectId.isValid(id)) return { success: false, error: "Invalid ID" };
+    if (!id || !ObjectId.isValid(id)) return { success: false, error: "Invalid ID" };
 
     const accessoriesCollection = await dbConnect(collections.ACCESSORIES);
     const result = await accessoriesCollection.deleteOne({ _id: new ObjectId(id) });
 
+    revalidatePath("/pet-accessories");
     revalidatePath("/dashboard/accessories-management");
+
     return { success: result.deletedCount === 1 };
   } catch (error) {
     console.error("deleteAccessory error:", error);
@@ -104,7 +174,7 @@ export const deleteAccessory = async (id) => {
   }
 };
 
-// (Reduce Accessory Stock - For Cart/Buy)
+//  Reduce Stock on Purchase
 export const reduceAccessoryStock = async (items = []) => {
   try {
     if (!items.length) return { success: false };
@@ -113,7 +183,6 @@ export const reduceAccessoryStock = async (items = []) => {
 
     for (const item of items) {
       const idStr = item.productId || item.product_id || item._id;
-
       if (!idStr || !ObjectId.isValid(idStr)) continue;
 
       const quantity = Number(item.quantity) || 1;
@@ -121,21 +190,25 @@ export const reduceAccessoryStock = async (items = []) => {
       await accessoriesCollection.updateOne(
         {
           _id: new ObjectId(idStr),
-          stock: { $gte: quantity },
+          stock: { $gte: quantity }
         },
-        {
-          $inc: { stock: -quantity },
-          $set: { updatedAt: new Date() },
-        }
+        [
+          {
+            $set: {
+              stock: { $subtract: ["$stock", quantity] },
+              updatedAt: new Date()
+            }
+          },
+          {
+            $set: {
+              inStock: { $gt: ["$stock", 0] }
+            }
+          }
+        ]
       );
     }
 
-    
-    await accessoriesCollection.updateMany(
-      { stock: { $lte: 0 } },
-      { $set: { inStock: false } }
-    );
-
+    revalidatePath("/pet-accessories");
     return { success: true };
   } catch (error) {
     console.error("reduceAccessoryStock error:", error);

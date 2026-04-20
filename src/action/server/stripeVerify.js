@@ -3,20 +3,22 @@
 import Stripe from "stripe";
 import { dbConnect, collections } from "@/lib/db";
 import { getCartItems } from "@/action/server/cart";
-import { reduceFoodStock } from "@/action/server/foods";
 import { ObjectId } from "mongodb";
+import { revalidatePath } from "next/cache";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export const verifyStripePayment = async (sessionId, userEmail) => {
+
+export const verifyStripePayment = async (sessionId, email) => {
   try {
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
-      return { success: false, message: "Payment not completed." };
+      return { success: false, message: "Payment not completed or failed." };
     }
 
-    const orderCollection = await dbConnect(collections.ORDER);
+    const orderCollection = await dbConnect(collections.ORDERS || "orders");
 
     const existingOrder = await orderCollection.findOne({
       stripeSessionId: sessionId,
@@ -31,68 +33,66 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
 
     const metadata = session.metadata || {};
     const mode = metadata.mode || "cart";
+    const userEmail = metadata.userEmail || email;
+
+    if (!userEmail) {
+      return { success: false, message: "User email missing in session." };
+    }
 
     let orderItems = [];
     let totalAmount = 0;
 
     if (mode === "buy-now") {
-      const foodsCollection = await dbConnect(collections.FOODS);
-      const foodId = metadata.foodId;
+      const productType = metadata.productType || "food";
+      const collectionName = productType === "accessory" ? collections.ACCESSORIES : collections.FOODS;
+
+      const productCollection = await dbConnect(collectionName);
+      const productId = metadata.productId;
       const quantity = Number(metadata.quantity || 1);
 
-      if (!foodId || !ObjectId.isValid(foodId)) {
-        return { success: false, message: "Invalid product in metadata." };
+      if (!productId || !ObjectId.isValid(productId)) {
+        return { success: false, message: "Invalid product ID." };
       }
 
-      const food = await foodsCollection.findOne({
-        _id: new ObjectId(foodId),
-      });
+      const product = await productCollection.findOne({ _id: new ObjectId(productId) });
 
-      if (!food) {
-        return { success: false, message: "Food not found." };
+      if (!product) {
+        return { success: false, message: "Product not found." };
       }
 
-      const finalPrice =
-        food.discountPrice && Number(food.discountPrice) < Number(food.price)
-          ? Number(food.discountPrice)
-          : Number(food.price);
+      const finalPrice = product.discountPrice && Number(product.discountPrice) < Number(product.price)
+        ? Number(product.discountPrice)
+        : Number(product.price);
 
-      orderItems = [
-        {
-          productId: food._id.toString(),
-          foodId: food._id.toString(),
-          productName: food.productName || "",
-          brand: food.brand || "",
-          image: food.image || "",
-          weight: food.weight || "",
-          weightUnit: food.weightUnit || "",
-          quantity,
-          price: finalPrice,
-          lineTotal: finalPrice * quantity,
-        },
-      ];
+      orderItems = [{
+        productId: product._id.toString(),
+        productName: product.productName || "Pet Product",
+        image: product.image || "",
+        productType: productType,
+        quantity: quantity,
+        price: finalPrice,
+        lineTotal: finalPrice * quantity,
+      }];
 
       totalAmount = finalPrice * quantity;
     } else {
       const cartItems = await getCartItems(userEmail);
 
-      if (!cartItems.length) {
-        return { success: false, message: "Cart is empty." };
+      if (!cartItems || cartItems.length === 0) {
+
+        return { success: false, message: "Cart items not found for this user." };
       }
 
       orderItems = cartItems.map((item) => ({
-        productId: item.productId || item.foodId || item.product_id || null,
-        foodId: item.foodId || item.productId || item.product_id || null,
-        productName: item.productName || "",
+        productId: (item.productId || item._id).toString(),
+        productName: item.productName || "Pet Product",
+        productType: item.productType || "food",
         quantity: Number(item.quantity || 1),
         price: Number(item.price || 0),
         lineTotal: Number(item.price || 0) * Number(item.quantity || 1),
       }));
 
-      totalAmount = orderItems.reduce(
-        (sum, item) => sum + Number(item.lineTotal || 0),
-        0
-      );
+      totalAmount = orderItems.reduce((sum, item) => sum + item.lineTotal, 0);
     }
 
     const orderDoc = {
@@ -108,10 +108,7 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
       paymentStatus: "paid",
       orderStatus: "processing",
       items: orderItems,
-      totalItems: orderItems.reduce(
-        (sum, item) => sum + Number(item.quantity || 0),
-        0
-      ),
+      totalItems: orderItems.reduce((sum, item) => sum + item.quantity, 0),
       subtotal: totalAmount,
       shippingCost: 0,
       totalAmount,
@@ -124,31 +121,34 @@ export const verifyStripePayment = async (sessionId, userEmail) => {
     const result = await orderCollection.insertOne(orderDoc);
 
     if (!result.insertedId) {
-      return { success: false, message: "Order save failed." };
+      throw new Error("Failed to save order to database.");
     }
 
-    const stockResult = await reduceFoodStock(orderItems);
-
-    if (!stockResult?.success) {
-      await orderCollection.deleteOne({ _id: result.insertedId });
-
-      return {
-        success: false,
-        message: stockResult?.message || "Stock update failed.",
-      };
+    /*
+    try {
+      const { reduceProductStock } = await import("@/action/server/stock");
+      await reduceProductStock(orderItems);
+    } catch (stockError) {
+      console.error("Stock update failed, but order saved:", stockError);
     }
+    */
 
     if (mode !== "buy-now") {
       const cartCollection = await dbConnect(collections.CART);
       await cartCollection.deleteMany({ userEmail });
     }
 
+
+    // revalidatePath("/dashboard/orders");
+    // revalidatePath("/cart");
+
     return {
       success: true,
       orderId: result.insertedId.toString(),
     };
+
   } catch (error) {
-    console.error("Stripe verify error:", error);
-    return { success: false, message: error.message };
+    console.error("Critical Stripe Verification Error:", error);
+    return { success: false, message: error.message || "An unexpected error occurred." };
   }
 };

@@ -1,101 +1,208 @@
 "use server";
-import { collections, dbConnect } from "@/lib/db"; 
+import { collections, dbConnect } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { verifyAdmin } from "@/lib/adminAuth";
+import { verifyAuth } from "@/lib/verifyAuth";
+import { createNotification } from "./notifications";
 
-// ১. ভ্যাকসিন অর্ডার প্লেস করা
+// start of vaccine
+
 export const placeVaccineOrder = async (data) => {
+  await verifyAuth();
+  const session = await getServerSession(authOptions);
   try {
-    const orderCollection = await dbConnect(collections.ORDERS);
+    const ordersCollection = await dbConnect(collections.VACCINES_ORDERS);
+
+    const existingOrder = await ordersCollection.findOne({
+      vaccineId: data.vaccineId,
+      userEmail: session.user.email,
+    });
+
+    if (existingOrder) {
+      return { success: false, message: "Already ordered" };
+    }
+
     const newOrder = {
       vaccineId: data.vaccineId,
       vaccineName: data.vaccineName,
-      userName: data.userName || "MD SHAKIL", // ডিফল্ট নাম
-      userEmail: data.userEmail || "shakil@example.com",
+      userName: session.user.name,
+      userEmail: session.user.email,
       status: "Pending",
       adminAccepted: false,
       doctorAssigned: false,
       isCompleted: false,
-      deadlineDate: null, 
+      deadlineDate: null,
+      userImage: session.user.image,
+      location: session.user.location,
       createdAt: new Date(),
     };
-    await orderCollection.insertOne(newOrder);
-    
-    // সব রিলেটেড পাথ রিভ্যালিডেট করুন
+    await ordersCollection.insertOne(newOrder);
+
+    // ! Create a notification for the Admin
+    await createNotification({
+      title: "New Vaccine Order",
+      message: `${session.user.name} has placed an order for ${data.vaccineName}.`,
+      type: "order",
+      receiverRole: "admin", // Targeted specifically for admin users
+      receiverEmail: null,
+    });
+
     revalidatePath("/dashboard/vaccinations");
-    revalidatePath("/dashboard/doctor"); 
+    revalidatePath("/dashboard/doctor");
+    revalidatePath("/", "layout");
+
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-// ২. অ্যাডমিন একসেপ্ট
 export const adminAcceptOrder = async (orderId) => {
+  await verifyAdmin();
   try {
-    const orderCollection = await dbConnect(collections.ORDERS);
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
-      { $set: { status: "AdminAccepted", adminAccepted: true } }
+      { $set: { status: "AdminAccepted", adminAccepted: true } },
     );
-    
+
     revalidatePath("/dashboard/vaccinations");
-    revalidatePath("/dashboard/doctor"); 
+    revalidatePath("/dashboard/doctor");
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৩. ডক্টর শিডিউল (এটিই আপনার ডক্টর পেজে ডাটা পাঠাবে)
 export const doctorScheduleOrder = async (orderId, days) => {
+  await verifyAdmin();
   try {
-    const orderCollection = await dbConnect(collections.ORDERS);
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
     const deadline = new Date();
-    deadline.setDate(deadline.getDate() + parseInt(days)); 
+    deadline.setDate(deadline.getDate() + parseInt(days));
 
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
-      { $set: { 
-          status: "DoctorAccepted", 
-          doctorAssigned: true, 
-          deadlineDate: deadline 
-        } 
-      }
+      {
+        $set: {
+          status: "Processing",
+          doctorAssigned: true,
+          deadlineDate: deadline,
+        },
+      },
     );
-    
-    // এই পাথটি নিশ্চিত করুন আপনার ডক্টর পেজের সাথে মিল আছে কি না
+
     revalidatePath("/dashboard/vaccinations");
-    revalidatePath("/dashboard/doctor"); 
-    
+    revalidatePath("/dashboard/doctor");
+
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৪. কমপ্লিট করা
+// admin only in vaccine management
+export const deleteVaccine = async (id) => {
+  await verifyAdmin();
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return { success: false, message: "Doctor not authenticated" };
+  }
+
+  try {
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+
+    const result = await orderCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    if (result.deletedCount > 0) {
+      // Revalidate to update the UI instantly
+      revalidatePath("/dashboard/vaccinations");
+      return { success: true, message: "Vaccine deleted successfully" };
+    }
+
+    return { success: false, message: "Order not found" };
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return { success: false, message: "Failed to delete from database" };
+  }
+};
+
 export const completeVaccination = async (orderId) => {
+  await verifyAdmin();
   try {
-    const orderCollection = await dbConnect(collections.ORDERS);
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const order = await orderCollection.findOne({ _id: new ObjectId(orderId) });
+    if (!order) {
+      return { success: false, message: "Order not found" };
+    }
+
     await orderCollection.updateOne(
       { _id: new ObjectId(orderId) },
-      { $set: { status: "Completed", isCompleted: true } }
+      { $set: { status: "Completing", isCompleted: true } },
     );
-    
+
+    await createNotification({
+        title: "Order Accepted",
+        message: `Your order for ${order.vaccineName} has been accepted.`,
+        type: "success",
+        receiverRole: null,
+        receiverEmail: order.userEmail, 
+      });
+
+    await createNotification({
+      title: "Vaccination Completed",
+      message: `Congratulations! Your vaccination for ${order.vaccineName} is now marked as completing.`,
+      type: "success",
+      receiverRole: "doctor",      
+      receiverEmail: null,
+      userEmail: order.userEmail,
+    });
+
     revalidatePath("/dashboard/vaccinations");
-    revalidatePath("/dashboard/doctor"); 
+    revalidatePath("/dashboard/doctor");
     return { success: true };
   } catch (error) {
     return { success: false };
   }
 };
 
-// ৫. সব অর্ডার গেট করা
-export const getAllOrders = async () => {
+// end of vaccine
+
+export const getDoctorOrders = async () => {
+  await verifyAdmin();
   try {
-    const orderCollection = await dbConnect(collections.ORDERS);
-    const orders = await orderCollection.find({}).sort({ createdAt: -1 }).toArray();
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const orders = await orderCollection
+      .find({ status: { $in: ["Processing", "Completed", "Pending"] } })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return JSON.parse(JSON.stringify(orders));
+  } catch (error) {
+    return [];
+  }
+};
+
+export const getVaccineOrders = async () => {
+  await verifyAdmin();
+  try {
+    const orderCollection = await dbConnect(collections.VACCINES_ORDERS);
+    const orders = await orderCollection
+      .find(
+        {},
+        {
+          projection: {
+            vaccineId: 0,
+          },
+        },
+      )
+      .sort({ createdAt: -1 })
+      .toArray();
     return JSON.parse(JSON.stringify(orders));
   } catch (error) {
     return [];

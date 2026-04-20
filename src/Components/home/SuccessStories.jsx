@@ -15,72 +15,75 @@ const stories = [
 
 export default function SuccessStories() {
   return (
-    <section className="bg-[#FDFCFB] px-6 py-24 overflow-hidden">
+    <section className="bg-[#FDFCFB] px-6 py-28 overflow-hidden">
       <div className="mx-auto max-w-7xl">
         
-        {/* Header - Consistent with your other sections */}
-        <div className="mb-16 text-center">
-          <div className="inline-flex items-center gap-2 bg-orange-100 mb-4 px-4 py-1 rounded-full font-black text-orange-600 text-xs tracking-widest">
-             <FaHeart /> TESTIMONIALS
+        {/* Header - Consistent with Expert/Accessories Section */}
+        <div className="mb-20 text-center">
+          <div className="inline-flex items-center gap-2 bg-orange-500/10 mb-5 px-5 py-2 border border-orange-500/20 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.2em]">
+             <FaHeart className="text-[12px]" /> TESTIMONIALS
           </div>
-          <h2 className="font-black text-gray-900 text-4xl md:text-5xl leading-tight">
+          <h2 className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]">
             Stories that make <br />
-            <span className="text-orange-500 italic">us wag our tails.</span>
+            <span className="text-orange-500">us wag our tails.</span>
           </h2>
         </div>
 
-        {/* Unique Masonry-ish Grid */}
-        <div className="gap-6 space-y-6 columns-1 md:columns-2 lg:columns-3">
+        {/* Masonry Grid with Refined Spacing */}
+        <div className="gap-8 space-y-8 columns-1 md:columns-2 lg:columns-3">
           {stories.map((story) => (
             <motion.div
               key={story.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              whileHover={{ y: -10 }}
+              whileHover={{ y: -12 }}
               className="group relative break-inside-avoid cursor-pointer"
             >
-              <div className={`relative w-full ${story.size} rounded-[2.5rem] overflow-hidden shadow-sm border-4 border-white group-hover:shadow-2xl transition-all duration-500`}>
+              <div className={`relative w-full ${story.size} rounded-[3rem] overflow-hidden shadow-2xl border-[10px] border-white group-hover:border-orange-50 transition-all duration-500`}>
                 
-                {/* Image */}
+                {/* Image with subtle zoom */}
                 <Image
                   src={story.img}
                   alt={story.name}
                   fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                 />
 
-                {/* Overlay Content (Always visible or Hover based) */}
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-8 transition-opacity duration-300">
-                  <div className="transition-transform translate-y-4 group-hover:translate-y-0 duration-500">
-                    <FaQuoteLeft className="opacity-0 group-hover:opacity-100 mb-4 text-orange-400 text-2xl transition-opacity" />
-                    <p className="mb-4 font-medium text-white text-lg italic leading-snug">
+                {/* Overlay Content */}
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-100 p-10 transition-all duration-300">
+                  <div className="transition-transform group-hover:-translate-y-2 duration-500 transform">
+                    <FaQuoteLeft className="opacity-50 group-hover:opacity-100 mb-4 text-orange-400 text-3xl transition-opacity" />
+                    <p className="mb-6 font-bold text-white text-xl italic leading-relaxed tracking-tight">
                       "{story.text}"
                     </p>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-orange-500 w-8 h-[2px]"></div>
-                      <h4 className="font-black text-white text-sm uppercase leading-none tracking-widest">
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="bg-orange-500 w-8 group-hover:w-12 h-[2px] transition-all duration-500"></div>
+                      <h4 className="font-black text-[11px] text-white uppercase leading-none tracking-[0.25em]">
                         {story.name}
                       </h4>
                     </div>
                   </div>
                 </div>
 
-                {/* Badge */}
-                <div className="top-6 right-6 absolute bg-white/20 opacity-0 group-hover:opacity-100 backdrop-blur-md p-3 border border-white/30 rounded-full text-white scale-50 group-hover:scale-100 transition-all duration-500 transform">
-                  <FaHeart className="text-orange-500" />
+                {/* Floating Heart Badge */}
+                <div className="top-8 right-8 absolute bg-white/10 opacity-0 group-hover:opacity-100 shadow-2xl backdrop-blur-xl p-4 border border-white/20 rounded-2xl text-white scale-50 group-hover:scale-100 transition-all duration-500">
+                  <FaHeart className="drop-shadow-lg text-orange-500" />
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Bottom CTA for Section */}
-        <div className="mt-16 text-center">
-            <button className="group inline-flex relative items-center gap-4 bg-orange-500 hover:bg-slate-900 shadow-[0_20px_40px_-15px_rgba(249,115,22,0.4)] hover:shadow-2xl px-12 py-5 rounded-2xl overflow-hidden font-black text-white uppercase tracking-wider transition-all duration-500">
-                READ ALL STORIES
+        {/* CTA - Consistent Button Style */}
+        
+        {/* <div className="mt-20 text-center">
+            <button className="group inline-flex relative items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-12 py-5 rounded-2xl overflow-hidden font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500">
+                <span className="z-10 relative">READ ALL STORIES</span>
+                <div className="top-0 -left-full group-hover:left-full absolute bg-gradient-to-r from-transparent via-white/10 to-transparent w-full h-full transition-all duration-1000"></div>
             </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

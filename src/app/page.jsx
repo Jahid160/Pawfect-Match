@@ -1,39 +1,45 @@
-import Banner from "@/components/home/Banner";
-import WhyChooseUs from "@/components/home/WhyChooseUs";
-import PetCategories from "@/components/home/PetCategories";
-import RecentPets from "@/components/cards/RecentPets";
-import HowItWorks from "@/components/home/HowItWorks";
-import VaccinationSection from "@/components/home/VaccinationSection";
-import InteractivePetFood from "@/components/home/InteractivePetFood";
-import PetAccessoriesSection from "@/components/home/PetAccessoriesSection";
-import ExpertSection from "@/components/ExpertSection/ExpertSection";
-import SuccessStories from "@/components/home/SuccessStories";
-import OurSponsor from "@/components/home/OurSponsor";
-import Newsletter from "@/components/home/Newsletter";
+import Banner from "@/Components/home/Banner";
+import WhyChooseUs from "@/Components/home/WhyChooseUs";
+import PetCategories from "@/Components/home/PetCategories";
+import RecentPets from "@/Components/cards/RecentPets";
+import HowItWorks from "@/Components/home/HowItWorks";
+import VaccinationSection from "@/Components/home/VaccinationSection";
+import InteractivePetFood from "@/Components/home/InteractivePetFood";
+import PetAccessoriesSection from "@/Components/home/PetAccessoriesSection";
+import ExpertSection from "@/Components/ExpertSection/ExpertSection";
+import SuccessStories from "@/Components/home/SuccessStories";
+import OurSponsor from "@/Components/home/OurSponsor";
+import Newsletter from "@/Components/home/Newsletter";
+import FAQSection from "@/Components/home/FAQSection";
+import ImpactSection from "@/Components/home/ImpactSection";
+import NewsletterGame from "@/Components/home/NewsletterGame";
+
 
 const mainPage = () => {
   return (
-    <div className="space-y-10 lg:space-y-24 pb-20">
+    <div className="">
       <Banner />
 
-      <WhyChooseUs />
+      <ImpactSection />
 
-      <PetCategories />
       <RecentPets />
+      <PetCategories />
 
+      <WhyChooseUs />
       <HowItWorks />
 
       <VaccinationSection />
-
-      <InteractivePetFood />
       <PetAccessoriesSection />
+      <InteractivePetFood />
 
       <ExpertSection />
       <SuccessStories />
 
       <OurSponsor />
+      <FAQSection />
 
-      <Newsletter />
+      {/* <Newsletter /> */}
+      <NewsletterGame />
     </div>
   );
 };

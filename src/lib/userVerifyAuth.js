@@ -5,7 +5,6 @@ import { dbConnect, collections } from "@/lib/db";
 export async function userVerifyAuth() {
 
   const session = await getServerSession(authOptions);
-// console.log("session",session);
   if (!session) {
     throw new Error("Not authenticated");
   }
@@ -16,8 +15,12 @@ export async function userVerifyAuth() {
     email: session.user.email
   });
 
+  if (!dbUser) {
+    throw new Error("User record not found in the system.");
+  }
+
   if (dbUser.role !== "user") {
-    throw new Error("User only");
+    throw new Error("Access Denied: User privileges required.");
   }
 
   return dbUser;

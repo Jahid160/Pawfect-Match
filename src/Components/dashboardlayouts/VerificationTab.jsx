@@ -10,21 +10,24 @@ import { FaUserSlash } from "react-icons/fa";
 import { updateShelterStatus } from '@/action/server/Shelteruser';
 import Swal from 'sweetalert2';
 import ShelterDetailsModal from './ShelterDetailsModal';
+import { useSession } from 'next-auth/react';
+
 
 const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, setCurrentPage, startIndex, endIndex, totalPages, statusFilter, setStatusFilter, setSearchTerm }) => {
      const [selectedRequest, setSelectedRequest] = useState(null);
      const [isOpen, setIsOpen] = useState(false);
 
 
+
      const options = [
           { value: "All", label: "All Status", color: "bg-amber-500" },
           { value: "Pending", label: "Pending Requests", color: "bg-orange-500" },
-          { value: "Approved", label: "Approved Shelters", color: "bg-emerald-500" },
+          { value: "Active", label: "Approved Shelters", color: "bg-emerald-500" },
           { value: "Rejected", label: "Rejected Applications", color: "bg-rose-500" },
           { value: "Suspended", label: "Suspended Shelters", color: "bg-slate-400" },
      ];
 
-     const handleStatusUpdate = async (id, newStatus) => {
+     const handleStatusUpdate = async (id, email, newStatus) => {
           Swal.fire({
                title: "Are you sure?",
                text: `You are about to change the status to ${newStatus}.`,
@@ -39,7 +42,7 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
           }).then(async (result) => {
                if (result.isConfirmed) {
                     try {
-                         const response = await updateShelterStatus(id, newStatus);
+                         const response = await updateShelterStatus(id, email, newStatus);
                          if (response.success) {
                               setRequests((prev) =>
                                    prev.map((req) => (req._id === id ? { ...req, status: newStatus } : req))
@@ -188,7 +191,7 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                             {filteredRequests.map((request) => {
                                                                  const statusConfigs = {
                                                                       Pending: { row: "border-l-orange-500 bg-orange-50/40 hover:bg-orange-100/60", badge: "bg-orange-200 text-orange-800", icon: <MdAccessTime size={14} className="animate-pulse" /> },
-                                                                      Approved: { row: "border-l-emerald-500 bg-emerald-50/40 hover:bg-emerald-100/60", badge: "bg-emerald-200 text-emerald-800", icon: <MdCheckCircle size={14} /> },
+                                                                      Active: { row: "border-l-emerald-500 bg-emerald-50/40 hover:bg-emerald-100/60", badge: "bg-emerald-200 text-emerald-800", icon: <MdCheckCircle size={14} /> },
                                                                       Suspended: { row: "border-l-slate-500 bg-slate-100/60 hover:bg-slate-200/60 opacity-80", badge: "bg-slate-300 text-slate-700", icon: <MdBlock size={14} /> },
                                                                       Rejected: { row: "border-l-rose-500 bg-rose-50/30 hover:bg-rose-100/50 opacity-90", badge: "bg-rose-200 text-rose-800", icon: <MdCancel size={14} /> }
                                                                  };
@@ -225,20 +228,20 @@ const VerificationTab = ({ totalItems, requests = [], setRequests, currentPage, 
                                                                            <td className="">
                                                                                 <div className="flex justify-center items-center gap-1 md:gap-3">
                                                                                      {request.status === 'Suspended' ? (
-                                                                                          <button className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, 'Approved')}>
+                                                                                          <button className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, request.email, 'Active')}>
                                                                                                <LuUserRoundCheck size={18} />
                                                                                           </button>
                                                                                      ) : (
-                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Approved'} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, 'Approved')}>
+                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Active'} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, request.email, 'Active')}>
                                                                                                <BiUserCheck size={18} />
                                                                                           </button>
                                                                                      )}
-                                                                                     {request.status === 'Approved' ? (
-                                                                                          <button className="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, 'Suspended')}>
+                                                                                     {request.status === 'Active' ? (
+                                                                                          <button className="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all" onClick={() => handleStatusUpdate(request._id, request.email, 'Suspended')}>
                                                                                                <FaUserSlash size={16} />
                                                                                           </button>
                                                                                      ) : (
-                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Suspended'} className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, 'Rejected')}>
+                                                                                          <button disabled={request.status === 'Rejected' || request.status === 'Suspended'} className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white disabled:bg-slate-100 disabled:text-slate-400" onClick={() => handleStatusUpdate(request._id, request.email, 'Rejected')}>
                                                                                                {request.status === 'Suspended' ? <FaUserSlash size={16} /> : <BiUserX size={18} />}
                                                                                           </button>
                                                                                      )}

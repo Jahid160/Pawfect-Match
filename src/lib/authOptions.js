@@ -4,31 +4,25 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { collections, dbConnect } from "./db";
 
+
 export const authOptions = {
   providers: [
-    //  Credentials
     CredentialsProvider({
       name: "Credentials",
       credentials: {},
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-
         const user = await loginUser({
           email: credentials.email,
           password: credentials.password,
         });
-
         return user || null;
       },
     }),
-
-    //  Google
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-
-    //  GitHub
     GitHubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
@@ -36,40 +30,58 @@ export const authOptions = {
   ],
 
   callbacks: {
-    /**
-     * সাইন ইন করার সময় ইউজারকে ডাটাবেজে সেভ বা আপডেট করা
-     */
     async signIn({ user, account }) {
       try {
         if (!user?.email) return false;
 
+
+        const ip =
+          // headersList.get("x-forwarded-for")?.split(",")[0] ||
+          "103.205.69.67";
+        // 2. Fetch Location data using the IP
+        let location = "Localhost";
+
+        // Only fetch if it's NOT a local address
+        if (ip !== "::1" && ip !== "127.0.0.1") {
+          try {
+            // Using ip-api.com (Alternative provider)
+            const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+            const geoData = await geoRes.json();
+
+            if (geoData && geoData.status === "success") {
+              location = `${geoData.city}, ${geoData.country}`;
+            } else {
+              // If the API fails or returns 'fail' for a reserved IP
+              location = geoData.message || "Unknown Location";
+            }
+          } catch (err) {
+            console.error("Geo API Error:", err);
+            location = "Service Unavailable";
+          }
+        }
         const usersCollection = await dbConnect(collections.USERS);
         const now = new Date();
 
-        // ইউজার থাকলে শুধু লগইন টাইম আপডেট হবে, না থাকলে নতুন ক্রিয়েট হবে
-        const result = await usersCollection.updateOne(
+        await usersCollection.updateOne(
           { email: user.email },
           {
             $setOnInsert: {
               email: user.email,
+              name: user.name,
+              image: user.image,
               role: "user",
               createdAt: now,
-              location: "Savar, Dhaka", // ডিফল্ট লোকেশন
+              status: "active",
             },
+
             $set: {
               provider: account?.provider || "credentials",
               lastLoginAt: now,
-              status: "active",
+              ipAddress: ip,
+              location: location,
             },
           },
-          { upsert: true }
-        );
-
-        // নতুন ইউজার নাকি পুরাতন তা ডিটেক্ট করা
-        const action = result.upsertedCount > 0 ? "register" : "login";
-        await usersCollection.updateOne(
-          { email: user.email },
-          { $set: { lastAuthAction: action } }
+          { upsert: true },
         );
 
         return true;
@@ -79,40 +91,44 @@ export const authOptions = {
       }
     },
 
-    /**
-     * JWT টোকেনে কাস্টম ডাটা (role, id, location, image) সেট করা
-     */
     async jwt({ token, user, trigger, session }) {
-      const usersCollection = await dbConnect(collections.USERS);
 
-      // যদি ক্লায়েন্ট সাইড থেকে update() কল করা হয় (যেমন প্রোফাইল পিকচার চেঞ্জ করলে)
-      if (trigger === "update" && session) {
-        token.name = session.name || token.name;
-        token.picture = session.image || token.picture;
-        token.location = session.location || token.location;
+      if (trigger === "update" && session?.user) {
+        if (session.user.image) token.picture = session.user.image;
+        if (session.user.name) token.name = session.user.name;
+        if (session.user.role) token.role = session.user.role;
+        return token;
       }
 
-      // ইনিশিয়াল লগইন বা টোকেন রিফ্রেশ করার সময় DB থেকে ডাটা আনা
-      if (user?.email || token?.email) {
-        const dbUser = await usersCollection.findOne({
-          email: user?.email || token.email,
-        });
 
+      if (user) {
+        const usersCollection = await dbConnect(collections.USERS);
+        const dbUser = await usersCollection.findOne({ email: user.email });
         if (dbUser) {
           token.id = dbUser._id?.toString();
           token.role = dbUser.role;
           token.location = dbUser.location;
-          token.picture = dbUser.image || user?.image || token.picture;
-          token.name = dbUser.name || user?.name || token.name;
+          token.picture = dbUser.image || user.image;
+          token.name = dbUser.name || user.name;
+        }
+        return token;
+      }
+
+
+      if (token?.email) {
+        const usersCollection = await dbConnect(collections.USERS);
+        const dbUser = await usersCollection.findOne(
+          { email: token.email },
+          { projection: { role: 1 } }
+        );
+        if (dbUser && dbUser.role !== token.role) {
+          token.role = dbUser.role;
         }
       }
 
       return token;
     },
 
-    /**
-     * সেশনে টোকেনের ডাটাগুলো এক্সপোজ করা যাতে useSession() দিয়ে পাওয়া যায়
-     */
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
@@ -127,6 +143,8 @@ export const authOptions = {
 
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
 
   pages: {

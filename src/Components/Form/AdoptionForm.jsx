@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   User,
@@ -14,12 +14,17 @@ import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { createAdoptionUser } from "@/action/server/Adoptionuser";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const AdoptionForm = () => {
   const [step, setStep] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
   const searchParams = useSearchParams();
   const petId = searchParams.get("petId");
+  const session = useSession();
+
+  const userEmail = session.data?.user?.email;
+
 
   // Form states (Guardian Details)
   const [formData, setFormData] = useState({
@@ -30,7 +35,11 @@ const AdoptionForm = () => {
     residence: "",
     yard: "",
   });
-
+  useEffect(() => {
+    if (userEmail) {
+      setFormData((prev) => ({ ...prev, email: userEmail }));
+    }
+  }, [userEmail]);
   // Capability Quiz states
   const [quizData, setQuizData] = useState({
     income: "",
@@ -74,7 +83,7 @@ const AdoptionForm = () => {
     }
 
     try {
-      // formData এবং quizData কে একসাথে একটি অবজেক্টে নেওয়া হচ্ছে
+
       const finalData = {
         ...formData,
         ...quizData,
@@ -157,12 +166,11 @@ const AdoptionForm = () => {
                       </label>
                       <input
                         type="email"
+                        value={userEmail || ""}
+                        readOnly
                         placeholder="hello@trusted.com"
-                        className="input w-full bg-white border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all rounded-xl"
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        value={formData.email}
+
+                        className="input w-full bg-slate-100 border-gray-200 text-slate-500 cursor-not-allowed rounded-xl outline-none"
                       />
                     </div>
                     <div className="form-control group">
