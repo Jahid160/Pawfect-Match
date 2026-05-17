@@ -1,109 +1,69 @@
-"use client";
-
 import Link from "next/link";
 import {
   Facebook,
   Instagram,
   Twitter,
   Mail,
-  Phone,
   MapPin,
   Heart,
   PawPrint,
   ExternalLink,
 } from "lucide-react";
 import Logo from "../Header/Logo";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { totalAdopted } from "@/action/server/pets";
+import AdoptedCounter from "./AdoptedCounter";
+
+// Static configurations kept outside to prevent memory re-allocation
+const PAW_POSITIONS = [
+  { top: "10%", left: "5%", rotate: -15 },
+  { top: "40%", left: "15%", rotate: 20 },
+  { top: "70%", left: "8%", rotate: -10 },
+  { top: "15%", right: "12%", rotate: 30 },
+  { top: "55%", right: "5%", rotate: -25 },
+  { top: "85%", right: "18%", rotate: 15 },
+];
+
+const SOCIAL_LINKS = [
+  { name: "Facebook", icon: Facebook, url: "https://facebook.com/" },
+  { name: "Instagram", icon: Instagram, url: "https://instagram.com/" },
+  { name: "Twitter", icon: Twitter, url: "https://twitter.com/" },
+];
+
+const FOOTER_LINKS = [
+  {
+    title: "Navigation",
+    links: [
+      { name: "Browse Pets", href: "all-pets/#petCat" },
+      { name: "Adoption", href: "all-pets/#petCat" },
+      { name: "vaccination", href: "vaccination/#vaccination" },
+      { name: "Accessories", href: "pet-accessories/#accessories" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { name: "Help Center", href: "/HelpCenterPage" },
+      { name: "About", href: "/about" },
+      { name: "Faq", href: "/faq" },
+      { name: "Team", href: "/team" },
+    ],
+  },
+];
 
 export default function Footer() {
-  const [adoptedCount, setAdoptedCount] = useState(0);
-  const pathname = usePathname();
-
-  useEffect(() => {
-    const fetchAdopted = async () => {
-      const res = await totalAdopted();
-
-      if (res.success) {
-        setAdoptedCount(res.data.adopted);
-      }
-    };
-
-    fetchAdopted();
-  }, []);
-    if (pathname.startsWith("/dashboard")) return null;
-  const pawPositions = [
-    { top: "10%", left: "5%", rotate: -15 },
-    { top: "40%", left: "15%", rotate: 20 },
-    { top: "70%", left: "8%", rotate: -10 },
-    { top: "15%", right: "12%", rotate: 30 },
-    { top: "55%", right: "5%", rotate: -25 },
-    { top: "85%", right: "18%", rotate: 15 },
-  ];
-
-  const socialLinks = [
-    {
-      name: "Facebook",
-      icon: Facebook,
-      url: "https://facebook.com/",
-    },
-    {
-      name: "Instagram",
-      icon: Instagram,
-      url: "https://instagram.com/",
-    },
-    {
-      name: "Twitter",
-      icon: Twitter,
-      url: "https://twitter.com/",
-    },
-  ];
-
-  const footerLinks = [
-    {
-      title: "Navigation",
-      links: [
-        { name: "Browse Pets", href: "all-pets/#petCat" },
-        { name: "Adoption", href: "all-pets/#petCat" },
-        { name: "vaccination", href: "vaccination/#vaccination" },
-        { name: "Accessories", href: "pet-accessories/#accessories" },
-      ],
-    },
-    {
-      title: "Support",
-      links: [
-        { name: "Help Center", href: "/HelpCenterPage" },
-        { name: "About", href: "/about" },
-        { name: "Faq", href: "/faq" },
-        { name: "Team", href: "/team" },
-      ],
-    },
-  ];
-
   return (
     <div className="bg-white pt-24 pb-12 w-full">
       <div className="mx-auto px-6">
-        {/* Main Footer Wrapper */}
         <footer className="relative bg-[#0F172A] shadow-[0_35px_60px_-15px_rgba(0,0,0,0.5)] p-10 md:p-16 border border-slate-800 rounded-[3rem] overflow-hidden">
-          {/* --- Animated Paw Prints  --- */}
-          {pawPositions.map((pos, idx) => (
-            <motion.div
+          {/* --- CSS Animated Paw Prints (Replaced Framer Motion for high performance) --- */}
+          {PAW_POSITIONS.map((pos, idx) => (
+            <div
               key={idx}
-              className="absolute text-orange-500 pointer-events-none"
-              style={{ ...pos }}
-              initial={{ opacity: 0.1, scale: 1 }}
-              animate={{
-                opacity: [0.1, 0.4, 0.1],
-                scale: [1, 1.2, 1],
-                filter: ["blur(1px)", "blur(0px)", "blur(1px)"],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: idx * 1,
-                ease: "easeInOut",
+              className="absolute text-orange-500/20 pointer-events-none animate-pulse"
+              style={{
+                top: pos.top,
+                left: pos.left,
+                right: pos.right,
+                animationDuration: `${3 + idx * 0.5}s`,
               }}
             >
               <PawPrint
@@ -111,11 +71,11 @@ export default function Footer() {
                 style={{ transform: `rotate(${pos.rotate}deg)` }}
                 strokeWidth={1.5}
               />
-            </motion.div>
+            </div>
           ))}
 
           {/* Subtle Glow Effects */}
-          <div className="-top-24 -left-24 absolute bg-orange-500/5 blur-[120px] rounded-full w-96 h-96 pointer-events-none"></div>
+          <div className="-top-24 -left-24 absolute bg-orange-500/5 blur-[120px] rounded-full w-96 h-96 pointer-events-none" />
 
           <div className="z-10 relative gap-16 grid grid-cols-1 lg:grid-cols-12">
             {/* Column 1: Brand & Mission */}
@@ -132,12 +92,11 @@ export default function Footer() {
 
               {/* Social Media */}
               <div className="flex gap-4">
-                {socialLinks.map((item, idx) => {
+                {SOCIAL_LINKS.map((item) => {
                   const Icon = item.icon;
-
                   return (
                     <a
-                      key={idx}
+                      key={item.name}
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -152,12 +111,11 @@ export default function Footer() {
 
             {/* Column 2 & 3: Navigation */}
             <div className="gap-8 grid grid-cols-2 lg:col-span-4">
-              {footerLinks.map((section, idx) => (
+              {FOOTER_LINKS.map((section, idx) => (
                 <div key={idx}>
                   <h3 className="mb-8 font-bold text-white text-sm uppercase tracking-[0.2em]">
                     {section.title}
                   </h3>
-
                   <ul className="space-y-4">
                     {section.links.map((link) => (
                       <li key={link.name}>
@@ -165,7 +123,7 @@ export default function Footer() {
                           href={link.href}
                           className="group flex items-center gap-2 text-slate-400 hover:text-orange-500 transition-all"
                         >
-                          <span className="bg-orange-500 rounded-full w-1.5 h-1.5 scale-0 group-hover:scale-100 transition-all duration-300"></span>
+                          <span className="bg-orange-500 rounded-full w-1.5 h-1.5 scale-0 group-hover:scale-100 transition-all duration-300" />
                           {link.name}
                         </Link>
                       </li>
@@ -178,7 +136,7 @@ export default function Footer() {
             {/* Column 4: Premium Contact Card */}
             <div className="lg:col-span-4">
               <div className="group relative space-y-6 bg-slate-900/80 backdrop-blur-sm p-8 border border-slate-800 rounded-[2.5rem] overflow-hidden">
-                <div className="top-0 right-0 absolute bg-orange-500/5 -mt-16 -mr-16 rounded-full w-32 h-32"></div>
+                <div className="top-0 right-0 absolute bg-orange-500/5 -mt-16 -mr-16 rounded-full w-32 h-32" />
 
                 <h3 className="flex items-center gap-2 font-bold text-white text-xl">
                   Get in Touch{" "}
@@ -216,7 +174,7 @@ export default function Footer() {
                 </div>
 
                 <Link
-                  href={"/all-pets"}
+                  href="/all-pets"
                   className="flex justify-center items-center gap-2 bg-orange-500 hover:bg-white shadow-orange-500/10 shadow-xl py-4 rounded-2xl w-full font-black text-white hover:text-orange-500 active:scale-[0.98] transition-all"
                 >
                   Start Adoption <Heart className="fill-current w-5 h-5" />
@@ -227,17 +185,14 @@ export default function Footer() {
 
           {/* Bottom Branding & Legal */}
           <div className="z-10 relative flex md:flex-row flex-col justify-between items-center gap-6 mt-16 pt-8 border-slate-800/50 border-t font-bold text-[12px] text-slate-500">
-            <div className="flex md:flex-row flex-col items-center gap-4 md:gap-10">
+            <div>
               <p className="uppercase tracking-widest">
                 © {new Date().getFullYear()} Pawfect Adoption
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-slate-900/80 shadow-inner px-5 py-2 border border-slate-800 rounded-full">
-              <span className="bg-orange-500 rounded-full w-2 h-2 animate-ping"></span>
-              <span className="text-slate-300 uppercase tracking-tighter">
-                {adoptedCount} Animals adopted
-              </span>
-            </div>
+
+            {/* Embedded Isolated Client Component */}
+            <AdoptedCounter />
           </div>
         </footer>
       </div>
