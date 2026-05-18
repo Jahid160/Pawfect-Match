@@ -22,11 +22,10 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
+      ppr: {
+        mode: "incremental",
+      },
       bodySizeLimit: "30mb",
-    },
-    turbopack: {
-      // If you need specific file watching, you can add rules here
-      // But for most cases, empty object or default is enough
     },
   },
   // webpack: (config, { dev, isServer }) => {

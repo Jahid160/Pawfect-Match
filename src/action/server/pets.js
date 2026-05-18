@@ -1,5 +1,5 @@
 "use server";
-
+import { unstable_cache } from "next/cache";
 import { verifyAdmin } from "@/lib/adminAuth";
 import { authOptions } from "@/lib/authOptions";
 import { collections, dbConnect } from "@/lib/db";
@@ -27,6 +27,35 @@ export const getPets = async () => {
     return [];
   }
 };
+
+export const get8Pets = unstable_cache(
+  async (limitCount = 0) => {
+    try {
+      const Petcollection = await petCollectionPromise;
+
+      let query = Petcollection.find().sort({ createdAt: -1 });
+
+      if (limitCount > 0) {
+        query = query.limit(limitCount);
+      }
+
+      const pets = await query.toArray();
+
+      return pets.map((pet) => ({
+        ...pet,
+        _id: pet._id.toString(),
+      }));
+    } catch (error) {
+      console.error("Error fetching pets:", error);
+      return [];
+    }
+  },
+  ["pets-data-cache"],
+  {
+    tags: ["pets"],
+    revalidate: 86400,
+  },
+);
 
 // Helper function to escape regex
 function escapeRegex(text) {
@@ -146,7 +175,7 @@ export const getSinglePets = async (id) => {
     try {
       const user = await verifyAuth();
       userId = user._id.toString();
-    } catch { }
+    } catch {}
 
     const savedBy = pet.savedBy || [];
     return {
@@ -162,8 +191,6 @@ export const getSinglePets = async (id) => {
   }
 };
 
-
-
 export const AddPets = async (petdata) => {
   const session = await getServerSession(authOptions);
   adminShelterAuth();
@@ -173,7 +200,7 @@ export const AddPets = async (petdata) => {
       ...petdata,
       status: "preview",
       email: session.user.email,
-    })
+    });
     if (result.insertedId) {
       await createNotification({
         title: "New Pet Entry Request",

@@ -1,3 +1,4 @@
+export const experimental_ppr = true;
 import Banner from "@/Components/home/Banner";
 import WhyChooseUs from "@/Components/home/WhyChooseUs";
 import PetCategories from "@/Components/home/PetCategories";
@@ -14,10 +15,10 @@ import FAQSection from "@/Components/home/FAQSection";
 import ImpactSection from "@/Components/home/ImpactSection";
 import NewsletterGame from "@/Components/home/NewsletterGame";
 
-
 const mainPage = () => {
   return (
     <div className="">
+      {/* <RecentPets /> */}
       <Banner />
 
       <ImpactSection />
@@ -38,7 +39,6 @@ const mainPage = () => {
       <OurSponsor />
       <FAQSection />
 
-      {/* <Newsletter /> */}
       <NewsletterGame />
     </div>
   );
