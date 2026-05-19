@@ -1,12 +1,15 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import { getPets } from "@/action/server/pets";
-import { PetCard } from "./Petcarts"; 
+import { get8Pets, getPets } from "@/action/server/pets";
+import { PetCard } from "./Petcarts";
+import { headers } from "next/headers";
 
-const RecentPets = async () => {
+const PetGrid = async () => {
+  await headers();
   let pets = [];
   try {
-    const allPets = await getPets();
+    const allPets = await get8Pets(8);
     pets = Array.isArray(allPets) ? allPets.slice(0, 8) : [];
   } catch (error) {
     console.error("Recent pets fetch error:", error);
@@ -15,13 +18,33 @@ const RecentPets = async () => {
   if (pets.length === 0) return null;
 
   return (
+    <div className="gap-x-8 gap-y-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      {pets.map((pet) => (
+        <PetCard key={pet._id?.toString() || pet.id} pet={pet} />
+      ))}
+    </div>
+  );
+};
+
+const PetsSkeleton = () => {
+  return (
+    <div className="gap-x-8 gap-y-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          className="bg-gray-100 rounded-3xl w-full h-96 animate-pulse"
+        />
+      ))}
+    </div>
+  );
+};
+
+const RecentPets = () => {
+  return (
     <section className="relative bg-white py-20 overflow-hidden">
       <div className="z-10 relative mx-auto px-6 lg:px-8 max-w-7xl">
-        
-        {/* --- SECTION HEADER --- */}
         <div className="flex md:flex-row flex-col justify-between items-start md:items-end gap-8 mb-16">
           <div className="max-w-3xl">
-            {/* Unified Premium Badge Style */}
             <div className="inline-flex items-center gap-2 bg-orange-50 mb-6 px-4 py-2 border border-orange-100 rounded-full font-black text-[10px] text-orange-600 uppercase tracking-[0.3em]">
               <span className="relative flex w-1.5 h-1.5">
                 <span className="inline-flex absolute bg-orange-400 opacity-75 rounded-full w-full h-full animate-ping"></span>
@@ -45,12 +68,9 @@ const RecentPets = async () => {
           </Link>
         </div>
 
-        {/* --- GRID LAYOUT --- */}
-        <div className="gap-x-8 gap-y-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {pets.map((pet) => (
-            <PetCard key={pet._id?.toString() || pet.id} pet={pet} />
-          ))}
-        </div>
+        <Suspense fallback={<PetsSkeleton />}>
+          <PetGrid />
+        </Suspense>
       </div>
     </section>
   );

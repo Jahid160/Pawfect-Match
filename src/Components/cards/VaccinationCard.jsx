@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FaChevronRight, FaBan, FaSyringe, FaShieldAlt } from "react-icons/fa";
+import Image from "next/image";
 
 export const VaccinationCard = ({ vaccine }) => {
   const vaccineId = vaccine._id?.toString();
@@ -18,10 +19,12 @@ export const VaccinationCard = ({ vaccine }) => {
       {/* Image Section - Using base-200 for background consistency */}
       <div className="relative bg-base-200 w-full h-64 overflow-hidden">
         {vaccine.image ? (
-          <img
+          <Image
+            fill
             src={vaccine.image}
-            alt={vaccine.vaccineName}
-            className={`w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-110 ${
+            alt={vaccine.vaccineName || "Vaccine Image"}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className={`object-contain p-6 transition-transform duration-500 group-hover:scale-110 ${
               isOutOfStock ? "grayscale opacity-70" : ""
             }`}
           />
@@ -54,8 +57,10 @@ export const VaccinationCard = ({ vaccine }) => {
           <span className="font-bold text-[10px] text-primary uppercase tracking-[0.2em]">
             {vaccine.forPet || "All Pets"}
           </span>
-          <div className={`flex items-center gap-1 text-[10px] font-bold uppercase ${isOutOfStock ? "text-error" : "text-success"}`}>
-             {isOutOfStock ? "Unavailable" : "Available Now"}
+          <div
+            className={`flex items-center gap-1 text-[10px] font-bold uppercase ${isOutOfStock ? "text-error" : "text-success"}`}
+          >
+            {isOutOfStock ? "Unavailable" : "Available Now"}
           </div>
         </div>
 
@@ -67,19 +72,21 @@ export const VaccinationCard = ({ vaccine }) => {
 
         {/* Meta info */}
         <div className="flex items-center gap-3 mb-4 font-bold text-[11px] text-neutral/40 uppercase tracking-wider">
-           <span className="flex items-center gap-1">
-             <FaSyringe className="text-primary/60" /> Professional Grade
-           </span>
-           <span className="bg-base-300 rounded-full w-1 h-1"></span>
-           <span className="flex items-center gap-1 uppercase">
-             {vaccine.category || "Vaccine"}
-           </span>
+          <span className="flex items-center gap-1">
+            <FaSyringe className="text-primary/60" /> Professional Grade
+          </span>
+          <span className="bg-base-300 rounded-full w-1 h-1"></span>
+          <span className="flex items-center gap-1 uppercase">
+            {vaccine.category || "Vaccine"}
+          </span>
         </div>
 
         {/* Price + CTA */}
         <div className="flex justify-between items-end gap-3 mt-auto pt-4 border-base-200 border-t">
           <div className="flex flex-col">
-            <span className="font-medium text-[10px] text-neutral/30">Total Cost</span>
+            <span className="font-medium text-[10px] text-neutral/30">
+              Total Cost
+            </span>
             <span className="font-black text-neutral text-xl leading-none tracking-tight">
               ${vaccine.price || 0}
             </span>

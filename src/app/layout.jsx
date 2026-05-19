@@ -1,3 +1,4 @@
+// export const experimental_ppr = true;
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import NextAuthProvider from "@/provider/NextAuthProvider";
@@ -8,10 +9,11 @@ import Footer from "@/Components/Footer/Footer";
 import SupportButton from "@/Components/HelpCenter/SupportButton";
 import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
+import CartInitializerWrapper from "@/Components/Cart/CartInitializerWrapper";
 
-import { getCartItems } from "@/action/server/cart";
-import { getServerSession } from "next-auth";
-import CartStoreInitializer from "@/Components/Cart/CartStoreInitializer";
+// import { getCartItems } from "@/action/server/cart";
+// import { getServerSession } from "next-auth";
+// import CartStoreInitializer from "@/Components/Cart/CartStoreInitializer";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,40 +32,29 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  
-  const session = await getServerSession();
-  let initialCartCount = 0;
-
-  if (session?.user?.email) {
-    try {
-      const cartItems = await getCartItems(session.user.email);
-      initialCartCount = cartItems?.length || 0;
-    } catch (error) {
-      console.error("Cart fetch error in layout:", error);
-    }
-  }
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`}>
         <NextAuthProvider>
           <AuthModalProvider>
-            
-            {/* Initializing Cart State */}
-            <CartStoreInitializer count={initialCartCount} />
-            
-            {/* Global Notifications */}
+            <Suspense fallback={null}>
+              <CartInitializerWrapper />
+            </Suspense>
+
             <Toaster position="top-right" reverseOrder={false} />
 
-            {/* Header / Navbar Section */}
-            <header className="mx-auto mb-16 py-2 md:w-11/12">
-              <Suspense fallback={<div className="bg-base-100 rounded-xl h-16 animate-pulse" />}>
+            {/* <header className="mx-auto py-2 md:w-11/12">
+              <Suspense
+                fallback={
+                  <div className="bg-base-100 rounded-xl h-20 animate-pulse w-full" />
+                }
+              >
                 <Navbar />
               </Suspense>
-            </header>
+            </header> */}
 
             {/* Main Content Area */}
-            <main className="mx-auto py-2 md:w-11/12 min-h-[calc(100vh-302px)]">
+            <main className="mx-auto  md:w-11/12 min-h-[calc(100vh-302px)]">
               {children}
             </main>
 
@@ -71,10 +62,9 @@ export default async function RootLayout({ children }) {
             <SupportButton />
 
             {/* Footer Section */}
-            <footer className="mt-auto">
+            {/* <footer className="mt-auto">
               <Footer />
-            </footer>
-
+            </footer> */}
           </AuthModalProvider>
         </NextAuthProvider>
       </body>
