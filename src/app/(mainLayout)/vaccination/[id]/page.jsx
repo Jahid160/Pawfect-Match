@@ -17,6 +17,7 @@ import { toast } from "react-hot-toast";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 export default function VaccineDetails({ params }) {
   const [vaccine, setVaccine] = useState(null);
@@ -66,7 +67,10 @@ export default function VaccineDetails({ params }) {
 
   if (loading)
     return (
-      <div  id="vaccination" className="h-screen flex items-center justify-center bg-[#FDF8F4]">
+      <div
+        id="vaccination"
+        className="h-screen flex items-center justify-center bg-[#FDF8F4]"
+      >
         <div className="flex flex-col items-center gap-2">
           <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -95,7 +99,8 @@ export default function VaccineDetails({ params }) {
           >
             <div className="absolute -inset-4 bg-orange-200/30 rounded-[4rem] blur-3xl"></div>
             <div className="relative h-[500px] rounded-[3.5rem] overflow-hidden border-[10px] border-white shadow-2xl">
-              <img
+              <Image
+                fill
                 src={
                   vaccine.image ||
                   "https://images.unsplash.com/photo-1584107662774-8d575e8f3550"

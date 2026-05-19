@@ -14,7 +14,10 @@ const AuthButtons = () => {
         <Link href="/dashboard" className="btn btn-primary">
           Dashboard
         </Link>
-        <button onClick={() => signOut()} className="btn btn-primary btn-outline">
+        <button
+          onClick={() => signOut()}
+          className="btn btn-primary btn-outline"
+        >
           Log Out
         </button>
       </div>

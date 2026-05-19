@@ -12,7 +12,7 @@ import { deleteEntry, updateEntry } from '@/action/server/Entries';
 import Swal from 'sweetalert2';
 import { SheltergetStatus } from '@/action/server/Shelteruser';
 import { useSession } from 'next-auth/react';
-import Loading from '@/components/Loading';
+import Loading from '@/Components/Loading';
 
 
 const ShelterPendinglist = ({ pets = [] }) => {

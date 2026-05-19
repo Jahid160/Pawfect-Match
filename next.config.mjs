@@ -16,17 +16,22 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
         hostname: "**",
       },
     ],
   },
+  cacheComponents: true,
   experimental: {
     serverActions: {
       bodySizeLimit: "30mb",
-    },
-    turbopack: {
-      // If you need specific file watching, you can add rules here
-      // But for most cases, empty object or default is enough
     },
   },
   // webpack: (config, { dev, isServer }) => {

@@ -81,20 +81,41 @@ const DashboardNavbar = ({ isCollapsed }) => {
 
   const getIconDetails = (type) => {
     switch (type) {
-      case 'shelter_apply':
-        return { icon: <UserPlus size={16} className="text-purple-500" />, bg: "bg-purple-50" };
-      case 'shelter_approved':
-        return { icon: <Check size={16} className="text-emerald-500" />, bg: "bg-emerald-50" };
-      case 'adoption':
-        return { icon: <Heart size={16} className="text-rose-500" />, bg: "bg-rose-50" };
-      case 'adoption':
-        return { icon: <Heart size={16} className="text-rose-500" />, bg: "bg-rose-50" };
-      case 'order':
-        return { icon: <Package size={16} className="text-orange-500" />, bg: "bg-orange-50" };
-      case 'user_reg':
-        return { icon: <UserPlus size={16} className="text-blue-500" />, bg: "bg-blue-50" };
-      case 'alert':
-        return { icon: <AlertCircle size={16} className="text-amber-500" />, bg: "bg-amber-50" };
+      case "shelter_apply":
+        return {
+          icon: <UserPlus size={16} className="text-purple-500" />,
+          bg: "bg-purple-50",
+        };
+      case "shelter_approved":
+        return {
+          icon: <Check size={16} className="text-emerald-500" />,
+          bg: "bg-emerald-50",
+        };
+      case "adoption":
+        return {
+          icon: <Heart size={16} className="text-rose-500" />,
+          bg: "bg-rose-50",
+        };
+      case "adoption":
+        return {
+          icon: <Heart size={16} className="text-rose-500" />,
+          bg: "bg-rose-50",
+        };
+      case "order":
+        return {
+          icon: <Package size={16} className="text-orange-500" />,
+          bg: "bg-orange-50",
+        };
+      case "user_reg":
+        return {
+          icon: <UserPlus size={16} className="text-blue-500" />,
+          bg: "bg-blue-50",
+        };
+      case "alert":
+        return {
+          icon: <AlertCircle size={16} className="text-amber-500" />,
+          bg: "bg-amber-50",
+        };
       default:
         return {
           icon: <Check size={16} className="text-emerald-500" />,
@@ -136,20 +157,27 @@ const DashboardNavbar = ({ isCollapsed }) => {
         <h1 className="hover:opacity-80 ml-10 lg:ml-0 font-black text-slate-800 lg:text-xl italic uppercase tracking-tight transition-opacity">
           Dashboard{" "}
           <span className="text-orange-500">
-            {isAdmin ? "Overview" : isDoctor ? "Doctor Portal" : isShelter ? "Shelter Panel" : "User Portal  "}
-          </span >
-        </h1 >
-      </div >
+            {isAdmin
+              ? "Overview"
+              : isDoctor
+                ? "Doctor Portal"
+                : isShelter
+                  ? "Shelter Panel"
+                  : "User Portal  "}
+          </span>
+        </h1>
+      </div>
 
       {/* RIGHT SIDE: Notifications & Profile */}
-      < div className="flex items-center gap-5" >
+      <div className="flex items-center gap-5">
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationClick}
-            className={`relative rounded-2xl p-2.5 transition-all duration-300 ${isOpen
-              ? "bg-orange-50 text-orange-600 shadow-inner"
-              : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
-              }`}
+            className={`relative rounded-2xl p-2.5 transition-all duration-300 ${
+              isOpen
+                ? "bg-orange-50 text-orange-600 shadow-inner"
+                : "hover:bg-slate-50 text-slate-500 shadow-sm border border-slate-100"
+            }`}
           >
             <Bell size={22} strokeWidth={2.5} />
             {unreadCount > 0 && (
@@ -262,8 +290,8 @@ const DashboardNavbar = ({ isCollapsed }) => {
             </p>
           </div>
         </div>
-      </div >
-    </nav >
+      </div>
+    </nav>
   );
 };
 

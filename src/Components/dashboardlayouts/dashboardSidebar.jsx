@@ -68,7 +68,7 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
       href: "/dashboard/pet-request",
       icon: PawPrint,
     },
-        {
+    {
       name: "Pet Entry From",
       href: "/dashboard/shelter-petsreq",
       icon: LuUserPlus,
@@ -138,10 +138,11 @@ const DashboardSidebar = ({ isCollapsed, setIsCollapsed }) => {
   /* ---------------- STYLE HELPERS ---------------- */
   const getLinkStyle = (path) => {
     const isActive = pathname === path;
-    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${isActive
-      ? "bg-orange-500 text-white shadow-md shadow-orange-200"
-      : "hover:bg-orange-100 text-slate-600"
-      } ${isCollapsed ? "justify-center px-2" : ""}`;
+    return `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group mb-1 ${
+      isActive
+        ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+        : "hover:bg-orange-100 text-slate-600"
+    } ${isCollapsed ? "justify-center px-2" : ""}`;
   };
 
   return (

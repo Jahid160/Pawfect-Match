@@ -15,70 +15,71 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const VaccinationSection = () => {
-  const vaccineSlides = [
-    {
-      id: 1,
-      vaccineName: "Rabies Vaccine",
-      targetAudience: "Dogs & Cats",
-      image: "https://i.ibb.co.com/zT7ZxSpM/DHPP-Vaccine.avif",
-      description: "Essential protection against rabies virus.",
-      status: "Mandatory",
-      price: "$25",
-    },
-    {
-      id: 2,
-      vaccineName: "DHPP Vaccine",
-      targetAudience: "Dogs Only",
-      image: "https://i.ibb.co.com/8gdyWMZY/Rabies-Vaccine.jpg",
-      description: "5-in-1 vaccine protecting against Distemper.",
-      status: "High Demand",
-      price: "$45",
-    },
-    {
-      id: 3,
-      vaccineName: "FVRCP Vaccine",
-      targetAudience: "Cats Only",
-      image: "https://i.ibb.co.com/V0qRDR1V/FVRCP-Vaccine.avif",
-      description: "Core vaccine for feline viral protection.",
-      status: "Recommended",
-      price: "$35",
-    },
-  ];
+const VACCINE_SLIDES = [
+  {
+    id: 1,
+    vaccineName: "Rabies Vaccine",
+    targetAudience: "Dogs & Cats",
+    image: "https://i.ibb.co.com/zT7ZxSpM/DHPP-Vaccine.avif",
+    description: "Essential protection against rabies virus.",
+    status: "Mandatory",
+    price: "$25",
+  },
+  {
+    id: 2,
+    vaccineName: "DHPP Vaccine",
+    targetAudience: "Dogs Only",
+    image: "https://i.ibb.co.com/8gdyWMZY/Rabies-Vaccine.jpg",
+    description: "5-in-1 vaccine protecting against Distemper.",
+    status: "High Demand",
+    price: "$45",
+  },
+  {
+    id: 3,
+    vaccineName: "FVRCP Vaccine",
+    targetAudience: "Cats Only",
+    image: "https://i.ibb.co.com/V0qRDR1V/FVRCP-Vaccine.avif",
+    description: "Core vaccine for feline viral protection.",
+    status: "Recommended",
+    price: "$35",
+  },
+];
 
+const VaccinationSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % vaccineSlides.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % VACCINE_SLIDES.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [vaccineSlides.length]);
+  }, []);
 
   const handlePrev = () => {
     setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + vaccineSlides.length) % vaccineSlides.length
+      (prevIndex) =>
+        (prevIndex - 1 + VACCINE_SLIDES.length) % VACCINE_SLIDES.length,
     );
   };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % vaccineSlides.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % VACCINE_SLIDES.length);
   };
 
   return (
-    <section className="relative bg-orange-50/30 mx-4 my-20 py-24 border border-orange-100 rounded-[4rem] overflow-hidden">
+    <section className="relative bg-orange-50/30 mx-4 my-20 py-16 lg:py-24 border border-orange-100 rounded-[2.5rem] md:rounded-[4rem] overflow-hidden">
       {/* Background Decor */}
       <div className="-top-24 -left-24 absolute bg-orange-200/20 blur-[100px] rounded-full w-96 h-96 pointer-events-none"></div>
       <div className="right-0 bottom-0 absolute bg-red-100/30 blur-[80px] rounded-full w-64 h-64 pointer-events-none"></div>
 
       <div className="z-10 relative mx-auto px-6 max-w-7xl">
         <div className="items-center gap-16 grid grid-cols-1 lg:grid-cols-2">
-          
           {/* Left Side: Text & Features */}
           <div className="space-y-8">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
               className="inline-flex items-center gap-2 bg-red-50 px-4 py-2 border border-red-100 rounded-full"
             >
               <Bell size={14} className="text-red-600 animate-bounce" />
@@ -90,7 +91,8 @@ const VaccinationSection = () => {
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="font-black text-slate-900 text-5xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
+              viewport={{ once: true }}
+              className="font-black text-slate-900 text-4xl md:text-7xl leading-[0.95] tracking-[-0.04em]"
             >
               Essential <span className="text-orange-500">Vaccines</span> <br />
               For Your Pets
@@ -99,14 +101,15 @@ const VaccinationSection = () => {
             <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              className="max-w-md font-medium text-slate-600 text-lg leading-relaxed"
+              viewport={{ once: true }}
+              className="max-w-md font-medium text-slate-600 text-base md:text-lg leading-relaxed"
             >
               Protect your furry friends with our vet-approved vaccination
               programs. We ensure the highest quality medical care for every pet
               adoption journey.
             </motion.p>
 
-            <div className="flex flex-wrap gap-8">
+            <div className="flex flex-wrap gap-6 md:gap-8">
               <div className="flex items-center gap-3">
                 <div className="flex justify-center items-center bg-white shadow-md rounded-2xl w-12 h-12 text-orange-500">
                   <ShieldCheck size={24} />
@@ -142,7 +145,7 @@ const VaccinationSection = () => {
             >
               <Link
                 href="/vaccination"
-                className="group inline-flex items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-10 py-5 rounded-2xl font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
+                className="group inline-flex items-center gap-4 bg-slate-900 hover:bg-orange-600 shadow-xl px-8 md:px-10 py-4 md:py-5 rounded-2xl font-black text-[11px] text-white uppercase tracking-[0.2em] transition-all duration-500"
               >
                 <Syringe size={18} />
                 <span>See All Vaccines</span>
@@ -155,20 +158,20 @@ const VaccinationSection = () => {
           </div>
 
           {/* Right Side: Image Slider */}
-          <div className="group relative">
-            <div className="z-20 relative bg-white shadow-2xl mx-auto border-[12px] border-white rounded-[3.5rem] w-full max-w-[450px] aspect-[4/5] overflow-hidden">
+          <div className="group relative mt-12 lg:mt-0">
+            <div className="z-20 relative bg-white shadow-2xl mx-auto border-[8px] md:border-[12px] border-white rounded-[2.5rem] md:rounded-[3.5rem] w-full max-w-[420px] aspect-[4/5] overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={vaccineSlides[currentIndex].id}
-                  initial={{ opacity: 0, filter: "blur(10px)" }}
+                  key={VACCINE_SLIDES[currentIndex].id}
+                  initial={{ opacity: 0, filter: "blur(5px)" }}
                   animate={{ opacity: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, filter: "blur(10px)" }}
-                  transition={{ duration: 0.5 }}
+                  exit={{ opacity: 0, filter: "blur(5px)" }}
+                  transition={{ duration: 0.4 }}
                   className="relative w-full h-full"
                 >
                   <Image
-                    src={vaccineSlides[currentIndex].image}
-                    alt={vaccineSlides[currentIndex].vaccineName}
+                    src={VACCINE_SLIDES[currentIndex].image}
+                    alt={VACCINE_SLIDES[currentIndex].vaccineName}
                     fill
                     className="object-cover"
                     priority
@@ -178,62 +181,59 @@ const VaccinationSection = () => {
               </AnimatePresence>
             </div>
 
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons (মোবাইলে টাচ এরিয়া সেফ করার জন্য হিডেন, ডেক্সটপে ভিজিবল) */}
             <button
               onClick={handlePrev}
-              className="top-1/2 -left-6 z-30 absolute bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 shadow-xl p-4 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
+              className="top-1/2 -left-4 md:-left-6 z-30 absolute bg-white/90 hover:bg-white hidden md:flex opacity-0 group-hover:opacity-100 shadow-xl p-4 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
             >
               <ChevronLeft size={24} />
             </button>
             <button
               onClick={handleNext}
-              className="top-1/2 -right-6 z-30 absolute bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 shadow-xl p-4 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
+              className="top-1/2 -right-4 md:-right-6 z-30 absolute bg-white/90 hover:bg-white hidden md:flex opacity-0 group-hover:opacity-100 shadow-xl p-4 rounded-full text-slate-700 hover:text-orange-500 transition-all -translate-y-1/2"
             >
               <ChevronRight size={24} />
             </button>
 
-            {/* Floating Info Box */}
+            {/* Floating Info Box (মোবাইল রেসপন্সিভ করা হয়েছে: md:right-0, md:-bottom-8) */}
             <motion.div
-              key={`info-${vaccineSlides[currentIndex].id}`}
-              initial={{ y: 30, opacity: 0 }}
+              key={`info-${VACCINE_SLIDES[currentIndex].id}`}
+              initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="right-0 -bottom-8 z-30 absolute flex items-center gap-5 bg-white shadow-2xl p-6 border border-orange-50 rounded-[2.5rem] min-w-[300px]"
+              className="static md:absolute right-4 -bottom-6 z-30 flex items-center gap-4 bg-white shadow-2xl mt-4 md:mt-0 p-4 md:p-6 border border-orange-50 rounded-[2rem] md:rounded-[2.5rem] w-full md:w-auto md:min-w-[320px]"
             >
-              <div className="bg-orange-500 p-4 rounded-2xl text-white">
-                <Activity size={24} />
+              <div className="bg-orange-500 p-3 md:p-4 rounded-xl md:rounded-2xl text-white">
+                <Activity size={22} />
               </div>
               <div className="flex flex-col">
                 <p className="font-black text-[9px] text-orange-500 uppercase tracking-[0.2em]">
-                  {vaccineSlides[currentIndex].targetAudience}
+                  {VACCINE_SLIDES[currentIndex].targetAudience}
                 </p>
-                <p className="font-black text-slate-900 text-xl leading-tight tracking-tight">
-                  {vaccineSlides[currentIndex].vaccineName}
+                <p className="font-black text-slate-900 text-lg md:text-xl leading-tight tracking-tight">
+                  {VACCINE_SLIDES[currentIndex].vaccineName}
                 </p>
                 <p className="mt-1 font-bold text-[10px] text-slate-400 uppercase line-clamp-1 tracking-wider">
-                  {vaccineSlides[currentIndex].description}
+                  {VACCINE_SLIDES[currentIndex].description}
                 </p>
               </div>
             </motion.div>
 
-            {/* Status Badge */}
             <motion.div
               initial={{ scale: 0, rotate: 15 }}
               animate={{ scale: 1, rotate: -12 }}
-              className="top-10 -left-10 z-40 absolute flex flex-col justify-center items-center bg-red-600 shadow-2xl border-4 border-white rounded-full w-28 h-28 text-white text-center"
+              className="-top-4 -left-4 md:top-10 md:-left-10 z-40 absolute flex flex-col justify-center items-center bg-red-600 shadow-2xl border-4 border-white rounded-full w-24 h-24 md:w-28 md:h-28 text-white text-center"
             >
-              <span className="opacity-80 mb-1 font-black text-[8px] uppercase tracking-widest">
+              <span className="opacity-80 mb-0.5 font-black text-[7px] uppercase tracking-widest">
                 Status
               </span>
-              <span className="font-black text-[11px] uppercase leading-tight tracking-tighter">
-                {vaccineSlides[currentIndex].status}
+              <span className="font-black text-[10px] md:text-[11px] uppercase leading-tight tracking-tighter">
+                {VACCINE_SLIDES[currentIndex].status}
               </span>
-              <div className="bg-white/20 mt-1 px-2 py-0.5 rounded font-black text-[10px]">
-                {vaccineSlides[currentIndex].price}
+              <div className="bg-white/20 mt-1 px-1.5 py-0.5 rounded font-black text-[9px] md:text-[10px]">
+                {VACCINE_SLIDES[currentIndex].price}
               </div>
             </motion.div>
           </div>
-          {/* End of Right Side */}
-
         </div>
       </div>
     </section>

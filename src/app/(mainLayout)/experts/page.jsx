@@ -1,4 +1,4 @@
-import AllExpertsPage from '@/components/home/AllExpertsPage';
+import AllExpertsPage from '@/Components/home/AllExpertsPage';
 import React from 'react';
 
 const page = () => {
