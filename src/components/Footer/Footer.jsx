@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Logo from "../Header/Logo";
 import AdoptedCounter from "./AdoptedCounter";
+import CurrentYear from "./CurrentYear";
 
 // Static configurations kept outside to prevent memory re-allocation
 const PAW_POSITIONS = [
@@ -187,7 +188,7 @@ export default function Footer() {
           <div className="z-10 relative flex md:flex-row flex-col justify-between items-center gap-6 mt-16 pt-8 border-slate-800/50 border-t font-bold text-[12px] text-slate-500">
             <div>
               <p className="uppercase tracking-widest">
-                © {new Date().getFullYear()} Pawfect Adoption
+                © <CurrentYear /> Pawfect Adoption
               </p>
             </div>
 

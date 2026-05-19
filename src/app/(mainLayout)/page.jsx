@@ -1,4 +1,4 @@
-export const experimental_ppr = true;
+// export const experimental_ppr = true;
 import Banner from "@/Components/home/Banner";
 import WhyChooseUs from "@/Components/home/WhyChooseUs";
 import PetCategories from "@/Components/home/PetCategories";

@@ -1,8 +1,9 @@
-
 import { getUserApprovedPets } from "@/action/userServerDash/myPets";
 import MyPetsList from "./MyPetsList";
-export const dynamic = "force-dynamic";
+import { connection } from "next/server";
+// export const dynamic = "force-dynamic";
 const MyPetsPage = async () => {
+  await connection();
   const result = await getUserApprovedPets();
   const pets = result.success ? result.data : [];
 
@@ -21,9 +22,7 @@ const MyPetsPage = async () => {
         <MyPetsList pets={pets} />
       ) : (
         <div className="bg-white p-20 rounded-[2.5rem] border border-dashed border-slate-300 text-center">
-          <p className="text-slate-400 font-bold">
-            No approved pets yet.
-          </p>
+          <p className="text-slate-400 font-bold">No approved pets yet.</p>
         </div>
       )}
     </div>
